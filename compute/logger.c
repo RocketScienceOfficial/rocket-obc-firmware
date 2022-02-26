@@ -1,26 +1,30 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include <time.h>
+#include "math.h"
+
+#include "pico/time.h"
 
 #include "logger.h"
 #include "sd_card_controller.h"
 
-static char *getTimestamp()
+static char *get_timestamp()
 {
-	const int bufferSize = 16;
-	time_t t = time(NULL);
-	struct tm tm = *localtime(&t);
-	char *buffer = malloc(bufferSize);
+	uint32_t time_ms = to_ms_since_boot(get_absolute_time());
+	uint minutes = floor(time_ms / 60000);
+	uint seconds = floor(time_ms / 1000 - minutes * 60);
+	uint miliseconds = floor(time_ms - minutes * 60000 - seconds * 1000);
 
-	snprintf(buffer, bufferSize, "%02d:%02d:%02d", tm.tm_hour, tm.tm_min, tm.tm_sec);
+	char *buffer = malloc(32);
+
+	snprintf(buffer, 16, "%u:%u:%u", minutes, seconds, miliseconds);
 
 	return buffer;
 }
 
 static void __log(int sdwrite, const char *level, const char *format, va_list args)
 {
-	char *timestamp = getTimestamp();
+	char *timestamp = get_timestamp();
 	int len = snprintf(NULL, 0, LOG_FORMAT, timestamp, level, format) + 1;
 	char *newformat = malloc(len);
 
@@ -103,7 +107,7 @@ void my_log_measure_init()
 
 void my_log_measure_start()
 {
-	char *timestamp = getTimestamp();
+	char *timestamp = get_timestamp();
 	int len = snprintf(NULL, 0, MEASURE_FORMAT, timestamp) + 1;
 	char *newformat = malloc(len);
 

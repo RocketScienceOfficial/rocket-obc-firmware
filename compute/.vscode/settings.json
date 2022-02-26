@@ -7,6 +7,9 @@
         "logger.h": "c",
         "time.h": "c",
         "ff.h": "c",
-        "bmp280_controller.h": "c"
+        "bmp280_controller.h": "c",
+        "stdlib.h": "c",
+        "inttypes.h": "c",
+        "binary_info.h": "c"
     }
 }

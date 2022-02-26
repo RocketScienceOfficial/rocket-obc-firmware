@@ -2,7 +2,7 @@
 
 #include "pinout_config.h"
 
-#define PICO_DEFAULT_I2C 1
+#define PICO_DEFAULT_I2C BMP280_I2C
 #define PICO_DEFAULT_I2C_SDA_PIN BMP280_I2C_SDA_PIN
 #define PICO_DEFAULT_I2C_SCL_PIN BMP280_I2C_SCL_PIN
 
@@ -71,7 +71,7 @@ struct bmp280_calib_param
     int16_t dig_p9;
 } params;
 
-void bmp280_init()
+void bmp280_init_sensor()
 {
     uint8_t buf[2];
 
@@ -171,7 +171,7 @@ void bmp280_get_calib_params(struct bmp280_calib_param *params)
     params->dig_p9 = (int16_t)(buf[23] << 8) | buf[22];
 }
 
-void bmp_init()
+void bmp280_init()
 {
     my_log("Initializing BMP280...");
 
@@ -184,14 +184,14 @@ void bmp_init()
     gpio_pull_up(PICO_DEFAULT_I2C_SDA_PIN);
     gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
 
-    bmp280_init();
+    bmp280_init_sensor();
 
     bmp280_get_calib_params(&params);
 
     my_log("BMP280 Initialized!");
 }
 
-void bmp_getParams(int32_t *temperature, int32_t *pressure)
+void bmp280_read_values(int32_t *temperature, int32_t *pressure)
 {
     int32_t raw_temperature;
     int32_t raw_pressure;

@@ -22,7 +22,7 @@ void sd_init()
         my_log_error_notout("f_mount error: %s (%d)\n", FRESULT_str(fr), fr);
     }
 
-    my_log("==========\n\n\tBegining of the next session!\n==========\n");
+    my_log("\n==========\n\n\tBegining of the next session!\n==========\n");
 
     my_log("SD Card initialized successfully!");
 }

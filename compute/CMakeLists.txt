@@ -14,6 +14,7 @@ add_executable(${PROJECT_NAME}
     bmp280_controller.c
     logger.c
     sd_card_controller.c
+    mpu6050_controller.c
 )
 
 add_subdirectory(lib/no-OS-FatFS-SD-SPI-RPi-Pico/FatFs_SPI)
