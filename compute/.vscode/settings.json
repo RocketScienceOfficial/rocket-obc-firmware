@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "sd_card.h": "c",
+        "sd_card_controller.h": "c",
+        "stdio.h": "c",
+        "pinout_config.h": "c",
+        "logger.h": "c",
+        "time.h": "c",
+        "ff.h": "c",
+        "bmp280_controller.h": "c"
+    }
+}
