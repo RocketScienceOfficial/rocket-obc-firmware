@@ -1,9 +1,12 @@
 #ifndef MPU_6050_CONTROLLER_H
 #define MPU_6050_CONTROLLER_H
 
+#define ACCEL_FACTOR (0.000061)
+#define GYRO_FACTOR (0.007633)
+
 #include <stdio.h>
 
 void mpu6050_init();
-void mpu6050_get_values(int16_t *accel_x, int16_t *accel_y, int16_t *accel_z, int16_t *rot_x, int16_t *rot_y, int16_t *rot_z, int16_t *temperature);
+void mpu6050_get_values(double *accel_x, double *accel_y, double *accel_z, double *rot_x, double *rot_y, double *rot_z, double *temperature);
 
 #endif

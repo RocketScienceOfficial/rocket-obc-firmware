@@ -15,6 +15,7 @@ add_executable(${PROJECT_NAME}
     logger.c
     sd_card_controller.c
     mpu6050_controller.c
+    kalman.c
 )
 
 add_subdirectory(lib/no-OS-FatFS-SD-SPI-RPi-Pico/FatFs_SPI)
@@ -22,6 +23,8 @@ add_subdirectory(lib/no-OS-FatFS-SD-SPI-RPi-Pico/FatFs_SPI)
 target_link_libraries(${PROJECT_NAME}
     pico_stdlib
     hardware_i2c
+    hardware_pwm
+    hardware_clocks
     FatFs_SPI
 )
 

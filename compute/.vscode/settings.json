@@ -10,6 +10,16 @@
         "bmp280_controller.h": "c",
         "stdlib.h": "c",
         "inttypes.h": "c",
-        "binary_info.h": "c"
+        "binary_info.h": "c",
+        "kalman.h": "c",
+        "ranges": "c",
+        "string": "c",
+        "array": "c",
+        "deque": "c",
+        "unordered_map": "c",
+        "vector": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "pwm.h": "c"
     }
 }
