@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-include(pico_sdk_import.cmake)
+include(../pico-sdk/pico_sdk_init.cmake)
 
 project(data_control C CXX ASM)
 set(CMAKE_C_STANDARD 11)
