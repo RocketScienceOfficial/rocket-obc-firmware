@@ -4,11 +4,13 @@ jobs:
   Run-Tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Verify
+        uses: actions/checkout@v2
       - name: Run
         working-directory: ./compute
         run: |
+          git clone https://github.com/raspberrypi/pico-sdk.git
           mkdir build
           cd build
-          cmake -G "Unix Makefiles" ..
+          cmake -G "Unix Makefiles" .. -DPICO_SDK_PATH=../pico-sdk
           make
