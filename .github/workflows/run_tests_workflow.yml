@@ -8,5 +8,5 @@ jobs:
       - name: Run
         working-directory: ./compute
         run: |
-          cmake -G "MinGW Makefiles" ..
+          cmake -G "Unix Makefiles" ..
           make
