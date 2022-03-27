@@ -25,7 +25,6 @@
 
 void setMillis(int servoPin, float millis)
 {
-    asdasd
     pwm_set_gpio_level(servoPin, (millis / 20000.f) * 39062.0f);
 }
 
