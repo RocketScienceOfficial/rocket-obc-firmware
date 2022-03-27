@@ -6,7 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run
-        working-directory: ./compute
+        working-directory: ./compute/build
         run: |
           cmake -G "Unix Makefiles" ..
           make
