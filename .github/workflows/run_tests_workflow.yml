@@ -6,20 +6,17 @@ jobs:
     steps:
       - name: Verify
         uses: actions/checkout@v2
-      - name: Install dependencies
-        run: sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential
-      - name: Download Pico SDK
-        run: git clone https://github.com/raspberrypi/pico-sdk.git
-      - name: Build Compute
-        working-directory: ./compute
+      - name: Build
         run: |
+          sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential
+          git clone https://github.com/raspberrypi/pico-sdk.git
+          cd compute
           mkdir build
           cd build
           cmake -G "Unix Makefiles" .. -DPICO_SDK_PATH=../pico-sdk
           make
-      - name: Build Data Control
-        working-directory: ./data_control
-        run: |
+          cd ../..
+          cd data_control
           mkdir build
           cd build
           cmake -G "Unix Makefiles" .. -DPICO_SDK_PATH=../pico-sdk
