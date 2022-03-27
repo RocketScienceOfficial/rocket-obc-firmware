@@ -8,10 +8,12 @@ jobs:
     steps:
       - name: Verify
         uses: actions/checkout@v2
+      - name: Install dependencies
+        run: sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential
+      - name: Setup Git Submodules
+        run: git submodule update --init --recursive
       - name: Build
         run: |
-          sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential
-          git submodule update --init --recursive
           cd compute
           mkdir build
           cd build
