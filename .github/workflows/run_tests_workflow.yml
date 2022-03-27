@@ -6,7 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run
-        working-directory: compute/build/
+        working-directory: ./compute
         run: |
           cmake -G "MinGW Makefiles" ..
           make
