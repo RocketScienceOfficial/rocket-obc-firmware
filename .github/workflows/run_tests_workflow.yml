@@ -9,6 +9,8 @@ jobs:
       - name: Run
         working-directory: ./compute
         run: |
+          sudo apt-get update
+          sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential
           git clone https://github.com/raspberrypi/pico-sdk.git
           mkdir build
           cd build
