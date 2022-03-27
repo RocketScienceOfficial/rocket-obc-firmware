@@ -4,5 +4,7 @@ jobs:
   Run-Tests:
     runs-on: ubuntu-latest
     steps:
+      - run: pwd
+      - run: ls
       - run: chmod u+x compute/scripts/build.sh
       - run: ./compute/scripts/build.sh
