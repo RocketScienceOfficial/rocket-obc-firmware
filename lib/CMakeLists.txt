@@ -1,0 +1,8 @@
+add_subdirectory(misc)
+add_subdirectory(logging)
+add_subdirectory(vendor)
+add_subdirectory(maths)
+add_subdirectory(measurements)
+add_subdirectory(radio)
+add_subdirectory(sd)
+add_subdirectory(servo)

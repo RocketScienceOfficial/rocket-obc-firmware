@@ -12,17 +12,9 @@ jobs:
         run: sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential
       - name: Setup Git Submodules
         run: git submodule update --init --recursive
-      - name: Build Compute
-        working-directory: ./compute
+      - name: Build
         run: |
           mkdir build
           cd build
-          cmake -G "Unix Makefiles" ..
-          make
-      - name: Build Data Control
-        working-directory: ./data_control
-        run: |
-          mkdir build
-          cd build
-          cmake -G "Unix Makefiles" ..
+          cmake ..
           make

@@ -1,0 +1,27 @@
+{
+    "files.associations": {
+        "bmp280_controller.h": "c",
+        "binary_info.h": "c",
+        "structure.h": "c",
+        "clocks.h": "c",
+        "stdio.h": "c",
+        "sd_card_controller.h": "c",
+        "corecrt.h": "c",
+        "vcruntime.h": "c",
+        "corecrt_wstdio.h": "c",
+        "logger.h": "c",
+        "i2c.h": "c",
+        "pinout_config.h": "c",
+        "pico_time.h": "c",
+        "measurements_logger.h": "c",
+        "bmp280.h": "c",
+        "pwm.h": "c",
+        "stdarg.h": "c",
+        "time.h": "c",
+        "sd.h": "c",
+        "stdlib.h": "c",
+        "stdint.h": "c",
+        "f_util.h": "c",
+        "hw_config.h": "c"
+    }
+}
