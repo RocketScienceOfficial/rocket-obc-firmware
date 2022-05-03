@@ -1,60 +1,71 @@
-#include <stdio.h>
-
 #include "sd.h"
 #include "logger.h"
 #include "measurements_logger.h"
 #include "time_tracker.h"
-#include "pinout_config.h"
-
 #include "sd_card.h"
 #include "ff.h"
+#include "rtc.h"
+#include "f_util.h"
+#include "hw_config.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-bool is_sd_enabled = false;
-int buffer_start_time_ms = 0;
-sd_entry_t *entries;
-int entries_count = 0;
+static bool is_sd_enabled = false;
+static int buffer_start_time_ms = 0;
+static sd_entry_t *entries;
+static int entries_count = 0;
+static sd_card_t *pSD;
+static FRESULT fr;
 
-sd_card_t *pSD;
-FRESULT fr;
+static const char *__parseCallbackData(void **data)
+{
+    return (const char *)data[0];
+}
 
-static void log_callback(const char *text)
+static void log_callback(void **data, size_t size)
 {
     if (is_sd_enabled)
     {
-        sdWrite(text, LOG_FILENAME);
+        sdWrite(__parseCallbackData(data), LOG_FILENAME);
     }
 }
 
-static void logMeasurement_callback(const char *text)
+static void logMeasurement_callback(void **data, size_t size)
 {
     if (is_sd_enabled)
     {
-        sdWrite(text, MEASURE_FILENAME);
+        sdWrite(__parseCallbackData(data), MEASURE_FILENAME);
     }
 }
 
 void sdInit()
 {
-    //myLogInfo("Initializing SD Card...");
+    myLogInfo("Initializing SD Card...");
 
     pSD = sd_get_by_num(0);
     fr = f_mount(&pSD->fatfs, pSD->pcName, 1);
 
     if (FR_OK != fr)
     {
-        //myLogError("f_mount error: %s (%d)\n", FRESULT_str(fr), fr);
+        myLogError("f_mount error: %s (%d)\n", FRESULT_str(fr), fr);
 
         return;
     }
 
     is_sd_enabled = true;
 
-    myLogSetCallback(log_callback);
-    myLogMeasureSetCallback(logMeasurement_callback);
+    myLogInfo("\n==========\n\n\tBegining of the next session!\n==========\n");
+    myLogInfo("SD Card initialized successfully!");
+}
 
-    //myLogInfo("\n==========\n\n\tBegining of the next session!\n==========\n");
+void sdAttachToLogger()
+{
+    myLogAddCallback(&log_callback);
+    myLogMeasureAddCallback(&logMeasurement_callback);
+}
 
-    //myLogInfo("SD Card initialized successfully!");
+void sdBegin()
+{
 }
 
 void sdWrite(const char *msg, const char *file)
@@ -129,6 +140,10 @@ void sdWrite(const char *msg, const char *file)
             myLogError("f_close error: %s (%d)", FRESULT_str(fr), fr);
         }
     }
+}
+
+void sdEnd()
+{
 }
 
 void sdFlush(const char *file)

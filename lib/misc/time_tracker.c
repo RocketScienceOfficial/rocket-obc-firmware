@@ -1,5 +1,8 @@
 #include "time_tracker.h"
 #include "pico/time.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 unsigned int getMsSinceBoot()
 {
@@ -8,7 +11,7 @@ unsigned int getMsSinceBoot()
 	return time_ms;
 }
 
-const char *getTimestamp()
+char *getTimestamp()
 {
 	uint32_t time_ms = getMsSinceBoot();
 	uint minutes = floor(time_ms / 60000);

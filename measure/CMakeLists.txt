@@ -1,4 +1,4 @@
-add_executable(measure main.c)
+add_executable(measure main.c hw_config.c)
 
 target_link_libraries(measure PUBLIC FatFs_SPI pico_stdlib logging maths measurements misc radio sd)
 

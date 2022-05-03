@@ -10,22 +10,22 @@ void bmp280_init_sensor()
 
     const uint8_t reg_config_val = ((0x04 << 5) | (0x05 << 2)) & 0xFC;
 
-    buf[0] = REG_CONFIG;
+    buf[0] = BMP280_REG_CONFIG;
     buf[1] = reg_config_val;
-    i2c_write_blocking(i2c_default, ADDR, buf, 2, false);
+    i2c_write_blocking(i2c_default, BMP280_ADDR, buf, 2, false);
 
     const uint8_t reg_ctrl_meas_val = (0x01 << 5) | (0x03 << 2) | (0x03);
-    buf[0] = REG_CTRL_MEAS;
+    buf[0] = BMP280_REG_CTRL_MEAS;
     buf[1] = reg_ctrl_meas_val;
-    i2c_write_blocking(i2c_default, ADDR, buf, 2, false);
+    i2c_write_blocking(i2c_default, BMP280_ADDR, buf, 2, false);
 }
 
 void bmp280_read_raw(int32_t *temp, int32_t *pressure)
 {
     uint8_t buf[6];
-    uint8_t reg = REG_PRESSURE_MSB;
-    i2c_write_blocking(i2c_default, ADDR, &reg, 1, true);
-    i2c_read_blocking(i2c_default, ADDR, buf, 6, false);
+    uint8_t reg = BMP280_REG_PRESSURE_MSB;
+    i2c_write_blocking(i2c_default, BMP280_ADDR, &reg, 1, true);
+    i2c_read_blocking(i2c_default, BMP280_ADDR, buf, 6, false);
 
     *pressure = (buf[0] << 12) | (buf[1] << 4) | (buf[2] >> 4);
     *temp = (buf[3] << 12) | (buf[4] << 4) | (buf[5] >> 4);
@@ -33,8 +33,8 @@ void bmp280_read_raw(int32_t *temp, int32_t *pressure)
 
 void bmp280_reset()
 {
-    uint8_t buf[2] = {REG_RESET, 0xB6};
-    i2c_write_blocking(i2c_default, ADDR, buf, 2, false);
+    uint8_t buf[2] = {BMP280_REG_RESET, 0xB6};
+    i2c_write_blocking(i2c_default, BMP280_ADDR, buf, 2, false);
 }
 
 int32_t bmp280_convert(int32_t temp, struct bmp280_calib_param *params)
@@ -84,10 +84,10 @@ int32_t bmp280_convert_pressure(int32_t pressure, int32_t temp, struct bmp280_ca
 
 void bmp280_get_calib_params(struct bmp280_calib_param *params)
 {
-    uint8_t buf[NUM_CALIB_PARAMS] = {0};
-    uint8_t reg = REG_DIG_T1_LSB;
-    i2c_write_blocking(i2c_default, ADDR, &reg, 1, true);
-    i2c_read_blocking(i2c_default, ADDR, buf, NUM_CALIB_PARAMS, false);
+    uint8_t buf[BMP280_NUM_CALIB_PARAMS] = {0};
+    uint8_t reg = BMP280_REG_DIG_T1_LSB;
+    i2c_write_blocking(i2c_default, BMP280_ADDR, &reg, 1, true);
+    i2c_read_blocking(i2c_default, BMP280_ADDR, buf, BMP280_NUM_CALIB_PARAMS, false);
 
     params->dig_t1 = (uint16_t)(buf[1] << 8) | buf[0];
     params->dig_t2 = (int16_t)(buf[3] << 8) | buf[2];

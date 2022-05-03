@@ -1,31 +1,27 @@
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include "measurements_logger.h"
-#include "time_tracker.h"
+#include "logging_utils.h"
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
 
-static logMeasureCallback_t logCallback = NULL;
+static const int BUFFER_SIZE = 64;
 
-static void __logMeasure(const char *format, va_list args)
+static event_handler_t s_eventHandler;
+static char *buffer = NULL;
+
+void myLogMeasureInit()
 {
-    int len = snprintf(NULL, 0, MEASURE_FORMAT, format) + 1;
-    char *newformat = malloc(len);
-
-    snprintf(newformat, len, MEASURE_FORMAT, format);
-
-    int flen = vprintf(newformat, args) + 1;
-
-    char buffer[128];
-    vsnprintf(buffer, flen, newformat, args);
-    
-    logCallback(buffer);
-
-    free(newformat);
+    initHandler(&s_eventHandler);
 }
 
-void myLogMeasureSetCallback(logMeasureCallback_t callback)
+void myLogMeasureAddCallback(eventCallback_t callback)
 {
-    logCallback = callback;
+    addEvent(&s_eventHandler, callback, NULL);
+}
+
+void myLogMeasureBegin()
+{
+    buffer = calloc(BUFFER_SIZE, sizeof(char));
 }
 
 void myLogMeasure(const char *format, ...)
@@ -33,11 +29,21 @@ void myLogMeasure(const char *format, ...)
     va_list ap;
 
     va_start(ap, format);
-    __logMeasure(format, ap);
+    char *message = vlogBase(format, ap);
     va_end(ap);
+
+    strcat(buffer, message);
+
+    free(message);
 }
 
 void myLogMeasureEnd()
 {
-    myLogMeasure("\n");
+    char *txt = logBase("%s\n", buffer);
+    void *data[1] = {txt};
+
+    callEvent(&s_eventHandler, data, 1);
+
+    free(txt);
+    free(buffer);
 }

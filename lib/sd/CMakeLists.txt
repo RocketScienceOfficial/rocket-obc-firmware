@@ -1,5 +1,4 @@
 add_library(sd
-    hw_config.c
     sd.h
     sd.c
     )

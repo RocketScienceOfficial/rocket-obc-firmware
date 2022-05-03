@@ -7,10 +7,10 @@
 static void mpu6050_reset()
 {
     uint8_t buf[] = {0x6B, 0x00};
-    i2c_write_blocking(i2c_default, ADDR, buf, 2, false);
+    i2c_write_blocking(i2c_default, MPU6050_ADDR, buf, 2, false);
 
     uint8_t buf2 = {0x1C, 2 << 3};
-    i2c_write_blocking(i2c_default, ADDR, buf2, 2, false);
+    i2c_write_blocking(i2c_default, MPU6050_ADDR, buf2, 2, false);
 }
 
 static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp)
@@ -18,8 +18,8 @@ static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp)
     uint8_t buffer[6];
 
     uint8_t val = 0x3B;
-    i2c_write_blocking(i2c_default, ADDR, &val, 1, true);
-    i2c_read_blocking(i2c_default, ADDR, buffer, 6, false);
+    i2c_write_blocking(i2c_default, MPU6050_ADDR, &val, 1, true);
+    i2c_read_blocking(i2c_default, MPU6050_ADDR, buffer, 6, false);
 
     for (int i = 0; i < 3; i++)
     {
@@ -27,8 +27,8 @@ static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp)
     }
 
     val = 0x43;
-    i2c_write_blocking(i2c_default, ADDR, &val, 1, true);
-    i2c_read_blocking(i2c_default, ADDR, buffer, 6, false);
+    i2c_write_blocking(i2c_default, MPU6050_ADDR, &val, 1, true);
+    i2c_read_blocking(i2c_default, MPU6050_ADDR, buffer, 6, false);
 
     for (int i = 0; i < 3; i++)
     {
@@ -36,8 +36,8 @@ static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp)
     }
 
     val = 0x41;
-    i2c_write_blocking(i2c_default, ADDR, &val, 1, true);
-    i2c_read_blocking(i2c_default, ADDR, buffer, 2, false);
+    i2c_write_blocking(i2c_default, MPU6050_ADDR, &val, 1, true);
+    i2c_read_blocking(i2c_default, MPU6050_ADDR, buffer, 2, false);
 
     *temp = buffer[0] << 8 | buffer[1];
 }

@@ -1,108 +1,107 @@
-#include "pico/stdlib.h"
-#include "pico/binary_info.h"
-#include "hardware/gpio.h"
-#include "hardware/spi.h"
-#include "pinout_config.h"
+// #include "pico/stdlib.h"
+// #include "pico/binary_info.h"
+// #include "hardware/gpio.h"
+// #include "hardware/spi.h"
 
-#define PIN_MISO SX1278_MISO_GPIO
-#define PIN_CS SX1278_CS_GPIO
-#define PIN_SCK SX1278_SCK_GPIO
-#define PIN_MOSI SX1278_MOSI_GPIO
+// #define PIN_MISO SX1278_MISO_GPIO
+// #define PIN_CS SX1278_CS_GPIO
+// #define PIN_SCK SX1278_SCK_GPIO
+// #define PIN_MOSI SX1278_MOSI_GPIO
 
-#define SPI_PORT SX1278_SPI
-#define READ_BIT 0x80
+// #define SPI_PORT SX1278_SPI
+// #define READ_BIT 0x80
 
-#define LORA_DEFAULT_SPI spi0
-#define LORA_DEFAULT_SPI_FREQUENCY 8E6
-#define LORA_DEFAULT_SS_PIN 8
-#define LORA_DEFAULT_RESET_PIN 9
-#define LORA_DEFAULT_DIO0_PIN 7
+// #define LORA_DEFAULT_SPI spi0
+// #define LORA_DEFAULT_SPI_FREQUENCY 8E6
+// #define LORA_DEFAULT_SS_PIN 8
+// #define LORA_DEFAULT_RESET_PIN 9
+// #define LORA_DEFAULT_DIO0_PIN 7
 
-#define PA_OUTPUT_RFO_PIN 0
-#define PA_OUTPUT_PA_BOOST_PIN 1
+// #define PA_OUTPUT_RFO_PIN 0
+// #define PA_OUTPUT_PA_BOOST_PIN 1
 
-typedef struct lora_data
-{
-  spi_inst_t *_spi;
-  int _ss;
-  int _reset;
-  int _dio0;
-  long _frequency;
-  int _packetIndex;
-  int _implicitHeaderMode;
-  void (*_onReceive)(int);
-  void (*_onTxDone)();
-} lora_data_t;
+// typedef struct lora_data
+// {
+//   spi_inst_t *_spi;
+//   int _ss;
+//   int _reset;
+//   int _dio0;
+//   long _frequency;
+//   int _packetIndex;
+//   int _implicitHeaderMode;
+//   void (*_onReceive)(int);
+//   void (*_onTxDone)();
+// } lora_data_t;
 
-int loraBegin(lora_data_t *data, long frequency);
-void loraEnd(lora_data_t *data);
+// int loraBegin(lora_data_t *data, long frequency);
+// void loraEnd(lora_data_t *data);
 
-int loraBeginPacket(lora_data_t *data, int implicitHeader = false);
-int loraEndPacket(lora_data_t *data, bool async = false);
+// int loraBeginPacket(lora_data_t *data, int implicitHeader = false);
+// int loraEndPacket(lora_data_t *data, bool async = false);
 
-int loraParsePacket(lora_data_t *data, int size = 0);
-int loraPacketRssi(lora_data_t *data);
-float loraPacketSnr(lora_data_t *data);
-long loraPacketFrequencyError(lora_data_t *data);
+// int loraParsePacket(lora_data_t *data, int size = 0);
+// int loraPacketRssi(lora_data_t *data);
+// float loraPacketSnr(lora_data_t *data);
+// long loraPacketFrequencyError(lora_data_t *data);
 
-int loraRssi(lora_data_t *data);
+// int loraRssi(lora_data_t *data);
 
-size_t loraWrite(lora_data_t *data, uint8_t byte);
-size_t loraWrite(lora_data_t *data, const uint8_t *buffer, size_t size);
+// size_t loraWrite(lora_data_t *data, uint8_t byte);
+// size_t loraWrite(lora_data_t *data, const uint8_t *buffer, size_t size);
 
-int loraAailable(lora_data_t *data);
-int loraRead(lora_data_t *data);
-int loraPeek(lora_data_t *data);
-void loraFlush(lora_data_t *data);
+// int loraAailable(lora_data_t *data);
+// int loraRead(lora_data_t *data);
+// int loraPeek(lora_data_t *data);
+// void loraFlush(lora_data_t *data);
 
-void loraOnReceive(lora_data_t *data, void (*callback)(int));
-void loraOnTxDone(lora_data_t *data, void (*callback)());
+// void loraOnReceive(lora_data_t *data, void (*callback)(int));
+// void loraOnTxDone(lora_data_t *data, void (*callback)());
 
-void loraReceive(lora_data_t *data, int size = 0);
+// void loraReceive(lora_data_t *data, int size = 0);
 
-void loraIdle(lora_data_t *data);
-void loraSleep(lora_data_t *data);
+// void loraIdle(lora_data_t *data);
+// void loraSleep(lora_data_t *data);
 
-void loraSetTxPower(int level, int outputPin = PA_OUTPUT_PA_BOOST_PIN);
-void loraSetFrequency(long frequency);
-void loraSetSpreadingFactor(int sf);
-void loraSetSignalBandwidth(long sbw);
-void loraSetCodingRate4(int denominator);
-void loraSetPreambleLength(long length);
-void loraSetSyncWord(int sw);
-void loraEnableCrc();
-void loraDisableCrc();
-void loraEnableInvertIQ();
-void loraDisableInvertIQ();
+// void loraSetTxPower(lora_data_t *data, int level, int outputPin = PA_OUTPUT_PA_BOOST_PIN);
+// void loraSetFrequency(lora_data_t *data, long frequency);
+// void loraSetSpreadingFactor(lora_data_t *data, int sf);
+// void loraSetSignalBandwidth(lora_data_t *data, long sbw);
+// void loraSetCodingRate4(lora_data_t *data, int denominator);
+// void loraSetPreambleLength(lora_data_t *data, long length);
+// void loraSetSyncWord(lora_data_t *data, int sw);
+// void loraEnableCrc(lora_data_t *data);
+// void loraDisableCrc(lora_data_t *data);
+// void loraEnableInvertIQ(lora_data_t *data);
+// void loraDisableInvertIQ(lora_data_t *data);
 
-void loraSetOCP(uint8_t mA);
+// void loraSetOCP(lora_data_t *data, uint8_t mA);
 
-void loraSetGain(uint8_t gain);
+// void loraSetGain(lora_data_t *data, uint8_t gain);
 
-void loraCrc() { loraEnableCrc(); }
-void loraNoCrc() { loraDisableCrc(); }
+// void loraCrc(lora_data_t *data) { loraEnableCrc(); }
+// void loraNoCrc() { loraDisableCrc(); }
 
-uint8_t loraRandom();
+// uint8_t loraRandom(lora_data_t *data);
 
-void loraSetPins(int ss = LORA_DEFAULT_SS_PIN, int reset = LORA_DEFAULT_RESET_PIN, int dio0 = LORA_DEFAULT_DIO0_PIN);
-void loraSetSPI(spi_inst_t &spi);
-void loraSetSPIFrequency(uint32_t frequency);
+// void loraSetPins(lora_data_t *data, int ss = LORA_DEFAULT_SS_PIN, int reset = LORA_DEFAULT_RESET_PIN, int dio0 = LORA_DEFAULT_DIO0_PIN);
+// void loraSetSPI(lora_data_t *data, spi_inst_t &spi);
+// void loraSetSPIFrequency(lora_data_t *data, uint32_t frequency);
 
-void loraDumpRegisters();
+// void loraDumpRegisters(lora_data_t *data);
 
-void loraExplicitHeaderMode();
-void loraImplicitHeaderMode();
+// void loraExplicitHeaderMode(lora_data_t *data);
+// void loraImplicitHeaderMode(lora_data_t *data);
 
-void loraHandleDio0Rise();
-bool loraIsTransmitting();
+// void loraHandleDio0Rise(lora_data_t *data);
+// bool loraIsTransmitting(lora_data_t *data);
 
-int loraGetSpreadingFactor();
-long loraGetSignalBandwidth();
+// int loraGetSpreadingFactor(lora_data_t *data);
+// long loraGetSignalBandwidth(lora_data_t *data);
 
-void loraSetLdoFlag();
+// void loraSetLdoFlag(lora_data_t *data);
 
-uint8_t loraReadRegister(uint8_t address);
-void loraWriteRegister(uint8_t address, uint8_t value);
-uint8_t loraSingleTransfer(uint8_t address, uint8_t value);
+// uint8_t loraReadRegister(lora_data_t *data, uint8_t address);
+// void loraWriteRegister(lora_data_t *data, uint8_t address, uint8_t value);
+// uint8_t loraSingleTransfer(lora_data_t *data, uint8_t address, uint8_t value);
 
-void loraOnDio0Rise(uint, uint32_t);
+// void loraOnDio0Rise(uint, uint32_t);

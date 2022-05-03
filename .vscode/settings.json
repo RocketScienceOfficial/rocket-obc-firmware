@@ -22,6 +22,18 @@
         "stdlib.h": "c",
         "stdint.h": "c",
         "f_util.h": "c",
-        "hw_config.h": "c"
+        "hw_config.h": "c",
+        "logging_utils.h": "c",
+        "sd_card.h": "c",
+        "log_printer.h": "c",
+        "ctype.h": "c",
+        "string.h": "c",
+        "time_tracker.h": "c",
+        "cmath": "c",
+        "my_event.h": "c",
+        "console_input.h": "c",
+        "console_commands.h": "c",
+        "ff.h": "c",
+        "rtc.h": "c"
     }
 }

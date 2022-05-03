@@ -1,32 +1,33 @@
 #include "logger.h"
+#include "logging_utils.h"
 #include "time_tracker.h"
-#include <stdio.h>
-#include <stdarg.h>
 #include <stdlib.h>
+#include <stdio.h>
 
-static logCallback_t logCallback = NULL;
+static event_handler_t s_eventHandler;
 
-static void __log(const char* level, const char *format, va_list args)
+static void __log(const char *level, const char *format, va_list args)
 {
-	const char *timestamp = getTimestamp();
-	int len = snprintf(NULL, 0, LOG_FORMAT, timestamp, level, format) + 1;
-	char *newformat = malloc(len);
+	char *timestamp = getTimestamp();
+	char *message = vlogBase(format, args);
+	char *log = logBase(LOG_FORMAT, level, timestamp, message);
+	void *data[1] = {log};
 
-	snprintf(newformat, len, LOG_FORMAT, timestamp, level, format);
-
-	int flen = vprintf(newformat, args) + 1;
-	char buffer[128];
-	vsnprintf(buffer, flen, newformat, args);
-
-	logCallback(buffer);
+	callEvent(&s_eventHandler, data, 1);
 
 	free(timestamp);
-	free(newformat);
+	free(message);
+	free(log);
 }
 
-void myLogSetCallback(logCallback_t callback)
+void myLogInit()
 {
-	logCallback = callback;
+	initHandler(&s_eventHandler);
+}
+
+void myLogAddCallback(eventCallback_t callback)
+{
+	addEvent(&s_eventHandler, callback, NULL);
 }
 
 void myLogInfo(const char *format, ...)

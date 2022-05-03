@@ -1,6 +1,6 @@
 add_library(servo
-    servo.c
-    servo.h
+    mg995.c
+    mg995.h
     )
 
 target_link_libraries(servo pico_stdlib hardware_pwm)
