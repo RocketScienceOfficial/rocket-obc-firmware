@@ -5,10 +5,8 @@ add_library(logging
     measurements_logger.c
     logging_utils.h
     logging_utils.c
-    log_printer.h
-    log_printer.c
     )
 
-target_link_libraries(logging misc)
+target_link_libraries(logging time_tracker events)
 
 target_include_directories(logging PUBLIC .)

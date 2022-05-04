@@ -34,6 +34,16 @@
         "console_input.h": "c",
         "console_commands.h": "c",
         "ff.h": "c",
-        "rtc.h": "c"
+        "rtc.h": "c",
+        "assert.h": "c",
+        "console_colors.h": "c",
+        "default_console_commands.h": "c",
+        "array": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "ranges": "c",
+        "utility": "c",
+        "stddef.h": "c",
+        "typeinfo": "c"
     }
 }

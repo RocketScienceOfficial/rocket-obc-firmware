@@ -1,9 +1,10 @@
 #include "logging_utils.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 char *vlogBase(const char *format, va_list args)
 {
-    int len = vsnprintf(NULL, 0, format, args) + 1;
+    size_t len = vsnprintf(NULL, 0, format, args) + 1;
     char *newformat = malloc(len);
 
     vsnprintf(newformat, len, format, args);

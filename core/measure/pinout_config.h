@@ -6,14 +6,14 @@
 #define MPU6050_I2C_SDA_PIN 14
 #define MPU6050_I2C_SCL_PIN 15
 
-#define SD_CARD_SPI spi1
+#define SD_CARD_SPI 1
 #define SD_CARD_MISO_GPIO 12
 #define SD_CARD_MOSI_GPIO 11
 #define SD_CARD_SCK_GPIO 10
-#define SD_CARD_SC_GPIO 13
+#define SD_CARD_CS_GPIO 13
 #define SD_CARD_FREQ_KHZ 1000
 
-#define SX1278_SPI spi0
+#define SX1278_SPI 0
 #define SX1278_MISO_GPIO 16
 #define SX1278_MOSI_GPIO 19
 #define SX1278_SCK_GPIO 18

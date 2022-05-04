@@ -3,5 +3,5 @@ add_library(sd
     sd.c
     )
 
-target_link_libraries(sd logging misc pico_stdlib FatFs_SPI)
+target_link_libraries(sd logging pico_stdlib FatFs_SPI time_tracker myassert)
 target_include_directories(sd PUBLIC .)

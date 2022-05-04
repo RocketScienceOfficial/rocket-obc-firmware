@@ -2,13 +2,8 @@
 
 #include <stdio.h>
 
-//#define PICO_DEFAULT_I2C MPU6050_I2C
-//#define PICO_DEFAULT_I2C_SDA_PIN MPU6050_I2C_SDA_PIN
-//#define PICO_DEFAULT_I2C_SCL_PIN MPU6050_I2C_SCL_PIN
-
-#define ACCEL_FACTOR (0.000061)
-#define GYRO_FACTOR (0.007633)
-#define MPU6050_ADDR 0x68
+#define MPU6050_ACCEL_FACTOR (0.000061)
+#define MPU6050_GYRO_FACTOR (0.007633)
 
 typedef struct mpu6050_data
 {
@@ -21,6 +16,6 @@ typedef struct mpu6050_data
     double temperature;
 } mpu6050_data_t;
 
-void mpu6050Init();
+void mpu6050Init(int i2c, int sda, int scl);
 void mpu6050ReadRaw(mpu6050_data_t* data);
 void mpu6050ConvertData(mpu6050_data_t* data);

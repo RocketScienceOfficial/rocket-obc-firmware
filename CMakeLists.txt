@@ -9,5 +9,4 @@ set(CMAKE_CXX_STANDARD 17)
 pico_sdk_init()
 
 add_subdirectory(lib)
-add_subdirectory(measure)
-add_subdirectory(dataReceiver)
+add_subdirectory(core)

@@ -1,17 +1,12 @@
 #pragma once
 
-#define SD_CARD_TIMEOUT_MS 4000
-
-typedef struct
-{
-    char *filename;
-    char *text;
-} sd_entry_t;
+#define SD_FILES_MAX_COUNT 4
 
 void sdInit();
 void sdAttachToLogger();
-void sdBegin();
-void sdWrite();
-void sdEnd();
-void sdFlush();
+void sdInitFile(const char *file);
+void sdBegin(const char *file);
+void sdWrite(const char *msg, const char *file);
+void sdEnd(const char *file);
+void sdFlush(const char *file);
 void sdTerminate();
