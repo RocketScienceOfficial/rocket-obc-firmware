@@ -2,6 +2,8 @@
 
 #include <stddef.h>
 
+#define EVENT_MAX_LISTENERS 8
+
 typedef void (*eventCallback_t)(void **, size_t);
 
 typedef struct event_data
@@ -12,7 +14,7 @@ typedef struct event_data
 
 typedef struct event_handler
 {
-    event_data_t *events;
+    event_data_t events[EVENT_MAX_LISTENERS];
     int eventsCount;
     int code;
     int _lastId;

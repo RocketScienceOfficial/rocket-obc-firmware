@@ -24,3 +24,36 @@ char *getTimestamp()
 
 	return buffer;
 }
+
+int runEvery(unsigned int ms)
+{
+	static unsigned int timerOffset = 0;
+
+	if (getMsSinceBoot() - timerOffset >= ms)
+	{
+		timerOffset = getMsSinceBoot();
+
+		return 1;
+	}
+
+	return 0;
+}
+
+int runEvery_offset(unsigned int ms, unsigned int offset)
+{
+	static unsigned int timerOffset = 0;
+
+	if (timerOffset == 0)
+	{
+		timerOffset = offset;
+	}
+
+	if (getMsSinceBoot() - timerOffset >= ms)
+	{
+		timerOffset = getMsSinceBoot();
+
+		return 1;
+	}
+
+	return 0;
+}

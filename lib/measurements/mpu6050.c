@@ -91,13 +91,13 @@ void mpu6050ReadRaw(mpu6050_data_t *data)
 
     mpu6050_read_raw(acceleration, gyro, &temp);
 
-    data->accel_x = convert_to_ms2(acceleration[0]);
-    data->accel_y = convert_to_ms2(acceleration[1]);
-    data->accel_z = convert_to_ms2(acceleration[2]);
-    data->rot_x = convert_to_dps(gyro[0]);
-    data->rot_y = convert_to_dps(gyro[1]);
-    data->rot_z = convert_to_dps(gyro[2]);
-    data->temperature = convert_temperature(temp);
+    data->accel_x = acceleration[0];
+    data->accel_y = acceleration[1];
+    data->accel_z = acceleration[2];
+    data->rot_x = gyro[0];
+    data->rot_y = gyro[1];
+    data->rot_z = gyro[2];
+    data->temperature = temp;
 
     myLogInfo("Successfully read MPU6050!");
 }
@@ -105,6 +105,14 @@ void mpu6050ReadRaw(mpu6050_data_t *data)
 void mpu6050ConvertData(mpu6050_data_t *data)
 {
     myLogInfo("Converting data from MPU6050...");
+
+    data->accel_x = convert_to_ms2(data->accel_x);
+    data->accel_y = convert_to_ms2(data->accel_y);
+    data->accel_z = convert_to_ms2(data->accel_z);
+    data->rot_x = convert_to_dps(data->rot_x);
+    data->rot_y = convert_to_dps(data->rot_y);
+    data->rot_z = convert_to_dps(data->rot_z);
+    data->temperature = convert_temperature(data->temperature);
 
     myLogInfo("Successfully converted raw data from MPU6050!");
 }

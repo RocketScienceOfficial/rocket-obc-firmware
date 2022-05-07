@@ -11,6 +11,9 @@
 #include "time_tracker.h"
 #include "console_colors.h"
 #include "my_assert.h"
+#include "lora.h"
+
+static lora_data_t s_LoraData;
 
 void start();
 void initialize();
@@ -41,6 +44,9 @@ void initialize()
 {
     myLogInit();
 
+    consoleSetUser("receiver");
+    consoleStart();
+
     consoleInputAttachToLogger();
     attachPrinterToLog();
     consoleInputAttachToPrinter();
@@ -51,13 +57,27 @@ void initialize()
 
     registerDefaultConsoleCommands();
 
+    lora_pinout_t loraPinout = {
+        .spi = SX1278_SPI,
+        .sck = SX1278_SCK_GPIO,
+        .miso = SX1278_MISO_GPIO,
+        .mosi = SX1278_MOSI_GPIO,
+        .cs = SX1278_CS_GPIO,
+        .ss = SX1278_SS_GPIO,
+        .reset = SX1278_RESET_GPIO,
+        .dio0 = SX1278_DIO0_GPIO};
+
+    loraInit(&s_LoraData, &loraPinout);
+
+    s_LoraData.pinout = loraPinout;
+
+    MY_ASSERT(loraBegin(&s_LoraData, SX1278_FREQ_HZ));
+
     mg995_data_t data_1 = {.pin = MG995_PIN_1};
     mg995_data_t data_2 = {.pin = MG995_PIN_2};
 
     mg995Init(&data_1);
     mg995Init(&data_2);
-
-    consoleStart();
 
     myLogInfo("Everything is ready!");
 }
@@ -65,6 +85,15 @@ void initialize()
 void loop()
 {
     checkCommand();
+
+    if (runEvery(5000))
+    {
+        myLogInfo("Sending packet...");
+
+        loraBeginPacket(&s_LoraData, 0);
+        loraWrite_str(&s_LoraData, "Hello World!");
+        loraEndPacket(&s_LoraData, 0);
+    }
 }
 
 void checkCommand()

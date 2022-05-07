@@ -6,6 +6,7 @@
 #define CONSOLE_INPUT_MAX_LENGTH 128
 
 void consoleStart();
+void consoleSetUser(const char* user);
 void consoleProcessCharacter(int c, char ***tokens_out_ptr, size_t *size_out);
 void consoleTokenizeInput(char* input, char*** tokens_out_ptr, size_t* size_out);
 void consoleInputAttachToLogger();

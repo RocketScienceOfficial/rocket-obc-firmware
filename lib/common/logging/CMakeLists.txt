@@ -1,8 +1,6 @@
 add_library(logging
     logger.h
     logger.c
-    measurements_logger.h
-    measurements_logger.c
     logging_utils.h
     logging_utils.c
     )

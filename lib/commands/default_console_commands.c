@@ -2,7 +2,7 @@
 #include "console_commands.h"
 #include "logger.h"
 
-console_command_t commands[] = {
+static console_command_t s_Commands[] = {
     {.name = "hello", .func = helloCommand},
     {.name = "hello_name", .func = helloNameCommand},
 };
@@ -28,10 +28,10 @@ void helloNameCommand(char **args, size_t argc)
 
 void registerDefaultConsoleCommands()
 {
-    size_t count = sizeof(commands) / sizeof(console_command_t);
+    size_t count = sizeof(s_Commands) / sizeof(console_command_t);
 
     for (size_t i = 0; i < count; i++)
     {
-        registerCommand(&commands[i]);
+        registerCommand(&s_Commands[i]);
     }
 }

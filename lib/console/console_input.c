@@ -6,13 +6,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static char cmd[CONSOLE_INPUT_MAX_LENGTH];
-static size_t size;
+#define CONSOLE_ENTRY_FORMAT "%s> "
+#define CONSOLE_ENTRY_FORMAT_NL "\n%s> "
+
+static char s_Cmd[CONSOLE_INPUT_MAX_LENGTH];
+static size_t s_Size;
+static const char *s_User;
+
+static void logConsoleEntry_nl()
+{
+    myLogConsole(CONSOLE_ENTRY_FORMAT_NL, s_User);
+}
+
+static void logConsoleEntry()
+{
+    myLogConsole(CONSOLE_ENTRY_FORMAT, s_User);
+}
 
 void consoleStart()
 {
-    myLogConsole("> ");
-    stdio_flush();
+    logConsoleEntry_nl();
+}
+
+void consoleSetUser(const char *user)
+{
+    s_User = user;
 }
 
 void consoleProcessCharacter(int c, char ***tokens_out_ptr, size_t *size_out)
@@ -22,43 +40,44 @@ void consoleProcessCharacter(int c, char ***tokens_out_ptr, size_t *size_out)
         return;
     }
 
-    myLogConsole("%c", c);
-    stdio_flush();
-
     if (c == '\r')
     {
-        if (strnlen(cmd, sizeof(cmd)) == 0)
+        myLogConsole("%c", c);
+
+        if (strnlen(s_Cmd, sizeof(s_Cmd)) == 0)
         {
-            myLogConsole("\n> ");
-            stdio_flush();
+            logConsoleEntry_nl();
 
             return;
         }
 
-        consoleTokenizeInput(cmd, tokens_out_ptr, size_out);
+        consoleTokenizeInput(s_Cmd, tokens_out_ptr, size_out);
 
-        size = 0;
-        memset(cmd, 0, sizeof(cmd));
+        s_Size = 0;
+        memset(s_Cmd, 0, sizeof(s_Cmd));
 
-        myLogConsole("\n> ");
-        stdio_flush();
+        logConsoleEntry_nl();
     }
     else
     {
         if (c == '\b' || c == (char)127)
         {
-            if (size > 0)
+            if (s_Size > 0)
             {
-                size--;
-                cmd[size] = '\0';
+                myLogConsole("%c", c);
+
+                s_Size--;
+                s_Cmd[s_Size] = '\0';
             }
         }
         else
         {
-            if (size < sizeof(cmd) - 1)
+            myLogConsole("%c", c);
+
+            if (s_Size < sizeof(s_Cmd) - 1)
             {
-                cmd[size] = c;
-                size++;
+                s_Cmd[s_Size] = c;
+                s_Size++;
             }
         }
     }
@@ -93,7 +112,6 @@ static void logCallback(void **data, size_t size)
         const char *removeLineAnsi = "\33[2K\r";
 
         myLogConsole(removeLineAnsi);
-        stdio_flush();
     }
 }
 
@@ -108,8 +126,8 @@ static void logPrinterCallback(void **data, size_t size)
 
     if (level != LOG_LEVEL_CONSOLE)
     {
-        myLogConsole("> %s", cmd);
-        stdio_flush();
+        logConsoleEntry();
+        myLogConsole(s_Cmd);
     }
 }
 

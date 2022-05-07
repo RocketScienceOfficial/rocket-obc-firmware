@@ -1,6 +1,5 @@
 #include "sd.h"
 #include "logger.h"
-#include "measurements_logger.h"
 #include "time_tracker.h"
 #include "sd_card.h"
 #include "my_assert.h"
@@ -19,19 +18,19 @@ typedef struct sd_file
     FIL file;
 } sd_file_t;
 
-static bool s_sdEnabled = false;
+static int s_SdEnabled = false;
 static sd_card_t *s_pSD;
-static FRESULT s_fr;
-static sd_file_t s_files[SD_FILES_MAX_COUNT];
-static size_t s_filesCount;
+static FRESULT s_FR;
+static sd_file_t s_Files[SD_FILES_MAX_COUNT];
+static size_t s_FilesCount;
 
 static FIL *getFileByName(const char *name)
 {
-    for (size_t i = 0; i < s_filesCount; ++i)
+    for (size_t i = 0; i < s_FilesCount; ++i)
     {
-        if (strcmp(name, s_files[i].name) == 0)
+        if (strcmp(name, s_Files[i].name) == 0)
         {
-            return &s_files[i].file;
+            return &s_Files[i].file;
         }
     }
 
@@ -45,17 +44,9 @@ static const char *__parseCallbackData(void **data)
 
 static void log_callback(void **data, size_t size)
 {
-    if (s_sdEnabled)
+    if (s_SdEnabled)
     {
         sdWrite(__parseCallbackData(data), LOG_FILENAME);
-    }
-}
-
-static void logMeasurement_callback(void **data, size_t size)
-{
-    if (s_sdEnabled)
-    {
-        sdWrite(__parseCallbackData(data), MEASURE_FILENAME);
     }
 }
 
@@ -64,16 +55,16 @@ void sdInit()
     myLogInfo("Initializing SD Card...");
 
     s_pSD = sd_get_by_num(0);
-    s_fr = f_mount(&s_pSD->fatfs, s_pSD->pcName, 1);
+    s_FR = f_mount(&s_pSD->fatfs, s_pSD->pcName, 1);
 
-    if (FR_OK != s_fr)
+    if (FR_OK != s_FR)
     {
-        myLogError("f_mount error: %s (%d)\n", FRESULT_str(s_fr), s_fr);
+        myLogError("f_mount error: %s (%d)\n", FRESULT_str(s_FR), s_FR);
 
         return;
     }
 
-    s_sdEnabled = true;
+    s_SdEnabled = true;
 
     myLogInfo("SD Card initialized successfully!");
 }
@@ -81,36 +72,43 @@ void sdInit()
 void sdAttachToLogger()
 {
     myLogAddCallback(&log_callback);
-    myLogMeasureAddCallback(&logMeasurement_callback);
 }
 
 void sdInitFile(const char *file)
 {
     sd_file_t f = {.name = file};
 
-    s_files[s_filesCount] = f;
-    s_filesCount++;
+    s_Files[s_FilesCount] = f;
+    s_FilesCount++;
 }
 
 void sdBegin(const char *file)
 {
+    if (!s_SdEnabled)
+    {
+        return;
+    }
+
     FIL *f = getFileByName(file);
 
     MY_ASSERT(f != NULL);
 
-    s_fr = f_open(f, file, FA_OPEN_APPEND | FA_WRITE);
+    s_FR = f_open(f, file, FA_OPEN_APPEND | FA_WRITE);
 
-    if (FR_OK != s_fr && FR_EXIST != s_fr)
+    if (FR_OK != s_FR && FR_EXIST != s_FR)
     {
-        s_sdEnabled = false;
+        s_SdEnabled = false;
 
-        myLogError("f_open error: %s (%d)", FRESULT_str(s_fr), s_fr);
+        myLogError("f_open error: %s (%d)", FRESULT_str(s_FR), s_FR);
     }
 }
 
 void sdWrite(const char *msg, const char *file)
 {
-    s_sdEnabled = true;
+    if (!s_SdEnabled)
+    {
+        return;
+    }
 
     FIL *f = getFileByName(file);
 
@@ -118,7 +116,7 @@ void sdWrite(const char *msg, const char *file)
 
     if (f_printf(f, msg) < 0)
     {
-        s_sdEnabled = false;
+        s_SdEnabled = false;
 
         myLogError("f_printf failed");
     }
@@ -126,30 +124,45 @@ void sdWrite(const char *msg, const char *file)
 
 void sdEnd(const char *file)
 {
+    if (!s_SdEnabled)
+    {
+        return;
+    }
+
     FIL *f = getFileByName(file);
 
     MY_ASSERT(f != NULL);
 
-    s_fr = f_close(f);
+    s_FR = f_close(f);
 
-    if (FR_OK != s_fr)
+    if (FR_OK != s_FR)
     {
-        s_sdEnabled = false;
+        s_SdEnabled = false;
 
-        myLogError("f_close error: %s (%d)", FRESULT_str(s_fr), s_fr);
+        myLogError("f_close error: %s (%d)", FRESULT_str(s_FR), s_FR);
     }
 }
 
 void sdFlush(const char *file)
 {
+    if (!s_SdEnabled)
+    {
+        return;
+    }
+
     f_unlink(file);
 }
 
 void sdTerminate()
 {
+    if (!s_SdEnabled)
+    {
+        return;
+    }
+
     myLogInfo("Terminating SD Card...");
 
     f_unmount(s_pSD->pcName);
 
-    s_sdEnabled = false;
+    s_SdEnabled = false;
 }

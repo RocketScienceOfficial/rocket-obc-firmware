@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 
+#define CONSOLE_MAX_COMMANDS 16
 #define CONSOLE_ARGUMENTS_COUNT_ERROR_MSG "Invalid arguments count!"
 
 typedef void (*consoleCommandFunction_t)(char **args, size_t argc);

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static event_handler_t s_eventHandler;
+static event_handler_t s_EventHandler;
 
 static void __log(const char *level, const char *format, va_list args)
 {
@@ -15,7 +15,7 @@ static void __log(const char *level, const char *format, va_list args)
 		char *log = logBase(LOG_FORMAT, level, timestamp, message);
 		void *data[] = {log, level};
 
-		callEvent(&s_eventHandler, data, 2);
+		callEvent(&s_EventHandler, data, 2);
 
 		free(timestamp);
 		free(message);
@@ -27,7 +27,7 @@ static void __log(const char *level, const char *format, va_list args)
 		char *log = vlogBase(message, args);
 		void *data[] = {log, level};
 
-		callEvent(&s_eventHandler, data, 2);
+		callEvent(&s_EventHandler, data, 2);
 
 		free(message);
 		free(log);
@@ -37,7 +37,7 @@ static void __log(const char *level, const char *format, va_list args)
 		char *log = vlogBase(format, args);
 		void *data[] = {log, level};
 
-		callEvent(&s_eventHandler, data, 2);
+		callEvent(&s_EventHandler, data, 2);
 
 		free(log);
 	}
@@ -45,12 +45,12 @@ static void __log(const char *level, const char *format, va_list args)
 
 void myLogInit()
 {
-	initHandler(&s_eventHandler);
+	initHandler(&s_EventHandler);
 }
 
 void myLogAddCallback(eventCallback_t callback)
 {
-	addEvent(&s_eventHandler, callback, NULL);
+	addEvent(&s_EventHandler, callback, NULL);
 }
 
 void myLogInfo(const char *format, ...)

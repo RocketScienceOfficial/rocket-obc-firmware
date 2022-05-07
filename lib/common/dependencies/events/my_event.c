@@ -5,9 +5,9 @@ static int s_currentCode = 0;
 
 void initHandler(event_handler_t *handler_out)
 {
-    handler_out->events = NULL;
     handler_out->eventsCount = 0;
     handler_out->code = s_currentCode;
+    handler_out->_lastId = 0;
 
     s_currentCode++;
 }
@@ -22,44 +22,36 @@ void callEvent(event_handler_t *handler, void **data, size_t size)
 
 void addEvent(event_handler_t *handler, eventCallback_t callback, int *id_out)
 {
-    event_data_t *oldEvents = handler->events;
-    int oldEventsCount = handler->eventsCount;
-
-    handler->events = malloc(sizeof(event_data_t) * (oldEventsCount + 1));
-
-    for (int i = 0; i < oldEventsCount; i++)
-    {
-        handler->events[i] = oldEvents[i];
-    }
-
-    handler->events[oldEventsCount] = (event_data_t){callback, handler->_lastId + 1};
+    *id_out = handler->_lastId;
+    handler->events[handler->eventsCount] = (event_data_t){callback, *id_out};
     handler->eventsCount++;
     handler->_lastId++;
-
-    if (id_out)
-    {
-        *id_out = handler->_lastId;
-    }
-
-    free(oldEvents);
 }
 
 void removeEvent(event_handler_t *handler, int *id)
 {
-    event_data_t *oldEvents = handler->events;
-    int oldEventsCount = handler->eventsCount;
+    int index = -1;
 
-    handler->events = malloc(sizeof(event_data_t) * (oldEventsCount - 1));
-
-    for (int i = 0; i < oldEventsCount; i++)
+    for (int i = 0; i < handler->eventsCount; i++)
     {
-        if (oldEvents[i].id != *id)
+        if (handler->events[i].id == *id)
         {
-            handler->events[i] = oldEvents[i];
+            handler->events[i].callback = NULL;
+            handler->events[i].id = -1;
+
+            index = i;
+
+            break;
         }
     }
 
-    handler->eventsCount--;
+    if (index != -1)
+    {
+        for (int i = index; i < handler->eventsCount - 1; i++)
+        {
+            handler->events[i] = handler->events[i + 1];
+        }
 
-    free(oldEvents);
+        handler->eventsCount--;
+    }
 }

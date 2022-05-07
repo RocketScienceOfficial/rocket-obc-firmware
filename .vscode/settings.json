@@ -44,6 +44,10 @@
         "ranges": "c",
         "utility": "c",
         "stddef.h": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "string": "c",
+        "lora.h": "c",
+        "console_log_printer.h": "c",
+        "my_assert.h": "c"
     }
 }

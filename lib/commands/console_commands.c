@@ -2,36 +2,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-static console_command_t *s_commands;
-static size_t s_commandSize;
+static console_command_t s_Commands[CONSOLE_MAX_COMMANDS];
+static size_t s_CommandSize;
 
 void registerCommand(console_command_t *command)
 {
-    console_command_t *oldCommands = s_commands;
-    int oldSize = s_commandSize;
-
-    s_commands = malloc(sizeof(console_command_t) * (oldSize + 1));
-
-    for (int i = 0; i < oldSize; i++)
-    {
-        s_commands[i] = oldCommands[i];
-    }
-
-    s_commands[oldSize] = *command;
-    s_commandSize++;
-
-    free(oldCommands);
+    s_Commands[s_CommandSize] = *command;
+    s_CommandSize++;
 }
 
 console_command_t *parseCommand(char **tokens, size_t tokensSize, char ***commandArgs_out_ptr, size_t *commandArgsSize_out)
 {
     console_command_t *command = NULL;
 
-    for (size_t i = 0; i < s_commandSize; i++)
+    for (size_t i = 0; i < s_CommandSize; i++)
     {
-        if (strcmp(s_commands[i].name, tokens[0]) == 0)
+        if (strcmp(s_Commands[i].name, tokens[0]) == 0)
         {
-            command = &s_commands[i];
+            command = &s_Commands[i];
         }
     }
 
