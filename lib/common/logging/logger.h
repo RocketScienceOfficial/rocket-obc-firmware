@@ -9,7 +9,7 @@
 #define LOG_LEVEL_DEBUG "DEBUG"
 #define LOG_LEVEL_ERROR "ERROR"
 
-typedef void (*logCallback_t)(const char* level, const char *msg);
+typedef void (*logCallback_t)(const char *level, const char *msg);
 
 typedef struct log_sink_data
 {
@@ -39,6 +39,7 @@ logger_data_t *myLogGetMeasureLogger();
 #define MY_LOG_CORE_ERROR(msg, ...) myLogError(myLogGetCoreLogger(), msg, ##__VA_ARGS__)
 
 #define MY_LOG_MEASURE_PATTERN "%c;"
-#define MY_LOG_MEASURE_INFO(msg, ...) myLogInfo(myLogGetMeasureLogger(), msg, ##__VA_ARGS__)
-#define MY_LOG_MEASURE_DEBUG(msg, ...) myLogDebug(myLogGetMeasureLogger(), msg, ##__VA_ARGS__)
-#define MY_LOG_MEASUREG_ERROR(msg, ...) myLogError(myLogGetMeasureLogger(), msg, ##__VA_ARGS__)
+#define MY_LOG_MEASURE_INFO_LEVEL "INFO"
+#define MY_LOG_MEASURE_END_LEVEL "END"
+#define MY_LOG_MEASURE(msg, ...) myLog(myLogGetMeasureLogger(), MY_LOG_MEASURE_INFO_LEVEL, msg, ##__VA_ARGS__)
+#define MY_LOG_MEASURE_END() myLog(myLogGetMeasureLogger(), MY_LOG_MEASURE_END_LEVEL, "\n")

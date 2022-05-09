@@ -49,7 +49,14 @@ static void __measureCallback(const char *level, const char *msg)
 {
     if (s_SdEnabled)
     {
-        sdWrite(msg, LOG_MEASUREMENTS_FILENAME);
+        if (level == MY_LOG_MEASURE_INFO_LEVEL)
+        {
+            sdWrite(msg, LOG_MEASUREMENTS_FILENAME);
+        }
+        else if (level == MY_LOG_MEASURE_END_LEVEL)
+        {
+            sdWrite("\n", LOG_MEASUREMENTS_FILENAME);
+        }
     }
 }
 
