@@ -2,8 +2,12 @@
 
 #define SD_FILES_MAX_COUNT 4
 
+#define LOG_CORE_FILENAME "log.txt"
+#define LOG_MEASUREMENTS_FILENAME "measurements.csv"
+
 void sdInit();
-void sdAttachToLogger();
+void sdAttachToCoreLogger();
+void sdAttachToMeasureLogger();
 void sdInitFile(const char *file);
 void sdBegin(const char *file);
 void sdWrite(const char *msg, const char *file);

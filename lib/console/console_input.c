@@ -1,5 +1,4 @@
 #include "console_input.h"
-#include "logger.h"
 #include "pico/stdlib.h"
 #include <ctype.h>
 #include <string.h>
@@ -15,17 +14,17 @@ static const char *s_User;
 
 static void logConsoleEntry_nl()
 {
-    myLogConsole(CONSOLE_ENTRY_FORMAT_NL, s_User);
+    MY_LOG_CONSOLE(CONSOLE_ENTRY_FORMAT_NL, s_User);
 }
 
 static void logConsoleEntry()
 {
-    myLogConsole(CONSOLE_ENTRY_FORMAT, s_User);
+    MY_LOG_CONSOLE(CONSOLE_ENTRY_FORMAT, s_User);
 }
 
 void consoleStart()
 {
-    logConsoleEntry_nl();
+    logConsoleEntry();
 }
 
 void consoleSetUser(const char *user)
@@ -42,7 +41,7 @@ void consoleProcessCharacter(int c, char ***tokens_out_ptr, size_t *size_out)
 
     if (c == '\r')
     {
-        myLogConsole("%c", c);
+        MY_LOG_CONSOLE("%c", c);
 
         if (strnlen(s_Cmd, sizeof(s_Cmd)) == 0)
         {
@@ -64,7 +63,7 @@ void consoleProcessCharacter(int c, char ***tokens_out_ptr, size_t *size_out)
         {
             if (s_Size > 0)
             {
-                myLogConsole("%c", c);
+                MY_LOG_CONSOLE("%c", c);
 
                 s_Size--;
                 s_Cmd[s_Size] = '\0';
@@ -72,7 +71,7 @@ void consoleProcessCharacter(int c, char ***tokens_out_ptr, size_t *size_out)
         }
         else
         {
-            myLogConsole("%c", c);
+            MY_LOG_CONSOLE("%c", c);
 
             if (s_Size < sizeof(s_Cmd) - 1)
             {
@@ -103,37 +102,37 @@ void consoleTokenizeInput(char *input, char ***tokens_out_ptr, size_t *size_out)
     }
 }
 
-static void logCallback(void **data, size_t size)
+static void logCallback(const char *level, const char *msg)
 {
-    const char *level = (const char *)data[1];
+    const char *removeLineAnsi = "\33[2K\r";
 
-    if (level != LOG_LEVEL_CONSOLE)
+    MY_LOG_CONSOLE(removeLineAnsi);
+}
+
+void consoleInputAttachToLogger(logger_data_t *otherLoggers, size_t otherLoggersCount)
+{
+    myLogCreateSink(myLogGetCoreLogger(), &logCallback, "");
+
+    for (size_t i = 0; i < otherLoggersCount; i++)
     {
-        const char *removeLineAnsi = "\33[2K\r";
-
-        myLogConsole(removeLineAnsi);
+        myLogCreateSink(&otherLoggers[i], &logCallback, "");
     }
 }
 
-void consoleInputAttachToLogger()
+static void logPrinterCallback(const char *level, const char *msg)
 {
-    myLogAddCallback(logCallback);
+    logConsoleEntry();
+    MY_LOG_CONSOLE(s_Cmd);
 }
 
-static void logPrinterCallback(void **data, size_t size)
+void consoleInputAttachToPrinter(logger_data_t *otherLoggers, size_t otherLoggersCount)
 {
-    const char *level = (const char *)data[1];
+    myLogCreateSink(myLogGetCoreLogger(), &logPrinterCallback, "");
 
-    if (level != LOG_LEVEL_CONSOLE)
+    for (size_t i = 0; i < otherLoggersCount; i++)
     {
-        logConsoleEntry();
-        myLogConsole(s_Cmd);
+        myLogCreateSink(&otherLoggers[i], &logPrinterCallback, "");
     }
-}
-
-void consoleInputAttachToPrinter()
-{
-    myLogAddCallback(logPrinterCallback);
 }
 
 void consoleCheckInput(char ***tokens_out_ptr, size_t *size_out)
@@ -144,4 +143,19 @@ void consoleCheckInput(char ***tokens_out_ptr, size_t *size_out)
     {
         consoleProcessCharacter(ch, tokens_out_ptr, size_out);
     }
+}
+
+static logger_data_t s_Logger;
+static int s_LoggerInitialized;
+
+logger_data_t *myLogGetConsoleLogger()
+{
+    if (!s_LoggerInitialized)
+    {
+        myLogCreateLogger(&s_Logger);
+
+        s_LoggerInitialized = 1;
+    }
+
+    return &s_Logger;
 }

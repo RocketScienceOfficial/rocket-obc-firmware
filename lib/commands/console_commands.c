@@ -63,3 +63,18 @@ int checkArgsCount(size_t expectedCount, size_t actualCount, char **output_ptr)
 
     return 1;
 }
+
+static logger_data_t s_Logger;
+static int s_LoggerInitialized;
+
+logger_data_t *myLogGetCommandLogger()
+{
+	if (!s_LoggerInitialized)
+	{
+		myLogCreateLogger(&s_Logger);
+
+		s_LoggerInitialized = 1;
+	}
+
+	return &s_Logger;
+}

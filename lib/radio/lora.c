@@ -616,7 +616,7 @@ void loraDumpRegisters(lora_data_t *data)
 {
     for (int i = 0; i < 128; i++)
     {
-        myLogInfo("0x%x: 0x%x", i, __loraReadRegister(data, i));
+        MY_LOG_CORE_INFO("0x%x: 0x%x", i, __loraReadRegister(data, i));
     }
 }
 

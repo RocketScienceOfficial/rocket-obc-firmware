@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stddef.h>
+#include "logger.h"
 
 #define CONSOLE_MAX_COMMANDS 16
 #define CONSOLE_ARGUMENTS_COUNT_ERROR_MSG "Invalid arguments count!"
@@ -17,3 +18,7 @@ void registerCommand(console_command_t *command);
 console_command_t *parseCommand(char **tokens, size_t tokensSize, char ***commandArgs_out_ptr, size_t *commandArgsSize_out);
 void executeCommand(console_command_t *command, char **commandArgs, size_t argc);
 int checkArgsCount(size_t expectedCount, size_t actualCount, char** output_ptr);
+logger_data_t* myLogGetCommandLogger();
+
+#define MY_LOG_COMMAND_PATTERN "%c\n"
+#define MY_LOG_COMMAND(msg, ...) myLogInfo(myLogGetCommandLogger(), msg, ##__VA_ARGS__)

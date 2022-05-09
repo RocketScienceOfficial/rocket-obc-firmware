@@ -170,7 +170,7 @@ void bmp280_get_calib_params(struct bmp280_calib_param *params)
 
 void bmp280Init(int i2c, int sda, int scl)
 {
-    myLogInfo("Initializing BMP280...");
+    MY_LOG_CORE_INFO("Initializing BMP280...");
 
     s_i2c = i2c;
 
@@ -184,12 +184,12 @@ void bmp280Init(int i2c, int sda, int scl)
 
     bmp280_get_calib_params(&params);
 
-    myLogInfo("BMP280 Initialized!");
+    MY_LOG_CORE_INFO("BMP280 Initialized!");
 }
 
 void bmp280Read(bmp280_data_t *data)
 {
-    myLogInfo("Reading BMP280...");
+    MY_LOG_CORE_INFO("Reading BMP280...");
 
     int32_t raw_temperature;
     int32_t raw_pressure;
@@ -199,5 +199,5 @@ void bmp280Read(bmp280_data_t *data)
     data->temperature = bmp280_convert_temp(raw_temperature, &params);
     data->pressure = bmp280_convert_pressure(raw_pressure, raw_temperature, &params);
 
-    myLogInfo("Succesffully read BMP280!");
+    MY_LOG_CORE_INFO("Succesffully read BMP280!");
 }

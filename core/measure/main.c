@@ -7,7 +7,8 @@
 #include "time_tracker.h"
 #include "console_input.h"
 #include "console_colors.h"
-#include "console_log_printer.h"
+#include "log_printer.h"
+#include "commands_printer.h"
 #include "console_commands.h"
 #include "default_console_commands.h"
 #include "my_assert.h"
@@ -45,16 +46,15 @@ void start()
 
 void initialize()
 {
-    myLogInit();
-
     consoleSetUser("measure");
     consoleStart();
 
-    consoleInputAttachToLogger();
+    consoleInputAttachToLogger(NULL, 0);
     attachPrinterToLog();
-    consoleInputAttachToPrinter();
+    attachPrinterToCommandsLog();
+    consoleInputAttachToPrinter(NULL, 0);
 
-    myLogInfo("Initializing...");
+    MY_LOG_CORE_INFO("Initializing...");
 
     resetColorsAndEffects();
 
@@ -86,7 +86,7 @@ void initialize()
 
     //sdBegin(LOG_FILENAME);
 
-    myLogInfo("Everything is ready!");
+    MY_LOG_CORE_INFO("Everything is ready!");
 
     //sdEnd(LOG_FILENAME);
 }
@@ -126,11 +126,11 @@ void loop()
 
     if (packetSize)
     {
-        myLogInfo("Received packet '");
+        MY_LOG_CORE_INFO("Received packet '");
 
         while (loraAvailable(&s_LoraData))
         {
-            myLogInfo("%c", (char)loraRead(&s_LoraData));
+            MY_LOG_CORE_INFO("%c", (char)loraRead(&s_LoraData));
         }
     }
 }

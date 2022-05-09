@@ -53,7 +53,7 @@ static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp)
 
 void mpu6050Init(int i2c, int sda, int scl)
 {
-    myLogInfo("Initializing MPU6050...");
+    MY_LOG_CORE_INFO("Initializing MPU6050...");
 
     s_i2c = i2c;
 
@@ -65,7 +65,7 @@ void mpu6050Init(int i2c, int sda, int scl)
 
     mpu6050_reset();
 
-    myLogInfo("Successfully initialized MPU6050!");
+    MY_LOG_CORE_INFO("Successfully initialized MPU6050!");
 }
 
 double convert_to_ms2(int16_t raw)
@@ -85,7 +85,7 @@ double convert_temperature(int16_t raw)
 
 void mpu6050ReadRaw(mpu6050_data_t *data)
 {
-    myLogInfo("Reading MPU6050...");
+    MY_LOG_CORE_INFO("Reading MPU6050...");
 
     int16_t acceleration[3], gyro[3], temp;
 
@@ -99,12 +99,12 @@ void mpu6050ReadRaw(mpu6050_data_t *data)
     data->rot_z = gyro[2];
     data->temperature = temp;
 
-    myLogInfo("Successfully read MPU6050!");
+    MY_LOG_CORE_INFO("Successfully read MPU6050!");
 }
 
 void mpu6050ConvertData(mpu6050_data_t *data)
 {
-    myLogInfo("Converting data from MPU6050...");
+    MY_LOG_CORE_INFO("Converting data from MPU6050...");
 
     data->accel_x = convert_to_ms2(data->accel_x);
     data->accel_y = convert_to_ms2(data->accel_y);
@@ -114,5 +114,5 @@ void mpu6050ConvertData(mpu6050_data_t *data)
     data->rot_z = convert_to_dps(data->rot_z);
     data->temperature = convert_temperature(data->temperature);
 
-    myLogInfo("Successfully converted raw data from MPU6050!");
+    MY_LOG_CORE_INFO("Successfully converted raw data from MPU6050!");
 }
