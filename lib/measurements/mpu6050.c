@@ -116,3 +116,17 @@ void mpu6050ConvertData(mpu6050_data_t *data)
 
     MY_LOG_CORE_INFO("Successfully converted raw data from MPU6050!");
 }
+
+void mpu6050FilterData(kalman_filter_data_t *kalmanData, mpu6050_data_t *data)
+{
+    MY_LOG_CORE_INFO("Filtering data from MPU6050...");
+
+    data->accel_x = kalman(kalmanData, data->accel_x);
+    data->accel_y = kalman(kalmanData, data->accel_y);
+    data->accel_z = kalman(kalmanData, data->accel_z);
+    data->rot_x = kalman(kalmanData, data->rot_x);
+    data->rot_y = kalman(kalmanData, data->rot_y);
+    data->rot_z = kalman(kalmanData, data->rot_z);
+
+    MY_LOG_CORE_INFO("Successfully filtered data from MPU6050!");
+}
