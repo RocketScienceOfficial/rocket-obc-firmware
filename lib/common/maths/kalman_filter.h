@@ -24,4 +24,5 @@ typedef struct kalman_filter_data
 
 } kalman_filter_data_t;
 
+void kalmanInit(kalman_filter_data_t* data);
 double kalman(kalman_filter_data_t *data, double u);

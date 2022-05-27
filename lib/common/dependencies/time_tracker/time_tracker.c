@@ -11,13 +11,11 @@ unsigned int getMsSinceBoot()
 	return time_ms;
 }
 
-int runEvery(unsigned int ms)
+int runEvery(unsigned int ms, unsigned int* timerOffset)
 {
-	static unsigned int timerOffset = 0;
-
-	if (getMsSinceBoot() - timerOffset >= ms)
+	if (getMsSinceBoot() - *timerOffset >= ms)
 	{
-		timerOffset = getMsSinceBoot();
+		*timerOffset = getMsSinceBoot();
 
 		return 1;
 	}

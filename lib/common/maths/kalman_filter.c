@@ -1,5 +1,15 @@
 #include "kalman_filter.h"
 
+void kalmanInit(kalman_filter_data_t *data)
+{
+    data->R = 40;
+    data->H = 1.00;
+    data->Q = 10;
+    data->P = 0;
+    data->U_hat = 0;
+    data->K = 0;
+}
+
 double kalman(kalman_filter_data_t *data, double u)
 {
     data->K = data->P * data->H / (data->H * data->P * data->H + data->R);

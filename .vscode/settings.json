@@ -51,6 +51,7 @@
         "my_assert.h": "c",
         "algorithm": "c",
         "math.h": "c",
-        "kalman_filter.h": "c"
+        "kalman_filter.h": "c",
+        "commands_printer.h": "c"
     }
 }
