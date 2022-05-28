@@ -104,9 +104,9 @@ void consoleTokenizeInput(char *input, char ***tokens_out_ptr, size_t *size_out)
 
 static void logCallback(const char *level, const char *msg)
 {
-    const char *removeLineAnsi = "\33[2K\r";
+    //const char *removeLineAnsi = "\33[2K\r";
 
-    MY_LOG_CONSOLE(removeLineAnsi);
+    //MY_LOG_CONSOLE(removeLineAnsi);
 }
 
 void consoleInputAttachToLogger(logger_data_t *otherLoggers, size_t otherLoggersCount)
