@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include "pico/stdlib.h"
-#include "pinout_config.h"
+#include "pinout.h"
 #include "logger.h"
 #include "time_tracker.h"
 #include "console_input.h"
@@ -91,8 +91,8 @@ void initialize()
     sdFlush(LOG_CORE_FILENAME);
     sdInitFile(LOG_MEASUREMENTS_FILENAME);
     sdFlush(LOG_MEASUREMENTS_FILENAME);
-    sdAttachToCoreLogger();
-    sdAttachToMeasureLogger();
+    sdAttachToCoreLogger(LOG_CORE_FILENAME);
+    sdAttachToMeasureLogger(LOG_MEASUREMENTS_FILENAME);
 
     sdBegin(LOG_CORE_FILENAME);
 */

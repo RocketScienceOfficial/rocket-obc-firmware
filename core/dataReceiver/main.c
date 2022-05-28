@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "pico/stdlib.h"
-#include "pinout_config.h"
+#include "pinout.h"
 #include "logger.h"
 #include "log_printer.h"
 #include "commands_printer.h"

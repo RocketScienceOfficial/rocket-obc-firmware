@@ -52,6 +52,8 @@
         "algorithm": "c",
         "math.h": "c",
         "kalman_filter.h": "c",
-        "commands_printer.h": "c"
+        "commands_printer.h": "c",
+        "console_printer.h": "c",
+        "pinout.h": "c"
     }
 }

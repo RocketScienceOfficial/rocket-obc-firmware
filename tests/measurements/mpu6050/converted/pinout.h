@@ -1,0 +1,3 @@
+#define MPU6050_I2C 0
+#define MPU6050_I2C_SDA_PIN 16
+#define MPU6050_I2C_SCL_PIN 17

@@ -23,6 +23,8 @@ static sd_card_t *s_pSD;
 static FRESULT s_FR;
 static sd_file_t s_Files[SD_FILES_MAX_COUNT];
 static size_t s_FilesCount;
+static const char* s_CoreLogFileName;
+static const char* s_MeasureLogFileName;
 
 static FIL *getFileByName(const char *name)
 {
@@ -41,7 +43,7 @@ static void __logCallback(const char *level, const char *msg)
 {
     if (s_SdEnabled)
     {
-        sdWrite(msg, LOG_CORE_FILENAME);
+        sdWrite(msg, s_CoreLogFileName);
     }
 }
 
@@ -51,11 +53,11 @@ static void __measureCallback(const char *level, const char *msg)
     {
         if (level == MY_LOG_MEASURE_INFO_LEVEL)
         {
-            sdWrite(msg, LOG_MEASUREMENTS_FILENAME);
+            sdWrite(msg, s_MeasureLogFileName);
         }
         else if (level == MY_LOG_MEASURE_END_LEVEL)
         {
-            sdWrite("\n", LOG_MEASUREMENTS_FILENAME);
+            sdWrite("\n", s_MeasureLogFileName);
         }
     }
 }
@@ -79,13 +81,17 @@ void sdInit()
     MY_LOG_CORE_INFO("SD Card initialized successfully!");
 }
 
-void sdAttachToCoreLogger()
+void sdAttachToCoreLogger(const char* fileName)
 {
+    s_CoreLogFileName = fileName;
+
     myLogCreateSink(myLogGetCoreLogger(), &__logCallback, MY_LOG_CORE_PATTERN);
 }
 
-void sdAttachToMeasureLogger()
+void sdAttachToMeasureLogger(const char* fileName)
 {
+    s_MeasureLogFileName = fileName;
+    
     myLogCreateSink(myLogGetMeasureLogger(), &__measureCallback, MY_LOG_MEASURE_PATTERN);
 }
 

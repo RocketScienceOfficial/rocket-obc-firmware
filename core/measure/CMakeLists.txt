@@ -1,6 +1,6 @@
 add_executable(measure main.c hw_config.c)
 
-target_link_libraries(measure PUBLIC pico_stdlib logging maths measurements radio sd console commands console_colors myassert)
+target_link_libraries(measure PUBLIC pico_stdlib time_tracker logging maths measurements radio sd console commands console_colors myassert)
 
 pico_enable_stdio_usb(measure 1)
 pico_enable_stdio_uart(measure 0)
