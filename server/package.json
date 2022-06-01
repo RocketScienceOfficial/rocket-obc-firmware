@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js"
+    "start": "node app.js",
+    "start-dev": "nodemon app.js"
   },
   "author": "",
   "license": "ISC",
@@ -15,5 +16,8 @@
     "express": "^4.18.1",
     "serialport": "^10.4.0",
     "ws": "^8.7.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.16"
   }
 }

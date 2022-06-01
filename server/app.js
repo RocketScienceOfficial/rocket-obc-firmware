@@ -10,20 +10,8 @@ const PORT = 8080;
 const app = express();
 const server = http.createServer(app);
 
-function handleSerialPortListen(data) {
-    console.log("Received message from serial port: " + data);
-
-    webSocketControl.sendToClients(data);
-}
-
-function handleWebSocketListen(data) {
-    console.log("Received message from client: " + data);
-
-    serialPortControl.write(data, function () { })
-}
-
 webSocketControl.init(server, handleWebSocketListen);
-serialPortControl.listen(handleSerialPortListen);
+serialPortControl.init(handleSerialPortConnected, handleSerialPortListen, handleSerialPortClose, handleSerialPortInitFailed);
 
 app.use(express.static("public"));
 app.use("/css", express.static(__dirname + "public/css"));
@@ -37,3 +25,61 @@ app.use("/", website);
 app.use("/api", api);
 
 server.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+
+function handleWebSocketListen(data) {
+    serialPortControl.write(data + '\r', function () { });
+}
+
+function handleSerialPortConnected(path) {
+
+}
+
+function handleSerialPortListen(data) {
+    try {
+        const parsedData = JSON.parse(data);
+
+        if (parsedData.type == "REMOTE_COMMAND") {
+            if (parsedData.level == "CLIENT") {
+                webSocketControl.sendToClients(data);
+            }
+            else if (parsedData.level == "SERVER") {
+
+            }
+        }
+        else {
+            webSocketControl.sendToClients(data);
+        }
+    } catch (e) {
+        //console.log(e);
+    }
+}
+
+function handleSerialPortClose() {
+    findSerialPort();
+}
+
+function handleSerialPortInitFailed() {
+    findSerialPort();
+}
+
+function findSerialPort() {
+    const serialPortInterval = setInterval(() => {
+        if (!serialPortControl.isConnected()) {
+            console.log("Looking for serial port...");
+
+            serialPortControl.getPortPath(path => {
+                if (path != serialPortControl.UNKNOWN_PATH) {
+                    console.log("Found serial port: " + path);
+
+                    serialPortControl.listen(path, handleSerialPortListen, handleSerialPortClose);
+
+                    clearInterval(serialPortInterval);
+                }
+                else {
+                    console.log("Couldn't find serial port");
+                }
+            });
+        }
+
+    }, 500);
+}
