@@ -31,7 +31,7 @@ function listen(path, onRead, onClose) {
 
     port = new SerialPort({
         path: path,
-        baudRate: 9600,
+        baudRate: 115200,
     });
 
     port.on("close", function () {
@@ -77,9 +77,12 @@ function write(data, callback) {
 function getPortPath(callback, index = 0) {
     SerialPort.list().then(ports => {
         let count = 0;
-
+        
         for (let i = 0; i < ports.length; i++) {
-            if (ports[i].vendorId == VENDOR_ID && ports[i].productId == PRODUCT_ID) {
+            const vendor = ports[i].vendorId.toUpperCase();
+            const product = ports[i].productId.toUpperCase();
+
+            if (vendor == VENDOR_ID && product == PRODUCT_ID) {
                 if (index == count) {
                     callback(ports[i].path);
 

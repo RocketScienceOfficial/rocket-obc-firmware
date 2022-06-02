@@ -5,7 +5,7 @@ const serialPortControl = require("./src/serial/serialPortControl");
 const api = require("./src/api/index");
 const webSocketControl = require("./src/rtc/webSocketControl");
 
-const PORT = 8080;
+const PORT = 48080;
 
 const app = express();
 const server = http.createServer(app);

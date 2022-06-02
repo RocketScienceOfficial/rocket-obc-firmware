@@ -1,4 +1,4 @@
-const url = "ws://localhost:8080";
+const url = "ws://localhost:48080";
 const socket = new WebSocket(url);
 const callbacks = [];
 
