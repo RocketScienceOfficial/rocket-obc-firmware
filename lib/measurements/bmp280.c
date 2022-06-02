@@ -222,10 +222,10 @@ void bmp280Read(bmp280_data_t *data)
     MY_LOG_CORE_INFO("Succesffully read BMP280!");
 }
 
-double bmp280GetAltitude(bmp280_data_t *data)
+float bmp280GetAltitude(bmp280_data_t *data)
 {
-    double pressure = data->pressure;
-    double altitude = PRESSURE_TEMPERATURE_CONSTANT * (1.0 - pow(pressure / SEA_LEVEL_PRESSURE, PRESSURE_GAS_CONSTANT));
+    int pressure = data->pressure;
+    float altitude = PRESSURE_TEMPERATURE_CONSTANT * (1.0 - pow(pressure / SEA_LEVEL_PRESSURE, PRESSURE_GAS_CONSTANT));
 
     return altitude;
 }

@@ -15,4 +15,4 @@ typedef struct bmp280_data
 int bmp280Init(int i2c, int sda, int scl);
 int bmp280Check();
 void bmp280Read(bmp280_data_t *data);
-double bmp280GetAltitude(bmp280_data_t* data);
+float bmp280GetAltitude(bmp280_data_t* data);

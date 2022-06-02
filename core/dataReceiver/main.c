@@ -93,6 +93,7 @@ void loop()
         memcpy(&bmp280Data, s_Packet.payload, s_Packet.payloadSize);
 
         MY_LOG_CORE_INFO("Pressure: %d", bmp280Data.pressure);
+        MY_LOG_CORE_INFO("Altitude: %f", bmp280GetAltitude(&bmp280Data));
         MY_LOG_CORE_INFO("Temperature: %f", bmp280Data.temperature);
     }
 }
