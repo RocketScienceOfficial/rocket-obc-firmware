@@ -152,7 +152,7 @@ void takeMeasurements()
 
     memcpy(packet.payload, &bmp280Data, packet.payloadSize);
 
-    sendPacket(&s_LoraData, &packet);
+    radioSendPacket(&s_LoraData, &packet);
 
     MY_LOG_MEASURE_INT(bmp280Data.pressure);
     MY_LOG_MEASURE_FLOAT(bmp280Data.temperature);

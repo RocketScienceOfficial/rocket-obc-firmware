@@ -85,7 +85,7 @@ void loop()
         MY_LOG_CORE_INFO("HELLO!");
     }
 
-    if (receivePacket(&s_LoraData, &s_Packet))
+    if (radioReceivePacket(&s_LoraData, &s_Packet))
     {
         MY_LOG_CORE_INFO("Packet received!");
 

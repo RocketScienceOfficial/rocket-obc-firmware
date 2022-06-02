@@ -3,14 +3,16 @@
 #include <string.h>
 #include "logger.h"
 
-void sendPacket(lora_data_t *lora, radio_packet_t *packet)
+void radioSendPacket(lora_data_t *lora, radio_packet_t *packet)
 {
+    encryptDecrypt(packet->buffer, PACKET_KEY);
+
     loraBeginPacket(lora, 0);
     loraWrite_str_s(lora, packet->buffer, sizeof(radio_packet_t) - (MAX_PAYLOAD_SIZE - packet->payloadSize));
     loraEndPacket(lora, 0);
 }
 
-int receivePacket(lora_data_t *lora, radio_packet_t *packet)
+int radioReceivePacket(lora_data_t *lora, radio_packet_t *packet)
 {
     int packetSize = loraParsePacket(lora, 0);
 
@@ -24,6 +26,8 @@ int receivePacket(lora_data_t *lora, radio_packet_t *packet)
             buffer[i] = (char)loraRead(lora);
             i++;
         }
+
+        encryptDecrypt(buffer, PACKET_KEY);
 
         memcpy(packet->buffer, buffer, packetSize);
 

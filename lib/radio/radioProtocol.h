@@ -26,5 +26,5 @@ typedef union radio_packet
     };
 } radio_packet_t;
 
-void sendPacket(lora_data_t *lora, radio_packet_t *packet);
-int receivePacket(lora_data_t *lora, radio_packet_t *packet);
+void radioSendPacket(lora_data_t *lora, radio_packet_t *packet);
+int radioReceivePacket(lora_data_t *lora, radio_packet_t *packet);
