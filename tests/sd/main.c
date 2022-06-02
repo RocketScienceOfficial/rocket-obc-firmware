@@ -1,15 +1,16 @@
+#include <string.h>
 #include "pico/stdlib.h"
 #include "pinout.h"
 #include "sd.h"
 #include "my_assert.h"
 #include "logger.h"
-#include "log_printer.h"
+#include "log_serial.h"
 #include "time_tracker.h"
-#include "console_colors.h"
 
 #define TEST_FILENAME "test.txt"
 
 static unsigned int s_TimerOffset = 0;
+static char s_Buffer[512];
 
 void start();
 void initialize();
@@ -37,9 +38,7 @@ void start()
 
 void initialize()
 {
-    resetColorsAndEffects();
-
-    attachPrinterToLog();
+    attachSerialToLog(myLogGetCoreLogger());
 
     MY_LOG_CORE_INFO("Initializing...");
 

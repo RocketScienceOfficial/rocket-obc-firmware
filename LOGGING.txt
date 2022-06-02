@@ -1,0 +1,22 @@
+CORE_LOG:
+    - INFO
+    - DEBUG
+    - ERROR
+
+MEASURE_LOG:
+    - ...
+        * format: json
+            + key
+            + value
+
+COMMAND_OUTPUT:
+    - ...
+        * hello
+        * hello_name <string>
+
+REMOTE_COMMAND:
+    - CLIENT
+    - SERVER (client does not receive this)
+
+CRASH:
+    - ...

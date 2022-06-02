@@ -3,8 +3,7 @@
 #include "lora.h"
 #include "my_assert.h"
 #include "logger.h"
-#include "log_printer.h"
-#include "console_colors.h"
+#include "log_serial.h"
 
 static lora_data_t s_LoraData;
 
@@ -34,9 +33,7 @@ void start()
 
 void initialize()
 {
-    resetColorsAndEffects();
-
-    attachPrinterToLog();
+    attachSerialToLog(myLogGetCoreLogger());
 
     MY_LOG_CORE_INFO("Initializing...");
 

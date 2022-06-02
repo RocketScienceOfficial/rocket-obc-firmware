@@ -1,21 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "pico/stdlib.h"
 #include "pinout.h"
 #include "logger.h"
-#include "log_printer.h"
-#include "commands_printer.h"
-#include "console_printer.h"
+#include "log_serial.h"
 #include "mg995.h"
 #include "console_input.h"
 #include "console_commands.h"
+#include "remote_commands.h"
 #include "default_console_commands.h"
 #include "time_tracker.h"
-#include "console_colors.h"
 #include "my_assert.h"
 #include "lora.h"
+#include "radioProtocol.h"
+#include "bmp280.h"
 
 static lora_data_t s_LoraData;
+static radio_packet_t s_Packet;
 static unsigned int s_TimerOffset;
 
 void start();
@@ -45,16 +47,11 @@ void start()
 
 void initialize()
 {
-    resetColorsAndEffects();
-
-    attachPrinterToConsoleLog();
     consoleSetUser("receiver");
-    consoleStart();
 
-    consoleInputAttachToLogger(myLogGetCommandLogger(), 1);
-    attachPrinterToLog();
-    attachPrinterToCommandsLog();
-    consoleInputAttachToPrinter(myLogGetCommandLogger(), 1);
+    attachSerialToLog(myLogGetCoreLogger());
+    attachSerialToLog(myLogGetCommandOutputLogger());
+    attachSerialToLog(myLogGetRemoteCommandLogger());
 
     MY_LOG_CORE_INFO("Initializing...");
 
@@ -76,12 +73,6 @@ void initialize()
 
     MY_ASSERT(loraBegin(&s_LoraData, SX1278_FREQ_HZ));
 
-    // mg995_data_t data_1 = {.pin = MG995_PIN_1};
-    // mg995_data_t data_2 = {.pin = MG995_PIN_2};
-
-    // mg995Init(&data_1);
-    // mg995Init(&data_2);
-
     MY_LOG_CORE_INFO("Everything is ready!");
 }
 
@@ -91,11 +82,18 @@ void loop()
 
     if (runEvery(5000, &s_TimerOffset))
     {
-        MY_LOG_CORE_INFO("Sending packet...");
+        MY_LOG_CORE_INFO("HELLO!");
+    }
 
-        loraBeginPacket(&s_LoraData, 0);
-        loraWrite_str(&s_LoraData, "Hello World!");
-        loraEndPacket(&s_LoraData, 0);
+    if (receivePacket(&s_LoraData, &s_Packet))
+    {
+        MY_LOG_CORE_INFO("Packet received!");
+
+        bmp280_data_t bmp280Data;
+        memcpy(&bmp280Data, s_Packet.payload, s_Packet.payloadSize);
+
+        MY_LOG_CORE_INFO("Pressure: %d", bmp280Data.pressure);
+        MY_LOG_CORE_INFO("Temperature: %f", bmp280Data.temperature);
     }
 }
 

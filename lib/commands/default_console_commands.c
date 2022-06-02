@@ -9,7 +9,7 @@ static console_command_t s_Commands[] = {
 
 void helloCommand(char **args, size_t argc)
 {
-    MY_LOG_COMMAND("Hello");
+    MY_LOG_COMMAND_OUTPUT("Hello");
 }
 
 void helloNameCommand(char **args, size_t argc)
@@ -18,11 +18,11 @@ void helloNameCommand(char **args, size_t argc)
 
     if (checkArgsCount(1, argc, &error))
     {
-        MY_LOG_COMMAND("Hello %s", args[0]);
+        MY_LOG_COMMAND_OUTPUT("Hello %s", args[0]);
     }
     else
     {
-        MY_LOG_COMMAND(error);
+        MY_LOG_COMMAND_OUTPUT(error);
     }
 }
 

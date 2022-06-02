@@ -5,9 +5,10 @@
 #include <stdio.h>
 #include <math.h>
 
-void myLogCreateLogger(logger_data_t *logger)
+void myLogCreateLogger(logger_data_t *logger, const char *name)
 {
 	logger->numSinks = 0;
+	logger->name = name;
 }
 
 void myLogCreateSink(logger_data_t *logger, logCallback_t callback, const char *pattern)
@@ -16,9 +17,9 @@ void myLogCreateSink(logger_data_t *logger, logCallback_t callback, const char *
 	logger->numSinks++;
 }
 
-char *parseLog(const char *pattern, const char *level, const char *format, va_list args)
+char *parseLog(const char *loggerName, const char *pattern, const char *level, const char *format, va_list args)
 {
-	char *log = (char *)malloc(sizeof(char) * 256);
+	char *log = (char *)malloc(sizeof(char) * MAX_LOG_SIZE);
 	size_t logIndex = 0;
 	unsigned int timeMs = getMsSinceBoot();
 	unsigned int minutes = floor(timeMs / 60000);
@@ -87,6 +88,14 @@ char *parseLog(const char *pattern, const char *level, const char *format, va_li
 
 				free(msg);
 			}
+			else if (pattern[tmpI] == 't')
+			{
+				for (size_t j = 0; loggerName[j] != '\0'; j++)
+				{
+					log[logIndex] = loggerName[j];
+					logIndex++;
+				}
+			}
 
 			i = tmpI;
 		}
@@ -106,7 +115,7 @@ static void __log(logger_data_t *logger, const char *level, const char *format, 
 {
 	for (size_t i = 0; i < logger->numSinks; i++)
 	{
-		char *log = parseLog(logger->sinks[i].pattern, level, format, args);
+		char *log = parseLog(logger->name, logger->sinks[i].pattern, level, format, args);
 
 		logger->sinks[i].callback(level, log);
 
@@ -123,33 +132,6 @@ void myLog(logger_data_t *logger, const char *level, const char *format, ...)
 	va_end(ap);
 }
 
-void myLogInfo(logger_data_t *logger, const char *format, ...)
-{
-	va_list ap;
-
-	va_start(ap, format);
-	__log(logger, LOG_LEVEL_INFO, format, ap);
-	va_end(ap);
-}
-
-void myLogDebug(logger_data_t *logger, const char *format, ...)
-{
-	va_list ap;
-
-	va_start(ap, format);
-	__log(logger, LOG_LEVEL_DEBUG, format, ap);
-	va_end(ap);
-}
-
-void myLogError(logger_data_t *logger, const char *format, ...)
-{
-	va_list ap;
-
-	va_start(ap, format);
-	__log(logger, LOG_LEVEL_ERROR, format, ap);
-	va_end(ap);
-}
-
 static logger_data_t s_CoreLogger;
 static int s_CoreInitialized;
 
@@ -157,7 +139,7 @@ logger_data_t *myLogGetCoreLogger()
 {
 	if (!s_CoreInitialized)
 	{
-		myLogCreateLogger(&s_CoreLogger);
+		myLogCreateLogger(&s_CoreLogger, MY_LOG_CORE_NAME);
 
 		s_CoreInitialized = 1;
 	}
@@ -172,7 +154,7 @@ logger_data_t *myLogGetMeasureLogger()
 {
 	if (!s_MeasureInitialized)
 	{
-		myLogCreateLogger(&s_MeasureLogger);
+		myLogCreateLogger(&s_MeasureLogger, MY_LOG_MEASURE_NAME);
 
 		s_MeasureInitialized = 1;
 	}

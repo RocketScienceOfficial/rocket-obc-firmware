@@ -1,6 +1,6 @@
 add_executable(radioReceiverTest main.c)
 
-target_link_libraries(radioReceiverTest PUBLIC pico_stdlib logging radio myassert console_colors)
+target_link_libraries(radioReceiverTest PUBLIC pico_stdlib logging radio myassert)
 
 pico_enable_stdio_usb(radioReceiverTest 1)
 pico_enable_stdio_uart(radioReceiverTest 0)

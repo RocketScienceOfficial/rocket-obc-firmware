@@ -51,7 +51,7 @@ static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp)
     *temp = buffer[0] << 8 | buffer[1];
 }
 
-void mpu6050Init(int i2c, int sda, int scl)
+int mpu6050Init(int i2c, int sda, int scl)
 {
     MY_LOG_CORE_INFO("Initializing MPU6050...");
 
@@ -63,24 +63,39 @@ void mpu6050Init(int i2c, int sda, int scl)
     gpio_pull_up(sda);
     gpio_pull_up(scl);
 
+    if (!mpu6050Check())
+    {
+        return 0;
+    }
+
     mpu6050_reset();
 
     MY_LOG_CORE_INFO("Successfully initialized MPU6050!");
+
+    return 1;
 }
 
-double convert_to_ms2(int16_t raw)
+int mpu6050Check()
+{
+    uint8_t data;
+    int ret = i2c_read_blocking(getI2C(), MPU6050_ADDR, &data, 1, false);
+
+    return ret < 0 ? 0 : 1;
+}
+
+float convert_to_ms2(int16_t raw)
 {
     return raw * MPU6050_ACCEL_FACTOR * GRAVITY;
 }
 
-double convert_to_dps(int16_t raw)
+float convert_to_dps(int16_t raw)
 {
     return raw * MPU6050_GYRO_FACTOR;
 }
 
-double convert_temperature(int16_t raw)
+float convert_temperature(int16_t raw)
 {
-    return (raw / 340.0) + 36.53;
+    return (raw / 340.0f) + 36.53f;
 }
 
 void mpu6050ReadRaw(mpu6050_data_t *data)

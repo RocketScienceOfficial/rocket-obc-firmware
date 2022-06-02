@@ -18,7 +18,7 @@ void registerCommand(console_command_t *command);
 console_command_t *parseCommand(char **tokens, size_t tokensSize, char ***commandArgs_out_ptr, size_t *commandArgsSize_out);
 void executeCommand(console_command_t *command, char **commandArgs, size_t argc);
 int checkArgsCount(size_t expectedCount, size_t actualCount, char **output_ptr);
-logger_data_t *myLogGetCommandLogger();
+logger_data_t *myLogGetCommandOutputLogger();
 
-#define MY_LOG_COMMAND_PATTERN "%c\n"
-#define MY_LOG_COMMAND(msg, ...) myLog(myLogGetCommandLogger(), "", msg, ##__VA_ARGS__)
+#define MY_LOG_COMMAND_OUTUT_NAME "COMMAND_OUTPUT"
+#define MY_LOG_COMMAND_OUTPUT(msg, ...) myLog(myLogGetCommandOutputLogger(), "", msg, ##__VA_ARGS__)

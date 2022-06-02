@@ -3,9 +3,8 @@
 #include "mpu6050.h"
 #include "my_assert.h"
 #include "logger.h"
-#include "log_printer.h"
+#include "log_serial.h"
 #include "time_tracker.h"
-#include "console_colors.h"
 #include "kalman_filter.h"
 
 static kalman_filter_data_t s_KalmanData;
@@ -37,9 +36,7 @@ void start()
 
 void initialize()
 {
-    resetColorsAndEffects();
-
-    attachPrinterToLog();
+    attachSerialToLog(myLogGetCoreLogger());
 
     MY_LOG_CORE_INFO("Initializing...");
 

@@ -2,6 +2,7 @@
 #include "logger.h"
 #include "hardware/i2c.h"
 #include "pico/stdlib.h"
+#include <math.h>
 
 #define BMP280_ADDR _u(0x76)
 
@@ -114,11 +115,11 @@ float bmp280ConvertTemp(int32_t temp, struct bmp280_calib_param *params)
     int32_t t_fine = bmp280Convert(temp, params);
     int32_t final = (t_fine * 5 + 128) >> 8;
     float result = final / 100.0f;
-    
+
     return result;
 }
 
-float bmp280ConvertPressure(int32_t pressure, int32_t temp, struct bmp280_calib_param *params)
+int bmp280ConvertPressure(int32_t pressure, int32_t temp, struct bmp280_calib_param *params)
 {
     int32_t t_fine = bmp280Convert(temp, params);
 
@@ -146,9 +147,8 @@ float bmp280ConvertPressure(int32_t pressure, int32_t temp, struct bmp280_calib_
     var1 = (((int32_t)params->dig_p9) * ((int32_t)(((converted >> 3) * (converted >> 3)) >> 13))) >> 12;
     var2 = (((int32_t)(converted >> 2)) * ((int32_t)params->dig_p8)) >> 13;
     converted = (uint32_t)((int32_t)converted + ((var1 + var2 + params->dig_p7) >> 4));
-    float result = converted;
 
-    return result;
+    return converted;
 }
 
 void bmp280GetCalibParams(struct bmp280_calib_param *params)
@@ -173,7 +173,7 @@ void bmp280GetCalibParams(struct bmp280_calib_param *params)
     params->dig_p9 = (int16_t)(buf[23] << 8) | buf[22];
 }
 
-void bmp280Init(int i2c, int sda, int scl)
+int bmp280Init(int i2c, int sda, int scl)
 {
     MY_LOG_CORE_INFO("Initializing BMP280...");
 
@@ -185,11 +185,26 @@ void bmp280Init(int i2c, int sda, int scl)
     gpio_pull_up(sda);
     gpio_pull_up(scl);
 
+    if (!bmp280Check())
+    {
+        return 0;
+    }
+
     bmp280InitSensor();
 
     bmp280GetCalibParams(&params);
 
     MY_LOG_CORE_INFO("BMP280 Initialized!");
+
+    return 1;
+}
+
+int bmp280Check()
+{
+    uint8_t data;
+    int ret = i2c_read_blocking(getI2C(), BMP280_ADDR, &data, 1, false);
+
+    return ret < 0 ? 0 : 1;
 }
 
 void bmp280Read(bmp280_data_t *data)
@@ -205,4 +220,12 @@ void bmp280Read(bmp280_data_t *data)
     data->pressure = bmp280ConvertPressure(raw_pressure, raw_temperature, &params);
 
     MY_LOG_CORE_INFO("Succesffully read BMP280!");
+}
+
+double bmp280GetAltitude(bmp280_data_t *data)
+{
+    double pressure = data->pressure;
+    double altitude = PRESSURE_TEMPERATURE_CONSTANT * (1.0 - pow(pressure / SEA_LEVEL_PRESSURE, PRESSURE_GAS_CONSTANT));
+
+    return altitude;
 }

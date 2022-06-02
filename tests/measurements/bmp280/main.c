@@ -3,9 +3,8 @@
 #include "bmp280.h"
 #include "my_assert.h"
 #include "logger.h"
-#include "log_printer.h"
+#include "log_serial.h"
 #include "time_tracker.h"
-#include "console_colors.h"
 
 static unsigned int s_TimerOffset = 0;
 
@@ -35,9 +34,7 @@ void start()
 
 void initialize()
 {
-    resetColorsAndEffects();
-
-    attachPrinterToLog();
+    attachSerialToLog(myLogGetCoreLogger());
 
     MY_LOG_CORE_INFO("Initializing...");
 

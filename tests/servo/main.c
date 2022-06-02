@@ -1,9 +1,8 @@
 #include "pico/stdlib.h"
 #include "pinout.h"
 #include "logger.h"
-#include "log_printer.h"
+#include "log_serial.h"
 #include "mg995.h"
-#include "console_colors.h"
 #include "my_assert.h"
 
 static unsigned int s_TimerOffset;
@@ -28,9 +27,7 @@ void start()
 
 void initialize()
 {
-    resetColorsAndEffects();
-
-    attachPrinterToLog();
+    attachSerialToLog(myLogGetCoreLogger());
 
     MY_LOG_CORE_INFO("Initializing...");
 
