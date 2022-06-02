@@ -1,5 +1,6 @@
 const { SerialPort } = require("serialport");
 
+const SERIAL_BAUD_RATE = 115200;
 const UNKNOWN_PATH = "UNKNOWN";
 const VENDOR_ID = "2E8A";
 const PRODUCT_ID = "000A";
@@ -31,7 +32,7 @@ function listen(path, onRead, onClose) {
 
     port = new SerialPort({
         path: path,
-        baudRate: 115200,
+        baudRate: SERIAL_BAUD_RATE,
     });
 
     port.on("close", function () {
@@ -77,19 +78,24 @@ function write(data, callback) {
 function getPortPath(callback, index = 0) {
     SerialPort.list().then(ports => {
         let count = 0;
-        
+
         for (let i = 0; i < ports.length; i++) {
-            const vendor = ports[i].vendorId.toUpperCase();
-            const product = ports[i].productId.toUpperCase();
+            const vendor = ports[i].vendorId;
+            const product = ports[i].productId;
 
-            if (vendor == VENDOR_ID && product == PRODUCT_ID) {
-                if (index == count) {
-                    callback(ports[i].path);
+            if (vendor != undefined && product != undefined) {
+                const vendorId = vendor.toUpperCase();
+                const productId = product.toUpperCase();
+                
+                if (vendorId == VENDOR_ID && productId == PRODUCT_ID) {
+                    if (index == count) {
+                        callback(ports[i].path);
 
-                    return;
+                        return;
+                    }
+
+                    count++;
                 }
-
-                count++;
             }
         }
 
