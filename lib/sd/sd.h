@@ -5,6 +5,9 @@
 #define LOG_CORE_FILENAME "log.txt"
 #define LOG_MEASURE_FILENAME "measurements.csv"
 
+#define MY_LOG_CORE_PATTERN "[%l %M:%S:%m] %c\n"
+#define MY_LOG_MEASURE_PATTERN "%c;"
+
 int sdInit();
 void sdAttachToCoreLogger();
 void sdAttachToMeasureLogger();

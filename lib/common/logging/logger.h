@@ -28,7 +28,6 @@ void myLog(logger_data_t *logger, const char *level, const char *format, ...);
 logger_data_t *myLogGetCoreLogger();
 logger_data_t *myLogGetMeasureLogger();
 
-#define MY_LOG_CORE_PATTERN "[%l %M:%S:%m] %c\n"
 #define LOG_LEVEL_INFO "INFO"
 #define LOG_LEVEL_DEBUG "DEBUG"
 #define LOG_LEVEL_ERROR "ERROR"
@@ -37,7 +36,6 @@ logger_data_t *myLogGetMeasureLogger();
 #define MY_LOG_CORE_DEBUG(msg, ...) myLog(myLogGetCoreLogger(), LOG_LEVEL_DEBUG, msg, ##__VA_ARGS__)
 #define MY_LOG_CORE_ERROR(msg, ...) myLog(myLogGetCoreLogger(), LOG_LEVEL_ERROR, msg, ##__VA_ARGS__)
 
-#define MY_LOG_MEASURE_PATTERN "%c;"
 #define MY_LOG_MEASURE_NAME "MEASURE_LOG"
 #define MY_LOG_MEASURE_INFO_LEVEL "INFO"
 #define MY_LOG_MEASURE_END_LEVEL "END"
