@@ -1,4 +1,5 @@
 const { SerialPort } = require("serialport");
+const { ReadlineParser } = require('@serialport/parser-readline');
 
 const SERIAL_BAUD_RATE = 115200;
 const UNKNOWN_PATH = "UNKNOWN";
@@ -43,15 +44,12 @@ function listen(path, onRead, onClose) {
         port = null;
     });
 
-    port.on('data', function (data) {
-        const splittedData = data.toString().split('\n');
-        splittedData.pop();
+    const parser = port.pipe(new ReadlineParser({ delimiter: '\n' }));
 
-        splittedData.forEach(d => {
-            console.log("Received message from serial port: " + d);
+    parser.on("data", (data) => {
+        console.log("Received message from serial port: " + data);
 
-            onRead(d);
-        });
+        onRead(data);
     });
 
     onConnected(path);
@@ -86,7 +84,7 @@ function getPortPath(callback, index = 0) {
             if (vendor != undefined && product != undefined) {
                 const vendorId = vendor.toUpperCase();
                 const productId = product.toUpperCase();
-                
+
                 if (vendorId == VENDOR_ID && productId == PRODUCT_ID) {
                     if (index == count) {
                         callback(ports[i].path);
