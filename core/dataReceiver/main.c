@@ -11,13 +11,12 @@
 #include "remote_commands.h"
 #include "default_console_commands.h"
 #include "time_tracker.h"
-#include "my_assert.h"
 #include "lora.h"
-#include "radioProtocol.h"
+#include "radio_protocol.h"
 #include "bmp280.h"
 
 static lora_data_t s_LoraData;
-static radio_packet_t s_Packet;
+static radio_body_t s_PacketBody;
 static unsigned int s_TimerOffset;
 
 void start();
@@ -47,9 +46,8 @@ void start()
 
 void initialize()
 {
-    consoleSetUser("receiver");
-
     attachSerialToLog(myLogGetCoreLogger());
+    attachSerialToLog(myLogGetMeasureLogger());
     attachSerialToLog(myLogGetCommandOutputLogger());
     attachSerialToLog(myLogGetRemoteCommandLogger());
 
@@ -71,7 +69,7 @@ void initialize()
 
     s_LoraData.pinout = loraPinout;
 
-    MY_ASSERT(loraBegin(&s_LoraData, SX1278_FREQ_HZ));
+    loraBegin(&s_LoraData, SX1278_FREQ_HZ);
 
     MY_LOG_CORE_INFO("Everything is ready!");
 }
@@ -85,16 +83,18 @@ void loop()
         MY_LOG_CORE_INFO("HELLO!");
     }
 
-    if (radioReceivePacket(&s_LoraData, &s_Packet))
+    if (radioReceivePacket(&s_LoraData, &s_PacketBody))
     {
         MY_LOG_CORE_INFO("Packet received!");
 
         bmp280_data_t bmp280Data;
-        memcpy(&bmp280Data, s_Packet.payload, s_Packet.payloadSize);
+        memcpy(&bmp280Data, s_PacketBody.payload, s_PacketBody.payloadSize);
 
-        MY_LOG_CORE_INFO("Pressure: %d", bmp280Data.pressure);
-        MY_LOG_CORE_INFO("Altitude: %f", bmp280GetAltitude(&bmp280Data));
-        MY_LOG_CORE_INFO("Temperature: %f", bmp280Data.temperature);
+        MY_LOG_MEASURE_RECEIVER_INT("Pressure", bmp280Data.pressure);
+        MY_LOG_MEASURE_RECEIVER_FLOAT("Altitude", bmp280GetAltitude(&bmp280Data));
+        MY_LOG_MEASURE_RECEIVER_FLOAT("Temperature", bmp280Data.temperature);
+
+        free(s_PacketBody.payload);
     }
 }
 

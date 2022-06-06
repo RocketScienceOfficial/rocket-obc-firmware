@@ -7,12 +7,6 @@
 
 static char s_Cmd[CONSOLE_INPUT_MAX_LENGTH];
 static size_t s_Size;
-static const char *s_User;
-
-void consoleSetUser(const char *user)
-{
-    s_User = user;
-}
 
 void consoleProcessCharacter(int c, char ***tokens_out_ptr, size_t *size_out)
 {

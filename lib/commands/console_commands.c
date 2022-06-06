@@ -20,6 +20,7 @@ console_command_t *parseCommand(char **tokens, size_t tokensSize, char ***comman
         if (strcmp(s_Commands[i].name, tokens[0]) == 0)
         {
             command = &s_Commands[i];
+            break;
         }
     }
 

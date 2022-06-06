@@ -63,6 +63,7 @@
         "type_traits": "c",
         "cryptography.h": "c",
         "log_serial.h": "c",
-        "remote_commands.h": "c"
+        "remote_commands.h": "c",
+        "radio_protocol.h": "c"
     }
 }

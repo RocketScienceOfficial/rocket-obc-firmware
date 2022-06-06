@@ -17,6 +17,3 @@ COMMAND_OUTPUT:
 REMOTE_COMMAND:
     - CLIENT
     - SERVER (client does not receive this)
-
-CRASH:
-    - ...

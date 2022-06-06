@@ -1,5 +1,4 @@
 #include "logger.h"
-#include "logging_utils.h"
 #include "time_tracker.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -78,7 +77,10 @@ char *parseLog(const char *loggerName, const char *pattern, const char *level, c
 			}
 			else if (pattern[tmpI] == 'c')
 			{
-				char *msg = vlogBase(format, args);
+				size_t len = vsnprintf(NULL, 0, format, args) + 1;
+				char *msg = malloc(len);
+
+				vsnprintf(msg, len, format, args);
 
 				for (size_t j = 0; msg[j] != '\0'; j++)
 				{

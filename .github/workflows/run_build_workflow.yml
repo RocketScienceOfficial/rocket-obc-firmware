@@ -3,18 +3,9 @@ on: [push]
 jobs:
   Run-Tests:
     runs-on: ubuntu-latest
-    env:
-      PICO_SDK_PATH: ../../pico-sdk
     steps:
       - name: Verify
         uses: actions/checkout@v2
-      - name: Install dependencies
-        run: sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential
-      - name: Setup Git Submodules
-        run: git submodule update --init --recursive
       - name: Build
-        run: |
-          mkdir build
-          cd build
-          cmake ..
-          make
+        run: ./scripts/setup.sh
+        shell: bash

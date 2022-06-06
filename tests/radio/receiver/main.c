@@ -1,11 +1,13 @@
 #include "pico/stdlib.h"
 #include "pinout.h"
 #include "lora.h"
+#include "radio_protocol.h"
 #include "my_assert.h"
 #include "logger.h"
 #include "log_serial.h"
 
 static lora_data_t s_LoraData;
+static radio_body_t s_PacketBody;
 
 void start();
 void initialize();
@@ -58,15 +60,9 @@ void initialize()
 
 void loop()
 {
-    int packetSize = loraParsePacket(&s_LoraData, 0);
-
-    if (packetSize)
+    if (radioReceivePacket(&s_LoraData, &s_PacketBody))
     {
-        MY_LOG_CORE_INFO("Received packet '");
-
-        while (loraAvailable(&s_LoraData))
-        {
-            MY_LOG_CORE_INFO("%c", (char)loraRead(&s_LoraData));
-        }
+        MY_LOG_CORE_INFO("Received packet!");
+        MY_LOG_CORE_INFO("%s", s_PacketBody.payload);
     }
 }

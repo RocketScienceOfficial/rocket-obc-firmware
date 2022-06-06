@@ -2,11 +2,14 @@
 
 pushd %~dp0\..
 
-pushd server
-npm install
-popd
+git submodule update --init
 
-git submodule update --init --recursive
+cd scripts
 call build.bat
+cd ..
+
+cd server
+call npm install
+cd ..
 
 popd

@@ -10,10 +10,9 @@
 #include "console_commands.h"
 #include "remote_commands.h"
 #include "default_console_commands.h"
-#include "my_assert.h"
 #include "sd.h"
 #include "lora.h"
-#include "radioProtocol.h"
+#include "radio_protocol.h"
 #include "bmp280.h"
 #include "mpu6050.h"
 #include "kalman_filter.h"
@@ -50,8 +49,6 @@ void start()
 
 void initialize()
 {
-    consoleSetUser("measure");
-
     attachSerialToLog(myLogGetCoreLogger());
 
     MY_LOG_CORE_INFO("Initializing...");
@@ -72,7 +69,7 @@ void initialize()
 
     s_LoraData.pinout = loraPinout;
 
-    MY_ASSERT(loraBegin(&s_LoraData, SX1278_FREQ_HZ));
+    loraBegin(&s_LoraData, SX1278_FREQ_HZ);
 
     sdInit();
     sdInitFile(LOG_CORE_FILENAME);
@@ -143,16 +140,18 @@ void takeMeasurements()
     bmp280_data_t bmp280Data;
     bmp280Read(&bmp280Data);
 
-    radio_packet_t packet = {
-        .header = {
-            .command = 'M',
-        },
+    radio_body_t body = {
+        .command = 'M',
         .payloadSize = sizeof(bmp280Data),
     };
 
-    memcpy(packet.payload, &bmp280Data, packet.payloadSize);
+    char buffer[body.payloadSize];
 
-    radioSendPacket(&s_LoraData, &packet);
+    memcpy(buffer, &bmp280Data, body.payloadSize);
+
+    body.payload = buffer;
+
+    radioSendPacket(&s_LoraData, &body);
 
     MY_LOG_MEASURE_INT(bmp280Data.pressure);
     MY_LOG_MEASURE_FLOAT(bmp280Data.temperature);

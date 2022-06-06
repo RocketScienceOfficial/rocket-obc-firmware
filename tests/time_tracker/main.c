@@ -1,11 +1,10 @@
 #include "pico/stdlib.h"
-#include "pinout.h"
+#include "my_assert.h"
 #include "logger.h"
 #include "log_serial.h"
-#include "mg995.h"
-#include "my_assert.h"
+#include "time_tracker.h"
 
-static unsigned int s_TimerOffset;
+static unsigned int s_TimerOffset = 0;
 
 void start();
 void initialize();
@@ -14,7 +13,6 @@ void loop();
 int main()
 {
     start();
-
     initialize();
 
     while (1)
@@ -37,14 +35,17 @@ void initialize()
 
     MY_LOG_CORE_INFO("Initializing...");
 
-    mg995_data_t data = {.pin = MG995_PIN};
+    MY_ASSERT(getMsSinceBoot() >= 5000);
 
-    mg995Init(&data);
-
-    MY_LOG_CORE_INFO("Everything is ready!");
+    MY_LOG_CORE_INFO("Done!");
 }
 
 void loop()
 {
     tight_loop_contents();
+
+    if (runEvery(1000, &s_TimerOffset))
+    {
+        MY_LOG_CORE_INFO("Hello!");
+    }
 }

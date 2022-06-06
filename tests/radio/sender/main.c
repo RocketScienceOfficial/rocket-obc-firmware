@@ -1,10 +1,12 @@
 #include "pico/stdlib.h"
 #include "pinout.h"
 #include "lora.h"
+#include "radio_protocol.h"
 #include "my_assert.h"
 #include "logger.h"
 #include "log_serial.h"
 #include "time_tracker.h"
+#include <string.h>
 
 static lora_data_t s_LoraData;
 static unsigned int s_TimerOffset = 0;
@@ -64,8 +66,14 @@ void loop()
     {
         MY_LOG_CORE_INFO("Sending packet...");
 
-        loraBeginPacket(&s_LoraData, 0);
-        loraWrite_str(&s_LoraData, "Hello World!");
-        loraEndPacket(&s_LoraData, 0);
+        char text[] = "Hello world!";
+
+        radio_body_t body = {
+            .command = 'T',
+            .payloadSize = sizeof(text) / sizeof(char),
+            .payload = text,
+        };
+
+        radioSendPacket(&s_LoraData, &body);
     }
 }

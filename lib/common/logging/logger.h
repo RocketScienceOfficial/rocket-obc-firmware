@@ -39,6 +39,8 @@ logger_data_t *myLogGetMeasureLogger();
 #define MY_LOG_MEASURE_NAME "MEASURE_LOG"
 #define MY_LOG_MEASURE_INFO_LEVEL "INFO"
 #define MY_LOG_MEASURE_END_LEVEL "END"
+#define MY_LOG_MEASURE_RECEIVER_INT(name, value) myLog(myLogGetMeasureLogger(), "", "%s:%d", name, value)
+#define MY_LOG_MEASURE_RECEIVER_FLOAT(name, value) myLog(myLogGetMeasureLogger(), "", "%s:%f", name, value)
 #define MY_LOG_MEASURE_INT(value) myLog(myLogGetMeasureLogger(), MY_LOG_MEASURE_INFO_LEVEL, "%d", value)
 #define MY_LOG_MEASURE_FLOAT(value) myLog(myLogGetMeasureLogger(), MY_LOG_MEASURE_INFO_LEVEL, "%f", value)
 #define MY_LOG_MEASURE_END() myLog(myLogGetMeasureLogger(), MY_LOG_MEASURE_END_LEVEL, "")

@@ -1,6 +1,5 @@
 #include "lora.h"
 #include "logger.h"
-#include "my_assert.h"
 #include <string.h>
 #include <stddef.h>
 
@@ -775,8 +774,6 @@ void __loraOnDio0Rise(uint gpio, uint32_t events)
     gpio_acknowledge_irq(gpio, events);
 
     lora_data_t *data = __loraDataFromGPIO(gpio);
-
-    MY_ASSERT(data != NULL);
 
     __loraHandleDio0Rise(data);
 }

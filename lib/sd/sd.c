@@ -2,7 +2,6 @@
 #include "logger.h"
 #include "time_tracker.h"
 #include "sd_card.h"
-#include "my_assert.h"
 #include "ff.h"
 #include "rtc.h"
 #include "f_util.h"
