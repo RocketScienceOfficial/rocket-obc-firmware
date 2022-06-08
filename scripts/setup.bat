@@ -2,7 +2,7 @@
 
 pushd %~dp0\..
 
-git submodule update --init
+git submodule update --init --recursive
 
 cd scripts
 call build.bat

@@ -10,4 +10,4 @@ cd -
 
 git submodule update --init --recursive
 
-scripts/build.sh
+./scripts/build.sh
