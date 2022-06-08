@@ -64,6 +64,7 @@
         "cryptography.h": "c",
         "log_serial.h": "c",
         "remote_commands.h": "c",
-        "radio_protocol.h": "c"
+        "radio_protocol.h": "c",
+        "mpu6050.h": "c"
     }
 }

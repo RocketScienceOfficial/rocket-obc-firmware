@@ -1,6 +1,6 @@
 add_executable(mathsTest main.c)
 
-target_link_libraries(mathsTest PUBLIC pico_stdlib logging maths myassert)
+target_link_libraries(mathsTest PUBLIC pico_stdlib logging maths test_framework)
 
 pico_enable_stdio_usb(mathsTest 1)
 pico_enable_stdio_uart(mathsTest 0)

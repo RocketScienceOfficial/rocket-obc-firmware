@@ -2,7 +2,7 @@
 #include "pinout.h"
 #include "lora.h"
 #include "radio_protocol.h"
-#include "my_assert.h"
+#include "test_framework.h"
 #include "logger.h"
 #include "log_serial.h"
 

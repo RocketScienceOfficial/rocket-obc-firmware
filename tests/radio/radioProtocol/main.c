@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
-#include "my_assert.h"
+#include "test_framework.h"
 #include "logger.h"
 #include "log_serial.h"
 #include "radio_protocol.h"

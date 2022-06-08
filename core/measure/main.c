@@ -68,6 +68,7 @@ void initialize()
     loraInit(&s_LoraData, &loraPinout);
 
     s_LoraData.pinout = loraPinout;
+    s_LoraData.txPower = 20;
 
     loraBegin(&s_LoraData, SX1278_FREQ_HZ);
 

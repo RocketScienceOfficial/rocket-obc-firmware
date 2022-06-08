@@ -1,6 +1,6 @@
 add_executable(mpu6050ConvertedTest main.c)
 
-target_link_libraries(mpu6050ConvertedTest PUBLIC pico_stdlib time_tracker logging measurements myassert)
+target_link_libraries(mpu6050ConvertedTest PUBLIC pico_stdlib time_tracker logging measurements test_framework)
 
 pico_enable_stdio_usb(mpu6050ConvertedTest 1)
 pico_enable_stdio_uart(mpu6050ConvertedTest 0)

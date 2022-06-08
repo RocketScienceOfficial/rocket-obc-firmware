@@ -5,6 +5,7 @@
 #include "hardware/gpio.h"
 #include "hardware/spi.h"
 
+#define LORA_DEFAULT_TX_POWER 17
 #define LORA_MAX_INSTANCES 2
 
 #define PA_OUTPUT_RFO_PIN 0
@@ -25,6 +26,7 @@ typedef struct lora_pinout
 typedef struct lora_data
 {
     lora_pinout_t pinout;
+    int txPower;
     long _frequency;
     int _packetIndex;
     int _implicitHeaderMode;

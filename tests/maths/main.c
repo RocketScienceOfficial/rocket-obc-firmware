@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "cryptography.h"
-#include "my_assert.h"
+#include "test_framework.h"
 #include "logger.h"
 #include "log_serial.h"
 
@@ -34,7 +34,7 @@ void initialize()
     attachSerialToLog(myLogGetCoreLogger());
 
     MY_LOG_CORE_INFO("Initializing...");
-
+ 
     char buffer[] = "Hello World!";
     char buffer2[] = "Hello World!";
     char key[] = {0x30, 0x3A};

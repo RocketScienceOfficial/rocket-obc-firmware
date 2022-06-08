@@ -1,6 +1,6 @@
+add_subdirectory(_dependencies)
 add_subdirectory(commands)
 add_subdirectory(console)
-add_subdirectory(dependencies)
 add_subdirectory(logger)
 add_subdirectory(maths)
 add_subdirectory(measurements)

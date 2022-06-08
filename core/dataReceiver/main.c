@@ -68,6 +68,7 @@ void initialize()
     loraInit(&s_LoraData, &loraPinout);
 
     s_LoraData.pinout = loraPinout;
+    s_LoraData.txPower = 20;
 
     loraBegin(&s_LoraData, SX1278_FREQ_HZ);
 
@@ -93,6 +94,7 @@ void loop()
         MY_LOG_MEASURE_RECEIVER_INT("Pressure", bmp280Data.pressure);
         MY_LOG_MEASURE_RECEIVER_FLOAT("Altitude", bmp280GetAltitude(&bmp280Data));
         MY_LOG_MEASURE_RECEIVER_FLOAT("Temperature", bmp280Data.temperature);
+        MY_LOG_MEASURE_RECEIVER_INT("RSSI", loraRssi(&s_LoraData));
 
         free(s_PacketBody.payload);
     }

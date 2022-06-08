@@ -63,6 +63,7 @@ static size_t s_LoraDatasCount = 0;
 
 void loraInit(lora_data_t *data, lora_pinout_t *pinout)
 {
+    data->txPower = LORA_DEFAULT_TX_POWER;
     data->_frequency = 0;
     data->_packetIndex = 0;
     data->_implicitHeaderMode = 0;
@@ -115,7 +116,7 @@ int loraBegin(lora_data_t *data, long frequency)
     __loraWriteRegister(data, REG_LNA, __loraReadRegister(data, REG_LNA) | 0x03);
     __loraWriteRegister(data, REG_MODEM_CONFIG_3, 0x04);
 
-    loraSetTxPower(data, 17, PA_OUTPUT_PA_BOOST_PIN);
+    loraSetTxPower(data, data->txPower, PA_OUTPUT_PA_BOOST_PIN);
 
     loraIdle(data);
 
