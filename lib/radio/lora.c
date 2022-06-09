@@ -465,7 +465,7 @@ void loraSetSpreadingFactor(lora_data_t *data, int sf)
     __loraSetLdoFlag(data);
 }
 
-void setSignalBandwidth(lora_data_t *data, long sbw)
+void loraSetSignalBandwidth(lora_data_t *data, long sbw)
 {
     int bw;
 
@@ -681,7 +681,7 @@ bool __loraIsTransmitting(lora_data_t *data)
     return false;
 }
 
-int loraGetSpreadingFactor(lora_data_t *data)
+int __loraGetSpreadingFactor(lora_data_t *data)
 {
     return __loraReadRegister(data, REG_MODEM_CONFIG_2) >> 4;
 }

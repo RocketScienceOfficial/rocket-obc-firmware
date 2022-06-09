@@ -1,6 +1,7 @@
 #include "pico/stdlib.h"
 #include <stddef.h>
 #include <string.h>
+#include <stdlib.h>
 #include "test_framework.h"
 #include "logger.h"
 #include "log_serial.h"

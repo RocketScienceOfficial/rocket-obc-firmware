@@ -68,9 +68,12 @@ void initialize()
     loraInit(&s_LoraData, &loraPinout);
 
     s_LoraData.pinout = loraPinout;
-    s_LoraData.txPower = 17;
+    s_LoraData.txPower = 20;
 
     loraBegin(&s_LoraData, SX1278_FREQ_HZ);
+
+    loraSetSpreadingFactor(&s_LoraData, 8);
+    loraSetSignalBandwidth(&s_LoraData, 125000);
 
     MY_LOG_CORE_INFO("Everything is ready!");
 }

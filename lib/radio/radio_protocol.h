@@ -12,6 +12,7 @@ typedef struct radio_header
 typedef struct radio_body
 {
     char command;
+    char padding[3];
     size_t payloadSize;
     char *payload;
 } radio_body_t;

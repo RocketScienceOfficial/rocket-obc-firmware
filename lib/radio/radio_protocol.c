@@ -11,11 +11,11 @@ const char RADIO_PACKET_KEY[] = {
 
 void serializeRadioPacket(radio_body_t *body, char **buffer_out_ptr, size_t *size_out)
 {
-    size_t bodySize = sizeof(char) + sizeof(size_t) + sizeof(char) * body->payloadSize;
+    size_t bodySize = sizeof(char) + sizeof(char[3]) + sizeof(size_t) + sizeof(char) * body->payloadSize;
     char bodyBuffer[bodySize];
 
-    memcpy(bodyBuffer, &body->command, sizeof(char) + sizeof(size_t));
-    memcpy(bodyBuffer + sizeof(char) + sizeof(size_t), body->payload, sizeof(char) * body->payloadSize);
+    memcpy(bodyBuffer, &body->command, sizeof(char) + sizeof(char[3]) + sizeof(size_t));
+    memcpy(bodyBuffer + sizeof(char) + sizeof(char[3]) + sizeof(size_t), body->payload, sizeof(char) * body->payloadSize);
 
     radio_header_t header = {
         .paritySize = 0,
@@ -50,31 +50,41 @@ void deserializeRadioPacket(char *buffer, size_t size, radio_body_t *body_out, i
     size_t currentBufferOffset = 0;
     memcpy(&packet.header, buffer + currentBufferOffset, sizeof(size_t));
 
-    currentBufferOffset += sizeof(size_t);
-    packet.header.parity = (char *)malloc(sizeof(char) * packet.header.paritySize);
-    memcpy(packet.header.parity, buffer + currentBufferOffset, packet.header.paritySize * sizeof(char));
+    if (packet.header.paritySize > 0 && packet.header.paritySize <= size - currentBufferOffset)
+    {
+        currentBufferOffset += sizeof(size_t);
+        packet.header.parity = (char *)malloc(sizeof(char) * packet.header.paritySize);
+        memcpy(packet.header.parity, buffer + currentBufferOffset, packet.header.paritySize * sizeof(char));
 
-    currentBufferOffset += packet.header.paritySize * sizeof(char);
-    size_t bodyOffset = currentBufferOffset;
-    memcpy(&packet.body, buffer + currentBufferOffset, sizeof(char) + sizeof(size_t));
+        size_t bodyOffset = currentBufferOffset + packet.header.paritySize * sizeof(char);
+        size_t parityBufferSize = size - bodyOffset;
 
-    currentBufferOffset += sizeof(char) + sizeof(size_t);
-    packet.body.payload = (char *)malloc(sizeof(char) * packet.body.payloadSize);
-    memcpy(packet.body.payload, buffer + currentBufferOffset, sizeof(char) * packet.body.payloadSize);
+        size_t parityBuffSz = 0;
+        char *parityBuffer = NULL;
+        calculateParity(buffer + bodyOffset, parityBufferSize, &parityBuffer, &parityBuffSz);
 
-    size_t parityBufferSize = size - bodyOffset;
+        int comp = memcmp(packet.header.parity, parityBuffer, sizeof(char) * packet.header.paritySize);
+        *validationResult = comp == 0 ? 1 : 0;
 
-    size_t parityBuffSz = 0;
-    char *parityBuffer = NULL;
-    calculateParity(buffer + bodyOffset, parityBufferSize, &parityBuffer, &parityBuffSz);
+        if (*validationResult)
+        {
+            currentBufferOffset += packet.header.paritySize * sizeof(char);
+            memcpy(&packet.body, buffer + currentBufferOffset, sizeof(char) + sizeof(char[3]) + sizeof(size_t));
 
-    int comp = memcmp(packet.header.parity, parityBuffer, sizeof(char) * packet.header.paritySize);
+            currentBufferOffset += sizeof(char) + sizeof(char[3]) + sizeof(size_t);
+            packet.body.payload = (char *)malloc(sizeof(char) * packet.body.payloadSize);
+            memcpy(packet.body.payload, buffer + currentBufferOffset, sizeof(char) * packet.body.payloadSize);
 
-    free(packet.header.parity);
-    free(parityBuffer);
+            *body_out = packet.body;
+        }
 
-    *body_out = packet.body;
-    *validationResult = comp == 0 ? 1 : 0;
+        free(packet.header.parity);
+        free(parityBuffer);
+    }
+    else
+    {
+        *validationResult = 0;
+    }
 }
 
 void radioSendPacket(lora_data_t *lora, radio_body_t *body)
