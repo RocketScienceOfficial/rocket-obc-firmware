@@ -44,6 +44,10 @@ function listen(path, onRead, onClose) {
         port = null;
     });
 
+    port.on("error", function(err) {
+        console.error(err);
+    });
+
     const parser = port.pipe(new ReadlineParser({ delimiter: '\n' }));
 
     parser.on("data", (data) => {

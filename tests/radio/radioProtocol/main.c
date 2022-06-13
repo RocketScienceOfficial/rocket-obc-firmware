@@ -70,6 +70,8 @@ void initialize()
     MY_LOG_CORE_INFO("Done!");
 }
 
+static radio_body_t s_TestBody;
+
 void loop()
 {
     tight_loop_contents();

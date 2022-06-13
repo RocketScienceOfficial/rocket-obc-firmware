@@ -36,31 +36,25 @@ void initialize()
 
     MY_LOG_CORE_INFO("Initializing...");
 
-    char **buffer;
-    size_t bufferSize = 0;
-    consoleProcessCharacter('h', &buffer, &bufferSize);
-    consoleProcessCharacter('e', &buffer, &bufferSize);
-    consoleProcessCharacter('l', &buffer, &bufferSize);
-    consoleProcessCharacter('l', &buffer, &bufferSize);
-    consoleProcessCharacter('o', &buffer, &bufferSize);
-    consoleProcessCharacter(' ', &buffer, &bufferSize);
-    consoleProcessCharacter('w', &buffer, &bufferSize);
-    consoleProcessCharacter('o', &buffer, &bufferSize);
-    consoleProcessCharacter('r', &buffer, &bufferSize);
-    consoleProcessCharacter('l', &buffer, &bufferSize);
-    consoleProcessCharacter('d', &buffer, &bufferSize);
-    consoleProcessCharacter('\r', &buffer, &bufferSize);
+    console_input_t input = {0};
+    consoleProcessCharacter('h', &input);
+    consoleProcessCharacter('e', &input);
+    consoleProcessCharacter('l', &input);
+    consoleProcessCharacter('l', &input);
+    consoleProcessCharacter('o', &input);
+    consoleProcessCharacter(' ', &input);
+    consoleProcessCharacter('w', &input);
+    consoleProcessCharacter('o', &input);
+    consoleProcessCharacter('r', &input);
+    consoleProcessCharacter('l', &input);
+    consoleProcessCharacter('d', &input);
+    consoleProcessCharacter('\r', &input);
 
-    MY_ASSERT(bufferSize == 2);
-    MY_ASSERT(strcmp(buffer[0], "hello") == 0);
-    MY_ASSERT(strcmp(buffer[1], "world") == 0);
+    MY_ASSERT(input.size == 2);
+    MY_ASSERT(strcmp(input.tokens[0], "hello") == 0);
+    MY_ASSERT(strcmp(input.tokens[1], "world") == 0);
 
-    for (int i = 0; i < bufferSize; i++)
-    {
-        free(buffer[i]);
-    }
-
-    free(buffer);
+    consoleClearInput(&input);
 
     MY_LOG_CORE_INFO("Done!");
 }

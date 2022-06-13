@@ -1,4 +1,5 @@
 #include "cryptography.h"
+#include "logger.h"
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
@@ -19,28 +20,34 @@ static size_t count1Bits(char n)
 
 void encryptDecrypt(char *buffer, size_t size, const char *key, size_t keySize)
 {
+    MY_LOG_CORE_INFO("Encrypting/decrypting buffer with size: %d...", size);
+
     for (size_t i = 0; i < size; i++)
     {
         buffer[i] = buffer[i] ^ key[i % keySize];
     }
 }
 
-void calculateParityRows(char *buffer, size_t size, char **parityOut, size_t *paritySizeOut)
+void calculateParityRows(char *buffer, size_t size, parity_data_t* data_out_ptr)
 {
-    *paritySizeOut = (int)ceil(size / 8.0);
-    *parityOut = (char *)calloc(*paritySizeOut, sizeof(char));
+    MY_LOG_CORE_INFO("Calculating parity rows...");
+
+    data_out_ptr->size = (int)ceil(size / 8.0);
+    data_out_ptr->buffer = (char *)calloc(data_out_ptr->size, sizeof(char));
 
     for (size_t i = 0; i < size; i++)
     {
         size_t oneBits = count1Bits(buffer[i]);
-        (*parityOut)[i / 8] |= ((oneBits % 2) << (i % 8));
+        data_out_ptr->buffer[i / 8] |= ((oneBits % 2) << (i % 8));
     }
 }
 
-void calculateParityColumns(char *buffer, size_t size, char **parityOut, size_t *paritySizeOut)
+void calculateParityColumns(char *buffer, size_t size, parity_data_t* data_out_ptr)
 {
-    *paritySizeOut = (int)ceil(size / 8.0);
-    *parityOut = (char *)calloc(*paritySizeOut, sizeof(char));
+    MY_LOG_CORE_INFO("Calculating parity columns...");
+
+    data_out_ptr->size = (int)ceil(size / 8.0);
+    data_out_ptr->buffer = (char *)calloc(data_out_ptr->size, sizeof(char));
 
     for (size_t i = 0; i < size; i += 8)
     {
@@ -59,27 +66,39 @@ void calculateParityColumns(char *buffer, size_t size, char **parityOut, size_t 
             }
 
             size_t oneBits = count1Bits(n);
-            (*parityOut)[i / 8] |= (oneBits % 2) << (i % 8);
+            data_out_ptr->buffer[i / 8] |= (oneBits % 2) << (i % 8);
         }
     }
 }
 
-void calculateParity(char *buffer, size_t size, char **parityOut, size_t *paritySizeOut)
+void calculateParity(char* buffer, size_t size, parity_data_t* data_out_ptr)
 {
-    char *parityRows = NULL;
-    size_t parityRowsSize = 0;
-    char *parityColumns = NULL;
-    size_t parityColumnsSize = 0;
+    MY_LOG_CORE_INFO("Calculating parity...");
 
-    calculateParityRows(buffer, size, &parityRows, &parityRowsSize);
-    calculateParityColumns(buffer, size, &parityColumns, &parityColumnsSize);
+    parity_data_t rows = {0};
+    parity_data_t columns = {0};
 
-    *paritySizeOut = parityRowsSize + parityColumnsSize;
-    *parityOut = (char *)malloc(*paritySizeOut * sizeof(char));
+    calculateParityRows(buffer, size, &rows);
+    calculateParityColumns(buffer, size, &columns);
 
-    memcpy(*parityOut, parityRows, parityRowsSize);
-    memcpy(*parityOut + parityRowsSize, parityColumns, parityColumnsSize);
+    data_out_ptr->size = rows.size + columns.size;
+    data_out_ptr->buffer = (char *)malloc(data_out_ptr->size * sizeof(char));
 
-    free(parityRows);
-    free(parityColumns);
+    memcpy(data_out_ptr->buffer, rows.buffer, rows.size);
+    memcpy(data_out_ptr->buffer + rows.size, columns.buffer, columns.size);
+
+    clearParity(&rows);
+    clearParity(&columns);
+
+    MY_LOG_CORE_INFO("Calculated parity with size: %d", data_out_ptr->size);
+}
+
+void clearParity(parity_data_t* parity)
+{
+    MY_LOG_CORE_INFO("Clearing parity...");
+
+    if (parity->size > 0)
+    {
+        free(parity->buffer);
+    }
 }

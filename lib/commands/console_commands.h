@@ -14,10 +14,17 @@ typedef struct console_command
     consoleCommandFunction_t func;
 } console_command_t;
 
+typedef struct command_args
+{
+    char **args;
+    size_t size;
+} command_args_t;
+
 void registerCommand(console_command_t *command);
-console_command_t *parseCommand(char **tokens, size_t tokensSize, char ***commandArgs_out_ptr, size_t *commandArgsSize_out);
-void executeCommand(console_command_t *command, char **commandArgs, size_t argc);
+console_command_t *parseCommand(char **tokens, size_t tokensSize, command_args_t* args_out_ptr);
+void executeCommand(console_command_t *command, command_args_t* args);
 int checkArgsCount(size_t expectedCount, size_t actualCount, char **output_ptr);
+void commandClearArgs(command_args_t* args);
 logger_data_t *myLogGetCommandOutputLogger();
 
 #define MY_LOG_COMMAND_OUTUT_NAME "COMMAND_OUTPUT"

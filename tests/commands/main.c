@@ -43,24 +43,15 @@ void initialize()
         "hello",
     };
     size_t tokensSize = 1;
-    char **commandArgs;
-    size_t commandArgsSize = 0;
-    console_command_t *command = parseCommand(tokens, tokensSize, &commandArgs, &commandArgsSize);
+    command_args_t args = {0};
+    console_command_t *command = parseCommand(tokens, tokensSize, &args);
 
     if (command != NULL)
     {
-        executeCommand(command, commandArgs, commandArgsSize);
+        executeCommand(command, &args);
     }
 
-    for (int i = 0; i < commandArgsSize; i++)
-    {
-        free(commandArgs[i]);
-    }
-
-    if (commandArgsSize > 0)
-    {
-        free(commandArgs);
-    }
+    commandClearArgs(&args);
 
     MY_LOG_CORE_INFO("Done!");
 }

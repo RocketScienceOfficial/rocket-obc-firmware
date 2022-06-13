@@ -17,9 +17,11 @@
 #include "mpu6050.h"
 #include "kalman_filter.h"
 #include "log_serial.h"
+#include "radio_config.h"
 
 static lora_data_t s_LoraData;
 static unsigned int s_TimerOffset = 0;
+static console_input_t s_ConsoleInput;
 
 void start();
 void initialize();
@@ -68,12 +70,12 @@ void initialize()
     loraInit(&s_LoraData, &loraPinout);
 
     s_LoraData.pinout = loraPinout;
-    s_LoraData.txPower = 20;
+    s_LoraData.txPower = RADIO_DBM;
 
-    loraSetSpreadingFactor(&s_LoraData, 8);
-    loraSetSignalBandwidth(&s_LoraData, 125000);
+    loraBegin(&s_LoraData, RADIO_FREQUENCY_HZ);
 
-    loraBegin(&s_LoraData, SX1278_FREQ_HZ);
+    loraSetSpreadingFactor(&s_LoraData, RADIO_SPREADING_FACTOR);
+    loraSetSignalBandwidth(&s_LoraData, RADIO_SIGNAL_BANDWIDTH);
 
     sdInit();
     sdInitFile(LOG_CORE_FILENAME);
@@ -96,7 +98,7 @@ void loop()
 {
     checkCommand();
 
-    if (runEvery(5000, &s_TimerOffset))
+    if (runEvery(1000, &s_TimerOffset))
     {
         sdBegin(LOG_CORE_FILENAME);
         sdBegin(LOG_MEASURE_FILENAME);
@@ -110,33 +112,22 @@ void loop()
 
 void checkCommand()
 {
-    char **tokens;
-    size_t tokensSize = 0;
-    consoleCheckInput(&tokens, &tokensSize);
+    consoleCheckInput(&s_ConsoleInput);
 
-    if (tokensSize > 0)
+    if (s_ConsoleInput.size > 0)
     {
-        char **commandArgs;
-        size_t commandArgsSize = 0;
-        console_command_t *command = parseCommand(tokens, tokensSize, &commandArgs, &commandArgsSize);
+        command_args_t args = {0};
+        console_command_t *command = parseCommand(s_ConsoleInput.tokens, s_ConsoleInput.size, &args);
 
-        if (command != NULL)
+        if (command)
         {
-            executeCommand(command, commandArgs, commandArgsSize);
+            executeCommand(command, &args);
         }
 
-        if (commandArgsSize > 0)
-        {
-            free(commandArgs);
-        }
-
-        for (int i = 0; i < tokensSize; i++)
-        {
-            free(tokens[i]);
-        }
-
-        free(tokens);
+        commandClearArgs(&args);
     }
+
+    consoleClearInput(&s_ConsoleInput);
 }
 
 void takeMeasurements()

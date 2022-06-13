@@ -6,4 +6,6 @@ add_library(maths
     cryptography.c
     )
 
+target_link_libraries(maths logging)
+
 target_include_directories(maths PUBLIC .)

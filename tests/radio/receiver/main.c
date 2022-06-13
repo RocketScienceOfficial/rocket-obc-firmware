@@ -8,6 +8,7 @@
 
 static lora_data_t s_LoraData;
 static radio_body_t s_PacketBody;
+static int s_RadioPacketValidation;
 
 void start();
 void initialize();
@@ -60,9 +61,23 @@ void initialize()
 
 void loop()
 {
-    if (radioReceivePacket(&s_LoraData, &s_PacketBody))
+    if (radioReceivePacket(&s_LoraData, &s_PacketBody, &s_RadioPacketValidation))
     {
         MY_LOG_CORE_INFO("Received packet!");
-        MY_LOG_CORE_INFO("%s", s_PacketBody.payload);
+
+        if (s_RadioPacketValidation)
+        {
+            MY_LOG_CORE_INFO("Packet is valid!");
+
+            MY_LOG_CORE_INFO("%s", s_PacketBody.payload);
+
+            radioClearPacket(&s_PacketBody);
+        }
+        else
+        {
+            MY_LOG_CORE_INFO("Validation failed!");
+        }
+
+        MY_LOG_CORE_INFO("Packet processed!");
     }
 }

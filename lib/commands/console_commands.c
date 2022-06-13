@@ -1,4 +1,5 @@
 #include "console_commands.h"
+#include "logger.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -11,8 +12,10 @@ void registerCommand(console_command_t *command)
     s_CommandSize++;
 }
 
-console_command_t *parseCommand(char **tokens, size_t tokensSize, char ***commandArgs_out_ptr, size_t *commandArgsSize_out)
+console_command_t *parseCommand(char **tokens, size_t tokensSize, command_args_t* args_out_ptr)
 {
+    MY_LOG_CORE_INFO("Parsing command...");
+    
     console_command_t *command = NULL;
 
     for (size_t i = 0; i < s_CommandSize; i++)
@@ -26,15 +29,19 @@ console_command_t *parseCommand(char **tokens, size_t tokensSize, char ***comman
 
     if (command)
     {
-        *commandArgsSize_out = tokensSize - 1;
+        MY_LOG_CORE_INFO("Command found: %s", command->name);
 
-        if (*commandArgsSize_out > 0)
+        args_out_ptr->size = tokensSize - 1;
+
+        if (args_out_ptr->size > 0)
         {
-            *commandArgs_out_ptr = (char **)malloc((*commandArgsSize_out) * sizeof(char *));
+            args_out_ptr->args = (char **)malloc(args_out_ptr->size * sizeof(char *));
 
             for (size_t i = 1; i < tokensSize; i++)
             {
-                (*commandArgs_out_ptr)[i - 1] = tokens[i];
+                args_out_ptr->args[i - 1] = (char *)malloc((strlen(tokens[i]) + 1) * sizeof(char));
+
+                strcpy(args_out_ptr->args[i - 1], tokens[i]);
             }
         }
 
@@ -42,15 +49,19 @@ console_command_t *parseCommand(char **tokens, size_t tokensSize, char ***comman
     }
     else
     {
-        *commandArgsSize_out = 0;
+        MY_LOG_CORE_ERROR("Command not found!");
+
+        args_out_ptr->size = 0;
 
         return NULL;
     }
 }
 
-void executeCommand(console_command_t *command, char **args, size_t argc)
+void executeCommand(console_command_t *command, command_args_t* args)
 {
-    command->func(args, argc);
+    MY_LOG_CORE_INFO("Executing command: %s", command->name);
+
+    command->func(args->args, args->size);
 }
 
 int checkArgsCount(size_t expectedCount, size_t actualCount, char **output_ptr)
@@ -64,6 +75,22 @@ int checkArgsCount(size_t expectedCount, size_t actualCount, char **output_ptr)
 
     return 1;
 }
+
+void commandClearArgs(command_args_t* args)
+{
+    MY_LOG_CORE_INFO("Clearing command arguments");
+
+    if (args->size > 0) 
+    {
+        for (size_t i = 0; i < args->size; i++)
+        {
+            free(args->args[i]);
+        }
+
+        free(args->args);
+    }
+}
+
 
 static logger_data_t s_Logger;
 static int s_LoggerInitialized;

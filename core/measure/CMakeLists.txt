@@ -1,5 +1,7 @@
 add_executable(measure main.c hw_config.c)
 
+target_include_directories(measure PUBLIC ../)
+
 target_link_libraries(measure PUBLIC pico_stdlib time_tracker logging maths measurements radio sd console commands)
 
 pico_enable_stdio_usb(measure 1)

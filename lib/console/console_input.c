@@ -1,5 +1,6 @@
 #include "console_input.h"
 #include "pico/stdlib.h"
+#include "logger.h"
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
@@ -8,7 +9,19 @@
 static char s_Cmd[CONSOLE_INPUT_MAX_LENGTH];
 static size_t s_Size;
 
-void consoleProcessCharacter(int c, char ***tokens_out_ptr, size_t *size_out)
+void consoleCheckInput(console_input_t *input_out)
+{
+    int ch = getchar_timeout_us(100);
+
+    if (ch != PICO_ERROR_TIMEOUT)
+    {
+        MY_LOG_CORE_INFO("Character received: %c", ch);
+
+        consoleProcessCharacter(ch, input_out);
+    }
+}
+
+void consoleProcessCharacter(int c, console_input_t *input_out)
 {
     if (!isprint(c) && !isspace(c))
     {
@@ -22,7 +35,9 @@ void consoleProcessCharacter(int c, char ***tokens_out_ptr, size_t *size_out)
             return;
         }
 
-        consoleTokenizeInput(s_Cmd, tokens_out_ptr, size_out);
+        MY_LOG_CORE_INFO("Return pressed!");
+
+        consoleTokenizeInput(s_Cmd, input_out);
 
         s_Size = 0;
         memset(s_Cmd, 0, sizeof(s_Cmd));
@@ -37,32 +52,41 @@ void consoleProcessCharacter(int c, char ***tokens_out_ptr, size_t *size_out)
     }
 }
 
-void consoleTokenizeInput(char *input, char ***tokens_out_ptr, size_t *size_out)
+void consoleTokenizeInput(char *input, console_input_t *input_out)
 {
-    *tokens_out_ptr = (char **)malloc(CONSOLE_ARGS_MAX_COUNT * sizeof(char *));
-    *size_out = 0;
+    MY_LOG_CORE_INFO("Tokenizing input...");
+
+    input_out->tokens = (char **)malloc(CONSOLE_ARGS_MAX_COUNT * sizeof(char *));
+    input_out->size = 0;
 
     char *cmdn = strtok(input, " ");
 
     while (cmdn != NULL)
     {
-        char *arg = malloc((strlen(cmdn) + 1) * sizeof(char));
+        char *arg = (char *)malloc((strlen(cmdn) + 1) * sizeof(char));
 
         strcpy(arg, cmdn);
 
-        (*tokens_out_ptr)[*size_out] = arg;
+        input_out->tokens[input_out->size] = arg;
 
         cmdn = strtok(NULL, " ");
-        (*size_out)++;
+        input_out->size++;
     }
+
+    MY_LOG_CORE_INFO("Input tokenized! Length: %d", input_out->size);
 }
 
-void consoleCheckInput(char ***tokens_out_ptr, size_t *size_out)
+void consoleClearInput(console_input_t *input)
 {
-    int ch = getchar_timeout_us(100);
+    MY_LOG_CORE_INFO("Clearing input");
 
-    if (ch != PICO_ERROR_TIMEOUT)
+    if (input->size > 0)
     {
-        consoleProcessCharacter(ch, tokens_out_ptr, size_out);
+        for (size_t i = 0; i < input->size; i++)
+        {
+            free(input->tokens[i]);
+        }
+
+        free(input->tokens);
     }
 }
