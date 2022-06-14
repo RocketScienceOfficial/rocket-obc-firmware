@@ -1,0 +1,8 @@
+add_executable(static_tests_runner main.c)
+
+target_link_libraries(static_tests_runner PUBLIC pico_stdlib test_framework logging commands commands_tests console_tests loggers_tests maths_tests bmp280_tests mpu6050_tests radio_protocol_tests sd_tests servo_tests time_tracker_test)
+
+pico_enable_stdio_usb(static_tests_runner 1)
+pico_enable_stdio_uart(static_tests_runner 0)
+
+pico_add_extra_outputs(static_tests_runner)

@@ -85,11 +85,6 @@ void loop()
 {
     checkCommand();
 
-    if (runEvery(1000, &s_TimerOffset))
-    {
-        MY_LOG_CORE_INFO("HELLO!");
-    }
-
     if (radioReceivePacket(&s_LoraData, &s_PacketBody, &s_RadioPacketValidation))
     {
         MY_LOG_CORE_INFO("Packet received!");
@@ -104,7 +99,6 @@ void loop()
             MY_LOG_MEASURE_RECEIVER_INT("Pressure", bmp280Data.pressure);
             MY_LOG_MEASURE_RECEIVER_FLOAT("Altitude", bmp280GetAltitude(&bmp280Data));
             MY_LOG_MEASURE_RECEIVER_FLOAT("Temperature", bmp280Data.temperature);
-            MY_LOG_MEASURE_RECEIVER_INT("RSSI", loraRssi(&s_LoraData));
 
             radioClearPacket(&s_PacketBody);
         }
@@ -113,6 +107,7 @@ void loop()
             MY_LOG_CORE_ERROR("Validation failed!");
         }
 
+        MY_LOG_MEASURE_RECEIVER_INT("RSSI", loraRssi(&s_LoraData));
         MY_LOG_CORE_INFO("Packet processed!");
     }
 }

@@ -34,4 +34,6 @@ void registerDefaultConsoleCommands()
     {
         registerCommand(&s_Commands[i]);
     }
+
+    MY_LOG_CORE_INFO("Registered %d console commands", count);
 }

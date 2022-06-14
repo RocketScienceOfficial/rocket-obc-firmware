@@ -45,6 +45,8 @@ console_command_t *parseCommand(char **tokens, size_t tokensSize, command_args_t
             }
         }
 
+        MY_LOG_CORE_INFO("Command arguments size: %d", args_out_ptr->size);
+
         return command;
     }
     else
@@ -62,6 +64,8 @@ void executeCommand(console_command_t *command, command_args_t* args)
     MY_LOG_CORE_INFO("Executing command: %s", command->name);
 
     command->func(args->args, args->size);
+
+    MY_LOG_CORE_INFO("Command executed: %s", command->name);
 }
 
 int checkArgsCount(size_t expectedCount, size_t actualCount, char **output_ptr)
@@ -78,8 +82,6 @@ int checkArgsCount(size_t expectedCount, size_t actualCount, char **output_ptr)
 
 void commandClearArgs(command_args_t* args)
 {
-    MY_LOG_CORE_INFO("Clearing command arguments");
-
     if (args->size > 0) 
     {
         for (size_t i = 0; i < args->size; i++)

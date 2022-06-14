@@ -2,6 +2,14 @@
     "files.associations": {
         "initializer_list": "c",
         "type_traits": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "radio_config.h": "c",
+        "radio_protocol.h": "c",
+        "test_commands.h": "c",
+        "cryptography.h": "c",
+        "pinout.h": "c",
+        "test_mpu6050.h": "c",
+        "stdio.h": "c",
+        "i2c.h": "c"
     }
 }

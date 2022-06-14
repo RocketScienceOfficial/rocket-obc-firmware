@@ -78,8 +78,6 @@ void consoleTokenizeInput(char *input, console_input_t *input_out)
 
 void consoleClearInput(console_input_t *input)
 {
-    MY_LOG_CORE_INFO("Clearing input");
-
     if (input->size > 0)
     {
         for (size_t i = 0; i < input->size; i++)
