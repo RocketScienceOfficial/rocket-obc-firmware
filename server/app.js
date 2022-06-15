@@ -6,6 +6,7 @@ const api = require("./src/api/index");
 const webSocketControl = require("./src/rtc/webSocketControl");
 
 const PORT = 8080;
+const DATA_PREFIX = "DATA:";
 
 const app = express();
 const server = http.createServer(app);
@@ -36,21 +37,26 @@ function handleSerialPortConnected(path) {
 
 function handleSerialPortListen(data) {
     try {
-        const parsedData = JSON.parse(data);
+        if (data.startsWith(DATA_PREFIX)) {
+            data = data.substring(DATA_PREFIX.length);
+            data = data.replaceAll('\\', '/');
 
-        if (parsedData.type == "REMOTE_COMMAND") {
-            if (parsedData.level == "CLIENT") {
+            const parsedData = JSON.parse(data);
+
+            if (parsedData.type == "REMOTE_COMMAND") {
+                if (parsedData.level == "CLIENT") {
+                    webSocketControl.sendToClients(data);
+                }
+                else if (parsedData.level == "SERVER") {
+
+                }
+            }
+            else {
                 webSocketControl.sendToClients(data);
             }
-            else if (parsedData.level == "SERVER") {
-
-            }
-        }
-        else {
-            webSocketControl.sendToClients(data);
         }
     } catch (e) {
-        //console.log(e);
+        console.error(e);
     }
 }
 

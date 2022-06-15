@@ -34,6 +34,19 @@ function listen(path, onRead, onClose) {
     port = new SerialPort({
         path: path,
         baudRate: SERIAL_BAUD_RATE,
+        autoOpen: false
+    });
+
+    port.open(function (err) {
+        if (err) {
+            console.error(err);
+        }
+    });
+
+    port.on("open", function () {
+        console.log("Serial port: " + path + " opened");
+
+        onConnected(path);
     });
 
     port.on("close", function () {
@@ -44,8 +57,8 @@ function listen(path, onRead, onClose) {
         port = null;
     });
 
-    port.on("error", function(err) {
-        console.error(err);
+    port.on("error", function (err) {
+        console.log("Serial port: " + path + " error: " + err);
     });
 
     const parser = port.pipe(new ReadlineParser({ delimiter: '\n' }));
@@ -55,8 +68,6 @@ function listen(path, onRead, onClose) {
 
         onRead(data);
     });
-
-    onConnected(path);
 }
 
 function write(data, callback) {

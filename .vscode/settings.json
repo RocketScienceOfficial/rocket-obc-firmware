@@ -10,6 +10,12 @@
         "pinout.h": "c",
         "test_mpu6050.h": "c",
         "stdio.h": "c",
-        "i2c.h": "c"
+        "i2c.h": "c",
+        "test_framework.h": "c",
+        "logger.h": "c",
+        "stdlib.h": "c",
+        "log_serial.h": "c",
+        "console_input.h": "c",
+        "test_radio_receiver.h": "c"
     }
 }

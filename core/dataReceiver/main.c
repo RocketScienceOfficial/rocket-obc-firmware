@@ -19,7 +19,6 @@
 static lora_data_t s_LoraData;
 static radio_body_t s_PacketBody;
 static int s_RadioPacketValidation;
-static unsigned int s_TimerOffset;
 static console_input_t s_ConsoleInput;
 
 void start();

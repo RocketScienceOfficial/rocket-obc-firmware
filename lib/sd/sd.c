@@ -43,7 +43,7 @@ static int __checkError(const char *funcName)
     {
         s_SdEnabled = false;
 
-        MY_LOG_CORE_ERROR("%s error: %s (%d)\n", funcName, FRESULT_str(s_FR), s_FR);
+        MY_LOG_CORE_ERROR("%s error: %s (%d)", funcName, FRESULT_str(s_FR), s_FR);
 
         return 1;
     }

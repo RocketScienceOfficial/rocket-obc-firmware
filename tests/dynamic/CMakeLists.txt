@@ -1,7 +1,0 @@
-# add_subdirectory(console)
-# add_subdirectory(logger)
-# add_subdirectory(measurements)
-# add_subdirectory(radio)
-# add_subdirectory(sd)
-# add_subdirectory(servo)
-# add_subdirectory(time_tracker)
