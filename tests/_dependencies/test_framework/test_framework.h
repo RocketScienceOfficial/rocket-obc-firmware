@@ -17,26 +17,20 @@
 
 
 #define MY_TEST_CASE(func)                          \
-{                                                   \
     MY_LOG_CORE_INFO("Running test: %s", #func);    \
-    int result = (func)();                          \
-    if (result == MY_TEST_FAIL_CODE)              \
+    if ((func)() == MY_TEST_FAIL_CODE)              \
     {                                               \
         MY_LOG_CORE_ERROR("Test %s failed", #func); \
     }                                               \
     else                                            \
     {                                               \
         MY_LOG_CORE_INFO("Test %s passed", #func);  \
-    }                                               \
-}
+    }
 #define MY_TEST_CASE_DYNAMIC(func)                  \
-{                                                   \
-    int result = (func)();                          \
-    if (result == MY_TEST_FAIL_CODE)              \
+    if ((func)() == MY_TEST_FAIL_CODE)              \
     {                                               \
         MY_LOG_CORE_ERROR("Test %s failed", #func); \
-    }                                               \
-}
+    }
 #define MY_TEST_CASE_INIT_FUNC_INTERNAL(name) MY_TEST_CASE((name ## _init))
 #define MY_TEST_CASE_INIT_FUNC(name) MY_TEST_CASE_INIT_FUNC_INTERNAL(name)
 #define MY_TEST_CASE_FUNC_INTERNAL(name, num) MY_TEST_CASE((name ## _testCase_ ## num))
