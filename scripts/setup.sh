@@ -4,7 +4,7 @@ cd `dirname $0`/..
 
 sudo apt install nodejs cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib build-essential
 
-cd server
+cd presentating/server
 npm install
 cd -
 

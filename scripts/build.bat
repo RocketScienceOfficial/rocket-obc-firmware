@@ -1,8 +1,8 @@
 @echo off
 
-pushd %~dp0\..
+pushd %~dp0\..\satellite
 
-if not exist "build" mkdir "build"
+if not exist build mkdir build
 
 cd build
 

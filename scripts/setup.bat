@@ -8,7 +8,7 @@ cd scripts
 call build.bat
 cd ..
 
-cd server
+cd presentating\server
 call npm install
 cd ..
 
