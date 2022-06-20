@@ -5,7 +5,12 @@ const callbacks = [];
 function sendMessage(msg) {
     console.log("Send message: " + msg);
 
-    socket.send(msg);
+    if (socket.readyState = WebSocket.OPEN) {
+        socket.send(msg);
+    }
+    else {
+        console.log("Connection is closed");
+    }
 }
 
 function onMessage(callback) {
