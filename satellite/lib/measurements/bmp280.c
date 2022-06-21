@@ -1,5 +1,6 @@
 #include "bmp280.h"
 #include "logger.h"
+#include "recorder.h"
 #include "hardware/i2c.h"
 #include "pico/stdlib.h"
 #include <math.h>
@@ -71,6 +72,8 @@ static i2c_inst_t *getI2C()
 
 void bmp280InitSensor()
 {
+    FUNCTION_PROFILE_BEGIN();
+
     uint8_t buf[2];
 
     const uint8_t reg_config_val = ((0x04 << 5) | (0x05 << 2)) & 0xFC;
@@ -83,10 +86,14 @@ void bmp280InitSensor()
     buf[0] = BMP280_REG_CTRL_MEAS;
     buf[1] = reg_ctrl_meas_val;
     i2c_write_blocking(getI2C(), BMP280_ADDR, buf, 2, false);
+
+    FUNCTION_PROFILE_END();
 }
 
 void bmp280ReadRaw(int32_t *temp, int32_t *pressure)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     uint8_t buf[6];
     uint8_t reg = BMP280_REG_PRESSURE_MSB;
     i2c_write_blocking(getI2C(), BMP280_ADDR, &reg, 1, true);
@@ -94,33 +101,50 @@ void bmp280ReadRaw(int32_t *temp, int32_t *pressure)
 
     *pressure = (buf[0] << 12) | (buf[1] << 4) | (buf[2] >> 4);
     *temp = (buf[3] << 12) | (buf[4] << 4) | (buf[5] >> 4);
+
+    FUNCTION_PROFILE_END();
 }
 
 void bmp280Reset()
 {
+    FUNCTION_PROFILE_BEGIN();
+
     uint8_t buf[2] = {BMP280_REG_RESET, 0xB6};
     i2c_write_blocking(getI2C(), BMP280_ADDR, buf, 2, false);
+
+    FUNCTION_PROFILE_END();
 }
 
 int32_t bmp280Convert(int32_t temp, struct bmp280_calib_param *params)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     int32_t var1, var2;
     var1 = ((((temp >> 3) - ((int32_t)params->dig_t1 << 1))) * ((int32_t)params->dig_t2)) >> 11;
     var2 = (((((temp >> 4) - ((int32_t)params->dig_t1)) * ((temp >> 4) - ((int32_t)params->dig_t1))) >> 12) * ((int32_t)params->dig_t3)) >> 14;
+
+    FUNCTION_PROFILE_END();
+
     return var1 + var2;
 }
 
 float bmp280ConvertTemp(int32_t temp, struct bmp280_calib_param *params)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     int32_t t_fine = bmp280Convert(temp, params);
     int32_t final = (t_fine * 5 + 128) >> 8;
     float result = final / 100.0f;
+
+    FUNCTION_PROFILE_END();
 
     return result;
 }
 
 int bmp280ConvertPressure(int32_t pressure, int32_t temp, struct bmp280_calib_param *params)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     int32_t t_fine = bmp280Convert(temp, params);
 
     int32_t var1, var2;
@@ -133,6 +157,8 @@ int bmp280ConvertPressure(int32_t pressure, int32_t temp, struct bmp280_calib_pa
     var1 = ((((32768 + var1)) * ((int32_t)params->dig_p1)) >> 15);
     if (var1 == 0)
     {
+        FUNCTION_PROFILE_END();
+
         return 0;
     }
     converted = (((uint32_t)(((int32_t)1048576) - pressure) - (var2 >> 12))) * 3125;
@@ -148,11 +174,15 @@ int bmp280ConvertPressure(int32_t pressure, int32_t temp, struct bmp280_calib_pa
     var2 = (((int32_t)(converted >> 2)) * ((int32_t)params->dig_p8)) >> 13;
     converted = (uint32_t)((int32_t)converted + ((var1 + var2 + params->dig_p7) >> 4));
 
+    FUNCTION_PROFILE_END();
+
     return converted;
 }
 
 void bmp280GetCalibParams(struct bmp280_calib_param *params)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     uint8_t buf[BMP280_NUM_CALIB_PARAMS] = {0};
     uint8_t reg = BMP280_REG_DIG_T1_LSB;
     i2c_write_blocking(getI2C(), BMP280_ADDR, &reg, 1, true);
@@ -171,10 +201,14 @@ void bmp280GetCalibParams(struct bmp280_calib_param *params)
     params->dig_p7 = (int16_t)(buf[19] << 8) | buf[18];
     params->dig_p8 = (int16_t)(buf[21] << 8) | buf[20];
     params->dig_p9 = (int16_t)(buf[23] << 8) | buf[22];
+
+    FUNCTION_PROFILE_END();
 }
 
 int bmp280Init(int i2c, int sda, int scl)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     MY_LOG_CORE_INFO("Initializing BMP280...");
 
     s_i2c = i2c;
@@ -187,6 +221,10 @@ int bmp280Init(int i2c, int sda, int scl)
 
     if (!bmp280Check())
     {
+        MY_LOG_CORE_ERROR("BMP280 not found!");
+
+        FUNCTION_PROFILE_END();
+
         return 0;
     }
 
@@ -196,19 +234,27 @@ int bmp280Init(int i2c, int sda, int scl)
 
     MY_LOG_CORE_INFO("BMP280 Initialized!");
 
+    FUNCTION_PROFILE_END();
+
     return 1;
 }
 
 int bmp280Check()
 {
+    FUNCTION_PROFILE_BEGIN();
+
     uint8_t data;
     int ret = i2c_read_blocking(getI2C(), BMP280_ADDR, &data, 1, false);
+
+    FUNCTION_PROFILE_END();
 
     return ret < 0 ? 0 : 1;
 }
 
 void bmp280Read(bmp280_data_t *data)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     MY_LOG_CORE_INFO("Reading BMP280...");
 
     int32_t raw_temperature;
@@ -220,12 +266,18 @@ void bmp280Read(bmp280_data_t *data)
     data->pressure = bmp280ConvertPressure(raw_pressure, raw_temperature, &params);
 
     MY_LOG_CORE_INFO("Succesffully read BMP280!");
+
+    FUNCTION_PROFILE_END();
 }
 
 float bmp280GetAltitude(bmp280_data_t *data)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     int pressure = data->pressure;
     float altitude = PRESSURE_TEMPERATURE_CONSTANT * (1.0 - pow(pressure / SEA_LEVEL_PRESSURE, PRESSURE_GAS_CONSTANT));
+
+    FUNCTION_PROFILE_END();
 
     return altitude;
 }

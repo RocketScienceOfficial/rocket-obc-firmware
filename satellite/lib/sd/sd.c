@@ -1,5 +1,6 @@
 #include "sd.h"
 #include "logger.h"
+#include "recorder.h"
 #include "time_tracker.h"
 #include "sd_card.h"
 #include "ff.h"
@@ -87,6 +88,14 @@ static void __logMeasureCallback(const char *level, const char *msg)
     }
 }
 
+static void __logRecordCallback(const char *level, const char *msg)
+{
+    if (s_SdEnabled)
+    {
+        sdWrite(msg, LOG_RECORD_FILENAME);
+    }
+}
+
 int sdInit()
 {
     MY_LOG_CORE_INFO("Initializing SD Card...");
@@ -124,6 +133,11 @@ void sdAttachToCoreLogger()
 void sdAttachToMeasureLogger()
 {
     myLogCreateSink(myLogGetMeasureLogger(), &__logMeasureCallback, MY_LOG_MEASURE_PATTERN);
+}
+
+void sdAttachToRecordLogger()
+{
+    myLogCreateSink(myLogGetRecordLogger(), &__logRecordCallback, MY_LOG_RECORD_PATTERN);
 }
 
 void sdInitFile(const char *file)

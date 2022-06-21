@@ -9,6 +9,9 @@ MEASURE_LOG:
             + key
             + value
 
+RECORD:
+    - ...
+
 COMMAND_OUTPUT:
     - ...
         * hello

@@ -1,11 +1,14 @@
 #include "cryptography.h"
 #include "logger.h"
+#include "recorder.h"
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
 
 static size_t count1Bits(char n)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     size_t count = 0;
 
     while (n)
@@ -15,21 +18,29 @@ static size_t count1Bits(char n)
         n >>= 1;
     }
 
+    FUNCTION_PROFILE_END();
+
     return count;
 }
 
 void encryptDecrypt(char *buffer, size_t size, const char *key, size_t keySize)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     MY_LOG_CORE_INFO("Encrypting/decrypting buffer with size: %d...", size);
 
     for (size_t i = 0; i < size; i++)
     {
         buffer[i] = buffer[i] ^ key[i % keySize];
     }
+
+    FUNCTION_PROFILE_END();
 }
 
-void calculateParityRows(char *buffer, size_t size, parity_data_t* data_out_ptr)
+void calculateParityRows(char *buffer, size_t size, parity_data_t *data_out_ptr)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     MY_LOG_CORE_INFO("Calculating parity rows...");
 
     data_out_ptr->size = (int)ceil(size / 8.0);
@@ -40,10 +51,14 @@ void calculateParityRows(char *buffer, size_t size, parity_data_t* data_out_ptr)
         size_t oneBits = count1Bits(buffer[i]);
         data_out_ptr->buffer[i / 8] |= ((oneBits % 2) << (i % 8));
     }
+
+    FUNCTION_PROFILE_END();
 }
 
-void calculateParityColumns(char *buffer, size_t size, parity_data_t* data_out_ptr)
+void calculateParityColumns(char *buffer, size_t size, parity_data_t *data_out_ptr)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     MY_LOG_CORE_INFO("Calculating parity columns...");
 
     data_out_ptr->size = (int)ceil(size / 8.0);
@@ -69,10 +84,14 @@ void calculateParityColumns(char *buffer, size_t size, parity_data_t* data_out_p
             data_out_ptr->buffer[i / 8] |= (oneBits % 2) << (i % 8);
         }
     }
+
+    FUNCTION_PROFILE_END();
 }
 
-void calculateParity(char* buffer, size_t size, parity_data_t* data_out_ptr)
+void calculateParity(char *buffer, size_t size, parity_data_t *data_out_ptr)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     MY_LOG_CORE_INFO("Calculating parity...");
 
     parity_data_t rows = {0};
@@ -91,14 +110,20 @@ void calculateParity(char* buffer, size_t size, parity_data_t* data_out_ptr)
     clearParity(&columns);
 
     MY_LOG_CORE_INFO("Calculated parity with size: %d", data_out_ptr->size);
+
+    FUNCTION_PROFILE_END();
 }
 
-void clearParity(parity_data_t* parity)
+void clearParity(parity_data_t *parity)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     MY_LOG_CORE_INFO("Clearing parity...");
 
     if (parity->size > 0)
     {
         free(parity->buffer);
     }
+
+    FUNCTION_PROFILE_END();
 }

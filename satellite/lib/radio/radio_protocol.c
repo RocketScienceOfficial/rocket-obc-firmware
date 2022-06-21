@@ -1,8 +1,9 @@
 #include "radio_protocol.h"
 #include "cryptography.h"
+#include "logger.h"
+#include "recorder.h"
 #include <string.h>
 #include <stdlib.h>
-#include "logger.h"
 
 const char RADIO_PACKET_KEY[] = {
     0x40,
@@ -11,6 +12,8 @@ const char RADIO_PACKET_KEY[] = {
 
 void serializeRadioPacket(radio_body_t *body, char **buffer_out_ptr, size_t *size_out)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     MY_LOG_CORE_INFO("Serializing radio packet...");
 
     size_t bodySize = sizeof(char) + sizeof(char[3]) + sizeof(size_t) + sizeof(char) * body->payloadSize;
@@ -44,10 +47,14 @@ void serializeRadioPacket(radio_body_t *body, char **buffer_out_ptr, size_t *siz
     memcpy(*buffer_out_ptr + headerSize, bodyBuffer, bodySize);
 
     MY_LOG_CORE_INFO("Successfully serialized radio packet!");
+
+    FUNCTION_PROFILE_END();
 }
 
 void deserializeRadioPacket(char *buffer, size_t size, radio_body_t *body_out, int *validationResult)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     MY_LOG_CORE_INFO("Deserializing radio packet...");
 
     radio_packet_t packet = {
@@ -94,7 +101,7 @@ void deserializeRadioPacket(char *buffer, size_t size, radio_body_t *body_out, i
         }
 
         free(packet.header.parity);
-        
+
         clearParity(&parity);
 
         MY_LOG_CORE_INFO("Successfully deserialized radio packet!");
@@ -105,10 +112,14 @@ void deserializeRadioPacket(char *buffer, size_t size, radio_body_t *body_out, i
 
         *validationResult = 0;
     }
+
+    FUNCTION_PROFILE_END();
 }
 
 void radioSendPacket(lora_data_t *lora, radio_body_t *body)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     MY_LOG_CORE_INFO("Sending packet...");
 
     char *buffer;
@@ -124,10 +135,14 @@ void radioSendPacket(lora_data_t *lora, radio_body_t *body)
     free(buffer);
 
     MY_LOG_CORE_INFO("Successfully sent packet!");
+
+    FUNCTION_PROFILE_END();
 }
 
-int radioReceivePacket(lora_data_t *lora, radio_body_t *body_out_ptr, int* validationResult_out_ptr)
+int radioReceivePacket(lora_data_t *lora, radio_body_t *body_out_ptr, int *validationResult_out_ptr)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     size_t packetSize = loraParsePacket(lora, 0);
 
     if (packetSize)
@@ -150,18 +165,26 @@ int radioReceivePacket(lora_data_t *lora, radio_body_t *body_out_ptr, int* valid
         MY_LOG_CORE_INFO("Validation result: %d", *validationResult_out_ptr);
         MY_LOG_CORE_INFO("Successfully received packet!");
 
+        FUNCTION_PROFILE_END();
+
         return 1;
     }
+
+    FUNCTION_PROFILE_END();
 
     return 0;
 }
 
-void radioClearPacket(radio_body_t* body)
+void radioClearPacket(radio_body_t *body)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     MY_LOG_CORE_INFO("Clearing packet...");
 
     if (body->payload)
     {
         free(body->payload);
     }
+
+    FUNCTION_PROFILE_END();
 }

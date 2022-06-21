@@ -1,6 +1,7 @@
 #include "console_input.h"
 #include "pico/stdlib.h"
 #include "logger.h"
+#include "recorder.h"
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
@@ -23,8 +24,12 @@ void consoleCheckInput(console_input_t *input_out)
 
 void consoleProcessCharacter(int c, console_input_t *input_out)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     if (!isprint(c) && !isspace(c))
     {
+        FUNCTION_PROFILE_END();
+
         return;
     }
 
@@ -50,10 +55,14 @@ void consoleProcessCharacter(int c, console_input_t *input_out)
             s_Size++;
         }
     }
+
+    FUNCTION_PROFILE_END();
 }
 
 void consoleTokenizeInput(char *input, console_input_t *input_out)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     MY_LOG_CORE_INFO("Tokenizing input...");
 
     input_out->tokens = (char **)malloc(CONSOLE_ARGS_MAX_COUNT * sizeof(char *));
@@ -74,17 +83,23 @@ void consoleTokenizeInput(char *input, console_input_t *input_out)
     }
 
     MY_LOG_CORE_INFO("Input tokenized! Length: %d", input_out->size);
+
+    FUNCTION_PROFILE_END();
 }
 
 void consoleClearInput(console_input_t *input)
 {
     if (input->size > 0)
     {
+        FUNCTION_PROFILE_BEGIN();
+
         for (size_t i = 0; i < input->size; i++)
         {
             free(input->tokens[i]);
         }
 
         free(input->tokens);
+        
+        FUNCTION_PROFILE_END();
     }
 }

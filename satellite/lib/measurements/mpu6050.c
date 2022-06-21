@@ -1,6 +1,7 @@
 #include "mpu6050.h"
 #include "constants.h"
 #include "logger.h"
+#include "recorder.h"
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 
@@ -15,15 +16,21 @@ static i2c_inst_t *getI2C()
 
 static void mpu6050_reset()
 {
+    FUNCTION_PROFILE_BEGIN();
+
     uint8_t buf[] = {0x6B, 0x00};
     i2c_write_blocking(getI2C(), MPU6050_ADDR, buf, 2, false);
 
     uint8_t buf2 = {0x1C, 2 << 3};
     i2c_write_blocking(getI2C(), MPU6050_ADDR, buf2, 2, false);
+
+    FUNCTION_PROFILE_END();
 }
 
 static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     uint8_t buffer[6];
 
     uint8_t val = 0x3B;
@@ -49,10 +56,14 @@ static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp)
     i2c_read_blocking(getI2C(), MPU6050_ADDR, buffer, 2, false);
 
     *temp = buffer[0] << 8 | buffer[1];
+
+    FUNCTION_PROFILE_END();
 }
 
 int mpu6050Init(int i2c, int sda, int scl)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     MY_LOG_CORE_INFO("Initializing MPU6050...");
 
     s_i2c = i2c;
@@ -65,6 +76,10 @@ int mpu6050Init(int i2c, int sda, int scl)
 
     if (!mpu6050Check())
     {
+        MY_LOG_CORE_ERROR("MPU6050 not found!");
+
+        FUNCTION_PROFILE_END();
+
         return 0;
     }
 
@@ -72,13 +87,19 @@ int mpu6050Init(int i2c, int sda, int scl)
 
     MY_LOG_CORE_INFO("Successfully initialized MPU6050!");
 
+    FUNCTION_PROFILE_END();
+
     return 1;
 }
 
 int mpu6050Check()
 {
+    FUNCTION_PROFILE_BEGIN();
+
     uint8_t data;
     int ret = i2c_read_blocking(getI2C(), MPU6050_ADDR, &data, 1, false);
+
+    FUNCTION_PROFILE_END();
 
     return ret < 0 ? 0 : 1;
 }
@@ -100,6 +121,8 @@ float convert_temperature(int16_t raw)
 
 void mpu6050ReadRaw(mpu6050_data_t *data)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     MY_LOG_CORE_INFO("Reading MPU6050...");
 
     int16_t acceleration[3], gyro[3], temp;
@@ -115,10 +138,14 @@ void mpu6050ReadRaw(mpu6050_data_t *data)
     data->temperature = temp;
 
     MY_LOG_CORE_INFO("Successfully read MPU6050!");
+
+    FUNCTION_PROFILE_END();
 }
 
 void mpu6050ConvertData(mpu6050_data_t *data)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     MY_LOG_CORE_INFO("Converting data from MPU6050...");
 
     data->accel_x = convert_to_ms2(data->accel_x);
@@ -130,10 +157,14 @@ void mpu6050ConvertData(mpu6050_data_t *data)
     data->temperature = convert_temperature(data->temperature);
 
     MY_LOG_CORE_INFO("Successfully converted raw data from MPU6050!");
+
+    FUNCTION_PROFILE_END();
 }
 
 void mpu6050FilterData(kalman_filter_data_t *kalmanData, mpu6050_data_t *data)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     MY_LOG_CORE_INFO("Filtering data from MPU6050...");
 
     data->accel_x = kalman(kalmanData, data->accel_x);
@@ -144,4 +175,6 @@ void mpu6050FilterData(kalman_filter_data_t *kalmanData, mpu6050_data_t *data)
     data->rot_z = kalman(kalmanData, data->rot_z);
 
     MY_LOG_CORE_INFO("Successfully filtered data from MPU6050!");
+
+    FUNCTION_PROFILE_END();
 }

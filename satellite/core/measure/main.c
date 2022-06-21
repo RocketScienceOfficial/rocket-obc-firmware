@@ -55,6 +55,18 @@ void initialize()
 
     MY_LOG_CORE_INFO("Initializing...");
 
+    sdInit();
+    sdInitFile(LOG_CORE_FILENAME);
+    sdInitFile(LOG_MEASURE_FILENAME);
+    sdFlush(LOG_CORE_FILENAME);
+    sdFlush(LOG_MEASURE_FILENAME);
+    sdAttachToCoreLogger();
+    sdAttachToMeasureLogger();
+    sdAttachToRecordLogger();
+
+    sdBegin(LOG_CORE_FILENAME);
+    sdBegin(LOG_RECORD_FILENAME);
+
     registerDefaultConsoleCommands();
 
     lora_pinout_t loraPinout = {
@@ -77,21 +89,12 @@ void initialize()
     loraSetSpreadingFactor(&s_LoraData, RADIO_SPREADING_FACTOR);
     loraSetSignalBandwidth(&s_LoraData, RADIO_SIGNAL_BANDWIDTH);
 
-    sdInit();
-    sdInitFile(LOG_CORE_FILENAME);
-    sdInitFile(LOG_MEASURE_FILENAME);
-    sdFlush(LOG_CORE_FILENAME);
-    sdFlush(LOG_MEASURE_FILENAME);
-    sdAttachToCoreLogger();
-    sdAttachToMeasureLogger();
-
-    sdBegin(LOG_CORE_FILENAME);
-
     bmp280Init(BMP280_I2C, BMP280_I2C_SDA_PIN, BMP280_I2C_SCL_PIN);
 
     MY_LOG_CORE_INFO("Everything is ready!");
 
     sdEnd(LOG_CORE_FILENAME);
+    sdEnd(LOG_RECORD_FILENAME);
 }
 
 void loop()
@@ -102,11 +105,13 @@ void loop()
     {
         sdBegin(LOG_CORE_FILENAME);
         sdBegin(LOG_MEASURE_FILENAME);
+        sdBegin(LOG_RECORD_FILENAME);
 
         takeMeasurements();
 
         sdEnd(LOG_CORE_FILENAME);
         sdEnd(LOG_MEASURE_FILENAME);
+        sdEnd(LOG_RECORD_FILENAME);
     }
 }
 
