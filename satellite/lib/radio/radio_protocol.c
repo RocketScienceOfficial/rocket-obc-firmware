@@ -139,6 +139,11 @@ void radioSendPacket(lora_data_t *lora, radio_body_t *body)
     FUNCTION_PROFILE_END();
 }
 
+int radioCheckPacket(lora_data_t *lora)
+{
+    return loraParsePacket(lora, 0);
+}
+
 int radioReceivePacket(lora_data_t *lora, radio_body_t *body_out_ptr, int *validationResult_out_ptr)
 {
     FUNCTION_PROFILE_BEGIN();

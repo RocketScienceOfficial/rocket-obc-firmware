@@ -3,11 +3,18 @@ CORE_LOG:
     - DEBUG
     - ERROR
 
+INTERNAL_CORE_LOG:
+    - INFO
+    - DEBUG
+    - ERROR
+
 MEASURE_LOG:
     - ...
-        * format: json
-            + key
-            + value
+        * <name>:<value>
+    - INFO
+        * <value>
+    - END
+        * <value>
 
 RECORD:
     - ...

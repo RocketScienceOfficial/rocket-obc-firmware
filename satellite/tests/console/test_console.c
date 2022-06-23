@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stddef.h>
 
+static int s_ConsoleChar;
 static console_input_t s_ConsoleInput;
 
 MY_TEST_FUNC(CONSOLE_TEST_NAME, 1)
@@ -32,17 +33,22 @@ MY_TEST_FUNC(CONSOLE_TEST_NAME, 1)
 
 MY_TEST_FUNC_DYNAMIC(CONSOLE_TEST_NAME, 1)
 {
-    consoleCheckInput(&s_ConsoleInput);
+    s_ConsoleChar = consoleCheckInput();
 
-    if (s_ConsoleInput.size > 0)
+    if (s_ConsoleChar)
     {
-        for (size_t i = 0; i < s_ConsoleInput.size; i++)
+        consoleGetInput(s_ConsoleChar, &s_ConsoleInput);
+        
+        if (s_ConsoleInput.size > 0)
         {
-            MY_LOG_CORE_INFO("%s", s_ConsoleInput.tokens[i]);
+            for (size_t i = 0; i < s_ConsoleInput.size; i++)
+            {
+                MY_LOG_CORE_INFO("%s", s_ConsoleInput.tokens[i]);
+            }
         }
-    }
 
-    consoleClearInput(&s_ConsoleInput);
+        consoleClearInput(&s_ConsoleInput);
+    }
 
     MY_TEST_END();
 }

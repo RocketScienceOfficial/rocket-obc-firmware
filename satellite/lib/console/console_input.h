@@ -12,7 +12,8 @@ typedef struct console_input
     size_t size;
 } console_input_t;
 
-void consoleCheckInput(console_input_t *input_out);
+int consoleCheckInput();
+void consoleGetInput(int chr, console_input_t *input_out);
 void consoleProcessCharacter(int c, console_input_t *input_out);
 void consoleTokenizeInput(char *input, console_input_t *input_out);
 void consoleClearInput(console_input_t *input);

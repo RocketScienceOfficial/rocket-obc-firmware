@@ -1,16 +1,19 @@
 #include "recorder.h"
 #include "time_tracker.h"
+#include <stdio.h>
 
-int functionProfileBegin(const char *function)
+unsigned int functionProfileBegin(const char *function)
 {
-    return getMsSinceBoot();
+	MY_LOG_RECORD("Begining execution of a function: '%s'", function);
+
+	return getMsSinceBoot();
 }
 
-void functionProfileEnd(const char *function, int beginResult)
+void functionProfileEnd(const char *function, unsigned int beginResult)
 {
-    int elapsed = getMsSinceBoot() - beginResult;
+	unsigned int elapsed = getMsSinceBoot() - beginResult;
 
-    MY_LOG_RECORD("Execution of function: '%s' took %d ms", function, elapsed);
+	MY_LOG_RECORD("Execution of function: '%s' took %u ms", function, elapsed);
 }
 
 static logger_data_t s_Logger;

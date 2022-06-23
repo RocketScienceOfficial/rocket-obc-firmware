@@ -10,16 +10,18 @@
 static char s_Cmd[CONSOLE_INPUT_MAX_LENGTH];
 static size_t s_Size;
 
-void consoleCheckInput(console_input_t *input_out)
+int consoleCheckInput()
 {
     int ch = getchar_timeout_us(100);
 
-    if (ch != PICO_ERROR_TIMEOUT)
-    {
-        MY_LOG_CORE_INFO("Character received: %c", ch);
+    return ch != PICO_ERROR_TIMEOUT ? ch : 0;
+}
 
-        consoleProcessCharacter(ch, input_out);
-    }
+void consoleGetInput(int chr, console_input_t *input_out)
+{
+    MY_LOG_CORE_INFO("Character received: %c", chr);
+
+    consoleProcessCharacter(chr, input_out);
 }
 
 void consoleProcessCharacter(int c, console_input_t *input_out)
@@ -99,7 +101,7 @@ void consoleClearInput(console_input_t *input)
         }
 
         free(input->tokens);
-        
+
         FUNCTION_PROFILE_END();
     }
 }

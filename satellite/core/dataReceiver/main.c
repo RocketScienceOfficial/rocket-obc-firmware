@@ -19,6 +19,7 @@
 static lora_data_t s_LoraData;
 static radio_body_t s_PacketBody;
 static int s_RadioPacketValidation;
+static int s_ConsoleChar;
 static console_input_t s_ConsoleInput;
 
 void start();
@@ -84,49 +85,57 @@ void loop()
 {
     checkCommand();
 
-    if (radioReceivePacket(&s_LoraData, &s_PacketBody, &s_RadioPacketValidation))
+    if (radioCheckPacket(&s_LoraData))
     {
-        MY_LOG_CORE_INFO("Packet received!");
-
-        if (s_RadioPacketValidation)
+        if (radioReceivePacket(&s_LoraData, &s_PacketBody, &s_RadioPacketValidation))
         {
-            MY_LOG_CORE_INFO("Packet is valid!");
+            MY_LOG_CORE_INFO("Packet received!");
 
-            bmp280_data_t bmp280Data;
-            memcpy(&bmp280Data, s_PacketBody.payload, s_PacketBody.payloadSize);
+            if (s_RadioPacketValidation)
+            {
+                MY_LOG_CORE_INFO("Packet is valid!");
 
-            MY_LOG_MEASURE_RECEIVER_INT("Pressure", bmp280Data.pressure);
-            MY_LOG_MEASURE_RECEIVER_FLOAT("Altitude", bmp280GetAltitude(&bmp280Data));
-            MY_LOG_MEASURE_RECEIVER_FLOAT("Temperature", bmp280Data.temperature);
+                bmp280_data_t bmp280Data;
+                memcpy(&bmp280Data, s_PacketBody.payload, s_PacketBody.payloadSize);
 
-            radioClearPacket(&s_PacketBody);
+                MY_LOG_MEASURE_RECEIVER_INT("Pressure", bmp280Data.pressure);
+                MY_LOG_MEASURE_RECEIVER_FLOAT("Altitude", bmp280GetAltitude(&bmp280Data));
+                MY_LOG_MEASURE_RECEIVER_FLOAT("Temperature", bmp280Data.temperature);
+
+                radioClearPacket(&s_PacketBody);
+            }
+            else
+            {
+                MY_LOG_CORE_ERROR("Validation failed!");
+            }
+
+            MY_LOG_MEASURE_RECEIVER_INT("RSSI", loraRssi(&s_LoraData));
+            MY_LOG_CORE_INFO("Packet processed!");
         }
-        else 
-        {
-            MY_LOG_CORE_ERROR("Validation failed!");
-        }
-
-        MY_LOG_MEASURE_RECEIVER_INT("RSSI", loraRssi(&s_LoraData));
-        MY_LOG_CORE_INFO("Packet processed!");
     }
 }
 
 void checkCommand()
 {
-    consoleCheckInput(&s_ConsoleInput);
+    s_ConsoleChar = consoleCheckInput();
 
-    if (s_ConsoleInput.size > 0)
+    if (s_ConsoleChar)
     {
-        command_args_t args = {0};
-        console_command_t *command = parseCommand(s_ConsoleInput.tokens, s_ConsoleInput.size, &args);
+        consoleGetInput(s_ConsoleChar, &s_ConsoleInput);
 
-        if (command)
+        if (s_ConsoleInput.size > 0)
         {
-            executeCommand(command, &args);
+            command_args_t args = {0};
+            console_command_t *command = parseCommand(s_ConsoleInput.tokens, s_ConsoleInput.size, &args);
+
+            if (command)
+            {
+                executeCommand(command, &args);
+            }
+
+            commandClearArgs(&args);
         }
 
-        commandClearArgs(&args);
+        consoleClearInput(&s_ConsoleInput);
     }
-
-    consoleClearInput(&s_ConsoleInput);
 }

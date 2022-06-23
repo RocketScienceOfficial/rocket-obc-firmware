@@ -20,7 +20,8 @@
 #include "radio_config.h"
 
 static lora_data_t s_LoraData;
-static unsigned int s_TimerOffset = 0;
+static unsigned int s_TimerOffset;
+static int s_ConsoleChar;
 static console_input_t s_ConsoleInput;
 
 void start();
@@ -58,8 +59,10 @@ void initialize()
     sdInit();
     sdInitFile(LOG_CORE_FILENAME);
     sdInitFile(LOG_MEASURE_FILENAME);
+    sdInitFile(LOG_RECORD_FILENAME);
     sdFlush(LOG_CORE_FILENAME);
     sdFlush(LOG_MEASURE_FILENAME);
+    sdFlush(LOG_RECORD_FILENAME);
     sdAttachToCoreLogger();
     sdAttachToMeasureLogger();
     sdAttachToRecordLogger();
@@ -69,25 +72,27 @@ void initialize()
 
     registerDefaultConsoleCommands();
 
-    lora_pinout_t loraPinout = {
-        .spi = SX1278_SPI,
-        .sck = SX1278_SCK_GPIO,
-        .miso = SX1278_MISO_GPIO,
-        .mosi = SX1278_MOSI_GPIO,
-        .cs = SX1278_CS_GPIO,
-        .ss = SX1278_SS_GPIO,
-        .reset = SX1278_RESET_GPIO,
-        .dio0 = SX1278_DIO0_GPIO};
+    /*
+        lora_pinout_t loraPinout = {
+            .spi = SX1278_SPI,
+            .sck = SX1278_SCK_GPIO,
+            .miso = SX1278_MISO_GPIO,
+            .mosi = SX1278_MOSI_GPIO,
+            .cs = SX1278_CS_GPIO,
+            .ss = SX1278_SS_GPIO,
+            .reset = SX1278_RESET_GPIO,
+            .dio0 = SX1278_DIO0_GPIO};
 
-    loraInit(&s_LoraData, &loraPinout);
+        loraInit(&s_LoraData, &loraPinout);
 
-    s_LoraData.pinout = loraPinout;
-    s_LoraData.txPower = RADIO_DBM;
+        s_LoraData.pinout = loraPinout;
+        s_LoraData.txPower = RADIO_DBM;
 
-    loraBegin(&s_LoraData, RADIO_FREQUENCY_HZ);
+        loraBegin(&s_LoraData, RADIO_FREQUENCY_HZ);
 
-    loraSetSpreadingFactor(&s_LoraData, RADIO_SPREADING_FACTOR);
-    loraSetSignalBandwidth(&s_LoraData, RADIO_SIGNAL_BANDWIDTH);
+        loraSetSpreadingFactor(&s_LoraData, RADIO_SPREADING_FACTOR);
+        loraSetSignalBandwidth(&s_LoraData, RADIO_SIGNAL_BANDWIDTH);
+    */
 
     bmp280Init(BMP280_I2C, BMP280_I2C_SDA_PIN, BMP280_I2C_SCL_PIN);
 
@@ -117,42 +122,51 @@ void loop()
 
 void checkCommand()
 {
-    consoleCheckInput(&s_ConsoleInput);
+    s_ConsoleChar = consoleCheckInput();
 
-    if (s_ConsoleInput.size > 0)
+    if (s_ConsoleChar)
     {
-        command_args_t args = {0};
-        console_command_t *command = parseCommand(s_ConsoleInput.tokens, s_ConsoleInput.size, &args);
+        sdBegin(LOG_RECORD_FILENAME);
 
-        if (command)
+        consoleGetInput(s_ConsoleChar, &s_ConsoleInput);
+
+        if (s_ConsoleInput.size > 0)
         {
-            executeCommand(command, &args);
+            command_args_t args = {0};
+            console_command_t *command = parseCommand(s_ConsoleInput.tokens, s_ConsoleInput.size, &args);
+
+            if (command)
+            {
+                executeCommand(command, &args);
+            }
+
+            commandClearArgs(&args);
         }
 
-        commandClearArgs(&args);
-    }
+        consoleClearInput(&s_ConsoleInput);
 
-    consoleClearInput(&s_ConsoleInput);
+        sdEnd(LOG_RECORD_FILENAME);
+    }
 }
 
 void takeMeasurements()
 {
     bmp280_data_t bmp280Data;
     bmp280Read(&bmp280Data);
+    /*
+        radio_body_t body = {
+            .command = 'M',
+            .payloadSize = sizeof(bmp280Data),
+        };
 
-    radio_body_t body = {
-        .command = 'M',
-        .payloadSize = sizeof(bmp280Data),
-    };
+        char buffer[body.payloadSize];
 
-    char buffer[body.payloadSize];
+        memcpy(buffer, &bmp280Data, body.payloadSize);
 
-    memcpy(buffer, &bmp280Data, body.payloadSize);
+        body.payload = buffer;
 
-    body.payload = buffer;
-
-    radioSendPacket(&s_LoraData, &body);
-
+        radioSendPacket(&s_LoraData, &body);
+    */
     MY_LOG_MEASURE_INT(bmp280Data.pressure);
     MY_LOG_MEASURE_FLOAT(bmp280Data.temperature);
     MY_LOG_MEASURE_END();
