@@ -8,7 +8,7 @@ cd scripts
 call build.bat
 cd ..
 
-cd presentation\server
+cd telemetry\server
 call npm install
 cd ..
 

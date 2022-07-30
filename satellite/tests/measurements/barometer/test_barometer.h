@@ -1,0 +1,9 @@
+#pragma once
+
+#include "test_framework.h"
+
+#define BAROMETER_TEST_NAME barometer
+
+MY_TEST_INIT_FUNC(BAROMETER_TEST_NAME);
+MY_TEST_FUNC(BAROMETER_TEST_NAME, 1);
+MY_TEST_FUNC_DYNAMIC(BAROMETER_TEST_NAME, 1);

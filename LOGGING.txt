@@ -3,18 +3,13 @@ CORE_LOG:
     - DEBUG
     - ERROR
 
-INTERNAL_CORE_LOG:
-    - INFO
-    - DEBUG
-    - ERROR
-
 MEASURE_LOG:
-    - ...
-        * <name>:<value>
     - INFO
         * <value>
     - END
-        * <value>
+
+RECEIVER_DATA:
+    - ...
 
 RECORD:
     - ...
@@ -25,5 +20,4 @@ COMMAND_OUTPUT:
         * hello_name <string>
 
 REMOTE_COMMAND:
-    - CLIENT
-    - SERVER (client does not receive this)
+    - ...

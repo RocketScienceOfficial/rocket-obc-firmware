@@ -1,6 +1,6 @@
 #include "test_radio_receiver.h"
 #include "pinout.h"
-#include "lora.h"
+#include "radio.h"
 #include "radio_config.h"
 #include "radio_protocol.h"
 #include "logger.h"

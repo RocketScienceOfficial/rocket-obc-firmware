@@ -119,7 +119,7 @@ static void __log(logger_data_t *logger, const char *level, const char *format, 
 	{
 		char *log = parseLog(logger->name, logger->sinks[i].pattern, level, format, args);
 
-		logger->sinks[i].callback(level, log);
+		logger->sinks[i].callback(logger, level, log);
 
 		free(log);
 	}
@@ -147,19 +147,4 @@ logger_data_t *myLogGetCoreLogger()
 	}
 
 	return &s_CoreLogger;
-}
-
-static logger_data_t s_MeasureLogger;
-static int s_MeasureInitialized;
-
-logger_data_t *myLogGetMeasureLogger()
-{
-	if (!s_MeasureInitialized)
-	{
-		myLogCreateLogger(&s_MeasureLogger, MY_LOG_MEASURE_NAME);
-
-		s_MeasureInitialized = 1;
-	}
-
-	return &s_MeasureLogger;
 }

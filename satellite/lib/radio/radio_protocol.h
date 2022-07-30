@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lora.h"
+#include "radio.h"
 #include <stddef.h>
 
 typedef struct radio_header

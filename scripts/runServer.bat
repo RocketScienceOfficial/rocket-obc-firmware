@@ -1,6 +1,6 @@
 @echo off
 
-pushd %~dp0\..\presentation\server
+pushd %~dp0\..\telemetry\server
 
 call npm run start-dev
 

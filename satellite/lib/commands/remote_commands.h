@@ -4,8 +4,5 @@
 
 logger_data_t *myLogGetRemoteCommandLogger();
 
-#define MY_LOG_REMOTE_COMMAND_CLIENT_NAME "CLIENT"
-#define MY_LOG_REMOTE_COMMAND_SERVER_NAME "SERVER"
 #define MY_LOG_REMOTE_COMMAND_NAME "REMOTE_COMMAND"
-#define RPC_CLIENT(msg, ...) myLog(myLogGetRemoteCommandLogger(), MY_LOG_REMOTE_COMMAND_CLIENT_NAME, msg, ##__VA_ARGS__)
-#define RPC_SERVER(msg, ...) myLog(myLogGetRemoteCommandLogger(), MY_LOG_REMOTE_COMMAND_SERVER_NAME, msg, ##__VA_ARGS__)
+#define MY_LOG_RPC(msg, ...) myLog(myLogGetRemoteCommandLogger(), "", msg, ##__VA_ARGS__)

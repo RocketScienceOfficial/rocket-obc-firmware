@@ -97,19 +97,21 @@ int checkArgsCount(size_t expectedCount, size_t actualCount, char **output_ptr)
 
 void commandClearArgs(command_args_t *args)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     if (args->size > 0)
     {
-        FUNCTION_PROFILE_BEGIN();
-
         for (size_t i = 0; i < args->size; i++)
         {
             free(args->args[i]);
         }
 
         free(args->args);
-
-        FUNCTION_PROFILE_END();
+        
+        args->size = 0;
     }
+
+    FUNCTION_PROFILE_END();
 }
 
 static logger_data_t s_Logger;

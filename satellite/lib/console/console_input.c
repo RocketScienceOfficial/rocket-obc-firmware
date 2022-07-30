@@ -12,16 +12,20 @@ static size_t s_Size;
 
 int consoleCheckInput()
 {
-    int ch = getchar_timeout_us(100);
+    int ch = getchar_timeout_us(0);
 
     return ch != PICO_ERROR_TIMEOUT ? ch : 0;
 }
 
 void consoleGetInput(int chr, console_input_t *input_out)
 {
-    MY_LOG_CORE_INFO("Character received: %c", chr);
+    FUNCTION_PROFILE_BEGIN();
+
+    MY_LOG_CORE_INFO("Character received: %d", chr);
 
     consoleProcessCharacter(chr, input_out);
+
+    FUNCTION_PROFILE_END();
 }
 
 void consoleProcessCharacter(int c, console_input_t *input_out)
@@ -91,10 +95,10 @@ void consoleTokenizeInput(char *input, console_input_t *input_out)
 
 void consoleClearInput(console_input_t *input)
 {
+    FUNCTION_PROFILE_BEGIN();
+
     if (input->size > 0)
     {
-        FUNCTION_PROFILE_BEGIN();
-
         for (size_t i = 0; i < input->size; i++)
         {
             free(input->tokens[i]);
@@ -102,6 +106,8 @@ void consoleClearInput(console_input_t *input)
 
         free(input->tokens);
 
-        FUNCTION_PROFILE_END();
+        input->size = 0;
     }
+    
+    FUNCTION_PROFILE_END();
 }

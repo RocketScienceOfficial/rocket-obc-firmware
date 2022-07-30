@@ -1,4 +1,4 @@
-#include "bmp280.h"
+#include "barometer.h"
 #include "logger.h"
 #include "recorder.h"
 #include "hardware/i2c.h"
@@ -205,7 +205,7 @@ void bmp280GetCalibParams(struct bmp280_calib_param *params)
     FUNCTION_PROFILE_END();
 }
 
-int bmp280Init(int i2c, int sda, int scl)
+int barometerInit(int i2c, int sda, int scl)
 {
     FUNCTION_PROFILE_BEGIN();
 
@@ -219,7 +219,7 @@ int bmp280Init(int i2c, int sda, int scl)
     gpio_pull_up(sda);
     gpio_pull_up(scl);
 
-    if (!bmp280Check())
+    if (!barometerCheck())
     {
         MY_LOG_CORE_ERROR("BMP280 not found!");
 
@@ -229,7 +229,6 @@ int bmp280Init(int i2c, int sda, int scl)
     }
 
     bmp280InitSensor();
-
     bmp280GetCalibParams(&params);
 
     MY_LOG_CORE_INFO("BMP280 Initialized!");
@@ -239,7 +238,7 @@ int bmp280Init(int i2c, int sda, int scl)
     return 1;
 }
 
-int bmp280Check()
+int barometerCheck()
 {
     FUNCTION_PROFILE_BEGIN();
 
@@ -251,7 +250,7 @@ int bmp280Check()
     return ret < 0 ? 0 : 1;
 }
 
-void bmp280Read(bmp280_data_t *data)
+void barometerRead(barometer_data_t *data)
 {
     FUNCTION_PROFILE_BEGIN();
 
@@ -270,7 +269,7 @@ void bmp280Read(bmp280_data_t *data)
     FUNCTION_PROFILE_END();
 }
 
-float bmp280GetAltitude(bmp280_data_t *data)
+float barometerGetAltitude(barometer_data_t *data)
 {
     FUNCTION_PROFILE_BEGIN();
 

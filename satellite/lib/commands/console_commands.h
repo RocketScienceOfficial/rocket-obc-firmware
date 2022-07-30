@@ -21,10 +21,10 @@ typedef struct command_args
 } command_args_t;
 
 void registerCommand(console_command_t *command);
-console_command_t *parseCommand(char **tokens, size_t tokensSize, command_args_t* args_out_ptr);
-void executeCommand(console_command_t *command, command_args_t* args);
+console_command_t *parseCommand(char **tokens, size_t tokensSize, command_args_t *args_out_ptr);
+void executeCommand(console_command_t *command, command_args_t *args);
 int checkArgsCount(size_t expectedCount, size_t actualCount, char **output_ptr);
-void commandClearArgs(command_args_t* args);
+void commandClearArgs(command_args_t *args);
 logger_data_t *myLogGetCommandOutputLogger();
 
 #define MY_LOG_COMMAND_OUTUT_NAME "COMMAND_OUTPUT"

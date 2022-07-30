@@ -1,7 +1,7 @@
 #include "log_serial.h"
 #include <stdio.h>
 
-static void logCallback(const char* level, const char* msg)
+static void logCallback(logger_data_t* logger, const char* level, const char* msg)
 {
     printf(msg);
 }
