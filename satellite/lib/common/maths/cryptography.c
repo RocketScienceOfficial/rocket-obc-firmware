@@ -5,7 +5,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-static size_t count1Bits(char n)
+static size_t count1Bits(uint8_t n)
 {
     FUNCTION_PROFILE_BEGIN();
 
@@ -23,7 +23,7 @@ static size_t count1Bits(char n)
     return count;
 }
 
-void encryptDecrypt(char *buffer, size_t size, const char *key, size_t keySize)
+void encryptDecrypt(uint8_t *buffer, size_t size, const uint8_t *key, size_t keySize)
 {
     FUNCTION_PROFILE_BEGIN();
 
@@ -37,14 +37,14 @@ void encryptDecrypt(char *buffer, size_t size, const char *key, size_t keySize)
     FUNCTION_PROFILE_END();
 }
 
-void calculateParityRows(char *buffer, size_t size, parity_data_t *data_out_ptr)
+void calculateParityRows(uint8_t *buffer, size_t size, parity_data_t *data_out_ptr)
 {
     FUNCTION_PROFILE_BEGIN();
 
     MY_LOG_CORE_INFO("Calculating parity rows...");
 
     data_out_ptr->size = (int)ceil(size / 8.0);
-    data_out_ptr->buffer = (char *)calloc(data_out_ptr->size, sizeof(char));
+    data_out_ptr->buffer = (uint8_t *)calloc(data_out_ptr->size, sizeof(uint8_t));
 
     for (size_t i = 0; i < size; i++)
     {
@@ -55,14 +55,14 @@ void calculateParityRows(char *buffer, size_t size, parity_data_t *data_out_ptr)
     FUNCTION_PROFILE_END();
 }
 
-void calculateParityColumns(char *buffer, size_t size, parity_data_t *data_out_ptr)
+void calculateParityColumns(uint8_t *buffer, size_t size, parity_data_t *data_out_ptr)
 {
     FUNCTION_PROFILE_BEGIN();
 
     MY_LOG_CORE_INFO("Calculating parity columns...");
 
     data_out_ptr->size = (int)ceil(size / 8.0);
-    data_out_ptr->buffer = (char *)calloc(data_out_ptr->size, sizeof(char));
+    data_out_ptr->buffer = (uint8_t *)calloc(data_out_ptr->size, sizeof(uint8_t));
 
     for (size_t i = 0; i < size; i += 8)
     {
@@ -73,7 +73,7 @@ void calculateParityColumns(char *buffer, size_t size, parity_data_t *data_out_p
 
         for (size_t j = 0; j < 8; j++)
         {
-            char n = 0;
+            uint8_t n = 0;
 
             for (size_t k = 0; k < 8; k++)
             {
@@ -88,7 +88,7 @@ void calculateParityColumns(char *buffer, size_t size, parity_data_t *data_out_p
     FUNCTION_PROFILE_END();
 }
 
-void calculateParity(char *buffer, size_t size, parity_data_t *data_out_ptr)
+void calculateParity(uint8_t *buffer, size_t size, parity_data_t *data_out_ptr)
 {
     FUNCTION_PROFILE_BEGIN();
 
@@ -101,7 +101,7 @@ void calculateParity(char *buffer, size_t size, parity_data_t *data_out_ptr)
     calculateParityColumns(buffer, size, &columns);
 
     data_out_ptr->size = rows.size + columns.size;
-    data_out_ptr->buffer = (char *)malloc(data_out_ptr->size * sizeof(char));
+    data_out_ptr->buffer = (uint8_t *)malloc(data_out_ptr->size * sizeof(uint8_t));
 
     memcpy(data_out_ptr->buffer, rows.buffer, rows.size);
     memcpy(data_out_ptr->buffer + rows.size, columns.buffer, columns.size);

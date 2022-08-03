@@ -1,20 +1,21 @@
 #pragma once
 
 #include "radio.h"
+#include <stdint.h>
 #include <stddef.h>
 
 typedef struct radio_header
 {
     size_t paritySize;
-    char *parity;
+    uint8_t *parity;
 } radio_header_t;
 
 typedef struct radio_body
 {
-    char command;
-    char padding[3];
+    uint8_t command;
+    uint8_t padding[3];
     size_t payloadSize;
-    char *payload;
+    uint8_t *payload;
 } radio_body_t;
 
 typedef struct radio_packet
@@ -23,8 +24,8 @@ typedef struct radio_packet
     radio_body_t body;
 } radio_packet_t;
 
-void serializeRadioPacket(radio_body_t *body, char **buffer_out_ptr, size_t *size_out);
-void deserializeRadioPacket(char *buffer, size_t size, radio_body_t *body_out, int *validationResult);
+void serializeRadioPacket(radio_body_t *body, uint8_t **buffer_out_ptr, size_t *size_out);
+void deserializeRadioPacket(uint8_t *buffer, size_t size, radio_body_t *body_out, int *validationResult);
 void radioSendPacket(lora_data_t *lora, radio_body_t *body);
 int radioCheckPacket(lora_data_t *lora);
 int radioReceivePacket(lora_data_t *lora, radio_body_t *body_out_ptr, int* validationResult_out_ptr);

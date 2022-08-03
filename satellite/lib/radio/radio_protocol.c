@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-const char RADIO_PACKET_KEY[] = {
+const uint8_t RADIO_PACKET_KEY[] = {
     0x18,
     0x07,
     0x45,
@@ -72,17 +72,17 @@ const char RADIO_PACKET_KEY[] = {
     0xa0,
 };
 
-void serializeRadioPacket(radio_body_t *body, char **buffer_out_ptr, size_t *size_out)
+void serializeRadioPacket(radio_body_t *body, uint8_t **buffer_out_ptr, size_t *size_out)
 {
     FUNCTION_PROFILE_BEGIN();
 
     MY_LOG_CORE_INFO("Serializing radio packet...");
 
-    size_t bodySize = sizeof(char) + sizeof(char[3]) + sizeof(size_t) + sizeof(char) * body->payloadSize;
-    char bodyBuffer[bodySize];
+    size_t bodySize = sizeof(uint8_t) + sizeof(uint8_t[3]) + sizeof(size_t) + sizeof(uint8_t) * body->payloadSize;
+    uint8_t bodyBuffer[bodySize];
 
-    memcpy(bodyBuffer, &body->command, sizeof(char) + sizeof(char[3]) + sizeof(size_t));
-    memcpy(bodyBuffer + sizeof(char) + sizeof(char[3]) + sizeof(size_t), body->payload, sizeof(char) * body->payloadSize);
+    memcpy(bodyBuffer, &body->command, sizeof(uint8_t) + sizeof(uint8_t[3]) + sizeof(size_t));
+    memcpy(bodyBuffer + sizeof(uint8_t) + sizeof(uint8_t[3]) + sizeof(size_t), body->payload, sizeof(uint8_t) * body->payloadSize);
 
     parity_data_t parity = {0};
 
@@ -93,16 +93,16 @@ void serializeRadioPacket(radio_body_t *body, char **buffer_out_ptr, size_t *siz
         .parity = parity.buffer,
     };
 
-    size_t headerSize = sizeof(size_t) + sizeof(char) * header.paritySize;
-    char headerBuffer[headerSize];
+    size_t headerSize = sizeof(size_t) + sizeof(uint8_t) * header.paritySize;
+    uint8_t headerBuffer[headerSize];
 
     memcpy(headerBuffer, &header.paritySize, sizeof(size_t));
-    memcpy(headerBuffer + sizeof(size_t), header.parity, sizeof(char) * header.paritySize);
+    memcpy(headerBuffer + sizeof(size_t), header.parity, sizeof(uint8_t) * header.paritySize);
 
     clearParity(&parity);
 
     size_t bufferSize = headerSize + bodySize;
-    *buffer_out_ptr = (char *)malloc(bufferSize);
+    *buffer_out_ptr = (uint8_t *)malloc(bufferSize);
     *size_out = bufferSize;
 
     memcpy(*buffer_out_ptr, headerBuffer, headerSize);
@@ -113,7 +113,7 @@ void serializeRadioPacket(radio_body_t *body, char **buffer_out_ptr, size_t *siz
     FUNCTION_PROFILE_END();
 }
 
-void deserializeRadioPacket(char *buffer, size_t size, radio_body_t *body_out, int *validationResult)
+void deserializeRadioPacket(uint8_t *buffer, size_t size, radio_body_t *body_out, int *validationResult)
 {
     FUNCTION_PROFILE_BEGIN();
 
@@ -132,26 +132,26 @@ void deserializeRadioPacket(char *buffer, size_t size, radio_body_t *body_out, i
     if (packet.header.paritySize > 0 && packet.header.paritySize <= size)
     {
         currentBufferOffset += sizeof(size_t);
-        packet.header.parity = (char *)malloc(sizeof(char) * packet.header.paritySize);
-        memcpy(packet.header.parity, buffer + currentBufferOffset, packet.header.paritySize * sizeof(char));
+        packet.header.parity = (uint8_t *)malloc(sizeof(uint8_t) * packet.header.paritySize);
+        memcpy(packet.header.parity, buffer + currentBufferOffset, packet.header.paritySize * sizeof(uint8_t));
 
-        size_t bodyOffset = currentBufferOffset + packet.header.paritySize * sizeof(char);
+        size_t bodyOffset = currentBufferOffset + packet.header.paritySize * sizeof(uint8_t);
         size_t parityBufferSize = size - bodyOffset;
 
         parity_data_t parity = {0};
         calculateParity(buffer + bodyOffset, parityBufferSize, &parity);
 
-        int comp = memcmp(packet.header.parity, parity.buffer, sizeof(char) * packet.header.paritySize);
+        int comp = memcmp(packet.header.parity, parity.buffer, sizeof(uint8_t) * packet.header.paritySize);
         *validationResult = comp == 0 ? 1 : 0;
 
         if (*validationResult)
         {
-            currentBufferOffset += packet.header.paritySize * sizeof(char);
-            memcpy(&packet.body, buffer + currentBufferOffset, sizeof(char) + sizeof(char[3]) + sizeof(size_t));
+            currentBufferOffset += packet.header.paritySize * sizeof(uint8_t);
+            memcpy(&packet.body, buffer + currentBufferOffset, sizeof(uint8_t) + sizeof(uint8_t[3]) + sizeof(size_t));
 
-            currentBufferOffset += sizeof(char) + sizeof(char[3]) + sizeof(size_t);
-            packet.body.payload = (char *)malloc(sizeof(char) * packet.body.payloadSize);
-            memcpy(packet.body.payload, buffer + currentBufferOffset, sizeof(char) * packet.body.payloadSize);
+            currentBufferOffset += sizeof(uint8_t) + sizeof(uint8_t[3]) + sizeof(size_t);
+            packet.body.payload = (uint8_t *)malloc(sizeof(uint8_t) * packet.body.payloadSize);
+            memcpy(packet.body.payload, buffer + currentBufferOffset, sizeof(uint8_t) * packet.body.payloadSize);
 
             *body_out = packet.body;
 
@@ -184,11 +184,11 @@ void radioSendPacket(lora_data_t *lora, radio_body_t *body)
 
     MY_LOG_CORE_INFO("Sending packet...");
 
-    char *buffer;
+    uint8_t *buffer;
     size_t bufferSize = 0;
     serializeRadioPacket(body, &buffer, &bufferSize);
 
-    encryptDecrypt(buffer, bufferSize, RADIO_PACKET_KEY, sizeof(RADIO_PACKET_KEY) / sizeof(char));
+    encryptDecrypt(buffer, bufferSize, RADIO_PACKET_KEY, sizeof(RADIO_PACKET_KEY) / sizeof(uint8_t));
 
     loraBeginPacket(lora, 0);
     loraWrite_str_s(lora, buffer, bufferSize);
@@ -216,16 +216,16 @@ int radioReceivePacket(lora_data_t *lora, radio_body_t *body_out_ptr, int *valid
     {
         MY_LOG_CORE_INFO("Receiving packet...");
 
-        char buffer[packetSize];
+        uint8_t buffer[packetSize];
         size_t i = 0;
 
         while (loraAvailable(lora))
         {
-            buffer[i] = (char)loraRead(lora);
+            buffer[i] = (uint8_t)loraRead(lora);
             i++;
         }
 
-        encryptDecrypt(buffer, packetSize, RADIO_PACKET_KEY, sizeof(RADIO_PACKET_KEY) / sizeof(char));
+        encryptDecrypt(buffer, packetSize, RADIO_PACKET_KEY, sizeof(RADIO_PACKET_KEY) / sizeof(uint8_t));
 
         deserializeRadioPacket(buffer, packetSize, body_out_ptr, validationResult_out_ptr);
 

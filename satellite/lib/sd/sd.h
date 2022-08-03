@@ -3,7 +3,7 @@
 #include "logger.h"
 
 #define SD_FILES_MAX_COUNT 4
-#define SD_CALLBACKS_MAX_COUNT 4
+#define SD_CALLBACKS_MAX_COUNT SD_FILES_MAX_COUNT
 
 int sdInit();
 void sdAttachToLogger(logger_data_t* logger, const char* pattern, const char* file);

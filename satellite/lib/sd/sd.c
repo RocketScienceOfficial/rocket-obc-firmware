@@ -19,8 +19,8 @@ typedef struct sd_file
 
 typedef struct sd_callback_data
 {
-    logger_data_t *logger;
-    const char *file;
+    const logger_data_t *logger;
+    const sd_file_t *file;
 } sd_callback_data_t;
 
 static int s_SdEnabled = false;
@@ -69,6 +69,10 @@ static sd_file_t *__getSDFileByName(const char *name)
         }
     }
 
+    s_SdEnabled = false;
+
+    MY_LOG_CORE_ERROR("Couldn't find file: '%s'", name);
+
     return NULL;
 }
 
@@ -78,9 +82,13 @@ static const char *__getCallbackFileNameByLogger(logger_data_t *logger)
     {
         if (strcmp(logger->name, s_Callbacks[i].logger->name) == 0)
         {
-            return s_Callbacks[i].file;
+            return s_Callbacks[i].file->name;
         }
     }
+
+    s_SdEnabled = false;
+
+    MY_LOG_CORE_ERROR("Couldn't find callback file for logger: '%s'", logger->name);
 
     return NULL;
 }
@@ -124,7 +132,7 @@ int sdInit()
 
 void sdAttachToLogger(logger_data_t *logger, const char *pattern, const char *file)
 {
-    sd_callback_data_t c = {.logger = logger, .file = file};
+    sd_callback_data_t c = {.logger = logger, .file = __getSDFileByName(file)};
 
     s_Callbacks[s_CallbacksCount] = c;
     s_CallbacksCount++;
@@ -148,6 +156,14 @@ int sdBegin(const char *file)
     }
 
     sd_file_t *sdFile = __getSDFileByName(file);
+
+    if (!sdFile)
+    {
+        MY_LOG_CORE_ERROR("File '%s' is does not exists!", file);
+
+        return 0;
+    }
+
     FIL *f = &sdFile->file;
 
     if (sdFile->isOpened)
@@ -190,6 +206,14 @@ int sdWrite(const char *msg, const char *file)
     }
 
     sd_file_t *sdFile = __getSDFileByName(file);
+
+    if (!sdFile)
+    {
+        MY_LOG_CORE_ERROR("File '%s' is does not exists!", file);
+
+        return 0;
+    }
+
     FIL *f = &sdFile->file;
 
     if (!sdFile->isOpened)
@@ -230,6 +254,14 @@ int sdEnd(const char *file)
     }
 
     sd_file_t *sdFile = __getSDFileByName(file);
+
+    if (!sdFile)
+    {
+        MY_LOG_CORE_ERROR("File '%s' is does not exists!", file);
+
+        return 0;
+    }
+
     FIL *f = &sdFile->file;
 
     if (!sdFile->isOpened)
@@ -264,6 +296,15 @@ int sdFlush(const char *file)
 {
     if (!s_SdEnabled)
     {
+        return 0;
+    }
+
+    sd_file_t *sdFile = __getSDFileByName(file);
+
+    if (!sdFile)
+    {
+        MY_LOG_CORE_ERROR("File '%s' is does not exists!", file);
+
         return 0;
     }
 

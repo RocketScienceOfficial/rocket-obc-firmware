@@ -4,14 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-unsigned int getMsSinceBoot()
+timer_t getMsSinceBoot()
 {
-	uint32_t time_ms = to_ms_since_boot(get_absolute_time());
+	timer_t time_ms = to_ms_since_boot(get_absolute_time());
 
 	return time_ms;
 }
 
-int runEvery(unsigned int ms, unsigned int* timerOffset)
+int runEvery(timer_t ms, timer_t* timerOffset)
 {
 	if (getMsSinceBoot() - *timerOffset >= ms)
 	{

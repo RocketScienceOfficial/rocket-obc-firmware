@@ -1,3 +1,5 @@
+#pragma once
+
 #define SX1278_SPI 1
 #define SX1278_MISO_GPIO 12
 #define SX1278_MOSI_GPIO 15

@@ -3,7 +3,7 @@
 #include "pinout.h"
 #include "time_tracker.h"
 
-static unsigned int s_TimerOffset = 0;
+static timer_t s_TimerOffset = 0;
 
 MY_TEST_INIT_FUNC(BAROMETER_TEST_NAME)
 {

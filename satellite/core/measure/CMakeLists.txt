@@ -7,7 +7,7 @@ add_executable(measure
     measurement_logger.c
 )
 
-target_link_libraries(measure PUBLIC core_shared pico_stdlib time_tracker logging maths measurements radio sd console commands)
+target_link_libraries(measure PUBLIC core_shared pico_stdlib time_tracker logging maths measurements radio sd console commands flash)
 
 pico_enable_stdio_usb(measure 1)
 pico_enable_stdio_uart(measure 0)

@@ -44,7 +44,7 @@ void sendRadio(measurement_data_t *data)
             .payloadSize = sizeof(*data),
         };
 
-        char *buffer = malloc(body.payloadSize);
+        uint8_t *buffer = malloc(body.payloadSize);
 
         memcpy(buffer, data, body.payloadSize);
 

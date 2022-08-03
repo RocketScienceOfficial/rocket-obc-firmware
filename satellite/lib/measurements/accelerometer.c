@@ -11,8 +11,7 @@
 #define DEFAULT_SCALE = 1;
 #define AX_OFFSET 552
 #define AY_OFFSET -241
-//#define AZ_OFFSET -3185
-#define AZ_OFFSET -2243
+#define AZ_OFFSET -3185
 #define AX_SCALE 1.00457
 #define AY_SCALE 0.99170
 #define AZ_SCALE 0.98317

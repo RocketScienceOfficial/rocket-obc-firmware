@@ -5,7 +5,7 @@
 
 #define TEST_FILENAME "test.txt"
 
-static unsigned int s_TimerOffset = 0;
+static timer_t s_TimerOffset = 0;
 
 MY_TEST_INIT_FUNC(SD_TEST_NAME)
 {

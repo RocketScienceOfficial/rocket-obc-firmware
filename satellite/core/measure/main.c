@@ -9,11 +9,14 @@
 #include "measurements_manager.h"
 #include "config.h"
 
-static unsigned int s_TimerOffset;
+#include "flash_control.h"
+
+static timer_t s_TimerOffset;
 
 int main()
 {
     stdio_init_all();
+    sleep_ms(5000);
 
     MY_LOG_CORE_INFO("Initializing...");
 

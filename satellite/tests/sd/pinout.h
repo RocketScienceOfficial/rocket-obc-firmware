@@ -1,3 +1,5 @@
+#pragma once
+
 #define SD_CARD_SPI 0
 #define SD_CARD_MISO_GPIO 16
 #define SD_CARD_MOSI_GPIO 19

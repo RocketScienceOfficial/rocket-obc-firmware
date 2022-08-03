@@ -5,9 +5,10 @@
 #include "radio_protocol.h"
 #include "logger.h"
 #include "time_tracker.h"
+#include <stdint.h>
 
 static lora_data_t s_LoraData;
-static unsigned int s_TimerOffset = 0;
+static timer_t s_TimerOffset = 0;
 
 MY_TEST_INIT_FUNC(RADIO_SENDER_NAME)
 {
