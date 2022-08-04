@@ -8,6 +8,7 @@
 
 #include "test_commands.h"
 #include "test_console.h"
+#include "test_flash.h"
 #include "test_logger.h"
 #include "test_maths.h"
 #include "test_barometer.h"
@@ -52,6 +53,7 @@ void initialize()
     MY_LOG_CORE_INFO("Initializing...");
 
     MY_TEST_CASE_INIT_FUNC(COMMANDS_TEST_NAME);
+    MY_TEST_CASE_INIT_FUNC(FLASH_TEST_NAME);
 
     if (ENABLE_BAROMETER)
     {
@@ -90,6 +92,7 @@ void runTests()
 
     MY_TEST_CASE_FUNC(COMMANDS_TEST_NAME, 1);
     MY_TEST_CASE_FUNC(CONSOLE_TEST_NAME, 1);
+    MY_TEST_CASE_FUNC(FLASH_TEST_NAME, 1);
     MY_TEST_CASE_FUNC(LOGGER_TEST_NAME, 1);
     MY_TEST_CASE_FUNC(MATHS_TEST_NAME, 1);
     MY_TEST_CASE_FUNC(MATHS_TEST_NAME, 2);

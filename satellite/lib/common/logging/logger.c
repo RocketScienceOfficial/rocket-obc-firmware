@@ -20,10 +20,10 @@ char *parseLog(const char *loggerName, const char *pattern, const char *level, c
 {
 	char *log = (char *)malloc(sizeof(char) * MAX_LOG_SIZE);
 	size_t logIndex = 0;
-	unsigned int timeMs = getMsSinceBoot();
-	unsigned int minutes = floor(timeMs / 60000);
-	unsigned int seconds = floor(timeMs / 1000 - minutes * 60);
-	unsigned int miliseconds = floor(timeMs - minutes * 60000 - seconds * 1000);
+	timer_t timeMs = getMsSinceBoot();
+	timer_t minutes = floor(timeMs / 60000);
+	timer_t seconds = floor(timeMs / 1000 - minutes * 60);
+	timer_t miliseconds = floor(timeMs - minutes * 60000 - seconds * 1000);
 
 	for (size_t i = 0; pattern[i] != '\0'; i++)
 	{

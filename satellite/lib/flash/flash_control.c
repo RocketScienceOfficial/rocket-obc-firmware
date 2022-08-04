@@ -1,7 +1,6 @@
 #include "flash_control.h"
 #include "recorder.h"
 #include "pico/stdlib.h"
-#include "hardware/flash.h"
 #include "hardware/sync.h"
 #include <string.h>
 
@@ -13,7 +12,7 @@ typedef struct flash_file
     const char *file;
     uint32_t addressOffset;
     size_t bytes;
-    uint8_t buffer[256];
+    uint8_t buffer[FLASH_WRITE_BUFFER_SIZE];
     size_t bufferSize;
 } flash_file_t;
 
@@ -130,7 +129,7 @@ void flashGetFile(const char *file, uint8_t **buffer_ptr, size_t *size)
 {
     flash_file_t *fileInfo = __getFileByName(file);
 
-    *buffer_ptr = (const uint8_t *)(XIP_BASE + FLASH_BASE_OFFSET + fileInfo->addressOffset);
+    *buffer_ptr = (uint8_t *)(XIP_BASE + FLASH_BASE_OFFSET + fileInfo->addressOffset);
     *size = fileInfo->bytes;
 }
 

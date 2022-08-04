@@ -1,10 +1,11 @@
 #pragma once
 
 #include "logger.h"
+#include "hardware/flash.h"
 #include <stdint.h>
 #include <stddef.h>
 
-#define FLASH_WRITE_BUFFER_SIZE 256
+#define FLASH_WRITE_BUFFER_SIZE FLASH_PAGE_SIZE
 #define FLASH_FILES_MAX_COUNT 4
 #define FLASH_CALLBACKS_MAX_COUNT FLASH_FILES_MAX_COUNT
 
