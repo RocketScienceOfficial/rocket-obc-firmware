@@ -7,8 +7,8 @@
 
 MY_TEST_INIT_FUNC(FLASH_TEST_NAME)
 {
-    flashInitFile(FLASH_TEST_FILE_NAME);
-    flashFlushFile(FLASH_TEST_FILE_NAME);
+    MY_ASSERT(FUNCSUCCESS(flashInitFile(getDefaultFlashModule(), FLASH_TEST_FILE_NAME)));
+    MY_ASSERT(FUNCSUCCESS(flashFlushFile(getDefaultFlashModule(), FLASH_TEST_FILE_NAME)));
 
     MY_TEST_END();
 }
@@ -22,12 +22,12 @@ MY_TEST_FUNC(FLASH_TEST_NAME, 1)
         data[i] = rand() >> 16;
     }
 
-    flashWriteFile(FLASH_TEST_FILE_NAME, data);
+    MY_ASSERT(FUNCSUCCESS(flashWriteFile(getDefaultFlashModule(), FLASH_TEST_FILE_NAME, data)));
 
     uint8_t *buffer;
     size_t size;
-    flashGetFile(FLASH_TEST_FILE_NAME, &buffer, &size);
 
+    MY_ASSERT(FUNCSUCCESS(flashGetFile(getDefaultFlashModule(), FLASH_TEST_FILE_NAME, &buffer, &size)));
     MY_ASSERT(size == FLASH_WRITE_BUFFER_SIZE);
 
     int mismatchIndex = -1;
@@ -42,6 +42,7 @@ MY_TEST_FUNC(FLASH_TEST_NAME, 1)
     }
 
     MY_ASSERT(mismatchIndex == -1);
+    MY_ASSERT(FUNCSUCCESS(flashFlushFile(getDefaultFlashModule(), FLASH_TEST_FILE_NAME)));
 
     MY_TEST_END();
 }

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "logger.h"
+#define DEFAULT_LOG_SERIAL_PATTERN "[%t %l %M:%S:%m] %c\n"
 
-#define LOG_SERIAL_JSON_PATTERN "[%t %l %M:%S:%m] %c\n"
-
-void attachSerialToLog(logger_data_t* logger);
+void logSerial(const char* msg);

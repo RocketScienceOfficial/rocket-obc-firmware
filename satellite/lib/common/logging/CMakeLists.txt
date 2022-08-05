@@ -1,4 +1,4 @@
-add_library(logging
+add_library(logging_lib
     log_serial.h
     log_serial.c
     logger.h
@@ -7,6 +7,6 @@ add_library(logging
     recorder.c
     )
 
-target_link_libraries(logging time_tracker)
+target_link_libraries(logging_lib time_tracker_lib error_handling_lib flash_lib)
 
-target_include_directories(logging PUBLIC .)
+target_include_directories(logging_lib PUBLIC .)

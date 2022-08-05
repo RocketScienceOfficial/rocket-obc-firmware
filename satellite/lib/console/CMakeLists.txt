@@ -1,8 +1,8 @@
-add_library(console
+add_library(console_lib
     console_input.h
     console_input.c
     )
 
-target_link_libraries(console pico_stdlib logging)
+target_link_libraries(console_lib pico_stdlib logging_lib error_handling_lib)
 
-target_include_directories(console PUBLIC .)
+target_include_directories(console_lib PUBLIC .)

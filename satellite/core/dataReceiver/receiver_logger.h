@@ -1,29 +1,19 @@
 #pragma once
 
 #include "measurements_utils.h"
-#include "logger.h"
 
-typedef struct receiver_internal_condition_data
+typedef struct ReceiverInternalConditionData
 {
     float measureRAMUsagePercent;
     float receiverRAMUsagePercent;
     int radioSignalStrength;
-} receiver_internal_condition_data_t;
+} ReceiverInternalConditionData;
 
-typedef struct receiver_send_data
+typedef struct ReceiverSendData
 {
-    measurement_data_t measurement;
-    receiver_internal_condition_data_t condition;
-} receiver_send_data_t;
+    MeasurementData measurement;
+    ReceiverInternalConditionData condition;
+} ReceiverSendData;
 
 void initializeReceiverLogger();
-void logReceiverData(receiver_send_data_t *data);
-logger_data_t *myLogGetReceiverDataLogger();
-
-#define MY_LOG_RECEIVER_DATA_PATTERN "%c"
-#define MY_LOG_RECEIVER_DATA_NAME "RECEIVER_DATA_LOG"
-#define MY_LOG_RECEIVER_DATA_BEGIN() myLog(myLogGetReceiverDataLogger(), "", "/*")
-#define MY_LOG_RECEIVER_DATA_FLOAT(val) myLog(myLogGetReceiverDataLogger(), "", "%f,", val)
-#define MY_LOG_RECEIVER_DATA_INT(val) myLog(myLogGetReceiverDataLogger(), "", "%d,", val)
-#define MY_LOG_RECEIVER_DATA_EMPTY() myLog(myLogGetReceiverDataLogger(), "", ",")
-#define MY_LOG_RECEIVER_DATA_END() myLog(myLogGetReceiverDataLogger(), "", "*/\n")
+void logReceiverData(ReceiverSendData *data);

@@ -6,14 +6,58 @@
 #define CONSOLE_ARGS_MAX_COUNT 8
 #define CONSOLE_INPUT_MAX_LENGTH 128
 
-typedef struct console_input 
+/**
+ * @brief Console input structure. All changes are done internally, so keep it just for reference!
+ */
+typedef struct ConsoleInput
 {
+    /**
+     * @brief Two-dimensional array of tokens.
+     */
     char **tokens;
-    size_t size;
-} console_input_t;
 
+    /**
+     * @brief Number of tokens.
+     */
+    size_t size;
+
+    /**
+     * @brief Current characters
+     */
+    char _cmd[CONSOLE_INPUT_MAX_LENGTH];
+
+    /**
+     * @brief Current characters length
+     */
+    size_t _cmdSize;
+} ConsoleInput;
+
+/**
+ * @brief Checks if the input is available.
+ *
+ * @return ASCII Character if available, 0 otherwise.
+ */
 int consoleCheckInput();
-void consoleGetInput(int chr, console_input_t *input_out);
-void consoleProcessCharacter(int c, console_input_t *input_out);
-void consoleTokenizeInput(char *input, console_input_t *input_out);
-void consoleClearInput(console_input_t *input);
+
+/**
+ * @brief Processess the character.
+ *
+ * @param c Character to process.
+ * @param input_out Console input structure to setup.
+ */
+void consoleProcessCharacter(int c, ConsoleInput *input_out);
+
+/**
+ * @brief Tokenizes the input.
+ *
+ * @param input Input to tokenize.
+ * @param input_out Console input structure to setup.
+ */
+void consoleTokenizeInput(char *input, ConsoleInput *input_out);
+
+/**
+ * @brief Clears the input.
+ *
+ * @param input Console input structure to clear.
+ */
+void consoleClearInput(ConsoleInput *input);

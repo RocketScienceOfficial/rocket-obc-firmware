@@ -3,8 +3,7 @@
 #include "config.h"
 #include "logger.h"
 #include "log_serial.h"
-#include "console_commands.h"
-#include "remote_commands.h"
+#include "commands.h"
 
 #include "test_commands.h"
 #include "test_console.h"
@@ -36,6 +35,8 @@ int main()
     {
         loop();
     }
+
+    return 0;
 }
 
 void start()
@@ -43,9 +44,7 @@ void start()
     stdio_init_all();
     sleep_ms(5000);
 
-    attachSerialToLog(myLogGetCoreLogger());
-    attachSerialToLog(myLogGetCommandOutputLogger());
-    attachSerialToLog(myLogGetRemoteCommandLogger());
+    myLogCreateConsoleSink(myLogGetCoreLogger(), DEFAULT_LOG_SERIAL_PATTERN);
 }
 
 void initialize()

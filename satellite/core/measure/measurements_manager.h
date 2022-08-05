@@ -3,4 +3,4 @@
 #include "measurements_utils.h"
 
 void initializeMeasurements();
-void takeMeasurements(measurement_data_t *data_out);
+void takeMeasurements(MeasurementData *data_out);

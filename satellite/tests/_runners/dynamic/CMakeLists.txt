@@ -1,6 +1,6 @@
 add_executable(dynamic_tests_runner main.c)
 
-target_link_libraries(dynamic_tests_runner PUBLIC pico_stdlib test_framework logging commands commands_tests console_tests loggers_tests maths_tests barometer_tests accelerometer_tests radio_protocol_tests radio_receiver_test radio_sender_tests sd_tests servo_tests time_tracker_test)
+target_link_libraries(dynamic_tests_runner PUBLIC pico_stdlib test_framework logging_lib commands_tests console_tests loggers_tests maths_tests barometer_tests accelerometer_tests radio_protocol_tests radio_receiver_test radio_sender_tests sd_tests servo_tests time_tracker_tests)
 
 pico_enable_stdio_usb(dynamic_tests_runner 1)
 pico_enable_stdio_uart(dynamic_tests_runner 0)

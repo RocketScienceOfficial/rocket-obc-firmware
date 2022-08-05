@@ -1,4 +1,5 @@
 #pragma once
+
 #include "test_framework.h"
 
 #define MATHS_TEST_NAME maths

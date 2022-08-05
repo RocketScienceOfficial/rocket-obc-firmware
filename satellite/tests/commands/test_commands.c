@@ -1,6 +1,6 @@
 #include "test_commands.h"
-#include "console_commands.h"
-#include "default_console_commands.h"
+#include "commands.h"
+#include "default_commands.h"
 
 MY_TEST_INIT_FUNC(COMMANDS_TEST_NAME)
 {
@@ -15,8 +15,8 @@ MY_TEST_FUNC(COMMANDS_TEST_NAME, 1)
         "hello",
     };
     size_t tokensSize = 1;
-    command_args_t args = {0};
-    console_command_t *command = parseCommand(tokens, tokensSize, &args);
+    CommandArgs args;
+    CommandData *command = parseCommand(tokens, tokensSize, &args);
 
     if (command != NULL)
     {

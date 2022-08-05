@@ -1,6 +1,7 @@
 #pragma once
 
 #include "measurements_utils.h"
+#include <stdbool.h>
 
 void initializeRadio();
-int checkRadioPacket(measurement_data_t *data_out, int *signalStrength);
+bool checkRadioPacket(MeasurementData *data_out, int *signalStrength);

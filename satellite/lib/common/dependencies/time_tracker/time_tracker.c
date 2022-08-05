@@ -4,21 +4,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-timer_t getMsSinceBoot()
+Timer getMsSinceBoot()
 {
 	timer_t time_ms = to_ms_since_boot(get_absolute_time());
 
 	return time_ms;
 }
 
-int runEvery(timer_t ms, timer_t* timerOffset)
+bool runEvery(Timer ms, Timer* timerOffset)
 {
 	if (getMsSinceBoot() - *timerOffset >= ms)
 	{
 		*timerOffset = getMsSinceBoot();
 
-		return 1;
+		return true;
 	}
 
-	return 0;
+	return false;
 }

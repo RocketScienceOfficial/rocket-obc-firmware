@@ -6,13 +6,14 @@
 #include "logger.h"
 #include "time_tracker.h"
 
-static lora_data_t s_LoraData;
-static radio_body_t s_PacketBody;
-static int s_RadioPacketValidation;
+static LoRaData s_LoraData;
+static RadioBody s_PacketBody;
+static bool s_RadioPacketAvailable;
+static bool s_RadioPacketValidation;
 
 MY_TEST_INIT_FUNC(RADIO_RECEIVER_NAME)
 {
-    lora_pinout_t loraPinout = {
+    LoRaPinout loraPinout = {
         .spi = SX1278_SPI,
         .sck = SX1278_SCK_GPIO,
         .miso = SX1278_MISO_GPIO,
@@ -23,12 +24,8 @@ MY_TEST_INIT_FUNC(RADIO_RECEIVER_NAME)
         .dio0 = SX1278_DIO0_GPIO};
 
     loraInit(&s_LoraData, &loraPinout);
-
-    s_LoraData.pinout = loraPinout;
-    s_LoraData.txPower = RADIO_DBM;
-
     MY_ASSERT(loraBegin(&s_LoraData, RADIO_FREQUENCY_HZ));
-
+    loraSetTxPower(&s_LoraData, RADIO_DBM);
     loraSetSpreadingFactor(&s_LoraData, RADIO_SPREADING_FACTOR);
     loraSetSignalBandwidth(&s_LoraData, RADIO_SIGNAL_BANDWIDTH);
 
@@ -37,7 +34,9 @@ MY_TEST_INIT_FUNC(RADIO_RECEIVER_NAME)
 
 MY_TEST_FUNC_DYNAMIC(RADIO_RECEIVER_NAME, 1)
 {
-    if (radioReceivePacket(&s_LoraData, &s_PacketBody, &s_RadioPacketValidation))
+    MY_ASSERT(FUNCSUCCESS(radioReceivePacket(&s_LoraData, &s_RadioPacketAvailable, &s_PacketBody, &s_RadioPacketValidation)));
+    
+    if (s_RadioPacketAvailable)
     {
         MY_LOG_CORE_INFO("Received packet!");
 
@@ -46,7 +45,7 @@ MY_TEST_FUNC_DYNAMIC(RADIO_RECEIVER_NAME, 1)
             MY_LOG_CORE_INFO("Packet is valid!");
             MY_LOG_CORE_INFO("%s", s_PacketBody.payload);
 
-            radioClearPacket(&s_PacketBody);
+            MY_ASSERT(FUNCSUCCESS(radioClearPacket(&s_PacketBody)));
         }
         else
         {

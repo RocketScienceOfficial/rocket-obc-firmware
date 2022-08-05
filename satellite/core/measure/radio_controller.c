@@ -4,16 +4,17 @@
 #include "pinout.h"
 #include "radio_utils.h"
 #include "config.h"
+#include "hardware_utils.h"
 #include <stdlib.h>
 #include <string.h>
 
-static lora_data_t s_LoraData;
+static LoRaData s_LoraData;
 
 void initializeRadio()
 {
     if (ENABLE_RADIO)
     {
-        lora_pinout_t loraPinout = {
+        LoRaPinout loraPinout = {
             .spi = SX1278_SPI,
             .sck = SX1278_SCK_GPIO,
             .miso = SX1278_MISO_GPIO,
@@ -24,22 +25,18 @@ void initializeRadio()
             .dio0 = SX1278_DIO0_GPIO};
 
         loraInit(&s_LoraData, &loraPinout);
-
-        s_LoraData.pinout = loraPinout;
-        s_LoraData.txPower = RADIO_DBM;
-
         loraBegin(&s_LoraData, RADIO_FREQUENCY_HZ);
-
+        loraSetTxPower(&s_LoraData, RADIO_DBM);
         loraSetSpreadingFactor(&s_LoraData, RADIO_SPREADING_FACTOR);
         loraSetSignalBandwidth(&s_LoraData, RADIO_SIGNAL_BANDWIDTH);
     }
 }
 
-void sendRadio(measurement_data_t *data)
+void sendRadio(MeasurementData *data)
 {
     if (ENABLE_RADIO)
     {
-        radio_body_t body = {
+        RadioBody body = {
             .command = MEASUREMENTS_RADIO_COMMAND_ID,
             .payloadSize = sizeof(*data),
         };
@@ -50,7 +47,7 @@ void sendRadio(measurement_data_t *data)
 
         body.payload = buffer;
 
-        radioSendPacket(&s_LoraData, &body);
+        HW_CALL(radioSendPacket(&s_LoraData, &body));
 
         free(buffer);
     }

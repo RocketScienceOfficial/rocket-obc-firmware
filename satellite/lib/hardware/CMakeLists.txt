@@ -1,0 +1,8 @@
+add_subdirectory(common)
+add_subdirectory(accelerometer)
+add_subdirectory(barometer)
+add_subdirectory(flash)
+add_subdirectory(gps)
+add_subdirectory(radio)
+add_subdirectory(sd)
+add_subdirectory(servo)

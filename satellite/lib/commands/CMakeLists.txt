@@ -1,12 +1,10 @@
-add_library(commands
-    console_commands.h
-    console_commands.c
-    default_console_commands.h
-    default_console_commands.c
-    remote_commands.h
-    remote_commands.c
+add_library(commands_lib
+    commands.h
+    commands.c
+    default_commands.h
+    default_commands.c
     )
 
-target_link_libraries(commands logging)
+target_link_libraries(commands_lib logging_lib)
 
-target_include_directories(commands PUBLIC .)
+target_include_directories(commands_lib PUBLIC .)

@@ -8,7 +8,7 @@ MY_TEST_FUNC(RADIO_PROTOCOL_TEST_NAME, 1)
 {
     uint8_t text[] = "Hello World!";
 
-    radio_body_t body = {
+    RadioBody body = {
         .command = 'T',
         .payloadSize = sizeof(text) / sizeof(uint8_t),
         .payload = text,
@@ -18,15 +18,13 @@ MY_TEST_FUNC(RADIO_PROTOCOL_TEST_NAME, 1)
     uint8_t *buffer;
     size_t size;
 
-    serializeRadioPacket(&body, &buffer, &size);
-
+    MY_ASSERT(FUNCSUCCESS(serializeRadioPacket(&body, &buffer, &size)));
     MY_ASSERT(memcmp(buffer, EXPECTED_SERIALIZED_BUFFER, sizeof(EXPECTED_SERIALIZED_BUFFER) / sizeof(uint8_t)) == 0);
 
-    radio_body_t body2 = {0};
-    int validationResult = 0;
+    RadioBody body2 = {0};
+    bool validationResult;
 
-    deserializeRadioPacket(buffer, size, &body2, &validationResult);
-
+    MY_ASSERT(FUNCSUCCESS(deserializeRadioPacket(buffer, size, &body2, &validationResult)));
     MY_ASSERT(validationResult);
     MY_ASSERT(body.command == body2.command);
     MY_ASSERT(body.payloadSize == body2.payloadSize);

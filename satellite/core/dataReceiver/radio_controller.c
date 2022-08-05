@@ -5,17 +5,19 @@
 #include "radio_utils.h"
 #include "pinout.h"
 #include "config.h"
+#include "hardware_utils.h"
 #include <string.h>
 
-static lora_data_t s_LoraData;
-static radio_body_t s_PacketBody;
-static int s_RadioPacketValidation;
+static LoRaData s_LoraData;
+static RadioBody s_PacketBody;
+static bool s_RadioPacketAvailable;
+static bool s_RadioPacketValidation;
 
 void initializeRadio()
 {
     if (ENABLE_RADIO)
     {
-        lora_pinout_t loraPinout = {
+        LoRaPinout loraPinout = {
             .spi = SX1278_SPI,
             .sck = SX1278_SCK_GPIO,
             .miso = SX1278_MISO_GPIO,
@@ -26,48 +28,43 @@ void initializeRadio()
             .dio0 = SX1278_DIO0_GPIO};
 
         loraInit(&s_LoraData, &loraPinout);
-
-        s_LoraData.pinout = loraPinout;
-        s_LoraData.txPower = RADIO_DBM;
-
         loraBegin(&s_LoraData, RADIO_FREQUENCY_HZ);
-
+        loraSetTxPower(&s_LoraData, RADIO_DBM);
         loraSetSpreadingFactor(&s_LoraData, RADIO_SPREADING_FACTOR);
         loraSetSignalBandwidth(&s_LoraData, RADIO_SIGNAL_BANDWIDTH);
     }
 }
 
-int checkRadioPacket(measurement_data_t *data_out, int *signalStrength)
+bool checkRadioPacket(MeasurementData *data_out, int *signalStrength)
 {
     if (ENABLE_RADIO)
     {
-        if (radioCheckPacket(&s_LoraData))
+        HW_CALL(radioReceivePacket(&s_LoraData, &s_RadioPacketAvailable, &s_PacketBody, &s_RadioPacketValidation));
+
+        if (s_RadioPacketAvailable)
         {
-            if (radioReceivePacket(&s_LoraData, &s_PacketBody, &s_RadioPacketValidation))
+            MY_LOG_CORE_INFO("Packet received!");
+
+            if (s_RadioPacketValidation)
             {
-                MY_LOG_CORE_INFO("Packet received!");
+                MY_LOG_CORE_INFO("Packet is valid!");
 
-                if (s_RadioPacketValidation)
-                {
-                    MY_LOG_CORE_INFO("Packet is valid!");
+                memcpy(data_out, s_PacketBody.payload, s_PacketBody.payloadSize);
 
-                    memcpy(data_out, s_PacketBody.payload, s_PacketBody.payloadSize);
-
-                    radioClearPacket(&s_PacketBody);
-                }
-                else
-                {
-                    MY_LOG_CORE_ERROR("Validation failed!");
-                }
-
-                *signalStrength = loraRssi(&s_LoraData);
-
-                MY_LOG_CORE_INFO("Packet processed!");
-
-                return s_RadioPacketValidation;
+                HW_CALL(radioClearPacket(&s_PacketBody));
             }
+            else
+            {
+                MY_LOG_CORE_ERROR("Validation failed!");
+            }
+
+            *signalStrength = loraRssi(&s_LoraData);
+
+            MY_LOG_CORE_INFO("Packet processed!");
+
+            return s_RadioPacketValidation;
         }
     }
 
-    return 0;
+    return false;
 }

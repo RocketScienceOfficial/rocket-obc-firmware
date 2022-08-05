@@ -4,17 +4,17 @@
 #include "accelerometer.h"
 #include "gps.h"
 
-enum components_states
+typedef enum ComponentsStates
 {
     COMPONENT_BAROMETER = 1 << 0,
     COMPONENT_ACCELEROMETER = 1 << 1,
     COMPONENT_GPS = 1 << 2,
-};
+} ComponentsStates;
 
-typedef struct measurement_data
+typedef struct MeasurementData
 {
-    barometer_data_t barometerData;
-    accelerometer_data_t accelerometerData;
-    gps_data_t gpsData;
+    BarometerData barometerData;
+    AccelerometerData accelerometerData;
+    GPSData gpsData;
     int componentsStatus;
-} measurement_data_t;
+} MeasurementData;

@@ -7,12 +7,12 @@
 #include "time_tracker.h"
 #include <stdint.h>
 
-static lora_data_t s_LoraData;
-static timer_t s_TimerOffset = 0;
+static LoRaData s_LoraData;
+static Timer s_TimerOffset = 0;
 
 MY_TEST_INIT_FUNC(RADIO_SENDER_NAME)
 {
-    lora_pinout_t loraPinout = {
+    LoRaPinout loraPinout = {
         .spi = SX1278_SPI,
         .sck = SX1278_SCK_GPIO,
         .miso = SX1278_MISO_GPIO,
@@ -23,12 +23,8 @@ MY_TEST_INIT_FUNC(RADIO_SENDER_NAME)
         .dio0 = SX1278_DIO0_GPIO};
 
     loraInit(&s_LoraData, &loraPinout);
-
-    s_LoraData.pinout = loraPinout;
-    s_LoraData.txPower = RADIO_DBM;
-
     MY_ASSERT(loraBegin(&s_LoraData, RADIO_FREQUENCY_HZ));
-
+    loraSetTxPower(&s_LoraData, RADIO_DBM);
     loraSetSpreadingFactor(&s_LoraData, RADIO_SPREADING_FACTOR);
     loraSetSignalBandwidth(&s_LoraData, RADIO_SIGNAL_BANDWIDTH);
 
@@ -43,13 +39,13 @@ MY_TEST_FUNC_DYNAMIC(RADIO_SENDER_NAME, 1)
 
         char text[] = "Hello world!";
 
-        radio_body_t body = {
+        RadioBody body = {
             .command = 'T',
             .payloadSize = sizeof(text) / sizeof(char),
             .payload = text,
         };
 
-        radioSendPacket(&s_LoraData, &body);
+        MY_ASSERT(FUNCSUCCESS(radioSendPacket(&s_LoraData, &body)));
     }
 
     MY_TEST_END();

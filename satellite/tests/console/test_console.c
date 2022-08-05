@@ -4,11 +4,11 @@
 #include <stddef.h>
 
 static int s_ConsoleChar;
-static console_input_t s_ConsoleInput;
+static ConsoleInput s_ConsoleInput;
 
 MY_TEST_FUNC(CONSOLE_TEST_NAME, 1)
 {
-    console_input_t input = {0};
+    ConsoleInput input = {0};
     consoleProcessCharacter('h', &input);
     consoleProcessCharacter('e', &input);
     consoleProcessCharacter('l', &input);
@@ -37,7 +37,7 @@ MY_TEST_FUNC_DYNAMIC(CONSOLE_TEST_NAME, 1)
 
     if (s_ConsoleChar)
     {
-        consoleGetInput(s_ConsoleChar, &s_ConsoleInput);
+        consoleProcessCharacter(s_ConsoleChar, &s_ConsoleInput);
         
         if (s_ConsoleInput.size > 0)
         {

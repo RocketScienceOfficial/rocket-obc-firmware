@@ -4,9 +4,9 @@
 
 MY_TEST_INIT_FUNC(SERVO_TEST_NAME)
 {
-    servo_data_t data = {.pin = MG995_PIN};
+    ServoData data = {0};
 
-    servoInit(&data);
+    MY_ASSERT(FUNCSUCCESS(servoInit(MG995_PIN, &data)));
 
     MY_TEST_END();
 }

@@ -1,32 +1,81 @@
 #include "logger.h"
+#include "log_serial.h"
 #include "time_tracker.h"
+#include "error_handling.h"
+#include "flash_control.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
-void myLogCreateLogger(logger_data_t *logger, const char *name)
+void myLogCreateLogger(Logger *logger, const char *name)
 {
-	logger->numSinks = 0;
-	logger->name = name;
+	if (!logger || !name)
+	{
+		REPORT_CRASH("Invalid logger or name");
+
+		return;
+	}
+
+	logger->_name = name;
+	logger->_numSinks = 0;
 }
 
-void myLogCreateSink(logger_data_t *logger, logCallback_t callback, const char *pattern)
+void myLogCreateConsoleSink(Logger *logger, const char *pattern)
 {
-	logger->sinks[logger->numSinks] = (log_sink_data_t){.callback = callback, .pattern = pattern};
-	logger->numSinks++;
+	if (!logger || !pattern)
+	{
+		REPORT_CRASH("Invalid logger or pattern");
+
+		return;
+	}
+
+	LogSinkData sink = {
+		._pattern = pattern,
+		._type = SINK_CONSOLE,
+	};
+
+	logger->_sinks[logger->_numSinks++] = sink;
+}
+
+void myLogCreateFileSink(Logger *logger, const char *pattern, const char *fileName)
+{
+	if (!logger || !pattern || !fileName)
+	{
+		REPORT_CRASH("Invalid logger, pattern or fileName");
+
+		return;
+	}
+
+	LogSinkData sink = {
+		._pattern = pattern,
+		._type = SINK_FILE,
+		._customData = fileName,
+	};
+
+	flashInitFile(getDefaultFlashModule(), fileName);
+	flashFlushFile(getDefaultFlashModule(), fileName);
+
+	logger->_sinks[logger->_numSinks++] = sink;
 }
 
 char *parseLog(const char *loggerName, const char *pattern, const char *level, const char *format, va_list args)
 {
 	char *log = (char *)malloc(sizeof(char) * MAX_LOG_SIZE);
 	size_t logIndex = 0;
-	timer_t timeMs = getMsSinceBoot();
-	timer_t minutes = floor(timeMs / 60000);
-	timer_t seconds = floor(timeMs / 1000 - minutes * 60);
-	timer_t miliseconds = floor(timeMs - minutes * 60000 - seconds * 1000);
+	Timer timeMs = getMsSinceBoot();
+	Timer minutes = floor(timeMs / 60000);
+	Timer seconds = floor(timeMs / 1000 - minutes * 60);
+	Timer miliseconds = floor(timeMs - minutes * 60000 - seconds * 1000);
 
 	for (size_t i = 0; pattern[i] != '\0'; i++)
 	{
+		if (logIndex >= MAX_LOG_SIZE)
+		{
+			REPORT_CRASH("Log is too big");
+
+			return NULL;
+		}
+
 		if (pattern[i] == '%')
 		{
 			size_t tmpI = i + 1;
@@ -113,19 +162,30 @@ char *parseLog(const char *loggerName, const char *pattern, const char *level, c
 	return log;
 }
 
-static void __log(logger_data_t *logger, const char *level, const char *format, va_list args)
+static void __log(Logger *logger, const char *level, const char *format, va_list args)
 {
-	for (size_t i = 0; i < logger->numSinks; i++)
+	for (size_t i = 0; i < logger->_numSinks; i++)
 	{
-		char *log = parseLog(logger->name, logger->sinks[i].pattern, level, format, args);
+		char *log = parseLog(logger->_name, logger->_sinks[i]._pattern, level, format, args);
 
-		logger->sinks[i].callback(logger, level, log);
+		switch (logger->_sinks[i]._type)
+		{
+		case SINK_CONSOLE:
+			logSerial(log);
+			break;
+		case SINK_FILE:
+			flashWriteFile(getDefaultFlashModule(), (char *)logger->_sinks[i]._customData, log);
+			break;
+		default:
+			REPORT_CRASH("Unknown sink type");
+			break;
+		}
 
 		free(log);
 	}
 }
 
-void myLog(logger_data_t *logger, const char *level, const char *format, ...)
+void myLog(Logger *logger, const char *level, const char *format, ...)
 {
 	va_list ap;
 
@@ -134,17 +194,17 @@ void myLog(logger_data_t *logger, const char *level, const char *format, ...)
 	va_end(ap);
 }
 
-static logger_data_t s_CoreLogger;
-static int s_CoreInitialized;
-
-logger_data_t *myLogGetCoreLogger()
+Logger *myLogGetCoreLogger()
 {
-	if (!s_CoreInitialized)
-	{
-		myLogCreateLogger(&s_CoreLogger, MY_LOG_CORE_NAME);
+	static Logger logger;
+	static int initialized;
 
-		s_CoreInitialized = 1;
+	if (!initialized)
+	{
+		myLogCreateLogger(&logger, MY_LOG_CORE_NAME);
+
+		initialized = 1;
 	}
 
-	return &s_CoreLogger;
+	return &logger;
 }

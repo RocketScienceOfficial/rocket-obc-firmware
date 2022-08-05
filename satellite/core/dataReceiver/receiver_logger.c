@@ -1,17 +1,23 @@
 #include "receiver_logger.h"
-#include <stdio.h>
+#include "logger.h"
 
-static void logCallback(logger_data_t *logger, const char *level, const char *msg)
-{
-    printf(msg);
-}
+static Logger s_Logger;
+
+#define MY_LOG_RECEIVER_DATA_PATTERN "%c"
+#define MY_LOG_RECEIVER_DATA_NAME "RECEIVER_DATA_LOG"
+#define MY_LOG_RECEIVER_DATA_BEGIN() myLog(&s_Logger, "", "/*")
+#define MY_LOG_RECEIVER_DATA_FLOAT(val) myLog(&s_Logger, "", "%f,", val)
+#define MY_LOG_RECEIVER_DATA_INT(val) myLog(&s_Logger, "", "%d,", val)
+#define MY_LOG_RECEIVER_DATA_EMPTY() myLog(&s_Logger, "", ",")
+#define MY_LOG_RECEIVER_DATA_END() myLog(&s_Logger, "", "*/\n")
 
 void initializeReceiverLogger()
 {
-    myLogCreateSink(myLogGetReceiverDataLogger(), &logCallback, MY_LOG_RECEIVER_DATA_PATTERN);
+    myLogCreateLogger(&s_Logger, MY_LOG_RECEIVER_DATA_NAME);
+    myLogCreateConsoleSink(&s_Logger, MY_LOG_RECEIVER_DATA_PATTERN);
 }
 
-void logReceiverData(receiver_send_data_t *data)
+void logReceiverData(ReceiverSendData *data)
 {
     MY_LOG_RECEIVER_DATA_BEGIN();
 
@@ -63,19 +69,4 @@ void logReceiverData(receiver_send_data_t *data)
     MY_LOG_RECEIVER_DATA_INT(data->condition.radioSignalStrength);
 
     MY_LOG_RECEIVER_DATA_END();
-}
-
-static logger_data_t s_Logger;
-static int s_Initialized;
-
-logger_data_t *myLogGetReceiverDataLogger()
-{
-    if (!s_Initialized)
-    {
-        myLogCreateLogger(&s_Logger, MY_LOG_RECEIVER_DATA_NAME);
-
-        s_Initialized = 1;
-    }
-
-    return &s_Logger;
 }

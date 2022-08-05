@@ -16,10 +16,10 @@ void functionProfileEnd(const char *function, uint32_t beginResult)
 	MY_LOG_RECORD("Execution of function: '%s' took %u ms", function, elapsed);
 }
 
-static logger_data_t s_Logger;
+static Logger s_Logger;
 static int s_LoggerInitialized;
 
-logger_data_t *myLogGetRecordLogger()
+Logger *myLogGetRecordLogger()
 {
 	if (!s_LoggerInitialized)
 	{

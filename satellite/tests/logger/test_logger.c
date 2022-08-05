@@ -1,4 +1,5 @@
 #include "test_logger.h"
+#include "logger.h"
 
 MY_TEST_FUNC(LOGGER_TEST_NAME, 1)
 {
