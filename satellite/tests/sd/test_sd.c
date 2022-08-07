@@ -22,6 +22,7 @@ MY_TEST_FUNC(SD_TEST_NAME, 1)
     MY_ASSERT(FUNCSUCCESS(sdBegin(&s_SDCard, TEST_FILENAME)));
     MY_ASSERT(FUNCSUCCESS(sdWrite(&s_SDCard, "Hello World!", TEST_FILENAME)));
     MY_ASSERT(FUNCSUCCESS(sdEnd(&s_SDCard, TEST_FILENAME)));
+    MY_ASSERT(FUNCSUCCESS(sdTerminate(&s_SDCard)));
 
     MY_TEST_END();
 }
@@ -30,6 +31,8 @@ MY_TEST_FUNC_DYNAMIC(SD_TEST_NAME, 1)
 {
     if (runEvery(1000, &s_TimerOffset))
     {
+        MY_LOG_CORE_INFO("Writing 'Hello World!' to SD card...");
+
         MY_ASSERT(FUNCSUCCESS(sdBegin(&s_SDCard, TEST_FILENAME)));
         MY_ASSERT(FUNCSUCCESS(sdWrite(&s_SDCard, "Hello World!", TEST_FILENAME)));
         MY_ASSERT(FUNCSUCCESS(sdEnd(&s_SDCard, TEST_FILENAME)));

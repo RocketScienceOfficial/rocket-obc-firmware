@@ -30,6 +30,30 @@ MY_TEST_FUNC(BAROMETER_TEST_NAME, 1)
     MY_TEST_END();
 }
 
+MY_TEST_FUNC(BAROMETER_TEST_NAME, 2)
+{
+    BarometerConfig config;
+
+    MY_ASSERT(FUNCFAILED(barometerInit(NULL, BMP280_I2C, BMP280_I2C_SDA_PIN, BMP280_I2C_SCL_PIN)));
+    MY_ASSERT(FUNCFAILED(barometerInit(&config, 0, 2, 3)));
+
+    MY_TEST_END();
+}
+
+MY_TEST_FUNC(BAROMETER_TEST_NAME, 3)
+{
+    MY_ASSERT(FUNCFAILED(barometerCheck(NULL, NULL)));
+
+    MY_TEST_END();
+}
+
+MY_TEST_FUNC(BAROMETER_TEST_NAME, 4)
+{
+    MY_ASSERT(FUNCFAILED(barometerRead(NULL, NULL)));
+
+    MY_TEST_END();
+}
+
 MY_TEST_FUNC_DYNAMIC(BAROMETER_TEST_NAME, 1)
 {
     if (runEvery(1000, &s_TimerOffset))

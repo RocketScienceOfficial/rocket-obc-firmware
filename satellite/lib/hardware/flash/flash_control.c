@@ -187,7 +187,9 @@ FUNCRESULT flashFileTerminate(FlashModule *module, const char *fileName)
         return ERR_POINTER;
     }
 
+    FUNCRESULT res = flashWriteFile(module, fileName, fileInfo->_buffer);
+
     module->_isInitialized = false;
 
-    return flashWriteFile(module, fileName, fileInfo->_buffer);
+    return res;
 }

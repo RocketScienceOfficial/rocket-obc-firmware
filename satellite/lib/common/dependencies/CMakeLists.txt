@@ -1,2 +1,1 @@
-add_subdirectory(error_handling)
 add_subdirectory(time_tracker)

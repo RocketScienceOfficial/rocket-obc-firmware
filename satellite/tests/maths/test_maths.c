@@ -79,3 +79,14 @@ MY_TEST_FUNC(MATHS_TEST_NAME, 6)
 
     MY_TEST_END();
 }
+
+MY_TEST_FUNC(MATHS_TEST_NAME, 7)
+{
+    MY_ASSERT(encryptDecrypt(NULL, 0, NULL, 0) == false);
+    MY_ASSERT(calculateParityRows(NULL, 0, NULL) == false);
+    MY_ASSERT(calculateParityColumns(NULL, 0, NULL) == false);
+    MY_ASSERT(calculateParity(NULL, 0, NULL) == false);
+    MY_ASSERT(clearParity(NULL) == false);
+
+    MY_TEST_END();
+}

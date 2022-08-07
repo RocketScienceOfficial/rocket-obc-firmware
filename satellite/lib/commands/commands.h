@@ -48,8 +48,10 @@ typedef struct CommandArgs
  * @brief Register command.
  * 
  * @param command Command to register.
+ * 
+ * @return True if command was registered successfully, false otherwise.
  */
-void registerCommand(CommandData *command);
+bool registerCommand(CommandData *command);
 
 /**
  * @brief Retrieve command and its args with tokens.
@@ -66,8 +68,10 @@ CommandData *parseCommand(char **tokens, size_t tokensSize, CommandArgs *args_ou
  * 
  * @param command Command to execute.
  * @param args Args for command.
+ * 
+ * @return True if command was executed successfully, false otherwise.
  */
-void executeCommand(CommandData *command, CommandArgs *args);
+bool executeCommand(CommandData *command, CommandArgs *args);
 
 /**
  * @brief Checks if command args size is valid.
@@ -84,4 +88,4 @@ bool checkArgsCount(size_t expectedCount, size_t actualCount, char **output_ptr)
  * 
  * @param args Args to clear.
  */
-void commandClearArgs(CommandArgs *args);
+bool commandClearArgs(CommandArgs *args);

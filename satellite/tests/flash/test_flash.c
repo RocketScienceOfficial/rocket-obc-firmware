@@ -43,6 +43,19 @@ MY_TEST_FUNC(FLASH_TEST_NAME, 1)
 
     MY_ASSERT(mismatchIndex == -1);
     MY_ASSERT(FUNCSUCCESS(flashFlushFile(getDefaultFlashModule(), FLASH_TEST_FILE_NAME)));
+    MY_ASSERT(FUNCSUCCESS(flashFileTerminate(getDefaultFlashModule(), FLASH_TEST_FILE_NAME)));
+
+    MY_TEST_END();
+}
+
+MY_TEST_FUNC(FLASH_TEST_NAME, 2)
+{
+    MY_ASSERT(FUNCFAILED(flashInit(NULL)));
+    MY_ASSERT(FUNCFAILED(flashInitFile(NULL, NULL)));
+    MY_ASSERT(FUNCFAILED(flashWriteFile(NULL, NULL, NULL)));
+    MY_ASSERT(FUNCFAILED(flashFlushFile(NULL, NULL)));
+    MY_ASSERT(FUNCFAILED(flashFileTerminate(NULL, NULL)));
+    MY_ASSERT(getDefaultFlashModule() != NULL);
 
     MY_TEST_END();
 }

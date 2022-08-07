@@ -1,17 +1,26 @@
 #include "logger.h"
 #include "log_serial.h"
 #include "time_tracker.h"
-#include "error_handling.h"
 #include "flash_control.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
+#define REPORT_ERROR(msg) logSerialError(msg)
+#define LOG_HW_CALL(func)                                                                                    \
+	{                                                                                                        \
+		FUNCRESULT result = func;                                                                            \
+		if (FUNCFAILED(result))                                                                              \
+		{                                                                                                    \
+			logSerialError("Hardware function with code failed: %d at '%s:%d'", result, __FILE__, __LINE__); \
+		}                                                                                                    \
+	}
+
 void myLogCreateLogger(Logger *logger, const char *name)
 {
 	if (!logger || !name)
 	{
-		REPORT_CRASH("Invalid logger or name");
+		REPORT_ERROR("Invalid logger or name");
 
 		return;
 	}
@@ -24,7 +33,7 @@ void myLogCreateConsoleSink(Logger *logger, const char *pattern)
 {
 	if (!logger || !pattern)
 	{
-		REPORT_CRASH("Invalid logger or pattern");
+		REPORT_ERROR("Invalid logger or pattern");
 
 		return;
 	}
@@ -32,6 +41,7 @@ void myLogCreateConsoleSink(Logger *logger, const char *pattern)
 	LogSinkData sink = {
 		._pattern = pattern,
 		._type = SINK_CONSOLE,
+		._customData = NULL,
 	};
 
 	logger->_sinks[logger->_numSinks++] = sink;
@@ -41,7 +51,7 @@ void myLogCreateFileSink(Logger *logger, const char *pattern, const char *fileNa
 {
 	if (!logger || !pattern || !fileName)
 	{
-		REPORT_CRASH("Invalid logger, pattern or fileName");
+		REPORT_ERROR("Invalid logger, pattern or fileName");
 
 		return;
 	}
@@ -49,11 +59,11 @@ void myLogCreateFileSink(Logger *logger, const char *pattern, const char *fileNa
 	LogSinkData sink = {
 		._pattern = pattern,
 		._type = SINK_FILE,
-		._customData = fileName,
+		._customData = (char *)fileName,
 	};
 
-	flashInitFile(getDefaultFlashModule(), fileName);
-	flashFlushFile(getDefaultFlashModule(), fileName);
+	LOG_HW_CALL(flashInitFile(getDefaultFlashModule(), fileName));
+	LOG_HW_CALL(flashFlushFile(getDefaultFlashModule(), fileName));
 
 	logger->_sinks[logger->_numSinks++] = sink;
 }
@@ -71,7 +81,7 @@ char *parseLog(const char *loggerName, const char *pattern, const char *level, c
 	{
 		if (logIndex >= MAX_LOG_SIZE)
 		{
-			REPORT_CRASH("Log is too big");
+			REPORT_ERROR("Log is too big");
 
 			return NULL;
 		}
@@ -168,20 +178,23 @@ static void __log(Logger *logger, const char *level, const char *format, va_list
 	{
 		char *log = parseLog(logger->_name, logger->_sinks[i]._pattern, level, format, args);
 
-		switch (logger->_sinks[i]._type)
+		if (log)
 		{
-		case SINK_CONSOLE:
-			logSerial(log);
-			break;
-		case SINK_FILE:
-			flashWriteFile(getDefaultFlashModule(), (char *)logger->_sinks[i]._customData, log);
-			break;
-		default:
-			REPORT_CRASH("Unknown sink type");
-			break;
-		}
+			switch (logger->_sinks[i]._type)
+			{
+			case SINK_CONSOLE:
+				logSerial(log);
+				break;
+			case SINK_FILE:
+				LOG_HW_CALL(flashWriteFile(getDefaultFlashModule(), (char *)logger->_sinks[i]._customData, log));
+				break;
+			default:
+				REPORT_ERROR("Unknown sink type");
+				break;
+			}
 
-		free(log);
+			free(log);
+		}
 	}
 }
 

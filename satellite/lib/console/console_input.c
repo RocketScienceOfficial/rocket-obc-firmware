@@ -2,7 +2,6 @@
 #include "pico/stdlib.h"
 #include "logger.h"
 #include "recorder.h"
-#include "error_handling.h"
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
@@ -15,70 +14,73 @@ int consoleCheckInput()
     return ch != PICO_ERROR_TIMEOUT ? ch : 0;
 }
 
-void consoleProcessCharacter(int c, ConsoleInput *input_out)
+bool consoleProcessCharacter(int c, ConsoleInput *input, ConsoleTokens *tokens)
 {
     FUNCTION_PROFILE_BEGIN();
 
-    if (!input_out)
+    if (!input || !tokens)
     {
         MY_LOG_CORE_ERROR("Invalid input");
         FUNCTION_PROFILE_END();
 
-        return;
+        return false;
     }
 
     if (!isprint(c) && !isspace(c))
     {
         FUNCTION_PROFILE_END();
 
-        return;
+        return false;
     }
 
     MY_LOG_CORE_INFO("Processing character: %c", c);
 
     if (c == '\r')
     {
-        if (strnlen(input_out->_cmd, sizeof(input_out->_cmd)) == 0)
+        if (strnlen(input->_cmd, sizeof(input->_cmd)) == 0)
         {
-            return;
+            return true;
         }
 
         MY_LOG_CORE_INFO("Return pressed!");
 
-        consoleTokenizeInput(input_out->_cmd, input_out);
-
-        input_out->_cmdSize = 0;
-        memset(input_out->_cmd, 0, sizeof(input_out->_cmd));
+        consoleTokenizeInput(input, tokens);
     }
     else
     {
-        if (input_out->_cmdSize < sizeof(input_out->_cmd) - 1)
+        if (input->_cmdSize < sizeof(input->_cmd) - 1)
         {
-            input_out->_cmd[input_out->_cmdSize++] = c;
+            input->_cmd[input->_cmdSize++] = c;
+        }
+        else
+        {
+            MY_LOG_CORE_ERROR("Command too long!");
         }
     }
 
     FUNCTION_PROFILE_END();
+
+    return true;
 }
 
-void consoleTokenizeInput(char *input, ConsoleInput *input_out)
+bool consoleTokenizeInput(ConsoleInput *input, ConsoleTokens *tokens)
 {
     FUNCTION_PROFILE_BEGIN();
 
-    if (!input || !input_out)
+    if (!input || !tokens)
     {
         MY_LOG_CORE_ERROR("Invalid input");
         FUNCTION_PROFILE_END();
 
-        return;
+        return false;
     }
 
     MY_LOG_CORE_INFO("Tokenizing input...");
 
-    input_out->tokens = (char **)malloc(CONSOLE_ARGS_MAX_COUNT * sizeof(char *));
-    input_out->size = 0;
+    tokens->tokens = (char **)malloc(CONSOLE_ARGS_MAX_COUNT * sizeof(char *));
+    tokens->size = 0;
 
-    char *cmdn = strtok(input, " ");
+    char *cmdn = strtok(input->_cmd, " ");
 
     while (cmdn != NULL)
     {
@@ -86,40 +88,47 @@ void consoleTokenizeInput(char *input, ConsoleInput *input_out)
 
         strcpy(arg, cmdn);
 
-        input_out->tokens[input_out->size] = arg;
+        tokens->tokens[tokens->size] = arg;
 
         cmdn = strtok(NULL, " ");
-        input_out->size++;
+        tokens->size++;
     }
 
-    MY_LOG_CORE_INFO("Input tokenized! Length: %d", input_out->size);
+    MY_LOG_CORE_INFO("Input tokenized! Length: %d", tokens->size);
 
     FUNCTION_PROFILE_END();
+
+    return true;
 }
 
-void consoleClearInput(ConsoleInput *input)
+bool consoleClear(ConsoleInput *input, ConsoleTokens *tokens)
 {
     FUNCTION_PROFILE_BEGIN();
 
-    if (!input)
+    if (!input || !tokens)
     {
         MY_LOG_CORE_ERROR("Invalid input");
         FUNCTION_PROFILE_END();
 
-        return;
+        return false;
     }
 
-    if (input->size > 0)
+    input->_cmdSize = 0;
+    memset(input->_cmd, 0, sizeof(input->_cmd));
+
+    if (tokens->size > 0)
     {
-        for (size_t i = 0; i < input->size; i++)
+        for (size_t i = 0; i < tokens->size; i++)
         {
-            free(input->tokens[i]);
+            free(tokens->tokens[i]);
         }
 
-        free(input->tokens);
+        free(tokens->tokens);
 
-        input->size = 0;
+        tokens->size = 0;
     }
 
     FUNCTION_PROFILE_END();
+
+    return true;
 }

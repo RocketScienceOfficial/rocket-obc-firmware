@@ -1,21 +1,38 @@
 #include "commands.h"
 #include "logger.h"
 #include "recorder.h"
-#include "error_handling.h"
 #include <stdlib.h>
 #include <string.h>
 
 static CommandData s_Commands[COMMANDS_MAX_COUNT];
 static size_t s_CommandSize;
 
-void registerCommand(CommandData *command)
+bool registerCommand(CommandData *command)
 {
     FUNCTION_PROFILE_BEGIN();
+
+    if (!command)
+    {
+        MY_LOG_CORE_ERROR("Invalid input");
+        FUNCTION_PROFILE_END();
+
+        return false;
+    }
+
+    if (s_CommandSize >= COMMANDS_MAX_COUNT)
+    {
+        MY_LOG_CORE_ERROR("Commands are full!");
+        FUNCTION_PROFILE_END();
+
+        return false;
+    }
 
     s_Commands[s_CommandSize] = *command;
     s_CommandSize++;
 
     FUNCTION_PROFILE_END();
+
+    return true;
 }
 
 CommandData *parseCommand(char **tokens, size_t tokensSize, CommandArgs *args_out_ptr)
@@ -81,7 +98,7 @@ CommandData *parseCommand(char **tokens, size_t tokensSize, CommandArgs *args_ou
     }
 }
 
-void executeCommand(CommandData *command, CommandArgs *args)
+bool executeCommand(CommandData *command, CommandArgs *args)
 {
     FUNCTION_PROFILE_BEGIN();
 
@@ -90,7 +107,7 @@ void executeCommand(CommandData *command, CommandArgs *args)
         MY_LOG_CORE_ERROR("Invalid input");
         FUNCTION_PROFILE_END();
 
-        return;
+        return false;
     }
 
     MY_LOG_CORE_INFO("Executing command: %s", command->name);
@@ -100,6 +117,8 @@ void executeCommand(CommandData *command, CommandArgs *args)
     MY_LOG_CORE_INFO("Command executed: %s", command->name);
 
     FUNCTION_PROFILE_END();
+
+    return true;
 }
 
 bool checkArgsCount(size_t expectedCount, size_t actualCount, char **output_ptr)
@@ -114,7 +133,7 @@ bool checkArgsCount(size_t expectedCount, size_t actualCount, char **output_ptr)
     return true;
 }
 
-void commandClearArgs(CommandArgs *args)
+bool commandClearArgs(CommandArgs *args)
 {
     FUNCTION_PROFILE_BEGIN();
 
@@ -123,7 +142,7 @@ void commandClearArgs(CommandArgs *args)
         MY_LOG_CORE_ERROR("Invalid input");
         FUNCTION_PROFILE_END();
 
-        return;
+        return false;
     }
 
     if (args->size > 0)
@@ -139,4 +158,6 @@ void commandClearArgs(CommandArgs *args)
     }
 
     FUNCTION_PROFILE_END();
+
+    return true;
 }

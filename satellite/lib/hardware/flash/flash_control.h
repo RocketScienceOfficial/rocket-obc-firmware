@@ -119,7 +119,7 @@ FUNCRESULT flashFlushFile(FlashModule *module, const char *fileName);
 FUNCRESULT flashGetFile(FlashModule *module, const char *fileName, uint8_t **buffer_ptr, size_t *size);
 
 /**
- * @brief Terminate flash module. After this call, flash module is not usable
+ * @brief Terminate flash module. After this call, this file is read-only
  *
  * @param module Flash module.
  * @param fileName File name.

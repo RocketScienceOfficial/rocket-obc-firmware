@@ -7,6 +7,6 @@ add_library(logging_lib
     recorder.c
     )
 
-target_link_libraries(logging_lib time_tracker_lib error_handling_lib flash_lib)
+target_link_libraries(logging_lib time_tracker_lib flash_lib)
 
 target_include_directories(logging_lib PUBLIC .)

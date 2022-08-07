@@ -92,7 +92,7 @@ bool calculateParity(uint8_t *buffer, size_t size, ParityData *data_out_ptr)
         return false;
     }
 
-    bool result = false;
+    bool result = true;
 
     ParityData rows = {0};
     ParityData columns = {0};

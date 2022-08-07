@@ -5,6 +5,7 @@
 
 static int s_ConsoleChar;
 static ConsoleInput s_ConsoleInput;
+static ConsoleTokens s_ConsoleTokens;
 
 void initializeCommands()
 {
@@ -20,12 +21,12 @@ bool consoleAvailable()
 
 void checkCommand()
 {
-    consoleProcessCharacter(s_ConsoleChar, &s_ConsoleInput);
+    consoleProcessCharacter(s_ConsoleChar, &s_ConsoleInput, &s_ConsoleTokens);
 
-    if (s_ConsoleInput.size > 0)
+    if (s_ConsoleTokens.size > 0)
     {
         CommandArgs args = {0};
-        CommandData *command = parseCommand(s_ConsoleInput.tokens, s_ConsoleInput.size, &args);
+        CommandData *command = parseCommand(s_ConsoleTokens.tokens, s_ConsoleTokens.size, &args);
 
         if (command)
         {
@@ -33,6 +34,6 @@ void checkCommand()
             commandClearArgs(&args);
         }
         
-        consoleClearInput(&s_ConsoleInput);
+        consoleClear(&s_ConsoleInput, &s_ConsoleTokens);
     }
 }

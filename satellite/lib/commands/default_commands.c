@@ -4,8 +4,8 @@
 #include "recorder.h"
 
 static CommandData s_Commands[] = {
-    {.name = "hello", .func = helloCommand},
-    {.name = "hello_name", .func = helloNameCommand},
+    {.name = "hello", .func = &helloCommand},
+    {.name = "hello_name", .func = &helloNameCommand},
 };
 
 void helloCommand(char **args, size_t argc)
@@ -35,7 +35,12 @@ void helloNameCommand(char **args, size_t argc)
     FUNCTION_PROFILE_END();
 }
 
-void registerDefaultConsoleCommands()
+size_t defaultCommandsGetCount()
+{
+    return sizeof(s_Commands) / sizeof(CommandData);
+}
+
+bool registerDefaultConsoleCommands()
 {
     FUNCTION_PROFILE_BEGIN();
 
@@ -43,10 +48,15 @@ void registerDefaultConsoleCommands()
 
     for (size_t i = 0; i < count; i++)
     {
-        registerCommand(&s_Commands[i]);
+        if (!registerCommand(&s_Commands[i]))
+        {
+            return false;
+        }
     }
 
     MY_LOG_CORE_INFO("Registered %d console commands", count);
 
     FUNCTION_PROFILE_END();
+
+    return true;
 }
