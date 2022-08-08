@@ -1,10 +1,10 @@
 #include "radio_controller.h"
-#include "radio.h"
-#include "radio_protocol.h"
 #include "pinout.h"
-#include "radio_utils.h"
 #include "config.h"
-#include "hardware_utils.h"
+#include "myhardware/radio.h"
+#include "myhardware/radio_protocol.h"
+#include "shared/radio_utils.h"
+#include "shared/hardware_utils.h"
 #include <stdlib.h>
 #include <string.h>
 

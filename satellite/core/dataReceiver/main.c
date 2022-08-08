@@ -2,12 +2,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "pico/stdlib.h"
-#include "logger.h"
 #include "receiver_logger.h"
-#include "log_serial.h"
 #include "radio_controller.h"
-#include "commands_utils.h"
-#include "console_input.h"
+#include "logging/logger.h"
+#include "logging/log_serial.h"
+#include "shared/commands_utils.h"
 
 static MeasurementData s_MeasurementData;
 static int s_RadioSignalStrength;

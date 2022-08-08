@@ -1,12 +1,11 @@
-add_library(logging_lib
-    log_serial.h
-    log_serial.c
-    logger.h
-    logger.c
-    recorder.h
-    recorder.c
+add_library(logging_lib STATIC
+    include/logging/log_serial.h
+    include/logging/logger.h
+    include/logging/recorder.h
+    src/log_serial.c
+    src/logger.c
+    src/recorder.c
     )
 
-target_link_libraries(logging_lib time_tracker_lib flash_lib)
-
-target_include_directories(logging_lib PUBLIC .)
+target_link_libraries(logging_lib PRIVATE utils_lib hardware_lib)
+target_include_directories(logging_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

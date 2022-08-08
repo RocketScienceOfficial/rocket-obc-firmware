@@ -6,8 +6,8 @@ if not exist build mkdir build
 
 cd build
 
-call cmake -G "MinGW Makefiles" ..
-call make -j4
+call cmake -G "Ninja" ..
+call ninja
 
 cd ..
 

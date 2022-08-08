@@ -1,11 +1,11 @@
 #include "radio_controller.h"
-#include "logger.h"
-#include "radio.h"
-#include "radio_protocol.h"
-#include "radio_utils.h"
 #include "pinout.h"
 #include "config.h"
-#include "hardware_utils.h"
+#include "logging/logger.h"
+#include "myhardware/radio.h"
+#include "myhardware/radio_protocol.h"
+#include "shared/radio_utils.h"
+#include "shared/hardware_utils.h"
 #include <string.h>
 
 static LoRaData s_LoraData;

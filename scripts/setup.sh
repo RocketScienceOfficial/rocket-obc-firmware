@@ -2,7 +2,7 @@
 
 cd `dirname $0`/..
 
-sudo apt install nodejs cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib build-essential
+sudo apt install nodejs cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib build-essential ninja-build
 
 cd telemetry/server
 npm install

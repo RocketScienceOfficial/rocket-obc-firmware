@@ -2,14 +2,14 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "pico/stdlib.h"
-#include "time_tracker.h"
-#include "logger.h"
-#include "recorder.h"
-#include "log_serial.h"
 #include "radio_controller.h"
-#include "commands_utils.h"
 #include "measurements_manager.h"
 #include "config.h"
+#include "utils/time_tracker.h"
+#include "logging/logger.h"
+#include "logging/recorder.h"
+#include "logging/log_serial.h"
+#include "shared/commands_utils.h"
 
 static Timer s_TimerOffset;
 

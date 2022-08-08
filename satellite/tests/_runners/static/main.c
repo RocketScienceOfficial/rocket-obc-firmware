@@ -1,9 +1,8 @@
 #include "pico/stdlib.h"
 #include "test_framework.h"
 #include "config.h"
-#include "logger.h"
-#include "log_serial.h"
-#include "commands.h"
+#include "logging/logger.h"
+#include "logging/log_serial.h"
 
 #include "test_accelerometer.h"
 #include "test_barometer.h"

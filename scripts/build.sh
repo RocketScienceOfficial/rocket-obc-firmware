@@ -8,8 +8,8 @@ fi
 
 cd build
 
-cmake -G "Unix Makefiles" ..
-make
+cmake -G "Ninja" ..
+ninja
 
 cd ..
 

@@ -6,6 +6,14 @@
 
 Project for the [CanSat](https://www.esa.int/Education/CanSat) satellite.
 
+## Requirements
+
+***
+
+1. CMake
+2. Ninja
+3. gcc-arm-none-eabi
+
 ## Install
 
 ***

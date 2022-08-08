@@ -1,5 +1,6 @@
 add_subdirectory(vendor)
+add_subdirectory(utils)
+add_subdirectory(myhardware)
 add_subdirectory(common)
-add_subdirectory(console)
 add_subdirectory(commands)
-add_subdirectory(hardware)
+add_subdirectory(console)

@@ -1,5 +1,6 @@
 #pragma once
-#include "logger.h"
+
+#include "logging/logger.h"
 
 #define MY_TEST_FAIL_CODE 0
 #define MY_TEST_SUCCESS_CODE 1

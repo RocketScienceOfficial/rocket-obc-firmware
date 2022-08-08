@@ -1,8 +1,8 @@
 #include "measurements_manager.h"
-#include "logger.h"
 #include "pinout.h"
 #include "config.h"
-#include "hardware_utils.h"
+#include "logging/logger.h"
+#include "shared/hardware_utils.h"
 
 static Logger s_MeasureLogger;
 static BarometerConfig s_BarometerConfig;

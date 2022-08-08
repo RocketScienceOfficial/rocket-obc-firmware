@@ -1,11 +1,9 @@
-add_library(core_shared
-    radio_utils.h
-    measurements_utils.h
-    commands_utils.h
-    commands_utils.c
-    hardware_utils.h
+add_library(core_shared STATIC
+    include/shared/commands_utils.h
+    include/shared/hardware_utils.h
+    include/shared/measurements_utils.h
+    include/shared/radio_utils.h
+    src/commands_utils.c
 )
 
-target_link_libraries(core_shared barometer_lib accelerometer_lib gps_lib console_lib commands_lib errors_lib)
-
-target_include_directories(core_shared PUBLIC .)
+target_include_directories(core_shared PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

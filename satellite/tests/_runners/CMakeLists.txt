@@ -1,2 +1,4 @@
+link_libraries(pico_stdlib test_framework logging_lib accelerometer_tests barometer_tests commands_tests console_tests flash_tests logger_tests maths_tests pinout_utils_tests radio_protocol_tests radio_receiver_test radio_sender_tests sd_tests servo_tests time_tracker_tests)
+
 add_subdirectory(dynamic)
 add_subdirectory(static)

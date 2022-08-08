@@ -4,9 +4,8 @@ add_executable(dataReceiver
     receiver_logger.c
 )
 
-target_link_libraries(dataReceiver PUBLIC core_shared pico_stdlib time_tracker_lib logging_lib maths_lib accelerometer_lib barometer_lib gps_lib radio_lib sd_lib console_lib commands_lib flash_lib servo_lib)
+target_link_libraries(dataReceiver PRIVATE core_shared)
 
 pico_enable_stdio_usb(dataReceiver 1)
 pico_enable_stdio_uart(dataReceiver 0)
-
 pico_add_extra_outputs(dataReceiver)
