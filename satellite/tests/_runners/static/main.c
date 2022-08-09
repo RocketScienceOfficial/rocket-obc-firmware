@@ -51,6 +51,8 @@ void initialize()
 {
     MY_LOG_CORE_INFO("Initializing...");
 
+    MY_TESTS_BEGIN();
+
     if (ENABLE_ACCELEROMETER)
     {
         MY_TEST_CASE_INIT_FUNC(ACCELEROMETER_TEST_NAME);
@@ -82,12 +84,16 @@ void initialize()
 
     MY_TEST_CASE_INIT_FUNC(TIME_TRACKER_TEST_NAME);
 
+    MY_TESTS_END();
+
     MY_LOG_CORE_INFO("Initialized!");
 }
 
 void runTests()
 {
-    MY_LOG_CORE_INFO("Running tests...");
+    MY_LOG_CORE_INFO("Running normal tests...");
+
+    MY_TESTS_BEGIN();
 
     if (ENABLE_ACCELEROMETER)
     {
@@ -133,6 +139,8 @@ void runTests()
     {
         MY_TEST_CASE_FUNC(SD_TEST_NAME, 1);
     }
+
+    MY_TESTS_END();
 
     MY_LOG_CORE_INFO("Tests finished!");
 }

@@ -48,6 +48,8 @@ void initialize()
 {
     MY_LOG_CORE_INFO("Initializing...");
 
+    MY_TESTS_BEGIN();
+
     MY_TEST_CASE_INIT_FUNC(COMMANDS_TEST_NAME);
 
     if (ENABLE_BAROMETER)
@@ -77,6 +79,8 @@ void initialize()
     }
 
     MY_TEST_CASE_INIT_FUNC(TIME_TRACKER_TEST_NAME);
+
+    MY_TESTS_END();
 
     MY_LOG_CORE_INFO("Initialized!");
 }
