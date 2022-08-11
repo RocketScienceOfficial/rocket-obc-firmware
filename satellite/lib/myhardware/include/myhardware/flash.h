@@ -103,7 +103,7 @@ FUNCRESULT flashWriteFile(FlashModule *module, const char *fileName, const char 
 FUNCRESULT flashFlushFile(FlashModule *module, const char *fileName);
 
 /**
- * @brief Read file.
+ * @brief Read file. Only 256 byte pages can be read, so data is buffered internally! To read all data, call flashFileTerminate() before.
  *
  * @param module Flash module.
  * @param fileName File name to read from.
