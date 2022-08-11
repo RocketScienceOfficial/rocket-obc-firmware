@@ -2,4 +2,5 @@ link_libraries(pico_stdlib logging_lib console_lib commands_lib utils_lib hardwa
 
 add_subdirectory(shared)
 add_subdirectory(measure)
+add_subdirectory(prototyping)
 add_subdirectory(dataReceiver)
