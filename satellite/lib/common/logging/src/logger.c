@@ -47,9 +47,9 @@ void myLogCreateConsoleSink(Logger *logger, const char *pattern)
 	logger->_sinks[logger->_numSinks++] = sink;
 }
 
-void myLogCreateFileSink(Logger *logger, const char *pattern, const char *fileName)
+void myLogCreateFileSink(Logger *logger, const char *pattern, size_t fileIndex)
 {
-	if (!logger || !pattern || !fileName)
+	if (!logger || !pattern || fileIndex >= FLASH_FILES_COUNT)
 	{
 		REPORT_ERROR("Invalid logger, pattern or fileName");
 
@@ -59,11 +59,10 @@ void myLogCreateFileSink(Logger *logger, const char *pattern, const char *fileNa
 	LogSinkData sink = {
 		._pattern = pattern,
 		._type = SINK_FILE,
-		._customData = (char *)fileName,
+		._customData = (size_t)fileIndex,
 	};
 
-	LOG_HW_CALL(flashInitFile(getDefaultFlashModule(), fileName));
-	LOG_HW_CALL(flashFlushFile(getDefaultFlashModule(), fileName));
+	LOG_HW_CALL(flashClearFile(getDefaultFlashModule(), fileIndex));
 
 	logger->_sinks[logger->_numSinks++] = sink;
 }
@@ -186,7 +185,7 @@ static void __log(Logger *logger, const char *level, const char *format, va_list
 				logSerial(log);
 				break;
 			case SINK_FILE:
-				LOG_HW_CALL(flashWriteFile(getDefaultFlashModule(), (char *)logger->_sinks[i]._customData, log));
+				LOG_HW_CALL(flashWriteFile(getDefaultFlashModule(), (size_t)logger->_sinks[i]._customData, log));
 				break;
 			default:
 				REPORT_ERROR("Unknown sink type");

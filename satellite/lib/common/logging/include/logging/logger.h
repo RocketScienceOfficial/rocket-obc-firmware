@@ -80,7 +80,7 @@ void myLogCreateConsoleSink(Logger *logger, const char *pattern);
  * @param logger Logger to add sink to.
  * @param pattern Pattern of sink.
  */
-void myLogCreateFileSink(Logger *logger, const char *pattern, const char *fileName);
+void myLogCreateFileSink(Logger *logger, const char *pattern, size_t fileIndex);
 
 /**
  * @brief Parses a log.

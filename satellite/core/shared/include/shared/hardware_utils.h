@@ -8,6 +8,6 @@
         FUNCRESULT result = func;                                                                             \
         if (FUNCFAILED(result))                                                                               \
         {                                                                                                     \
-            MY_LOG_CORE_ERROR("Hardware function with code failed: %d at '%s:%d'", result, __FILE__, __LINE__); \
+            MY_LOG_CORE_ERROR("Hardware function failed with code: %d at '%s:%d'", result, __FILE__, __LINE__); \
         }                                                                                                     \
     }

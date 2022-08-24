@@ -15,6 +15,7 @@ if not exist executables mkdir executables
 
 copy build\core\dataReceiver\dataReceiver.uf2 executables\dataReceiver.uf2
 copy build\core\measure\measure.uf2 executables\measure.uf2
+copy build\core\prototyping\prototyping.uf2 executables\prototyping.uf2
 copy build\tests\_runners\dynamic\dynamic_tests_runner.uf2 executables\dynamic_tests_runner.uf2
 copy build\tests\_runners\static\static_tests_runner.uf2 executables\static_tests_runner.uf2
 

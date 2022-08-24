@@ -10,7 +10,6 @@ static AccelerometerConfig s_AccelerometerConfig;
 
 #define MY_LOG_MEASURE_NAME "MEASURE_LOG"
 #define MY_LOG_MEASURE_PATTERN "%c;"
-#define MY_LOG_MEASURE_FILE_NAME "measurements.csv"
 #define MY_LOG_MEASURE_INT(value) myLog(&s_MeasureLogger, "", "%d", value)
 #define MY_LOG_MEASURE_FLOAT(value) myLog(&s_MeasureLogger, "", "%f", value)
 #define MY_LOG_MEASURE_END() myLog(&s_MeasureLogger, "", "\n")
@@ -18,7 +17,7 @@ static AccelerometerConfig s_AccelerometerConfig;
 void initializeMeasurements()
 {
     myLogCreateLogger(&s_MeasureLogger, MY_LOG_MEASURE_NAME);
-    myLogCreateFileSink(&s_MeasureLogger, MY_LOG_MEASURE_PATTERN, MY_LOG_MEASURE_FILE_NAME);
+    myLogCreateFileSink(&s_MeasureLogger, MY_LOG_MEASURE_PATTERN, MEASUREMENTS_FILE_INDEX);
 
     if (ENABLE_BAROMETER)
     {

@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#define FLASH_FILES_MAX_COUNT 4
+#define FLASH_FILES_COUNT 4
 
 /**
  * @brief Flash file structure. (INTERNAL USE)
@@ -13,20 +13,17 @@
 typedef struct _FlashFile
 {
     /**
-     * @brief File name.
-     */
-    const char *_name;
-
-    /**
-     * @brief Address offset in memory.
-     */
-    uint32_t _addressOffset;
-
-    /**
      * @brief File size.
      */
-    size_t _bytes;
+    size_t _size;
 
+} _FlashFile;
+
+/**
+ * @brief Flash file buffer structure. (INTERNAL USE)
+ */
+typedef struct _FlashFileBuffer
+{
     /**
      * @brief Buffer to write (Flash only allows to write 256 byte pages!).
      */
@@ -36,7 +33,23 @@ typedef struct _FlashFile
      * @brief Buffer size.
      */
     size_t _bufferSize;
-} _FlashFile;
+} _FlashFileBuffer;
+
+/**
+ * @brief Flash file system structure. (INTERNAL USE)
+ */
+typedef struct _FlashFileSystem
+{
+    /**
+     * @brief Is file system initialized.
+     */
+    uint32_t _initializationState;
+
+    /**
+     * @brief Flash files.
+     */
+    _FlashFile _files[FLASH_FILES_COUNT];
+} _FlashFileSystem;
 
 /**
  * @brief Flash structure. All changes are done internally, so keep it just for reference!
@@ -51,12 +64,12 @@ typedef struct FlashModule
     /**
      * @brief Flash files.
      */
-    _FlashFile _files[FLASH_FILES_MAX_COUNT];
+    _FlashFileSystem _fileSystem;
 
     /**
-     * @brief Flash files count.
+     * @brief Flash files buffers.
      */
-    size_t _filesCount;
+    _FlashFileBuffer _filesBuffers[FLASH_FILES_COUNT];
 } FlashModule;
 
 /**
@@ -68,15 +81,6 @@ typedef struct FlashModule
 FUNCRESULT flashInit(FlashModule *flashModule);
 
 /**
- * @brief Initialize file in flash module.
- *
- * @param module Flash module.
- * @param fileName File name.
- * @return Result code.
- */
-FUNCRESULT flashInitFile(FlashModule *module, const char *fileName);
-
-/**
  * @brief Get the Default Flash Module object
  *
  * @return Pointer to default Flash Module
@@ -84,40 +88,51 @@ FUNCRESULT flashInitFile(FlashModule *module, const char *fileName);
 FlashModule *getDefaultFlashModule();
 
 /**
- * @brief Write data to flash module. (Only 256 byte pages can be written, so data is buffered internally!)
+ * @brief Write data to flash module. Only 256 byte pages are allowed to write, so data is buffered internally.
  *
  * @param module Flash module.
- * @param fileName File name.
+ * @param fileIndex Index of file.
  * @param msg Text to write.
  * @return Result code.
  */
-FUNCRESULT flashWriteFile(FlashModule *module, const char *fileName, const char *msg);
+FUNCRESULT flashWriteFile(FlashModule *module, size_t fileIndex, const char *msg);
+
+/**
+ * @brief Write data to flash module. Only 256 byte pages are allowed to write, so data is buffered internally.
+ *
+ * @param module Flash module.
+ * @param fileIndex Index of file.
+ * @param buffer Buffer to write.
+ * @param size Size of buffer.
+ * @return Result code.
+ */
+FUNCRESULT flashWriteFileBuff(FlashModule *module, size_t fileIndex, const uint8_t *buffer, size_t size);
 
 /**
  * @brief Clear file
  *
  * @param module Flash module.
- * @param fileName File name to clear.
+ * @param fileIndex Index of file.
  * @return Result code.
  */
-FUNCRESULT flashFlushFile(FlashModule *module, const char *fileName);
+FUNCRESULT flashClearFile(FlashModule *module, size_t fileIndex);
 
 /**
- * @brief Read file. Only 256 byte pages can be read, so data is buffered internally! To read all data, call flashFileTerminate() before.
+ * @brief Read file.
  *
  * @param module Flash module.
- * @param fileName File name to read from.
+ * @param fileIndex Index of file.
  * @param buffer_ptr Pointer to buffer to read to.
  * @param size Size of buffer.
  * @return FUNCRESULT
  */
-FUNCRESULT flashGetFile(FlashModule *module, const char *fileName, uint8_t **buffer_ptr, size_t *size);
+FUNCRESULT flashGetFile(FlashModule *module, size_t fileIndex, const uint8_t **buffer_ptr, size_t *size);
 
 /**
- * @brief Terminate flash module. After this call, this file is read-only
+ * @brief Terminate flash module and flush buffers. After this call, this flash module is not usable anymore.
  *
  * @param module Flash module.
- * @param fileName File name.
+ * @param fileIndex Index of file
  * @return Result code.
  */
-FUNCRESULT flashFileTerminate(FlashModule *module, const char *fileName);
+FUNCRESULT flashTerminate(FlashModule *module);

@@ -147,7 +147,7 @@ int bmp280ConvertPressure(int32_t pressure, int32_t temp, struct bmp280_calib_pa
     var2 = (((int32_t)(converted >> 2)) * ((int32_t)params->dig_p8)) >> 13;
     converted = (uint32_t)((int32_t)converted + ((var1 + var2 + params->dig_p7) >> 4));
 
-    return converted;
+    return (int)converted;
 }
 
 void bmp280GetCalibParams(BarometerConfig *config, struct bmp280_calib_param *params)
@@ -245,6 +245,7 @@ FUNCRESULT barometerGetAltitude(BarometerConfig *config, BarometerData *data, fl
         return ERR_INVALIDARG;
     }
 
-    int pressure = data->pressure;
-    *altitude = PRESSURE_TEMPERATURE_CONSTANT * (1.0 - pow(pressure / SEA_LEVEL_PRESSURE, PRESSURE_GAS_CONSTANT));
+    *altitude = PRESSURE_TEMPERATURE_CONSTANT * (1.0 - pow(data->pressure / SEA_LEVEL_PRESSURE, PRESSURE_GAS_CONSTANT));
+
+    return SUC_OK;
 }

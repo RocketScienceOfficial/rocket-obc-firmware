@@ -200,7 +200,7 @@ FUNCRESULT sdEnd(SDCard *sdCard, const char *fileName)
     return SUC_OK;
 }
 
-FUNCRESULT sdFlush(SDCard *sdCard, const char *fileName)
+FUNCRESULT sdClearFile(SDCard *sdCard, const char *fileName)
 {
     if (!sdCard || !fileName)
     {

@@ -18,9 +18,13 @@ int main()
     stdio_init_all();
     sleep_ms(5000);
 
-    myLogCreateConsoleSink(myLogGetCoreLogger(), DEFAULT_LOG_SERIAL_PATTERN);
-    myLogCreateFileSink(myLogGetCoreLogger(), DEFAULT_LOG_SERIAL_PATTERN, "log.txt");
-    myLogCreateFileSink(myLogGetRecordLogger(), "%c\n", "record.txt");
+    if (DEBUG_MODE)
+    {
+        myLogCreateConsoleSink(myLogGetCoreLogger(), DEFAULT_LOG_SERIAL_PATTERN);
+    }
+    
+    myLogCreateFileSink(myLogGetCoreLogger(), DEFAULT_LOG_SERIAL_PATTERN, LOG_FILE_INDEX);
+    myLogCreateFileSink(myLogGetRecordLogger(), "%c\n", RECORD_FILE_INDEX);
 
     MY_LOG_CORE_INFO("Initializing...");
 

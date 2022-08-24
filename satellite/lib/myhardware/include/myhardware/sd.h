@@ -101,7 +101,7 @@ FUNCRESULT sdEnd(SDCard *sdCard, const char *fileName);
  * @param fileName File name.
  * @return Result code.
  */
-FUNCRESULT sdFlush(SDCard *sdCard, const char *fileName);
+FUNCRESULT sdClearFile(SDCard *sdCard, const char *fileName);
 
 /**
  * @brief Terminate SD. After this call, SD card is not usable.
