@@ -25,13 +25,16 @@ void initializeRadio()
             .cs = SX1278_CS_GPIO,
             .ss = SX1278_SS_GPIO,
             .reset = SX1278_RESET_GPIO,
-            .dio0 = SX1278_DIO0_GPIO};
+            .dio0 = SX1278_DIO0_GPIO,
+        };
 
         loraInit(&s_LoraData, &loraPinout);
         loraBegin(&s_LoraData, RADIO_FREQUENCY_HZ);
         loraSetTxPower(&s_LoraData, RADIO_DBM);
         loraSetSpreadingFactor(&s_LoraData, RADIO_SPREADING_FACTOR);
         loraSetSignalBandwidth(&s_LoraData, RADIO_SIGNAL_BANDWIDTH);
+
+        initRadioCommand(&s_LoraData);
     }
 }
 
@@ -45,11 +48,20 @@ bool checkRadioPacket(MeasurementData *data_out, int *signalStrength)
         {
             MY_LOG_CORE_INFO("Packet received!");
 
+            *signalStrength = loraRssi(&s_LoraData);
+
             if (s_RadioPacketValidation)
             {
                 MY_LOG_CORE_INFO("Packet is valid!");
 
-                memcpy(data_out, s_PacketBody.payload, s_PacketBody.payloadSize);
+                if (s_PacketBody.command == MEASUREMENTS_RADIO_COMMAND_ID)
+                {
+                    memcpy(data_out, s_PacketBody.payload, s_PacketBody.payloadSize);
+                }
+                else if (s_PacketBody.command == COMMANDS_RADIO_COMMAND_ID)
+                {
+                    radioRemoteCommandCallback(s_PacketBody.payload, s_PacketBody.payloadSize);
+                }
 
                 HW_CALL(radioClearPacket(&s_PacketBody));
             }
@@ -57,8 +69,6 @@ bool checkRadioPacket(MeasurementData *data_out, int *signalStrength)
             {
                 MY_LOG_CORE_ERROR("Validation failed!");
             }
-
-            *signalStrength = loraRssi(&s_LoraData);
 
             MY_LOG_CORE_INFO("Packet processed!");
 

@@ -7,9 +7,11 @@
 #include "logging/logger.h"
 #include "logging/log_serial.h"
 #include "shared/commands_utils.h"
+#include "shared/tick.h"
 
-static MeasurementData s_MeasurementData;
 static int s_RadioSignalStrength;
+static MeasurementData s_MeasurementData;
+static TickData s_TickData;
 
 int main()
 {
@@ -44,6 +46,8 @@ int main()
 
             logReceiverData(&data);
         }
+
+        tick(&s_TickData);
     }
 
     return 0;

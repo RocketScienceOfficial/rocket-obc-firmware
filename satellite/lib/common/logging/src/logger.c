@@ -59,7 +59,7 @@ void myLogCreateFileSink(Logger *logger, const char *pattern, size_t fileIndex)
 	LogSinkData sink = {
 		._pattern = pattern,
 		._type = SINK_FILE,
-		._customData = (size_t)fileIndex,
+		._customData = (void *)fileIndex,
 	};
 
 	LOG_HW_CALL(flashClearFile(getDefaultFlashModule(), fileIndex));

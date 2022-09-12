@@ -10,19 +10,20 @@
 #include "logging/recorder.h"
 #include "logging/log_serial.h"
 #include "shared/commands_utils.h"
+#include "shared/tick.h"
 
 static Timer s_TimerOffset;
+static TickData s_TickData;
 
 int main()
 {
     stdio_init_all();
-    sleep_ms(5000);
 
     if (DEBUG_MODE)
     {
         myLogCreateConsoleSink(myLogGetCoreLogger(), DEFAULT_LOG_SERIAL_PATTERN);
     }
-    
+
     myLogCreateFileSink(myLogGetCoreLogger(), DEFAULT_LOG_SERIAL_PATTERN, LOG_FILE_INDEX);
     myLogCreateFileSink(myLogGetRecordLogger(), "%c\n", RECORD_FILE_INDEX);
 
@@ -48,6 +49,8 @@ int main()
             takeMeasurements(&measurements);
             sendRadio(&measurements);
         }
+
+        tick(&s_TickData);
     }
 
     return 0;

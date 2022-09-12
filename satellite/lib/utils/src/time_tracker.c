@@ -6,7 +6,7 @@
 
 Timer getMsSinceBoot()
 {
-	timer_t time_ms = to_ms_since_boot(get_absolute_time());
+	Timer time_ms = to_ms_since_boot(get_absolute_time());
 
 	return time_ms;
 }

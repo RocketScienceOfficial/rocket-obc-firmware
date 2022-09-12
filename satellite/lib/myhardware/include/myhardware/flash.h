@@ -124,7 +124,7 @@ FUNCRESULT flashClearFile(FlashModule *module, size_t fileIndex);
  * @param fileIndex Index of file.
  * @param buffer_ptr Pointer to buffer to read to.
  * @param size Size of buffer.
- * @return FUNCRESULT
+ * @return Result code.
  */
 FUNCRESULT flashGetFile(FlashModule *module, size_t fileIndex, const uint8_t **buffer_ptr, size_t *size);
 

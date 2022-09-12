@@ -7,5 +7,5 @@ add_library(logging_lib STATIC
     src/recorder.c
     )
 
-target_link_libraries(logging_lib PRIVATE utils_lib hardware_lib)
+target_link_libraries(logging_lib PUBLIC utils_lib hardware_lib)
 target_include_directories(logging_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

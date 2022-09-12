@@ -171,8 +171,6 @@ FUNCRESULT flashClearFile(FlashModule *module, size_t fileIndex)
         return ERR_UNINITIALIZED;
     }
 
-    eraseFlashSectors(module, getFlashFileAddressOffset(fileIndex), FLASH_FILE_SIZE);
-
     _FlashFile *fileInfo = &module->_fileSystem._files[fileIndex];
 
     if (!fileInfo)
@@ -191,7 +189,7 @@ FUNCRESULT flashClearFile(FlashModule *module, size_t fileIndex)
 
 FUNCRESULT flashGetFile(FlashModule *module, size_t fileIndex, const uint8_t **buffer_ptr, size_t *size)
 {
-    if (!module || fileIndex >= FLASH_FILE_SIZE || !buffer_ptr || !size)
+    if (!module || fileIndex >= FLASH_FILES_COUNT || !buffer_ptr || !size)
     {
         return ERR_INVALIDARG;
     }
@@ -231,6 +229,7 @@ FUNCRESULT flashTerminate(FlashModule *module)
         if (module->_filesBuffers[i]._bufferSize > 0)
         {
             writeFlashPage(module, getFlashFileAddressOffset(i) + module->_fileSystem._files[i]._size, module->_filesBuffers[i]._buffer);
+
             module->_fileSystem._files[i]._size += module->_filesBuffers[i]._bufferSize;
             module->_filesBuffers[i]._bufferSize = 0;
         }
@@ -239,8 +238,6 @@ FUNCRESULT flashTerminate(FlashModule *module)
     }
 
     updateFlashFilesSizes(module);
-
-    module->_isInitialized = false;
 
     return SUC_OK;
 }
