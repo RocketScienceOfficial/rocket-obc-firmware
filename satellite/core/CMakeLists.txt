@@ -1,4 +1,4 @@
-link_libraries(pico_stdlib logging_lib console_lib commands_lib utils_lib hardware_lib)
+link_libraries(pico_stdlib utils_lib drivers_lib kernel_lib)
 
 add_subdirectory(shared)
 add_subdirectory(measure)

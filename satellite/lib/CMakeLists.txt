@@ -1,6 +1,1 @@
-add_subdirectory(vendor)
-add_subdirectory(utils)
-add_subdirectory(myhardware)
-add_subdirectory(common)
-add_subdirectory(commands)
-add_subdirectory(console)
+add_subdirectory(no-OS-FatFS-SD-SPI-RPi-Pico/FatFs_SPI)

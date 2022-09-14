@@ -1,0 +1,7 @@
+add_subdirectory(commands)
+add_subdirectory(console)
+add_subdirectory(logging)
+add_subdirectory(services)
+
+add_library(kernel_lib)
+target_link_libraries(kernel_lib PUBLIC kernel_commands_lib kernel_console_lib kernel_logging_lib kernel_services_lib)
