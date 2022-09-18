@@ -108,12 +108,22 @@ FUNCRESULT serializeRadioPacket(RadioBody *body, uint8_t **buffer_out_ptr, size_
     memcpy(*buffer_out_ptr, headerBuffer, headerSize);
     memcpy(*buffer_out_ptr + headerSize, bodyBuffer, bodySize);
 
+    if (!encryptDecrypt(*buffer_out_ptr, bufferSize, RADIO_PACKET_KEY, sizeof(RADIO_PACKET_KEY) / sizeof(uint8_t)))
+    {
+        return ERR_UNEXPECTED;
+    }
+
     return SUC_OK;
 }
 
 FUNCRESULT deserializeRadioPacket(uint8_t *buffer, size_t size, RadioBody *body_out, bool *validationResult)
 {
     _RadioPacket packet = {0};
+
+    if (!encryptDecrypt(buffer, size, RADIO_PACKET_KEY, sizeof(RADIO_PACKET_KEY) / sizeof(uint8_t)))
+    {
+        return ERR_UNEXPECTED;
+    }
 
     size_t currentBufferOffset = 0;
     memcpy(&packet._header, buffer + currentBufferOffset, sizeof(size_t));
@@ -159,71 +169,6 @@ FUNCRESULT deserializeRadioPacket(uint8_t *buffer, size_t size, RadioBody *body_
     else
     {
         *validationResult = false;
-    }
-
-    return SUC_OK;
-}
-
-FUNCRESULT radioSendPacket(LoRaData *lora, RadioBody *body)
-{
-    if (!lora || !body)
-    {
-        return ERR_INVALIDARG;
-    }
-
-    uint8_t *buffer;
-    size_t bufferSize = 0;
-
-    if (FUNCFAILED(serializeRadioPacket(body, &buffer, &bufferSize)))
-    {
-        return ERR_FAIL;
-    }
-
-    if (!encryptDecrypt(buffer, bufferSize, RADIO_PACKET_KEY, sizeof(RADIO_PACKET_KEY) / sizeof(uint8_t)))
-    {
-        return ERR_FAIL;
-    }
-
-    loraBeginPacket(lora, 0);
-    loraWrite_str_s(lora, buffer, bufferSize);
-    loraEndPacket(lora, 0);
-
-    free(buffer);
-
-    return SUC_OK;
-}
-
-FUNCRESULT radioReceivePacket(LoRaData *lora, bool *available, RadioBody *body, bool *validationResult)
-{
-    if (!lora || !available || !body || !validationResult)
-    {
-        return ERR_INVALIDARG;
-    }
-
-    size_t packetSize = loraParsePacket(lora, 0);
-
-    *available = packetSize > 0;
-
-    if (packetSize)
-    {
-        uint8_t buffer[packetSize];
-        size_t i = 0;
-
-        while (loraAvailable(lora))
-        {
-            buffer[i] = (uint8_t)loraRead(lora);
-            i++;
-        }
-
-        if (!encryptDecrypt(buffer, packetSize, RADIO_PACKET_KEY, sizeof(RADIO_PACKET_KEY) / sizeof(uint8_t)))
-        {
-            return ERR_FAIL;
-        }
-
-        if (FUNCFAILED(deserializeRadioPacket(buffer, packetSize, body, validationResult)))
-        {
-            return ERR_FAIL;
-        }
     }
 
     return SUC_OK;

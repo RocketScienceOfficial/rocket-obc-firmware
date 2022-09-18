@@ -1,12 +1,12 @@
 #include "measurements_manager.h"
 #include "pinout.h"
 #include "config.h"
-#include "logging/logger.h"
-#include "shared/hardware_utils.h"
+#include "kernel/logging/logger.h"
+#include "shared/functions_utils.h"
 
 static Logger s_MeasureLogger;
-static BarometerConfig s_BarometerConfig;
-static AccelerometerConfig s_AccelerometerConfig;
+static BMP280Config s_BarometerConfig;
+static MPU6050Config s_AccelerometerConfig;
 
 #define MY_LOG_MEASURE_NAME "MEASURE_LOG"
 #define MY_LOG_MEASURE_PATTERN "%c;"
@@ -21,12 +21,12 @@ void initializeMeasurements()
 
     if (ENABLE_BAROMETER)
     {
-        HW_CALL(barometerInit(&s_BarometerConfig, BMP280_I2C, BMP280_I2C_SDA_PIN, BMP280_I2C_SCL_PIN));
+        FUNC_CALL(bmp280Init(&s_BarometerConfig, BMP280_I2C, BMP280_I2C_SDA_PIN, BMP280_I2C_SCL_PIN));
     }
 
     if (ENABLE_ACCELEROMETER)
     {
-        HW_CALL(accelerometerInit(&s_AccelerometerConfig, MPU6050_I2C, MPU6050_I2C_SDA_PIN, MPU6050_I2C_SCL_PIN, MPU6050_LP_FILTER_LEVEL, MPU6050_ACCEL_SENS_LEVEL, MPU6050_GYRO_SENS_LEVEL));
+        FUNC_CALL(mpu6050Init(&s_AccelerometerConfig, MPU6050_I2C, MPU6050_I2C_SDA_PIN, MPU6050_I2C_SCL_PIN, MPU6050_LP_FILTER_LEVEL, MPU6050_ACCEL_SENS_LEVEL, MPU6050_GYRO_SENS_LEVEL));
     }
 
     if (ENABLE_GPS)
@@ -36,30 +36,24 @@ void initializeMeasurements()
 
 void takeMeasurements(MeasurementData *data_out)
 {
-    BarometerData barometerData = {0};
-    AccelerometerData accelerometerData = {0};
-    GPSData gpsData = {0};
+    BMP280Data barometerData = {0};
+    MPU6050Data accelerometerData = {0};
     int componentsStatus = 0;
 
     if (ENABLE_BAROMETER)
     {
-        HW_CALL(barometerRead(&s_BarometerConfig, &barometerData));
+        FUNC_CALL(bmp280Read(&s_BarometerConfig, &barometerData));
 
         componentsStatus |= COMPONENT_BAROMETER;
     }
 
     if (ENABLE_ACCELEROMETER)
     {
-        AccelerometerRawData mpu6050RawData = {0};
-        HW_CALL(accelerometerReadRaw(&s_AccelerometerConfig, &mpu6050RawData));
-        HW_CALL(accelerometerConvertData(&s_AccelerometerConfig, &mpu6050RawData, &accelerometerData));
+        MPU6050RawData mpu6050RawData = {0};
+        FUNC_CALL(mpu6050ReadRaw(&s_AccelerometerConfig, &mpu6050RawData));
+        FUNC_CALL(mpu6050ConvertData(&s_AccelerometerConfig, &mpu6050RawData, &accelerometerData));
 
         componentsStatus |= COMPONENT_ACCELEROMETER;
-    }
-
-    if (ENABLE_GPS)
-    {
-        componentsStatus |= COMPONENT_GPS;
     }
 
     MY_LOG_MEASURE_INT(barometerData.pressure);
@@ -70,15 +64,11 @@ void takeMeasurements(MeasurementData *data_out)
     MY_LOG_MEASURE_FLOAT(accelerometerData.rot_x);
     MY_LOG_MEASURE_FLOAT(accelerometerData.rot_y);
     MY_LOG_MEASURE_FLOAT(accelerometerData.rot_z);
-    MY_LOG_MEASURE_FLOAT(gpsData.latitude);
-    MY_LOG_MEASURE_FLOAT(gpsData.longitude);
-    MY_LOG_MEASURE_FLOAT(gpsData.altitude);
     MY_LOG_MEASURE_END();
 
     *data_out = (MeasurementData){
         .barometerData = barometerData,
         .accelerometerData = accelerometerData,
-        .gpsData = gpsData,
         .componentsStatus = componentsStatus,
     };
 }

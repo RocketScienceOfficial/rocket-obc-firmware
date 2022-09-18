@@ -1,6 +1,6 @@
 #pragma once
 
-#include "drivers/hwutils/errors_types.h"
+#include "utils/errors_types.h"
 #include "ff.h"
 #include "sd_card.h"
 #include "f_util.h"

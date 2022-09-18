@@ -1,7 +1,6 @@
 #pragma once
 
-#include "shared/measurements_utils.h"
+#include "drivers/lora/sx1278_driver.h"
 #include <stdbool.h>
 
-void initializeRadio();
-bool checkRadioPacket(MeasurementData *data_out, int *signalStrength);
+SX1278Pinout getRadioPinout();

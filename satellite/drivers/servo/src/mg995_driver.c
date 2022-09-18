@@ -34,7 +34,7 @@ FUNCRESULT mg995Init(const int pin, MG995Data *data)
 
     data->pin = pin;
 
-    FUNCRESULT res = servoRotateAngle(data, 0.0f);
+    FUNCRESULT res = mg995RotateAngle(data, 0.0f);
 
     return res;
 }

@@ -1,5 +1,5 @@
 #include "receiver_logger.h"
-#include "logging/logger.h"
+#include "kernel/logging/logger.h"
 
 static Logger s_Logger;
 
@@ -51,21 +51,9 @@ void logReceiverData(ReceiverSendData *data)
         MY_LOG_RECEIVER_DATA_EMPTY();
     }
 
-    if (data->measurement.componentsStatus & COMPONENT_GPS)
-    {
-        MY_LOG_RECEIVER_DATA_INT(data->measurement.gpsData.latitude);
-        MY_LOG_RECEIVER_DATA_FLOAT(data->measurement.gpsData.longitude);
-        MY_LOG_RECEIVER_DATA_FLOAT(data->measurement.gpsData.altitude);
-    }
-    else
-    {
-        MY_LOG_RECEIVER_DATA_EMPTY();
-        MY_LOG_RECEIVER_DATA_EMPTY();
-        MY_LOG_RECEIVER_DATA_EMPTY();
-    }
-
     MY_LOG_RECEIVER_DATA_FLOAT(data->condition.measureRAMUsagePercent);
     MY_LOG_RECEIVER_DATA_FLOAT(data->condition.receiverRAMUsagePercent);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->condition.measureBatteryPercent);
     MY_LOG_RECEIVER_DATA_INT(data->condition.radioSignalStrength);
 
     MY_LOG_RECEIVER_DATA_END();

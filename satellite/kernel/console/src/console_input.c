@@ -1,6 +1,4 @@
 #include "kernel/console/console_input.h"
-#include "kernel/logging/logger.h"
-#include "kernel/logging/recorder.h"
 #include "pico/stdlib.h"
 #include <ctype.h>
 #include <string.h>
@@ -14,68 +12,50 @@ int consoleCheckInput()
     return ch != PICO_ERROR_TIMEOUT ? ch : 0;
 }
 
-bool consoleProcessCharacter(int c, ConsoleInput *input, ConsoleTokens *tokens)
+FUNCRESULT consoleProcessCharacter(int c, ConsoleInput *input, ConsoleTokens *tokens)
 {
-    FUNCTION_PROFILE_BEGIN();
-
     if (!input || !tokens)
     {
-        MY_LOG_CORE_ERROR("Invalid input");
-        FUNCTION_PROFILE_END();
-
-        return false;
+        return ERR_INVALIDARG;
     }
 
     if (!isprint(c) && !isspace(c))
     {
-        FUNCTION_PROFILE_END();
-
-        return false;
+        return SUC_OK;
     }
-
-    MY_LOG_CORE_INFO("Processing character: %c", c);
 
     if (c == '\r')
     {
         if (strnlen(input->_cmd, sizeof(input->_cmd)) == 0)
         {
-            return true;
+            return SUC_OK;
         }
-
-        MY_LOG_CORE_INFO("Return pressed!");
-
-        consoleTokenizeInput(input, tokens);
+        else
+        {
+            return consoleTokenizeInput(input, tokens);
+        }
     }
     else
     {
         if (input->_cmdSize < sizeof(input->_cmd) - 1)
         {
             input->_cmd[input->_cmdSize++] = c;
+
+            return SUC_OK;
         }
         else
         {
-            MY_LOG_CORE_ERROR("Command too long!");
+            return ERR_FAIL;
         }
     }
-
-    FUNCTION_PROFILE_END();
-
-    return true;
 }
 
-bool consoleTokenizeInput(ConsoleInput *input, ConsoleTokens *tokens)
+FUNCRESULT consoleTokenizeInput(ConsoleInput *input, ConsoleTokens *tokens)
 {
-    FUNCTION_PROFILE_BEGIN();
-
     if (!input || !tokens)
     {
-        MY_LOG_CORE_ERROR("Invalid input");
-        FUNCTION_PROFILE_END();
-
-        return false;
+        return ERR_INVALIDARG;
     }
-
-    MY_LOG_CORE_INFO("Tokenizing input...");
 
     tokens->tokens = (char **)malloc(CONSOLE_ARGS_MAX_COUNT * sizeof(char *));
     tokens->size = 0;
@@ -94,23 +74,14 @@ bool consoleTokenizeInput(ConsoleInput *input, ConsoleTokens *tokens)
         tokens->size++;
     }
 
-    MY_LOG_CORE_INFO("Input tokenized! Length: %d", tokens->size);
-
-    FUNCTION_PROFILE_END();
-
-    return true;
+    return SUC_OK;
 }
 
-bool consoleClear(ConsoleInput *input, ConsoleTokens *tokens)
+FUNCRESULT consoleClear(ConsoleInput *input, ConsoleTokens *tokens)
 {
-    FUNCTION_PROFILE_BEGIN();
-
     if (!input || !tokens)
     {
-        MY_LOG_CORE_ERROR("Invalid input");
-        FUNCTION_PROFILE_END();
-
-        return false;
+        return ERR_INVALIDARG;
     }
 
     input->_cmdSize = 0;
@@ -128,7 +99,5 @@ bool consoleClear(ConsoleInput *input, ConsoleTokens *tokens)
         tokens->size = 0;
     }
 
-    FUNCTION_PROFILE_END();
-
-    return true;
+    return SUC_OK;
 }

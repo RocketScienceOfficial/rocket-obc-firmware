@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shared/measurements_utils.h"
+#include "drivers/lora/sx1278_driver.h"
+#include <stdbool.h>
 
-void initializeRadio();
-void sendRadio(MeasurementData *data);
+SX1278Pinout getRadioPinout();

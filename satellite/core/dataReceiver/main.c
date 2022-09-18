@@ -1,16 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include "pico/stdlib.h"
-#include "receiver_logger.h"
+#include "config.h"
 #include "radio_controller.h"
-#include "logging/logger.h"
-#include "logging/log_serial.h"
+#include "receiver_logger.h"
+#include "kernel/logging/logger.h"
+#include "kernel/console/console_output.h"
+#include "shared/functions_utils.h"
 #include "shared/commands_utils.h"
+#include "shared/radio_utils.h"
 #include "shared/tick.h"
 
-static int s_RadioSignalStrength;
-static MeasurementData s_MeasurementData;
+static RadioUtilPacketData s_Packet;
 static TickData s_TickData;
 
 int main()
@@ -21,8 +24,10 @@ int main()
 
     MY_LOG_CORE_INFO("Initializing...");
 
+    SX1278Pinout loraPinout = getRadioPinout();
+
     initializeCommands();
-    initializeRadio();
+    initializeRadio(&loraPinout);
     initializeReceiverLogger();
 
     MY_LOG_CORE_INFO("Everything is ready!");
@@ -34,17 +39,30 @@ int main()
             checkCommand();
         }
 
-        if (checkRadioPacket(&s_MeasurementData, &s_RadioSignalStrength))
+        if (checkRadioPacket(&s_Packet))
         {
-            ReceiverSendData data = {
-                .measurement = s_MeasurementData,
-                .condition = {
-                    .measureRAMUsagePercent = 0,
-                    .receiverRAMUsagePercent = 0,
-                    .radioSignalStrength = s_RadioSignalStrength,
-                }};
+            if (s_Packet.body.command == MEASUREMENTS_RADIO_COMMAND_ID)
+            {
+                MeasurementData measurement = {0};
+                memcpy(&measurement, &s_Packet.body.payload, s_Packet.body.payloadSize);
 
-            logReceiverData(&data);
+                ReceiverSendData data = {
+                    .measurement = measurement,
+                    .condition = {
+                        .measureRAMUsagePercent = 0,
+                        .receiverRAMUsagePercent = 0,
+                        .measureBatteryPercent = 0,
+                        .radioSignalStrength = s_Packet.signalStrength,
+                    }};
+
+                logReceiverData(&data);
+            }
+            else if (s_Packet.body.command == COMMANDS_RADIO_COMMAND_ID)
+            {
+                radioRemoteCommandCallback(s_Packet.body.payload, s_Packet.body.payloadSize);
+            }
+
+            FUNC_CALL(radioClearPacket(&s_Packet.body));
         }
 
         tick(&s_TickData);

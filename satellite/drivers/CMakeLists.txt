@@ -1,15 +1,16 @@
 add_subdirectory(hwutils)
-
-link_libraries(hwutils)
+add_subdirectory(gpio)
 
 add_subdirectory(accelerometer)
 add_subdirectory(barometer)
-#add_subdirectory(battery)
+add_subdirectory(battery)
 add_subdirectory(flash)
 add_subdirectory(gm)
 add_subdirectory(gps)
-#add_subdirectory(led)
+add_subdirectory(led)
 add_subdirectory(lora)
 add_subdirectory(sd)
 add_subdirectory(servo)
 add_subdirectory(uv)
+
+add_subdirectory(drivers_lib)

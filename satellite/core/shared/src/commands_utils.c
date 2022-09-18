@@ -1,7 +1,7 @@
 #include "shared/commands_utils.h"
-#include "console/console_input.h"
-#include "commands/commands.h"
-#include "commands/default_commands.h"
+#include "kernel/console/console_input.h"
+#include "kernel/commands/commands.h"
+#include "kernel/commands/default_commands.h"
 
 static int s_ConsoleChar;
 static ConsoleInput s_ConsoleInput;

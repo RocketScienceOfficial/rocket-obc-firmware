@@ -1,11 +1,12 @@
 #pragma once
 
+#define DEBUG_MODE 0
+
 #define ENABLE_RADIO 0
 #define ENABLE_SD 0
 #define ENABLE_BAROMETER 0
 #define ENABLE_ACCELEROMETER 0
 #define ENABLE_GPS 0
-#define DEBUG_MODE 0
 
 #define LOG_FILE_INDEX 0
 #define LOG_FILE_NAME "log.txt"

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "utils/errors_types.h"
 #include <stddef.h>
 #include <stdbool.h>
 
@@ -52,9 +53,9 @@ int consoleCheckInput();
  * @param input Console input structure to setup.
  * @param input Console tokens structure to setup.
  *
- * @return True if the character was processed, false otherwise.
+ * @return Result code.
  */
-bool consoleProcessCharacter(int c, ConsoleInput *input, ConsoleTokens *tokens);
+FUNCRESULT consoleProcessCharacter(int c, ConsoleInput *input, ConsoleTokens *tokens);
 
 /**
  * @brief Tokenizes the input.
@@ -62,15 +63,15 @@ bool consoleProcessCharacter(int c, ConsoleInput *input, ConsoleTokens *tokens);
  * @param input Input to tokenize.
  * @param tokens Console tokens structure to setup.
  *
- * @return True if the input was tokenized, false otherwise.
+ * @return Result code.
  */
-bool consoleTokenizeInput(ConsoleInput *input, ConsoleTokens *tokens);
+FUNCRESULT consoleTokenizeInput(ConsoleInput *input, ConsoleTokens *tokens);
 
 /**
  * @brief Clears the input.
  *
  * @param input Console input structure to clear.
  *
- * @return True if the input was cleared, false otherwise.
+ * @return Result code.
  */
-bool consoleClear(ConsoleInput *input, ConsoleTokens *tokens);
+FUNCRESULT consoleClear(ConsoleInput *input, ConsoleTokens *tokens);

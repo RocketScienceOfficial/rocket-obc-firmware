@@ -1,6 +1,6 @@
 #include "utils/cryptography.h"
-#include <string.h>
 #include <math.h>
+#include <string.h>
 #include <stdlib.h>
 
 static size_t count1Bits(uint8_t n)

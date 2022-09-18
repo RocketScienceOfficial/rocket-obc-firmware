@@ -6,6 +6,7 @@ typedef struct ReceiverInternalConditionData
 {
     float measureRAMUsagePercent;
     float receiverRAMUsagePercent;
+    float measureBatteryPercent;
     int radioSignalStrength;
 } ReceiverInternalConditionData;
 

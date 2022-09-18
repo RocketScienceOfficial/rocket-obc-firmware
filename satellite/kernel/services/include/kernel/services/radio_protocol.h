@@ -1,5 +1,6 @@
 #pragma once
 
+#include "utils/errors_types.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -84,26 +85,6 @@ FUNCRESULT serializeRadioPacket(RadioBody *body, uint8_t **buffer_out_ptr, size_
  * @return Result code.
  */
 FUNCRESULT deserializeRadioPacket(uint8_t *buffer, size_t size, RadioBody *body_out, bool *validationResult);
-
-/**
- * @brief Sends radio packet using radio.
- *
- * @param lora LoRa data.
- * @param body Packet body.
- * @return Result code.
- */
-FUNCRESULT radioSendPacket(LoRaData *lora, RadioBody *body);
-
-/**
- * @brief Receives radio packet using radio.
- *
- * @param lora LoRa data.
- * @param available Is new radio packet available.
- * @param body Packet bodyto get.
- * @param validationResult Validation result ot get.
- * @return Result code.
- */
-FUNCRESULT radioReceivePacket(LoRaData *lora, bool *available, RadioBody *body, bool *validationResult);
 
 /**
  * @brief Clears radio body. (i.a payload)

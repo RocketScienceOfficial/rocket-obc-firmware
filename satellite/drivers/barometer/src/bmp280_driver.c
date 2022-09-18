@@ -91,8 +91,7 @@ int32_t bmp280Convert(int32_t temp, BMP280Config *config)
 
 float bmp280ConvertTemp(int32_t temp, BMP280Config *config)
 {
-    BMP280CalibParams *params = &config->_calibParams;
-    int32_t t_fine = bmp280Convert(temp, params);
+    int32_t t_fine = bmp280Convert(temp, config);
     int32_t final = (t_fine * 5 + 128) >> 8;
     float result = final / 100.0f;
 
@@ -102,7 +101,7 @@ float bmp280ConvertTemp(int32_t temp, BMP280Config *config)
 int bmp280ConvertPressure(int32_t pressure, int32_t temp, BMP280Config *config)
 {
     BMP280CalibParams *params = &config->_calibParams;
-    int32_t t_fine = bmp280Convert(temp, params);
+    int32_t t_fine = bmp280Convert(temp, config);
     int32_t var1, var2;
     uint32_t converted = 0.0;
     var1 = (((int32_t)t_fine) >> 1) - (int32_t)64000;

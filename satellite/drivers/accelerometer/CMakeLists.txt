@@ -5,5 +5,5 @@ add_library(drivers_accelerometer_lib STATIC
     src/mpu6050_driver.c
     )
 
-target_link_libraries(drivers_accelerometer_lib PUBLIC pico_stdlib hardware_i2c utils_lib)
+target_link_libraries(drivers_accelerometer_lib PUBLIC pico_stdlib hardware_i2c utils_lib drivers_hwutils_lib)
 target_include_directories(drivers_accelerometer_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

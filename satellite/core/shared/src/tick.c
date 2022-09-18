@@ -1,5 +1,5 @@
 #include "shared/tick.h"
-#include "logging/logger.h"
+#include "kernel/logging/logger.h"
 
 void tick(TickData *data)
 {

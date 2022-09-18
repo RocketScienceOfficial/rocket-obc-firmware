@@ -1,6 +1,6 @@
 #pragma once
 
-#include "drivers/hwutils/errors_types.h"
+#include "utils/errors_types.h"
 
 /**
  * @brief Data used to control servo

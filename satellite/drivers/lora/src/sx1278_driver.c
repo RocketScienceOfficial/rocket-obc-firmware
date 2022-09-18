@@ -763,7 +763,7 @@ static SX1278Data *__loraDataFromGPIO(uint gpio)
     for (size_t i = 0; i < s_LoraDatasCount; i++)
     {
         SX1278Data *d = s_LoraDatas[i];
-        LoRaPinout _pinout = d->_pinout;
+        SX1278Pinout _pinout = d->_pinout;
 
         if (_pinout.cs == gpio || _pinout.miso == gpio || _pinout.mosi == gpio || _pinout.sck == gpio || _pinout.ss == gpio || _pinout.reset == gpio || _pinout.dio0 == gpio)
         {

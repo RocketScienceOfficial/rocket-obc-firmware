@@ -1,10 +1,12 @@
 #include "kernel/logging/logger.h"
-#include "kernel/logging/log_serial.h"
+#include "kernel/console/console_output.h"
 #include "utils/time_tracker.h"
 #include "drivers/flash/flash_driver.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+
+static LogCallback s_CurrentCallback;
 
 #define REPORT_ERROR(msg) logSerialError(msg)
 #define LOG_HW_CALL(func)                                                                                    \
@@ -65,6 +67,11 @@ void myLogCreateFileSink(Logger *logger, const char *pattern, size_t fileIndex)
 	LOG_HW_CALL(flashClearFile(getDefaultFlashModule(), fileIndex));
 
 	logger->_sinks[logger->_numSinks++] = sink;
+}
+
+void myLogSetCallback(LogCallback callback)
+{
+	s_CurrentCallback = callback;
 }
 
 char *parseLog(const char *loggerName, const char *pattern, const char *level, const char *format, va_list args)

@@ -15,6 +15,8 @@ typedef enum LoggerSinkType
     SINK_FILE,
 } LoggerSinkType;
 
+typedef void (*LogCallback)();
+
 /**
  * @brief Data structure for a sink. (INTERNAL USE)
  */

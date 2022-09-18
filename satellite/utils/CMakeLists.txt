@@ -1,6 +1,7 @@
 add_library(utils_lib STATIC
     include/utils/constants.h
     include/utils/cryptography.h
+    include/utils/errors_types.h
     include/utils/multithreading.h
     include/utils/time_tracker.h
     src/cryptography.c
