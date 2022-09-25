@@ -19,25 +19,25 @@ void initializeRadio(SX1278Pinout *pinout)
 
 bool checkRadioPacket(RadioUtilPacketData *packet)
 {
-    size_t packetSize = loraParsePacket(&s_LoraData, 0);
+    SIZE packetSize = loraParsePacket(&s_LoraData, 0);
 
     if (packetSize)
     {
         MY_LOG_CORE_INFO("Packet is available!");
 
-        uint8_t buffer[packetSize];
-        size_t i = 0;
+        BYTE buffer[packetSize];
+        SIZE i = 0;
 
         while (loraAvailable(&s_LoraData))
         {
-            buffer[i] = (uint8_t)loraRead(&s_LoraData);
+            buffer[i] = (BYTE)loraRead(&s_LoraData);
             i++;
         }
 
         packet->body = (RadioBody){0};
         packet->signalStrength = loraRssi(&s_LoraData);
 
-        bool packetValidation = false;
+        BOOL packetValidation = FALSE;
 
         FUNC_CALL(deserializeRadioPacket(buffer, packetSize, &packet->body, &packetValidation));
 
@@ -55,13 +55,13 @@ bool checkRadioPacket(RadioUtilPacketData *packet)
         return packetValidation;
     }
 
-    return false;
+    return FALSE;
 }
 
 void sendRadioPacket(RadioBody *body)
 {
-    uint8_t *packetBuffer;
-    size_t packetBufferSize = 0;
+    BYTE *packetBuffer;
+    SIZE packetBufferSize = 0;
 
     FUNC_CALL(serializeRadioPacket(body, &packetBuffer, &packetBufferSize));
 
@@ -72,18 +72,18 @@ void sendRadioPacket(RadioBody *body)
     free(packetBuffer);
 }
 
-void sendRadioRemoteCommand(char *msg)
+void sendRadioRemoteCommand(STRING msg)
 {
     RadioBody body = {
         .command = COMMANDS_RADIO_COMMAND_ID,
         .payloadSize = strlen(msg),
-        .payload = (uint8_t *)msg,
+        .payload = (BYTE *)msg,
     };
 
     sendRadioPacket(&body);
 }
 
-void radioRemoteCommandCallback(uint8_t *msg, size_t size)
+void radioRemoteCommandCallback(BYTE *msg, SIZE size)
 {
     ConsoleInput input = {0};
     ConsoleTokens tokens = {0};

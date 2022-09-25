@@ -1,9 +1,13 @@
-add_library(kernel_commands_lib STATIC
-    include/kernel/commands/commands.h
-    include/kernel/commands/default_commands.h
+set(MODULE_NAME kernel)
+set(LIB_NAME commands)
+set(LIB_GENERAL_NAME "${MODULE_NAME}_${LIB_NAME}_lib")
+
+add_library(${LIB_GENERAL_NAME} STATIC
+    include/${MODULE_NAME}/${LIB_NAME}/commands.h
+    include/${MODULE_NAME}/${LIB_NAME}/default_commands.h
     src/commands.c
     src/default_commands.c
-)
+    )
 
-target_link_libraries(kernel_commands_lib PRIVATE kernel_logging_lib)
-target_include_directories(kernel_commands_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(${LIB_GENERAL_NAME} PRIVATE kernel_logging_lib)
+target_include_directories(${LIB_GENERAL_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

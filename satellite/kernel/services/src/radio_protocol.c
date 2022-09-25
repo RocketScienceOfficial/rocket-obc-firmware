@@ -1,9 +1,9 @@
 #include "kernel/services/radio_protocol.h"
-#include "utils/cryptography.h"
+#include "tools/cryptography.h"
 #include <string.h>
 #include <stdlib.h>
 
-static const uint8_t RADIO_PACKET_KEY[] = {
+static const BYTE RADIO_PACKET_KEY[] = {
     0x18,
     0x07,
     0x45,
@@ -70,13 +70,13 @@ static const uint8_t RADIO_PACKET_KEY[] = {
     0xa0,
 };
 
-FUNCRESULT serializeRadioPacket(RadioBody *body, uint8_t **buffer_out_ptr, size_t *size_out)
+FUNCRESULT serializeRadioPacket(RadioBody *body, BYTE **buffer_out_ptr, SIZE *size_out)
 {
-    size_t bodySize = sizeof(uint8_t) + sizeof(uint8_t[3]) + sizeof(size_t) + sizeof(uint8_t) * body->payloadSize;
-    uint8_t bodyBuffer[bodySize];
+    SIZE bodySize = sizeof(BYTE) + sizeof(BYTE[3]) + sizeof(SIZE) + sizeof(BYTE) * body->payloadSize;
+    BYTE bodyBuffer[bodySize];
 
-    memcpy(bodyBuffer, &body->command, sizeof(uint8_t) + sizeof(uint8_t[3]) + sizeof(size_t));
-    memcpy(bodyBuffer + sizeof(uint8_t) + sizeof(uint8_t[3]) + sizeof(size_t), body->payload, sizeof(uint8_t) * body->payloadSize);
+    memcpy(bodyBuffer, &body->command, sizeof(BYTE) + sizeof(BYTE[3]) + sizeof(SIZE));
+    memcpy(bodyBuffer + sizeof(BYTE) + sizeof(BYTE[3]) + sizeof(SIZE), body->payload, sizeof(BYTE) * body->payloadSize);
 
     ParityData parity = {0};
 
@@ -90,25 +90,25 @@ FUNCRESULT serializeRadioPacket(RadioBody *body, uint8_t **buffer_out_ptr, size_
         ._parity = parity.buffer,
     };
 
-    size_t headerSize = sizeof(size_t) + sizeof(uint8_t) * header._paritySize;
-    uint8_t headerBuffer[headerSize];
+    SIZE headerSize = sizeof(SIZE) + sizeof(BYTE) * header._paritySize;
+    BYTE headerBuffer[headerSize];
 
-    memcpy(headerBuffer, &header._paritySize, sizeof(size_t));
-    memcpy(headerBuffer + sizeof(size_t), header._parity, sizeof(uint8_t) * header._paritySize);
+    memcpy(headerBuffer, &header._paritySize, sizeof(SIZE));
+    memcpy(headerBuffer + sizeof(SIZE), header._parity, sizeof(BYTE) * header._paritySize);
 
     if (!clearParity(&parity))
     {
         return ERR_FAIL;
     }
 
-    size_t bufferSize = headerSize + bodySize;
-    *buffer_out_ptr = (uint8_t *)malloc(bufferSize);
+    SIZE bufferSize = headerSize + bodySize;
+    *buffer_out_ptr = (BYTE *)malloc(bufferSize);
     *size_out = bufferSize;
 
     memcpy(*buffer_out_ptr, headerBuffer, headerSize);
     memcpy(*buffer_out_ptr + headerSize, bodyBuffer, bodySize);
 
-    if (!encryptDecrypt(*buffer_out_ptr, bufferSize, RADIO_PACKET_KEY, sizeof(RADIO_PACKET_KEY) / sizeof(uint8_t)))
+    if (!encryptDecrypt(*buffer_out_ptr, bufferSize, RADIO_PACKET_KEY, sizeof(RADIO_PACKET_KEY) / sizeof(BYTE)))
     {
         return ERR_UNEXPECTED;
     }
@@ -116,26 +116,26 @@ FUNCRESULT serializeRadioPacket(RadioBody *body, uint8_t **buffer_out_ptr, size_
     return SUC_OK;
 }
 
-FUNCRESULT deserializeRadioPacket(uint8_t *buffer, size_t size, RadioBody *body_out, bool *validationResult)
+FUNCRESULT deserializeRadioPacket(BYTE *buffer, SIZE size, RadioBody *body_out, BOOL *validationResult)
 {
     _RadioPacket packet = {0};
 
-    if (!encryptDecrypt(buffer, size, RADIO_PACKET_KEY, sizeof(RADIO_PACKET_KEY) / sizeof(uint8_t)))
+    if (!encryptDecrypt(buffer, size, RADIO_PACKET_KEY, sizeof(RADIO_PACKET_KEY) / sizeof(BYTE)))
     {
         return ERR_UNEXPECTED;
     }
 
-    size_t currentBufferOffset = 0;
-    memcpy(&packet._header, buffer + currentBufferOffset, sizeof(size_t));
+    SIZE currentBufferOffset = 0;
+    memcpy(&packet._header, buffer + currentBufferOffset, sizeof(SIZE));
 
     if (packet._header._paritySize > 0 && packet._header._paritySize <= size)
     {
-        currentBufferOffset += sizeof(size_t);
-        packet._header._parity = (uint8_t *)malloc(sizeof(uint8_t) * packet._header._paritySize);
-        memcpy(packet._header._parity, buffer + currentBufferOffset, packet._header._paritySize * sizeof(uint8_t));
+        currentBufferOffset += sizeof(SIZE);
+        packet._header._parity = (BYTE *)malloc(sizeof(BYTE) * packet._header._paritySize);
+        memcpy(packet._header._parity, buffer + currentBufferOffset, packet._header._paritySize * sizeof(BYTE));
 
-        size_t bodyOffset = currentBufferOffset + packet._header._paritySize * sizeof(uint8_t);
-        size_t parityBufferSize = size - bodyOffset;
+        SIZE bodyOffset = currentBufferOffset + packet._header._paritySize * sizeof(BYTE);
+        SIZE parityBufferSize = size - bodyOffset;
 
         ParityData parity = {0};
 
@@ -144,17 +144,17 @@ FUNCRESULT deserializeRadioPacket(uint8_t *buffer, size_t size, RadioBody *body_
             return ERR_FAIL;
         }
 
-        int comp = memcmp(packet._header._parity, parity.buffer, sizeof(uint8_t) * packet._header._paritySize);
+        int comp = memcmp(packet._header._parity, parity.buffer, sizeof(BYTE) * packet._header._paritySize);
         *validationResult = comp == 0;
 
         if (*validationResult)
         {
-            currentBufferOffset += packet._header._paritySize * sizeof(uint8_t);
-            memcpy(&packet._body, buffer + currentBufferOffset, sizeof(uint8_t) + sizeof(uint8_t[3]) + sizeof(size_t));
+            currentBufferOffset += packet._header._paritySize * sizeof(BYTE);
+            memcpy(&packet._body, buffer + currentBufferOffset, sizeof(BYTE) + sizeof(BYTE[3]) + sizeof(SIZE));
 
-            currentBufferOffset += sizeof(uint8_t) + sizeof(uint8_t[3]) + sizeof(size_t);
-            packet._body.payload = (uint8_t *)malloc(sizeof(uint8_t) * packet._body.payloadSize);
-            memcpy(packet._body.payload, buffer + currentBufferOffset, sizeof(uint8_t) * packet._body.payloadSize);
+            currentBufferOffset += sizeof(BYTE) + sizeof(BYTE[3]) + sizeof(SIZE);
+            packet._body.payload = (BYTE *)malloc(sizeof(BYTE) * packet._body.payloadSize);
+            memcpy(packet._body.payload, buffer + currentBufferOffset, sizeof(BYTE) * packet._body.payloadSize);
 
             *body_out = packet._body;
         }

@@ -1,9 +1,31 @@
 #pragma once
 
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+
+typedef uint8_t UINT8;
+typedef UINT8 BYTE;
+typedef char CHAR;
+typedef int16_t INT16;
+typedef int32_t INT32;
+typedef int64_t INT64;
+typedef uint16_t UINT16;
+typedef uint32_t UINT32;
+typedef uint64_t UINT64;
+typedef size_t SIZE;
+typedef float FLOAT;
+typedef bool BOOL;
+typedef void VOID;
+typedef CHAR *STRING;
+
+#define FALSE 0
+#define TRUE 1
+
 /**
  * @brief The result code of the function.
  */
-typedef int FUNCRESULT;
+typedef UINT32 FUNCRESULT;
 
 /**
  * @brief Success code.

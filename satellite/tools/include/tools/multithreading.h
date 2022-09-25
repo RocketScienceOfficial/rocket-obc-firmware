@@ -1,7 +1,6 @@
 #pragma once
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "typedefs.h"
 
 /**
  * @brief Type for thread function.
@@ -14,7 +13,7 @@ typedef void (*PicoCoreFunction)(void);
  * @param function Function to start on new core.
  * @return true if success.
  */
-bool startCore1(PicoCoreFunction function);
+BOOL startCore1(PicoCoreFunction function);
 
 /**
  * @brief Sends data to other core.
@@ -22,7 +21,7 @@ bool startCore1(PicoCoreFunction function);
  * @param data Data to send.
  * @return true if success.
  */
-bool sendToOtherCore(uint32_t data);
+BOOL sendToOtherCore(UINT32 data);
 
 /**
  * @brief Receives data from other core.
@@ -30,4 +29,4 @@ bool sendToOtherCore(uint32_t data);
  * @param data Data to receive.
  * @return true if success.
  */
-bool receiveFromOtherCore(uint32_t *data);
+BOOL receiveFromOtherCore(UINT32 *data);

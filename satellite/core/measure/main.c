@@ -6,7 +6,7 @@
 #include "config.h"
 #include "radio_controller.h"
 #include "measurements_manager.h"
-#include "utils/time_tracker.h"
+#include "tools/time_tracker.h"
 #include "kernel/logging/logger.h"
 #include "kernel/logging/recorder.h"
 #include "kernel/console/console_output.h"
@@ -16,7 +16,7 @@
 #include "shared/tick.h"
 
 static RadioUtilPacketData s_Packet;
-static Timer s_TimerOffset;
+static TIME s_TimerOffset;
 static TickData s_TickData;
 
 int main()

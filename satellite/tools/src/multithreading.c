@@ -1,37 +1,37 @@
-#include "utils/multithreading.h"
+#include "tools/multithreading.h"
 #include "pico/multicore.h"
 
-bool startCore1(PicoCoreFunction function)
+BOOL startCore1(PicoCoreFunction function)
 {
     if (function)
     {
         multicore_launch_core1(function);
 
-        return true;
+        return TRUE;
     }
     else
     {
-        return false;
+        return FALSE;
     }
 }
 
-bool sendToOtherCore(uint32_t data)
+BOOL sendToOtherCore(UINT32 data)
 {
     multicore_fifo_push_blocking(data);
 
-    return true;
+    return TRUE;
 }
 
-bool receiveFromOtherCore(uint32_t *data)
+BOOL receiveFromOtherCore(UINT32 *data)
 {
     if (data)
     {
         *data = multicore_fifo_pop_blocking();
 
-        return true;
+        return TRUE;
     }
     else
     {
-        return false;
+        return FALSE;
     }
 }

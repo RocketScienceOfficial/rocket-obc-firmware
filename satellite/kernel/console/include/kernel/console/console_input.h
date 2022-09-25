@@ -1,8 +1,6 @@
 #pragma once
 
-#include "utils/errors_types.h"
-#include <stddef.h>
-#include <stdbool.h>
+#include "tools/typedefs.h"
 
 #define CONSOLE_ARGS_MAX_COUNT 8
 #define CONSOLE_INPUT_MAX_LENGTH 128
@@ -15,12 +13,12 @@ typedef struct ConsoleInput
     /**
      * @brief Current characters
      */
-    char _cmd[CONSOLE_INPUT_MAX_LENGTH];
+    CHAR _cmd[CONSOLE_INPUT_MAX_LENGTH];
 
     /**
      * @brief Current characters length
      */
-    size_t _cmdSize;
+    SIZE _cmdSize;
 } ConsoleInput;
 
 /**
@@ -31,12 +29,12 @@ typedef struct ConsoleTokens
     /**
      * @brief Two-dimensional array of tokens.
      */
-    char **tokens;
+    STRING *tokens;
 
     /**
      * @brief Number of tokens.
      */
-    size_t size;
+    SIZE size;
 } ConsoleTokens;
 
 /**
@@ -44,7 +42,7 @@ typedef struct ConsoleTokens
  *
  * @return ASCII Character if available, 0 otherwise.
  */
-int consoleCheckInput();
+UINT32 consoleCheckInput();
 
 /**
  * @brief Processess the character.
@@ -55,7 +53,7 @@ int consoleCheckInput();
  *
  * @return Result code.
  */
-FUNCRESULT consoleProcessCharacter(int c, ConsoleInput *input, ConsoleTokens *tokens);
+FUNCRESULT consoleProcessCharacter(UINT32 c, ConsoleInput *input, ConsoleTokens *tokens);
 
 /**
  * @brief Tokenizes the input.

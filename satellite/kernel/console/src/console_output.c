@@ -2,7 +2,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-void logSerial(const char *format, ...)
+VOID consoleLog(const STRING format, ...)
 {
     va_list ap;
 
@@ -11,7 +11,7 @@ void logSerial(const char *format, ...)
     va_end(ap);
 }
 
-void logSerialError(const char *format, ...)
+VOID consoleLogError(const STRING format, ...)
 {
     va_list ap;
 

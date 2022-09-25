@@ -1,7 +1,11 @@
-add_library(drivers_battery_lib STATIC
-    include/drivers/battery/battery_driver.h
+set(MODULE_NAME drivers)
+set(LIB_NAME battery)
+set(LIB_GENERAL_NAME "${MODULE_NAME}_${LIB_NAME}_lib")
+
+add_library(${LIB_GENERAL_NAME} STATIC
+    include/${MODULE_NAME}/${LIB_NAME}/battery_driver.h
     src/battery_driver.c
     )
 
-target_link_libraries(drivers_battery_lib PUBLIC pico_stdlib utils_lib)
-target_include_directories(drivers_battery_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(${LIB_GENERAL_NAME} PUBLIC drivers_gpio_lib)
+target_include_directories(${LIB_GENERAL_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

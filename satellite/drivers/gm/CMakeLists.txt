@@ -1,7 +1,11 @@
-add_library(drivers_gm_lib STATIC
-    include/drivers/gm/sts_5_driver.h
-    src/sts_5_driver.c
-    )
+set(MODULE_NAME drivers)
+set(LIB_NAME gm)
+set(LIB_GENERAL_NAME "${MODULE_NAME}_${LIB_NAME}_lib")
 
-target_link_libraries(drivers_gm_lib PUBLIC utils_lib drivers_hwutils_lib)
-target_include_directories(drivers_gm_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+add_library(${LIB_GENERAL_NAME} STATIC
+    include/${MODULE_NAME}/${LIB_NAME}/sts_5_driver.h
+    src/sts_5_driver.c
+)
+
+target_link_libraries(${LIB_GENERAL_NAME} PUBLIC drivers_gpio_lib)
+target_include_directories(${LIB_GENERAL_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

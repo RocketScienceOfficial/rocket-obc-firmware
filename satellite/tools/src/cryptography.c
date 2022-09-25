@@ -1,11 +1,11 @@
-#include "utils/cryptography.h"
+#include "tools/cryptography.h"
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
 
-static size_t count1Bits(uint8_t n)
+static SIZE count1Bits(BYTE n)
 {
-    size_t count = 0;
+    SIZE count = 0;
 
     while (n)
     {
@@ -17,82 +17,82 @@ static size_t count1Bits(uint8_t n)
     return count;
 }
 
-bool encryptDecrypt(uint8_t *buffer, size_t size, const uint8_t *key, size_t keySize)
+BOOL encryptDecrypt(BYTE *buffer, SIZE size, const BYTE *key, SIZE keySize)
 {
     if (!buffer || size == 0 || !key || keySize == 0)
     {
-        return false;
+        return FALSE;
     }
 
-    for (size_t i = 0; i < size; i++)
+    for (SIZE i = 0; i < size; i++)
     {
         buffer[i] = buffer[i] ^ key[i % keySize];
     }
 
-    return true;
+    return TRUE;
 }
 
-bool calculateParityRows(uint8_t *buffer, size_t size, ParityData *data_out_ptr)
+BOOL calculateParityRows(const BYTE *buffer, SIZE size, ParityData *data_out_ptr)
 {
     if (!buffer || size == 0 || !data_out_ptr)
     {
-        return false;
+        return FALSE;
     }
 
-    data_out_ptr->size = (int)ceil(size / 8.0);
-    data_out_ptr->buffer = (uint8_t *)calloc(data_out_ptr->size, sizeof(uint8_t));
+    data_out_ptr->size = (SIZE)ceil(size / 8.0);
+    data_out_ptr->buffer = (BYTE *)calloc(data_out_ptr->size, sizeof(BYTE));
 
-    for (size_t i = 0; i < size; i++)
+    for (SIZE i = 0; i < size; i++)
     {
-        size_t oneBits = count1Bits(buffer[i]);
+        SIZE oneBits = count1Bits(buffer[i]);
         data_out_ptr->buffer[i / 8] |= ((oneBits % 2) << (i % 8));
     }
 
-    return true;
+    return TRUE;
 }
 
-bool calculateParityColumns(uint8_t *buffer, size_t size, ParityData *data_out_ptr)
+BOOL calculateParityColumns(const BYTE *buffer, SIZE size, ParityData *data_out_ptr)
 {
     if (!buffer || size == 0 || !data_out_ptr)
     {
-        return false;
+        return FALSE;
     }
 
-    data_out_ptr->size = (int)ceil(size / 8.0);
-    data_out_ptr->buffer = (uint8_t *)calloc(data_out_ptr->size, sizeof(uint8_t));
+    data_out_ptr->size = (SIZE)ceil(size / 8.0);
+    data_out_ptr->buffer = (BYTE *)calloc(data_out_ptr->size, sizeof(BYTE));
 
-    for (size_t i = 0; i < size; i += 8)
+    for (SIZE i = 0; i < size; i += 8)
     {
         if (i == size)
         {
             break;
         }
 
-        for (size_t j = 0; j < 8; j++)
+        for (SIZE j = 0; j < 8; j++)
         {
-            uint8_t n = 0;
+            BYTE n = 0;
 
-            for (size_t k = 0; k < 8; k++)
+            for (SIZE k = 0; k < 8; k++)
             {
                 n |= (buffer[i + k] & (1 << j)) << j;
             }
 
-            size_t oneBits = count1Bits(n);
+            SIZE oneBits = count1Bits(n);
             data_out_ptr->buffer[i / 8] |= (oneBits % 2) << (i % 8);
         }
     }
 
-    return true;
+    return TRUE;
 }
 
-bool calculateParity(uint8_t *buffer, size_t size, ParityData *data_out_ptr)
+BOOL calculateParity(const BYTE *buffer, SIZE size, ParityData *data_out_ptr)
 {
     if (!buffer || size == 0 || !data_out_ptr)
     {
-        return false;
+        return FALSE;
     }
 
-    bool result = true;
+    BOOL result = TRUE;
 
     ParityData rows = {0};
     ParityData columns = {0};
@@ -101,7 +101,7 @@ bool calculateParity(uint8_t *buffer, size_t size, ParityData *data_out_ptr)
     result = result && calculateParityColumns(buffer, size, &columns);
 
     data_out_ptr->size = rows.size + columns.size;
-    data_out_ptr->buffer = (uint8_t *)malloc(data_out_ptr->size * sizeof(uint8_t));
+    data_out_ptr->buffer = (BYTE *)malloc(data_out_ptr->size * sizeof(BYTE));
 
     memcpy(data_out_ptr->buffer, rows.buffer, rows.size);
     memcpy(data_out_ptr->buffer + rows.size, columns.buffer, columns.size);
@@ -112,11 +112,11 @@ bool calculateParity(uint8_t *buffer, size_t size, ParityData *data_out_ptr)
     return result;
 }
 
-bool clearParity(ParityData *parity)
+BOOL clearParity(ParityData *parity)
 {
     if (!parity)
     {
-        return false;
+        return FALSE;
     }
 
     if (parity->size > 0)
@@ -126,5 +126,5 @@ bool clearParity(ParityData *parity)
         parity->size = 0;
     }
 
-    return true;
+    return TRUE;
 }

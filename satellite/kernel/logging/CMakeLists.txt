@@ -1,9 +1,13 @@
-add_library(kernel_logging_lib STATIC
-    include/kernel/logging/logger.h
-    include/kernel/logging/recorder.h
+set(MODULE_NAME kernel)
+set(LIB_NAME logging)
+set(LIB_GENERAL_NAME "${MODULE_NAME}_${LIB_NAME}_lib")
+
+add_library(${LIB_GENERAL_NAME} STATIC
+    include/${MODULE_NAME}/${LIB_NAME}/logger.h
+    include/${MODULE_NAME}/${LIB_NAME}/recorder.h
     src/logger.c
     src/recorder.c
-    )
+)
 
-target_link_libraries(kernel_logging_lib PUBLIC utils_lib kernel_console_lib drivers_lib)
-target_include_directories(kernel_logging_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(kernel_logging_lib PRIVATE kernel_console_lib drivers_lib)
+target_include_directories(${LIB_GENERAL_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

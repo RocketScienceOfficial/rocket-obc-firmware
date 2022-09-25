@@ -8,7 +8,7 @@ static CommandData s_Commands[] = {
     {.name = "hello_name", .func = &helloNameCommand},
 };
 
-void helloCommand(char **args, size_t argc)
+void helloCommand(STRING *args, SIZE argc)
 {
     FUNCTION_PROFILE_BEGIN();
 
@@ -17,11 +17,11 @@ void helloCommand(char **args, size_t argc)
     FUNCTION_PROFILE_END();
 }
 
-void helloNameCommand(char **args, size_t argc)
+void helloNameCommand(STRING *args, SIZE argc)
 {
     FUNCTION_PROFILE_BEGIN();
 
-    char *error;
+    STRING error;
 
     if (checkArgsCount(1, argc, &error))
     {
@@ -35,22 +35,22 @@ void helloNameCommand(char **args, size_t argc)
     FUNCTION_PROFILE_END();
 }
 
-size_t defaultCommandsGetCount()
+SIZE defaultCommandsGetCount()
 {
     return sizeof(s_Commands) / sizeof(CommandData);
 }
 
-bool registerDefaultConsoleCommands()
+BOOL registerDefaultConsoleCommands()
 {
     FUNCTION_PROFILE_BEGIN();
 
-    size_t count = sizeof(s_Commands) / sizeof(CommandData);
+    SIZE count = sizeof(s_Commands) / sizeof(CommandData);
 
-    for (size_t i = 0; i < count; i++)
+    for (SIZE i = 0; i < count; i++)
     {
         if (!registerCommand(&s_Commands[i]))
         {
-            return false;
+            return FALSE;
         }
     }
 
@@ -58,5 +58,5 @@ bool registerDefaultConsoleCommands()
 
     FUNCTION_PROFILE_END();
 
-    return true;
+    return TRUE;
 }

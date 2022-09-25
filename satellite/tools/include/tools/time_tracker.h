@@ -1,19 +1,18 @@
 #pragma once
 
-#include <stdint.h>
-#include <stdbool.h>
+#include "typedefs.h"
 
 /**
  * @brief Time tracker definition.
  */
-typedef uint32_t Timer;
+typedef UINT32 TIME;
 
 /**
  * @brief Gets the current time in milliseconds.
  *
  * @return Current time in milliseconds.
  */
-Timer getMsSinceBoot();
+TIME getMsSinceBoot();
 
 /**
  * @brief periodically checks if the time has passed.
@@ -23,4 +22,4 @@ Timer getMsSinceBoot();
  *
  * @return True if the time has passed, false otherwise.
  */
-bool runEvery(Timer ms, Timer *timerOffset);
+BOOL runEvery(TIME ms, TIME *timerOffset);

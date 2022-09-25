@@ -1,9 +1,6 @@
 #pragma once
 
-#include "utils/errors_types.h"
-#include <stdint.h>
-#include <stdbool.h>
-#include <stddef.h>
+#include "tools/typedefs.h"
 
 #define FLASH_FILES_COUNT 4
 
@@ -15,7 +12,7 @@ typedef struct _FlashFile
     /**
      * @brief File size.
      */
-    size_t _size;
+    SIZE _size;
 
 } _FlashFile;
 
@@ -27,12 +24,12 @@ typedef struct _FlashFileBuffer
     /**
      * @brief Buffer to write (Flash only allows to write 256 byte pages!).
      */
-    uint8_t *_buffer;
+    BYTE *_buffer;
 
     /**
      * @brief Buffer size.
      */
-    size_t _bufferSize;
+    SIZE _bufferSize;
 } _FlashFileBuffer;
 
 /**
@@ -43,7 +40,7 @@ typedef struct _FlashFileSystem
     /**
      * @brief Is file system initialized.
      */
-    uint32_t _initializationState;
+    UINT32 _initializationState;
 
     /**
      * @brief Flash files.
@@ -59,7 +56,7 @@ typedef struct FlashModule
     /**
      * @brief Is Flash module initialized.
      */
-    bool _isInitialized;
+    BOOL _isInitialized;
 
     /**
      * @brief Flash files.
@@ -95,7 +92,7 @@ FlashModule *getDefaultFlashModule();
  * @param msg Text to write.
  * @return Result code.
  */
-FUNCRESULT flashWriteFile(FlashModule *module, size_t fileIndex, const char *msg);
+FUNCRESULT flashWriteFile(FlashModule *module, SIZE fileIndex, const CHAR *msg);
 
 /**
  * @brief Write data to flash module. Only 256 byte pages are allowed to write, so data is buffered internally.
@@ -106,7 +103,7 @@ FUNCRESULT flashWriteFile(FlashModule *module, size_t fileIndex, const char *msg
  * @param size Size of buffer.
  * @return Result code.
  */
-FUNCRESULT flashWriteFileBuff(FlashModule *module, size_t fileIndex, const uint8_t *buffer, size_t size);
+FUNCRESULT flashWriteFileBuff(FlashModule *module, SIZE fileIndex, const BYTE *buffer, SIZE size);
 
 /**
  * @brief Clear file
@@ -115,7 +112,7 @@ FUNCRESULT flashWriteFileBuff(FlashModule *module, size_t fileIndex, const uint8
  * @param fileIndex Index of file.
  * @return Result code.
  */
-FUNCRESULT flashClearFile(FlashModule *module, size_t fileIndex);
+FUNCRESULT flashClearFile(FlashModule *module, SIZE fileIndex);
 
 /**
  * @brief Read file.
@@ -126,7 +123,7 @@ FUNCRESULT flashClearFile(FlashModule *module, size_t fileIndex);
  * @param size Size of buffer.
  * @return Result code.
  */
-FUNCRESULT flashGetFile(FlashModule *module, size_t fileIndex, const uint8_t **buffer_ptr, size_t *size);
+FUNCRESULT flashGetFile(FlashModule *module, SIZE fileIndex, const BYTE **buffer_ptr, SIZE *size);
 
 /**
  * @brief Terminate flash module and flush buffers. After this call, this flash module is not usable anymore.

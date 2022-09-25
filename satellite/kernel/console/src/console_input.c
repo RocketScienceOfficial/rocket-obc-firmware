@@ -5,14 +5,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int consoleCheckInput()
+UINT32 consoleCheckInput()
 {
-    int ch = getchar_timeout_us(0);
+    UINT32 ch = getchar_timeout_us(0);
 
     return ch != PICO_ERROR_TIMEOUT ? ch : 0;
 }
 
-FUNCRESULT consoleProcessCharacter(int c, ConsoleInput *input, ConsoleTokens *tokens)
+FUNCRESULT consoleProcessCharacter(UINT32 c, ConsoleInput *input, ConsoleTokens *tokens)
 {
     if (!input || !tokens)
     {
@@ -57,14 +57,14 @@ FUNCRESULT consoleTokenizeInput(ConsoleInput *input, ConsoleTokens *tokens)
         return ERR_INVALIDARG;
     }
 
-    tokens->tokens = (char **)malloc(CONSOLE_ARGS_MAX_COUNT * sizeof(char *));
+    tokens->tokens = (STRING *)malloc(CONSOLE_ARGS_MAX_COUNT * sizeof(STRING));
     tokens->size = 0;
 
-    char *cmdn = strtok(input->_cmd, " ");
+    STRING cmdn = strtok(input->_cmd, " ");
 
     while (cmdn != NULL)
     {
-        char *arg = (char *)malloc((strlen(cmdn) + 1) * sizeof(char));
+        STRING arg = (STRING)malloc((strlen(cmdn) + 1) * sizeof(CHAR));
 
         strcpy(arg, cmdn);
 
@@ -89,7 +89,7 @@ FUNCRESULT consoleClear(ConsoleInput *input, ConsoleTokens *tokens)
 
     if (tokens->size > 0)
     {
-        for (size_t i = 0; i < tokens->size; i++)
+        for (SIZE i = 0; i < tokens->size; i++)
         {
             free(tokens->tokens[i]);
         }

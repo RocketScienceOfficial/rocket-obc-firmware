@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utils/errors_types.h"
+#include "tools/typedefs.h"
 #include "kernel/logging/logger.h"
 
 /**

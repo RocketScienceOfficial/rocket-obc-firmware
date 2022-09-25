@@ -1,6 +1,4 @@
 #include "drivers/barometer/bmp280_driver.h"
-#include "drivers/hwutils/pinout_utils.h"
-#include "hardware/i2c.h"
 #include "pico/stdlib.h"
 #include <math.h>
 
@@ -40,33 +38,28 @@
 #define BMP280_REG_DIG_P9_MSB _u(0x9F)
 #define BMP280_NUM_CALIB_PARAMS 24
 
-static i2c_inst_t *getI2C(BMP280Config *config)
-{
-    return (config->_i2c == 0 ? i2c0 : i2c1);
-}
-
 void bmp280InitSensor(BMP280Config *config)
 {
-    uint8_t buf[2];
+    BYTE buf[2];
 
-    const uint8_t reg_config_val = ((0x04 << 5) | (0x05 << 2)) & 0xFC;
+    const BYTE reg_config_val = ((0x04 << 5) | (0x05 << 2)) & 0xFC;
 
     buf[0] = BMP280_REG_CONFIG;
     buf[1] = reg_config_val;
-    i2c_write_blocking(getI2C(config), BMP280_ADDR, buf, 2, false);
+    i2cWriteBlocking(config->_i2c, BMP280_ADDR, buf, 2, FALSE);
 
-    const uint8_t reg_ctrl_meas_val = (0x01 << 5) | (0x03 << 2) | (0x03);
+    const BYTE reg_ctrl_meas_val = (0x01 << 5) | (0x03 << 2) | (0x03);
     buf[0] = BMP280_REG_CTRL_MEAS;
     buf[1] = reg_ctrl_meas_val;
-    i2c_write_blocking(getI2C(config), BMP280_ADDR, buf, 2, false);
+    i2cWriteBlocking(config->_i2c, BMP280_ADDR, buf, 2, FALSE);
 }
 
-void bmp280ReadRaw(BMP280Config *config, int32_t *temp, int32_t *pressure)
+void bmp280ReadRaw(BMP280Config *config, INT32 *temp, INT32 *pressure)
 {
-    uint8_t buf[6];
-    uint8_t reg = BMP280_REG_PRESSURE_MSB;
-    i2c_write_blocking(getI2C(config), BMP280_ADDR, &reg, 1, true);
-    i2c_read_blocking(getI2C(config), BMP280_ADDR, buf, 6, false);
+    BYTE buf[6];
+    BYTE reg = BMP280_REG_PRESSURE_MSB;
+    i2cWriteBlocking(getI2C(config), BMP280_ADDR, &reg, 1, TRUE);
+    i2cReadBlocking(config->_i2c, BMP280_ADDR, buf, 6, FALSE);
 
     *pressure = (buf[0] << 12) | (buf[1] << 4) | (buf[2] >> 4);
     *temp = (buf[3] << 12) | (buf[4] << 4) | (buf[5] >> 4);
@@ -74,101 +67,98 @@ void bmp280ReadRaw(BMP280Config *config, int32_t *temp, int32_t *pressure)
 
 void bmp280Reset(BMP280Config *config)
 {
-    uint8_t buf[2] = {BMP280_REG_RESET, 0xB6};
-    i2c_write_blocking(getI2C(config), BMP280_ADDR, buf, 2, false);
+    BYTE buf[2] = {BMP280_REG_RESET, 0xB6};
+    i2cWriteBlocking(config->_i2c, BMP280_ADDR, buf, 2, FALSE);
 }
 
-int32_t bmp280Convert(int32_t temp, BMP280Config *config)
+INT32 bmp280Convert(INT32 temp, BMP280Config *config)
 {
-    int32_t var1, var2;
+    INT32 var1, var2;
     BMP280CalibParams *params = &config->_calibParams;
 
-    var1 = ((((temp >> 3) - ((int32_t)params->dig_t1 << 1))) * ((int32_t)params->dig_t2)) >> 11;
-    var2 = (((((temp >> 4) - ((int32_t)params->dig_t1)) * ((temp >> 4) - ((int32_t)params->dig_t1))) >> 12) * ((int32_t)params->dig_t3)) >> 14;
+    var1 = ((((temp >> 3) - ((INT32)params->dig_t1 << 1))) * ((INT32)params->dig_t2)) >> 11;
+    var2 = (((((temp >> 4) - ((INT32)params->dig_t1)) * ((temp >> 4) - ((INT32)params->dig_t1))) >> 12) * ((INT32)params->dig_t3)) >> 14;
 
     return var1 + var2;
 }
 
-float bmp280ConvertTemp(int32_t temp, BMP280Config *config)
+FLOAT bmp280ConvertTemp(INT32 temp, BMP280Config *config)
 {
-    int32_t t_fine = bmp280Convert(temp, config);
-    int32_t final = (t_fine * 5 + 128) >> 8;
-    float result = final / 100.0f;
+    INT32 t_fine = bmp280Convert(temp, config);
+    INT32 final = (t_fine * 5 + 128) >> 8;
+    FLOAT result = final / 100.0f;
 
     return result;
 }
 
-int bmp280ConvertPressure(int32_t pressure, int32_t temp, BMP280Config *config)
+INT32 bmp280ConvertPressure(INT32 pressure, INT32 temp, BMP280Config *config)
 {
     BMP280CalibParams *params = &config->_calibParams;
-    int32_t t_fine = bmp280Convert(temp, config);
-    int32_t var1, var2;
-    uint32_t converted = 0.0;
-    var1 = (((int32_t)t_fine) >> 1) - (int32_t)64000;
-    var2 = (((var1 >> 2) * (var1 >> 2)) >> 11) * ((int32_t)params->dig_p6);
-    var2 += ((var1 * ((int32_t)params->dig_p5)) << 1);
-    var2 = (var2 >> 2) + (((int32_t)params->dig_p4) << 16);
-    var1 = (((params->dig_p3 * (((var1 >> 2) * (var1 >> 2)) >> 13)) >> 3) + ((((int32_t)params->dig_p2) * var1) >> 1)) >> 18;
-    var1 = ((((32768 + var1)) * ((int32_t)params->dig_p1)) >> 15);
+    INT32 t_fine = bmp280Convert(temp, config);
+    INT32 var1, var2;
+    UINT32 converted = 0.0;
+    var1 = (((INT32)t_fine) >> 1) - (INT32)64000;
+    var2 = (((var1 >> 2) * (var1 >> 2)) >> 11) * ((INT32)params->dig_p6);
+    var2 += ((var1 * ((INT32)params->dig_p5)) << 1);
+    var2 = (var2 >> 2) + (((INT32)params->dig_p4) << 16);
+    var1 = (((params->dig_p3 * (((var1 >> 2) * (var1 >> 2)) >> 13)) >> 3) + ((((INT32)params->dig_p2) * var1) >> 1)) >> 18;
+    var1 = ((((32768 + var1)) * ((INT32)params->dig_p1)) >> 15);
     if (var1 == 0)
     {
         return 0;
     }
-    converted = (((uint32_t)(((int32_t)1048576) - pressure) - (var2 >> 12))) * 3125;
+    converted = (((UINT32)(((INT32)1048576) - pressure) - (var2 >> 12))) * 3125;
     if (converted < 0x80000000)
     {
-        converted = (converted << 1) / ((uint32_t)var1);
+        converted = (converted << 1) / ((UINT32)var1);
     }
     else
     {
-        converted = (converted / (uint32_t)var1) * 2;
+        converted = (converted / (UINT32)var1) * 2;
     }
-    var1 = (((int32_t)params->dig_p9) * ((int32_t)(((converted >> 3) * (converted >> 3)) >> 13))) >> 12;
-    var2 = (((int32_t)(converted >> 2)) * ((int32_t)params->dig_p8)) >> 13;
-    converted = (uint32_t)((int32_t)converted + ((var1 + var2 + params->dig_p7) >> 4));
+    var1 = (((INT32)params->dig_p9) * ((INT32)(((converted >> 3) * (converted >> 3)) >> 13))) >> 12;
+    var2 = (((INT32)(converted >> 2)) * ((INT32)params->dig_p8)) >> 13;
+    converted = (UINT32)((INT32)converted + ((var1 + var2 + params->dig_p7) >> 4));
 
-    return (int)converted;
+    return (INT32)converted;
 }
 
 void bmp280GetCalibParams(BMP280Config *config)
 {
     BMP280CalibParams *params = &config->_calibParams;
-    uint8_t buf[BMP280_NUM_CALIB_PARAMS] = {0};
-    uint8_t reg = BMP280_REG_DIG_T1_LSB;
-    i2c_write_blocking(getI2C(config), BMP280_ADDR, &reg, 1, true);
-    i2c_read_blocking(getI2C(config), BMP280_ADDR, buf, BMP280_NUM_CALIB_PARAMS, false);
+    BYTE buf[BMP280_NUM_CALIB_PARAMS] = {0};
+    BYTE reg = BMP280_REG_DIG_T1_LSB;
+    i2cWriteBlocking(config->_i2c, BMP280_ADDR, &reg, 1, TRUE);
+    i2cReadBlocking(config->_i2c, BMP280_ADDR, buf, BMP280_NUM_CALIB_PARAMS, FALSE);
 
-    params->dig_t1 = (uint16_t)(buf[1] << 8) | buf[0];
-    params->dig_t2 = (int16_t)(buf[3] << 8) | buf[2];
-    params->dig_t3 = (int16_t)(buf[5] << 8) | buf[4];
+    params->dig_t1 = (UINT16)(buf[1] << 8) | buf[0];
+    params->dig_t2 = (INT16)(buf[3] << 8) | buf[2];
+    params->dig_t3 = (INT16)(buf[5] << 8) | buf[4];
 
-    params->dig_p1 = (uint16_t)(buf[7] << 8) | buf[6];
-    params->dig_p2 = (int16_t)(buf[9] << 8) | buf[8];
-    params->dig_p3 = (int16_t)(buf[11] << 8) | buf[10];
-    params->dig_p4 = (int16_t)(buf[13] << 8) | buf[12];
-    params->dig_p5 = (int16_t)(buf[15] << 8) | buf[14];
-    params->dig_p6 = (int16_t)(buf[17] << 8) | buf[16];
-    params->dig_p7 = (int16_t)(buf[19] << 8) | buf[18];
-    params->dig_p8 = (int16_t)(buf[21] << 8) | buf[20];
-    params->dig_p9 = (int16_t)(buf[23] << 8) | buf[22];
+    params->dig_p1 = (UINT16)(buf[7] << 8) | buf[6];
+    params->dig_p2 = (INT16)(buf[9] << 8) | buf[8];
+    params->dig_p3 = (INT16)(buf[11] << 8) | buf[10];
+    params->dig_p4 = (INT16)(buf[13] << 8) | buf[12];
+    params->dig_p5 = (INT16)(buf[15] << 8) | buf[14];
+    params->dig_p6 = (INT16)(buf[17] << 8) | buf[16];
+    params->dig_p7 = (INT16)(buf[19] << 8) | buf[18];
+    params->dig_p8 = (INT16)(buf[21] << 8) | buf[20];
+    params->dig_p9 = (INT16)(buf[23] << 8) | buf[22];
 }
 
-FUNCRESULT bmp280Init(BMP280Config *config, int i2c, int sda, int scl)
+FUNCRESULT bmp280Init(BMP280Config *config, I2CInstance i2c, PinNumber sda, PinNumber scl)
 {
-    if (!config || !pinoutCheckI2C(i2c) || !pinoutCheckI2C_SDA(i2c, sda) || !pinoutCheckI2C_SCL(i2c, scl))
+    if (!config || !i2cCheckInstance(i2c) || !i2cCheckSDA(i2c, sda) || !i2cCheckSCL(i2c, scl))
     {
         return ERR_INVALIDARG;
     }
 
     config->_i2c = i2c;
 
-    i2c_init(getI2C(config), 100 * 1000);
-    gpio_set_function(sda, GPIO_FUNC_I2C);
-    gpio_set_function(scl, GPIO_FUNC_I2C);
-    gpio_pull_up(sda);
-    gpio_pull_up(scl);
+    i2cInitAll(i2c, 100 * 1000);
+    i2cInitPins(i2c, sda, scl);
 
-    bool result;
+    BOOL result;
 
     if (FUNCFAILED(bmp280Check(config, &result)))
     {
@@ -186,17 +176,14 @@ FUNCRESULT bmp280Init(BMP280Config *config, int i2c, int sda, int scl)
     return SUC_OK;
 }
 
-FUNCRESULT bmp280Check(BMP280Config *config, bool *result)
+FUNCRESULT bmp280Check(BMP280Config *config, BOOL *result)
 {
     if (!config || !result)
     {
         return ERR_INVALIDARG;
     }
 
-    uint8_t data;
-    int ret = i2c_read_timeout_us(getI2C(config), BMP280_ADDR, &data, 1, false, 1E6);
-
-    *result = ret < 0 ? 0 : 1;
+    *result = i2cCheckDevice(config->_i2c, BMP280_ADDR);
 
     return SUC_OK;
 }
@@ -208,8 +195,8 @@ FUNCRESULT bmp280Read(BMP280Config *config, BMP280Data *data)
         return ERR_INVALIDARG;
     }
 
-    int32_t raw_temperature;
-    int32_t raw_pressure;
+    INT32 raw_temperature;
+    INT32 raw_pressure;
 
     bmp280ReadRaw(config, &raw_temperature, &raw_pressure);
 

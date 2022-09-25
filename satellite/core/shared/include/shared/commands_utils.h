@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stdbool.h>
+#include "tools/typedefs.h"
 
 void initializeCommands();
-bool consoleAvailable();
+BOOL consoleAvailable();
 void checkCommand();

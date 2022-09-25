@@ -1,5 +1,7 @@
 #pragma once
 
+#include "tools/typedefs.h"
+
 #define DEFAULT_LOG_SERIAL_PATTERN "[%t %l %M:%S:%m] %c\n"
 
 /**
@@ -8,7 +10,7 @@
  * @param format Format.
  * @param ... Arguments
  */
-void logSerial(const char *format, ...);
+VOID consoleLog(const STRING format, ...);
 
 /**
  * @brief Logs error message to serial output.
@@ -16,4 +18,4 @@ void logSerial(const char *format, ...);
  * @param format Format.
  * @param ... Arguments
  */
-void logSerialError(const char *format, ...);
+VOID consoleLogError(const STRING format, ...);

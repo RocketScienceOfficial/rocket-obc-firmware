@@ -1,10 +1,9 @@
 #pragma once
 
-#include "utils/errors_types.h"
+#include "tools/typedefs.h"
 #include "ff.h"
 #include "sd_card.h"
 #include "f_util.h"
-#include <stddef.h>
 
 #define SD_FILES_MAX_COUNT 4
 #define SD_CALLBACKS_MAX_COUNT SD_FILES_MAX_COUNT
@@ -17,7 +16,7 @@ typedef struct _SDFile
     /**
      * @brief File name.
      */
-    const char *_name;
+    STRING _name;
 
     /**
      * @brief File instance
@@ -27,7 +26,7 @@ typedef struct _SDFile
     /**
      * @brief Is file opened
      */
-    bool _isOpened;
+    BOOL _isOpened;
 } _SDFile;
 
 /**
@@ -38,7 +37,7 @@ typedef struct SDCard
     /**
      * @brief Is SD card initialized
      */
-    bool _isInitialized;
+    BOOL _isInitialized;
     /**
      * @brief SD Card instance.
      */
@@ -52,7 +51,7 @@ typedef struct SDCard
     /**
      * @brief SD Card files count.
      */
-    size_t _filesCount;
+    SIZE _filesCount;
 } SDCard;
 
 /**
@@ -68,7 +67,7 @@ FUNCRESULT sdInit(SDCard *sdCard);
  * @param fileName File name.
  * @return Result code.
  */
-FUNCRESULT sdInitFile(SDCard *sdCard, const char *fileName);
+FUNCRESULT sdInitFile(SDCard *sdCard, const STRING fileName);
 
 /**
  * @brief Open and prepare file for writing.
@@ -76,7 +75,7 @@ FUNCRESULT sdInitFile(SDCard *sdCard, const char *fileName);
  * @param fileName File name.
  * @return Result code.
  */
-FUNCRESULT sdBegin(SDCard *sdCard, const char *fileName);
+FUNCRESULT sdBegin(SDCard *sdCard, const STRING fileName);
 
 /**
  * @brief Write message to SD card.
@@ -85,7 +84,7 @@ FUNCRESULT sdBegin(SDCard *sdCard, const char *fileName);
  * @param fileName File name.
  * @return Result code.
  */
-FUNCRESULT sdWrite(SDCard *sdCard, const char *msg, const char *fileName);
+FUNCRESULT sdWrite(SDCard *sdCard, const STRING msg, const STRING fileName);
 
 /**
  * @brief Close file.
@@ -93,7 +92,7 @@ FUNCRESULT sdWrite(SDCard *sdCard, const char *msg, const char *fileName);
  * @param fileName File name.
  * @return Result code.
  */
-FUNCRESULT sdEnd(SDCard *sdCard, const char *fileName);
+FUNCRESULT sdEnd(SDCard *sdCard, const STRING fileName);
 
 /**
  * @brief Clear file.
@@ -101,7 +100,7 @@ FUNCRESULT sdEnd(SDCard *sdCard, const char *fileName);
  * @param fileName File name.
  * @return Result code.
  */
-FUNCRESULT sdClearFile(SDCard *sdCard, const char *fileName);
+FUNCRESULT sdClearFile(SDCard *sdCard, const STRING fileName);
 
 /**
  * @brief Terminate SD. After this call, SD card is not usable.

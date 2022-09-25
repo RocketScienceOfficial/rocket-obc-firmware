@@ -1,21 +1,20 @@
 #pragma once
 
-#include <stdbool.h>
-#include <stddef.h>
+#include "tools/typedefs.h"
 
-void helloCommand(char **args, size_t argc);
-void helloNameCommand(char **args, size_t argc);
+void helloCommand(STRING *args, SIZE argc);
+void helloNameCommand(STRING *args, SIZE argc);
 
 /**
  * @brief Get size of default commands.
  *
  * @return Count of default commands.
  */
-size_t defaultCommandsGetCount();
+SIZE defaultCommandsGetCount();
 
 /**
  * @brief Register default console commands.
  *
  * @return True if commands were registered successfully, false otherwise.
  */
-bool registerDefaultConsoleCommands();
+BOOL registerDefaultConsoleCommands();

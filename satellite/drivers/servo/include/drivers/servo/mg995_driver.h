@@ -1,6 +1,7 @@
 #pragma once
 
-#include "utils/errors_types.h"
+#include "tools/typedefs.h"
+#include "drivers/gpio/gpio_typedefs.h"
 
 /**
  * @brief Data used to control servo
@@ -10,12 +11,12 @@ typedef struct MG995Data
     /**
      * @brief Servo pin
      */
-    int pin;
+    PinNumber pin;
 
     /**
      * @brief Servo rotation in degrees
      */
-    float angle;
+    FLOAT angle;
 } MG995Data;
 
 /**
@@ -25,7 +26,7 @@ typedef struct MG995Data
  * @param data Data to setup
  * @return Result code
  */
-FUNCRESULT mg995Init(const int pin, MG995Data *data);
+FUNCRESULT mg995Init(PinNumber pin, MG995Data *data);
 
 /**
  * @brief Rotate servo to angle
@@ -34,4 +35,4 @@ FUNCRESULT mg995Init(const int pin, MG995Data *data);
  * @param angle Angle to rotate to (degrees)
  * @return Result code
  */
-FUNCRESULT mg995RotateAngle(MG995Data *data, float destAngleDegrees);
+FUNCRESULT mg995RotateAngle(MG995Data *data, FLOAT destAngleDegrees);

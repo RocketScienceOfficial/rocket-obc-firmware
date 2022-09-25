@@ -5,9 +5,9 @@
 #include <string.h>
 
 static CommandData s_Commands[COMMANDS_MAX_COUNT];
-static size_t s_CommandSize;
+static SIZE s_CommandSize;
 
-bool registerCommand(CommandData *command)
+BOOL registerCommand(CommandData *command)
 {
     FUNCTION_PROFILE_BEGIN();
 
@@ -16,7 +16,7 @@ bool registerCommand(CommandData *command)
         MY_LOG_CORE_ERROR("Invalid input");
         FUNCTION_PROFILE_END();
 
-        return false;
+        return FALSE;
     }
 
     if (s_CommandSize >= COMMANDS_MAX_COUNT)
@@ -24,7 +24,7 @@ bool registerCommand(CommandData *command)
         MY_LOG_CORE_ERROR("Commands are full!");
         FUNCTION_PROFILE_END();
 
-        return false;
+        return FALSE;
     }
 
     s_Commands[s_CommandSize] = *command;
@@ -32,10 +32,10 @@ bool registerCommand(CommandData *command)
 
     FUNCTION_PROFILE_END();
 
-    return true;
+    return TRUE;
 }
 
-CommandData *parseCommand(char **tokens, size_t tokensSize, CommandArgs *args_out_ptr)
+CommandData *parseCommand(STRING *tokens, SIZE tokensSize, CommandArgs *args_out_ptr)
 {
     FUNCTION_PROFILE_BEGIN();
 
@@ -53,7 +53,7 @@ CommandData *parseCommand(char **tokens, size_t tokensSize, CommandArgs *args_ou
 
     CommandData *command = NULL;
 
-    for (size_t i = 0; i < s_CommandSize; i++)
+    for (SIZE i = 0; i < s_CommandSize; i++)
     {
         if (strcmp(s_Commands[i].name, tokens[0]) == 0)
         {
@@ -70,11 +70,11 @@ CommandData *parseCommand(char **tokens, size_t tokensSize, CommandArgs *args_ou
 
         if (args_out_ptr->size > 0)
         {
-            args_out_ptr->args = (char **)malloc(args_out_ptr->size * sizeof(char *));
+            args_out_ptr->args = (STRING *)malloc(args_out_ptr->size * sizeof(STRING));
 
-            for (size_t i = 1; i < tokensSize; i++)
+            for (SIZE i = 1; i < tokensSize; i++)
             {
-                args_out_ptr->args[i - 1] = (char *)malloc((strlen(tokens[i]) + 1) * sizeof(char));
+                args_out_ptr->args[i - 1] = (STRING)malloc((strlen(tokens[i]) + 1) * sizeof(CHAR));
 
                 strcpy(args_out_ptr->args[i - 1], tokens[i]);
             }
@@ -98,7 +98,7 @@ CommandData *parseCommand(char **tokens, size_t tokensSize, CommandArgs *args_ou
     }
 }
 
-bool executeCommand(CommandData *command, CommandArgs *args)
+BOOL executeCommand(CommandData *command, CommandArgs *args)
 {
     FUNCTION_PROFILE_BEGIN();
 
@@ -107,7 +107,7 @@ bool executeCommand(CommandData *command, CommandArgs *args)
         MY_LOG_CORE_ERROR("Invalid input");
         FUNCTION_PROFILE_END();
 
-        return false;
+        return FALSE;
     }
 
     MY_LOG_CORE_INFO("Executing command: %s", command->name);
@@ -118,22 +118,22 @@ bool executeCommand(CommandData *command, CommandArgs *args)
 
     FUNCTION_PROFILE_END();
 
-    return true;
+    return TRUE;
 }
 
-bool checkArgsCount(size_t expectedCount, size_t actualCount, char **output_ptr)
+BOOL checkArgsCount(SIZE expectedCount, SIZE actualCount, STRING *output_ptr)
 {
     if (actualCount != expectedCount)
     {
         *output_ptr = COMMAND_ARGUMENTS_COUNT_ERROR_MSG;
 
-        return false;
+        return FALSE;
     }
 
-    return true;
+    return TRUE;
 }
 
-bool commandClearArgs(CommandArgs *args)
+BOOL commandClearArgs(CommandArgs *args)
 {
     FUNCTION_PROFILE_BEGIN();
 
@@ -142,12 +142,12 @@ bool commandClearArgs(CommandArgs *args)
         MY_LOG_CORE_ERROR("Invalid input");
         FUNCTION_PROFILE_END();
 
-        return false;
+        return FALSE;
     }
 
     if (args->size > 0)
     {
-        for (size_t i = 0; i < args->size; i++)
+        for (SIZE i = 0; i < args->size; i++)
         {
             free(args->args[i]);
         }
@@ -159,5 +159,5 @@ bool commandClearArgs(CommandArgs *args)
 
     FUNCTION_PROFILE_END();
 
-    return true;
+    return TRUE;
 }

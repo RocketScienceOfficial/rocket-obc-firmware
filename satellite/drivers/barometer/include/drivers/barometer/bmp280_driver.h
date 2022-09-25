@@ -1,16 +1,16 @@
 #pragma once
 
-#include "utils/errors_types.h"
-#include <stdbool.h>
-#include <stdint.h>
+#include "tools/typedefs.h"
+#include "drivers/gpio/gpio_typedefs.h"
+#include "drivers/gpio/i2c_driver.h"
 
 /**
  * @brief Barometer data
  */
 typedef struct BMP280Data
 {
-    float temperature;
-    int pressure;
+    FLOAT temperature;
+    INT32 pressure;
 } BMP280Data;
 
 /**
@@ -18,19 +18,19 @@ typedef struct BMP280Data
  */
 typedef struct BMP280CalibParams
 {
-    uint16_t dig_t1;
-    int16_t dig_t2;
-    int16_t dig_t3;
+    UINT16 dig_t1;
+    INT16 dig_t2;
+    INT16 dig_t3;
     
-    uint16_t dig_p1;
-    int16_t dig_p2;
-    int16_t dig_p3;
-    int16_t dig_p4;
-    int16_t dig_p5;
-    int16_t dig_p6;
-    int16_t dig_p7;
-    int16_t dig_p8;
-    int16_t dig_p9;
+    UINT16 dig_p1;
+    INT16 dig_p2;
+    INT16 dig_p3;
+    INT16 dig_p4;
+    INT16 dig_p5;
+    INT16 dig_p6;
+    INT16 dig_p7;
+    INT16 dig_p8;
+    INT16 dig_p9;
 } BMP280CalibParams;
 
 /**
@@ -38,7 +38,7 @@ typedef struct BMP280CalibParams
  */
 typedef struct BMP280Config
 {
-    int _i2c;
+    I2CInstance _i2c;
     BMP280CalibParams _calibParams;
 } BMP280Config;
 
@@ -51,7 +51,7 @@ typedef struct BMP280Config
  * @param scl SCL pin
  * @return Result code.
  */
-FUNCRESULT bmp280Init(BMP280Config *config, int i2c, int sda, int scl);
+FUNCRESULT bmp280Init(BMP280Config *config, I2CInstance i2c, PinNumber sda, PinNumber scl);
 
 /**
  * @brief Checks if the barometer is initialized
@@ -60,7 +60,7 @@ FUNCRESULT bmp280Init(BMP280Config *config, int i2c, int sda, int scl);
  * @param available Is Initialized
  * @return Result code.
  */
-FUNCRESULT bmp280Check(BMP280Config *config, bool *result);
+FUNCRESULT bmp280Check(BMP280Config *config, BOOL *result);
 
 /**
  * @brief Read barometer data

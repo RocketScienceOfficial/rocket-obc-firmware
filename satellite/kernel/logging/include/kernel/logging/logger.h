@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stddef.h>
+#include "tools/typedefs.h"
 #include <stdarg.h>
 
 #define MAX_LOGGER_SINKS 4
@@ -15,7 +15,7 @@ typedef enum LoggerSinkType
     SINK_FILE,
 } LoggerSinkType;
 
-typedef void (*LogCallback)();
+typedef VOID (*LogCallback)();
 
 /**
  * @brief Data structure for a sink. (INTERNAL USE)
@@ -25,7 +25,7 @@ typedef struct LogSinkData
     /**
      * @brief Pattern of sink.
      */
-    const char *_pattern;
+    STRING _pattern;
 
     /**
      * @brief Type of sink.
@@ -35,7 +35,7 @@ typedef struct LogSinkData
     /**
      * @brief Custom data of sink.
      */
-    void *_customData;
+    VOID *_customData;
 } LogSinkData;
 
 /**
@@ -46,7 +46,7 @@ typedef struct Logger
     /**
      * @brief Name of logger.
      */
-    const char *_name;
+    STRING _name;
 
     /**
      * @brief Sinks of logger.
@@ -57,7 +57,7 @@ typedef struct Logger
     /**
      * @brief Number of sinks.
      */
-    size_t _numSinks;
+    SIZE _numSinks;
 } Logger;
 
 /**
@@ -66,7 +66,7 @@ typedef struct Logger
  * @param logger Logger data to setup.
  * @param name Logger name.
  */
-void myLogCreateLogger(Logger *logger, const char *name);
+VOID myLogCreateLogger(Logger *logger, const STRING name);
 
 /**
  * @brief Creates a console sink.
@@ -74,7 +74,7 @@ void myLogCreateLogger(Logger *logger, const char *name);
  * @param logger Logger to add sink to.
  * @param pattern Pattern of sink.
  */
-void myLogCreateConsoleSink(Logger *logger, const char *pattern);
+VOID myLogCreateConsoleSink(Logger *logger, const STRING pattern);
 
 /**
  * @brief Creates a file sink.
@@ -82,7 +82,7 @@ void myLogCreateConsoleSink(Logger *logger, const char *pattern);
  * @param logger Logger to add sink to.
  * @param pattern Pattern of sink.
  */
-void myLogCreateFileSink(Logger *logger, const char *pattern, size_t fileIndex);
+VOID myLogCreateFileSink(Logger *logger, const STRING pattern, SIZE fileIndex);
 
 /**
  * @brief Parses a log.
@@ -92,9 +92,9 @@ void myLogCreateFileSink(Logger *logger, const char *pattern, size_t fileIndex);
  * @param level Level of log.
  * @param format Format of log.
  * @param args Arguments of log.
- * @return char* Parsed log.
+ * @return CHAR* Parsed log.
  */
-char *parseLog(const char *loggerName, const char *pattern, const char *level, const char *format, va_list args);
+STRING parseLog(const STRING loggerName, const STRING pattern, const STRING level, const STRING format, va_list args);
 
 /**
  * @brief Logs a message.
@@ -104,7 +104,7 @@ char *parseLog(const char *loggerName, const char *pattern, const char *level, c
  * @param format Format of log.
  * @param ... Arguments of log.
  */
-void myLog(Logger *logger, const char *level, const char *format, ...);
+VOID myLog(Logger *logger, const STRING level, const STRING format, ...);
 
 Logger *myLogGetCoreLogger();
 

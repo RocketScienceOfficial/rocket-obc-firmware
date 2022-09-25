@@ -11,13 +11,13 @@ static Logger s_Logger;
 #define MY_LOG_RECEIVER_DATA_EMPTY() myLog(&s_Logger, "", ",")
 #define MY_LOG_RECEIVER_DATA_END() myLog(&s_Logger, "", "*/\n")
 
-void initializeReceiverLogger()
+VOID initializeReceiverLogger()
 {
     myLogCreateLogger(&s_Logger, MY_LOG_RECEIVER_DATA_NAME);
     myLogCreateConsoleSink(&s_Logger, MY_LOG_RECEIVER_DATA_PATTERN);
 }
 
-void logReceiverData(ReceiverSendData *data)
+VOID logReceiverData(ReceiverSendData *data)
 {
     MY_LOG_RECEIVER_DATA_BEGIN();
 

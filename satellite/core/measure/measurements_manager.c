@@ -14,7 +14,7 @@ static MPU6050Config s_AccelerometerConfig;
 #define MY_LOG_MEASURE_FLOAT(value) myLog(&s_MeasureLogger, "", "%f", value)
 #define MY_LOG_MEASURE_END() myLog(&s_MeasureLogger, "", "\n")
 
-void initializeMeasurements()
+VOID initializeMeasurements()
 {
     myLogCreateLogger(&s_MeasureLogger, MY_LOG_MEASURE_NAME);
     myLogCreateFileSink(&s_MeasureLogger, MY_LOG_MEASURE_PATTERN, MEASUREMENTS_FILE_INDEX);
@@ -34,11 +34,11 @@ void initializeMeasurements()
     }
 }
 
-void takeMeasurements(MeasurementData *data_out)
+VOID takeMeasurements(MeasurementData *data_out)
 {
     BMP280Data barometerData = {0};
     MPU6050Data accelerometerData = {0};
-    int componentsStatus = 0;
+    INT32 componentsStatus = 0;
 
     if (ENABLE_BAROMETER)
     {

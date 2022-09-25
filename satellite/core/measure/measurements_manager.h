@@ -1,6 +1,7 @@
 #pragma once
 
 #include "shared/measurements_utils.h"
+#include "tools/typedefs.h"
 
-void initializeMeasurements();
-void takeMeasurements(MeasurementData *data_out);
+VOID initializeMeasurements();
+VOID takeMeasurements(MeasurementData *data_out);

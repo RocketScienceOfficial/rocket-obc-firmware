@@ -1,13 +1,14 @@
 #pragma once
 
 #include "shared/measurements_utils.h"
+#include "tools/typedefs.h"
 
 typedef struct ReceiverInternalConditionData
 {
-    float measureRAMUsagePercent;
-    float receiverRAMUsagePercent;
-    float measureBatteryPercent;
-    int radioSignalStrength;
+    FLOAT measureRAMUsagePercent;
+    FLOAT receiverRAMUsagePercent;
+    FLOAT measureBatteryPercent;
+    INT32 radioSignalStrength;
 } ReceiverInternalConditionData;
 
 typedef struct ReceiverSendData
@@ -16,5 +17,5 @@ typedef struct ReceiverSendData
     ReceiverInternalConditionData condition;
 } ReceiverSendData;
 
-void initializeReceiverLogger();
-void logReceiverData(ReceiverSendData *data);
+VOID initializeReceiverLogger();
+VOID logReceiverData(ReceiverSendData *data);

@@ -1,14 +1,13 @@
 #include "drivers/accelerometer/mpu6050_driver.h"
-#include "drivers/hwutils/pinout_utils.h"
-#include "utils/constants.h"
+#include "tools/constants.h"
 #include "pico/stdlib.h"
-#include "hardware/i2c.h"
 #include <string.h>
+#include <stdio.h>
 
 #define MPU6050_ADDR 0x68
 #define ACCEL_LBS_0 16384.0
 #define N_AXIS 3
-#define DEFAULT_SCALE = 1;
+#define DEFAULT_SCALE 1
 #define AX_OFFSET 552
 #define AY_OFFSET -241
 #define AZ_OFFSET -3185
@@ -21,76 +20,71 @@
 #define GYRO_BAND 35
 #define BIAS_COUNT 5000
 
-static i2c_inst_t *getI2C(MPU6050Config *config)
+static FLOAT getAccelLBS(INT32 level)
 {
-    return (config->_i2c == 0 ? i2c0 : i2c1);
-}
-
-static float getAccelLBS(int level)
-{
-    return (float)(level < 0 || level > 3) ? (1) : (1.0 / (level == 0 ? 16384.0 : level == 1 ? 8192.0
+    return (FLOAT)(level < 0 || level > 3) ? (1) : (1.0 / (level == 0 ? 16384.0 : level == 1 ? 8192.0
                                                                               : level == 2   ? 4096.0
                                                                                              : 2048.0));
 }
 
-static float getGyroLBS(int level)
+static FLOAT getGyroLBS(INT32 level)
 {
-    return (float)(level < 0 || level > 3) ? (1) : ((PI / 180.0) / (level == 0 ? 131.0 : level == 1 ? 65.5
+    return (FLOAT)(level < 0 || level > 3) ? (1) : ((PI / 180.0) / (level == 0 ? 131.0 : level == 1 ? 65.5
                                                                                      : level == 2   ? 32.8
                                                                                                     : 16.4));
 }
 
-static void mpu6050Reset(MPU6050Config *config, int lpFilter, int accelSensLevel, int gyroSensLevel)
+static void mpu6050Reset(MPU6050Config *config, INT32 lpFilter, INT32 accelSensLevel, INT32 gyroSensLevel)
 {
-    uint8_t buf[] = {0x6B, 0x00};
-    i2c_write_blocking(getI2C(config), MPU6050_ADDR, buf, 2, false);
+    BYTE buf[] = {0x6B, 0x00};
+    i2cWriteBlocking(config->_i2c, MPU6050_ADDR, buf, 2, FALSE);
 
-    uint8_t buf2[] = {0x1A, lpFilter <= 6 ? lpFilter : 0x00};
-    i2c_write_blocking(getI2C(config), MPU6050_ADDR, buf2, 2, false);
+    BYTE buf2[] = {0x1A, lpFilter <= 6 ? lpFilter : 0x00};
+    i2cWriteBlocking(config->_i2c, MPU6050_ADDR, buf2, 2, FALSE);
 
-    uint8_t buf3[] = {0x1B, gyroSensLevel == 1 ? 0x08 : gyroSensLevel == 2 ? 0x10
-                                                    : gyroSensLevel == 3   ? 0x18
-                                                                           : 0x00};
-    i2c_write_blocking(getI2C(config), MPU6050_ADDR, buf3, 2, false);
+    BYTE buf3[] = {0x1B, gyroSensLevel == 1 ? 0x08 : gyroSensLevel == 2 ? 0x10
+                                                 : gyroSensLevel == 3   ? 0x18
+                                                                        : 0x00};
+    i2cWriteBlocking(config->_i2c, MPU6050_ADDR, buf3, 2, FALSE);
 
-    uint8_t buf4[] = {0x1C, accelSensLevel == 1 ? 0x08 : accelSensLevel == 2 ? 0x10
-                                                     : accelSensLevel == 3   ? 0x18
-                                                                             : 0x00};
-    i2c_write_blocking(getI2C(config), MPU6050_ADDR, buf4, 2, false);
+    BYTE buf4[] = {0x1C, accelSensLevel == 1 ? 0x08 : accelSensLevel == 2 ? 0x10
+                                                  : accelSensLevel == 3   ? 0x18
+                                                                          : 0x00};
+    i2cWriteBlocking(config->_i2c, MPU6050_ADDR, buf4, 2, FALSE);
 }
 
-static void mpu6050ReadRawValues(MPU6050Config *config, int16_t accel[3], int16_t gyro[3], int16_t *temp)
+static void mpu6050ReadRawValues(MPU6050Config *config, INT16 accel[3], INT16 gyro[3], INT16 *temp)
 {
-    uint8_t buffer[6];
+    BYTE buffer[6];
 
-    uint8_t val = 0x3B;
-    i2c_write_blocking(getI2C(config), MPU6050_ADDR, &val, 1, true);
-    i2c_read_blocking(getI2C(config), MPU6050_ADDR, buffer, 6, false);
+    BYTE val = 0x3B;
+    i2cWriteBlocking(config->_i2c, MPU6050_ADDR, &val, 1, TRUE);
+    i2cReadBlocking(config->_i2c, MPU6050_ADDR, buffer, 6, FALSE);
 
-    for (int i = 0; i < 3; i++)
+    for (INT32 i = 0; i < 3; i++)
     {
         accel[i] = (buffer[i * 2] << 8 | buffer[(i * 2) + 1]);
     }
 
     val = 0x43;
-    i2c_write_blocking(getI2C(config), MPU6050_ADDR, &val, 1, true);
-    i2c_read_blocking(getI2C(config), MPU6050_ADDR, buffer, 6, false);
+    i2cWriteBlocking(config->_i2c, MPU6050_ADDR, &val, 1, TRUE);
+    i2cReadBlocking(config->_i2c, MPU6050_ADDR, buffer, 6, FALSE);
 
-    for (int i = 0; i < 3; i++)
+    for (INT32 i = 0; i < 3; i++)
     {
         gyro[i] = (buffer[i * 2] << 8 | buffer[(i * 2) + 1]);
     }
 
     val = 0x41;
-    i2c_write_blocking(getI2C(config), MPU6050_ADDR, &val, 1, true);
-    i2c_read_blocking(getI2C(config), MPU6050_ADDR, buffer, 2, false);
+    i2cWriteBlocking(config->_i2c, MPU6050_ADDR, &val, 1, TRUE);
+    i2cReadBlocking(config->_i2c, MPU6050_ADDR, buffer, 6, FALSE);
 
     *temp = buffer[0] << 8 | buffer[1];
 }
 
-FUNCRESULT mpu6050Init(MPU6050Config *config, int i2c, int sda, int scl, int lpFilter, int accelSensLevel, int gyroSensLevel)
+FUNCRESULT mpu6050Init(MPU6050Config *config, I2CInstance i2c, PinNumber sda, PinNumber scl, UINT8 lpFilter, UINT8 accelSensLevel, UINT8 gyroSensLevel)
 {
-    if (!config || !pinoutCheckI2C(i2c) || !pinoutCheckI2C_SDA(i2c, sda) || !pinoutCheckI2C_SCL(i2c, scl) || lpFilter < 0 || lpFilter > 6 || accelSensLevel < 0 || accelSensLevel > 3 || gyroSensLevel < 0 || gyroSensLevel > 3)
+    if (!config || !i2cCheckInstance(i2c) || !i2cCheckSDA(i2c, sda) || !i2cCheckSCL(i2c, scl) || lpFilter < 0 || lpFilter > 6 || accelSensLevel < 0 || accelSensLevel > 3 || gyroSensLevel < 0 || gyroSensLevel > 3)
     {
         return ERR_INVALIDARG;
     }
@@ -99,13 +93,10 @@ FUNCRESULT mpu6050Init(MPU6050Config *config, int i2c, int sda, int scl, int lpF
 
     config->_i2c = i2c;
 
-    i2c_init(getI2C(config), 400 * 1000);
-    gpio_set_function(sda, GPIO_FUNC_I2C);
-    gpio_set_function(scl, GPIO_FUNC_I2C);
-    gpio_pull_up(sda);
-    gpio_pull_up(scl);
+    i2cInitAll(config->_i2c, 400 * 1000);
+    i2cInitPins(config->_i2c, sda, scl);
 
-    bool result;
+    BOOL result;
 
     if (FUNCFAILED(mpu6050Check(config, &result)))
     {
@@ -125,17 +116,14 @@ FUNCRESULT mpu6050Init(MPU6050Config *config, int i2c, int sda, int scl, int lpF
     return SUC_OK;
 }
 
-FUNCRESULT mpu6050Check(MPU6050Config *config, bool *result)
+FUNCRESULT mpu6050Check(MPU6050Config *config, BOOL *result)
 {
     if (!config || !result)
     {
         return ERR_INVALIDARG;
     }
 
-    uint8_t data;
-    int ret = i2c_read_timeout_us(getI2C(config), MPU6050_ADDR, &data, 1, false, 1E6);
-
-    *result = ret < 0 ? 0 : 1;
+    *result = i2cCheckDevice(config->_i2c, MPU6050_ADDR);
 
     return SUC_OK;
 }
@@ -147,7 +135,7 @@ FUNCRESULT mpu6050ReadRaw(MPU6050Config *config, MPU6050RawData *data)
         return ERR_INVALIDARG;
     }
 
-    int16_t acceleration[3], gyro[3], temp;
+    INT16 acceleration[3], gyro[3], temp;
 
     mpu6050ReadRawValues(config, acceleration, gyro, &temp);
 
@@ -162,24 +150,24 @@ FUNCRESULT mpu6050ReadRaw(MPU6050Config *config, MPU6050RawData *data)
     return SUC_OK;
 }
 
-static float convertAcceleration(MPU6050Config *config, int16_t raw, int16_t offset, float scale)
+static FLOAT convertAcceleration(MPU6050Config *config, INT16 raw, INT16 offset, FLOAT scale)
 {
-    float calcScale = scale * config->_accelLBS;
-    float calcOffset = scale * ((float)offset) / ACCEL_LBS_0;
+    FLOAT calcScale = scale * config->_accelLBS;
+    FLOAT calcOffset = scale * ((FLOAT)offset) / ACCEL_LBS_0;
 
-    return ((float)raw) * calcScale - calcOffset;
+    return ((FLOAT)raw) * calcScale - calcOffset;
 }
 
-static float convertGyro(MPU6050Config *config, int16_t raw, float scale)
+static FLOAT convertGyro(MPU6050Config *config, INT16 raw, FLOAT scale)
 {
-    float calcScale = scale * config->_gryoLBS;
+    FLOAT calcScale = scale * config->_gryoLBS;
 
-    return ((float)raw) * calcScale;
+    return ((FLOAT)raw) * calcScale;
 }
 
-static float convertTemperature(int16_t raw)
+static FLOAT convertTemperature(INT16 raw)
 {
-    return (float)raw / 340.0 + 36.53;
+    return (FLOAT)raw / 340.0 + 36.53;
 }
 
 FUNCRESULT mpu6050ConvertData(MPU6050Config *config, MPU6050RawData *inData, MPU6050Data *outData)

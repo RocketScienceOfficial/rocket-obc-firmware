@@ -11,5 +11,6 @@ target_link_libraries(drivers_lib INTERFACE
     drivers_lora_lib
     drivers_sd_lib
     drivers_servo_lib
+    drivers_temp_lib
     drivers_uv_lib
 )

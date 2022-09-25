@@ -1,7 +1,11 @@
-add_library(drivers_sd_lib STATIC
-    include/drivers/sd/sd_driver.h
-    src/sd_driver.c
-    )
+set(MODULE_NAME drivers)
+set(LIB_NAME sd)
+set(LIB_GENERAL_NAME "${MODULE_NAME}_${LIB_NAME}_lib")
 
-target_link_libraries(drivers_sd_lib PUBLIC FatFs_SPI utils_lib drivers_hwutils_lib)
-target_include_directories(drivers_sd_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+add_library(${LIB_GENERAL_NAME} STATIC
+    include/${MODULE_NAME}/${LIB_NAME}/sd_driver.h
+    src/sd_driver.c
+)
+
+target_link_libraries(${LIB_GENERAL_NAME} PUBLIC drivers_gpio_lib FatFs_SPI)
+target_include_directories(${LIB_GENERAL_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

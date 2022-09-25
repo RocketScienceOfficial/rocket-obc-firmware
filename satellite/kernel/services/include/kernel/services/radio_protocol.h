@@ -1,9 +1,6 @@
 #pragma once
 
-#include "utils/errors_types.h"
-#include <stdint.h>
-#include <stdbool.h>
-#include <stddef.h>
+#include "tools/typedefs.h"
 
 /**
  * @brief Header of radio packet. (INTERNAL USE)
@@ -13,12 +10,12 @@ typedef struct _RadioHeader
     /**
      * @brief Parity Size.
      */
-    size_t _paritySize;
+    SIZE _paritySize;
 
     /**
      * @brief Parity.
      */
-    uint8_t *_parity;
+    BYTE *_parity;
 } _RadioHeader;
 
 /**
@@ -29,22 +26,22 @@ typedef struct RadioBody
     /**
      * @brief Packet command.
      */
-    uint8_t command;
+    BYTE command;
 
     /**
      * @brief Padding to align struct. Don't use it.
      */
-    uint8_t _padding[3];
+    BYTE _padding[3];
 
     /**
      * @brief Payload size.
      */
-    size_t payloadSize;
+    SIZE payloadSize;
 
     /**
      * @brief Packet payload.
      */
-    uint8_t *payload;
+    BYTE *payload;
 } RadioBody;
 
 /**
@@ -72,7 +69,7 @@ typedef struct _RadioPacket
  *
  * @return Result code.
  */
-FUNCRESULT serializeRadioPacket(RadioBody *body, uint8_t **buffer_out_ptr, size_t *size_out);
+FUNCRESULT serializeRadioPacket(RadioBody *body, BYTE **buffer_out_ptr, SIZE *size_out);
 
 /**
  * @brief Deserialize radio packet.
@@ -84,7 +81,7 @@ FUNCRESULT serializeRadioPacket(RadioBody *body, uint8_t **buffer_out_ptr, size_
  *
  * @return Result code.
  */
-FUNCRESULT deserializeRadioPacket(uint8_t *buffer, size_t size, RadioBody *body_out, bool *validationResult);
+FUNCRESULT deserializeRadioPacket(BYTE *buffer, SIZE size, RadioBody *body_out, BOOL *validationResult);
 
 /**
  * @brief Clears radio body. (i.a payload)

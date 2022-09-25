@@ -1,7 +1,11 @@
-add_library(drivers_led_lib STATIC
-    include/drivers/led/led_driver.h
-    src/led_driver.c
-    )
+set(MODULE_NAME drivers)
+set(LIB_NAME led)
+set(LIB_GENERAL_NAME "${MODULE_NAME}_${LIB_NAME}_lib")
 
-target_link_libraries(drivers_led_lib PUBLIC pico_stdlib utils_lib)
-target_include_directories(drivers_led_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+add_library(${LIB_GENERAL_NAME} STATIC
+    include/${MODULE_NAME}/${LIB_NAME}/simple_led_driver.h
+    src/simple_led_driver.c
+)
+
+target_link_libraries(${LIB_GENERAL_NAME} PUBLIC drivers_gpio_lib)
+target_include_directories(${LIB_GENERAL_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

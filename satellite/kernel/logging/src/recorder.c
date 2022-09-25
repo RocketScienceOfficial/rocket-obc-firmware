@@ -1,16 +1,15 @@
 #include "kernel/logging/recorder.h"
-#include <stdio.h>
 
-Timer functionProfileBegin(const char *function)
+TIME functionProfileBegin(STRING function)
 {
 	MY_LOG_RECORD("Begining execution of a function: '%s'", function);
 
 	return getMsSinceBoot();
 }
 
-void functionProfileEnd(const char *function, Timer beginResult)
+VOID functionProfileEnd(STRING function, TIME beginResult)
 {
-	Timer elapsed = getMsSinceBoot() - beginResult;
+	TIME elapsed = getMsSinceBoot() - beginResult;
 
 	MY_LOG_RECORD("Execution of function: '%s' took %u ms", function, elapsed);
 }
@@ -18,13 +17,13 @@ void functionProfileEnd(const char *function, Timer beginResult)
 Logger *myLogGetRecordLogger()
 {
 	static Logger logger;
-	static int loggerInitialized;
+	static BOOL loggerInitialized;
 
 	if (!loggerInitialized)
 	{
 		myLogCreateLogger(&logger, MY_LOG_RECORD_NAME);
 
-		loggerInitialized = 1;
+		loggerInitialized = TRUE;
 	}
 
 	return &logger;

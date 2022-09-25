@@ -1,24 +1,24 @@
 #include "kernel/logging/logger.h"
 #include "kernel/console/console_output.h"
-#include "utils/time_tracker.h"
 #include "drivers/flash/flash_driver.h"
+#include "tools/time_tracker.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
 static LogCallback s_CurrentCallback;
 
-#define REPORT_ERROR(msg) logSerialError(msg)
+#define REPORT_ERROR(msg) consoleLogError(msg)
 #define LOG_HW_CALL(func)                                                                                    \
 	{                                                                                                        \
 		FUNCRESULT result = func;                                                                            \
 		if (FUNCFAILED(result))                                                                              \
 		{                                                                                                    \
-			logSerialError("Hardware function with code failed: %d at '%s:%d'", result, __FILE__, __LINE__); \
+			consoleLogError("Hardware function with code failed: %d at '%s:%d'", result, __FILE__, __LINE__); \
 		}                                                                                                    \
 	}
 
-void myLogCreateLogger(Logger *logger, const char *name)
+VOID myLogCreateLogger(Logger *logger, const STRING name)
 {
 	if (!logger || !name)
 	{
@@ -31,7 +31,7 @@ void myLogCreateLogger(Logger *logger, const char *name)
 	logger->_numSinks = 0;
 }
 
-void myLogCreateConsoleSink(Logger *logger, const char *pattern)
+VOID myLogCreateConsoleSink(Logger *logger, const STRING pattern)
 {
 	if (!logger || !pattern)
 	{
@@ -49,7 +49,7 @@ void myLogCreateConsoleSink(Logger *logger, const char *pattern)
 	logger->_sinks[logger->_numSinks++] = sink;
 }
 
-void myLogCreateFileSink(Logger *logger, const char *pattern, size_t fileIndex)
+VOID myLogCreateFileSink(Logger *logger, const STRING pattern, SIZE fileIndex)
 {
 	if (!logger || !pattern || fileIndex >= FLASH_FILES_COUNT)
 	{
@@ -61,7 +61,7 @@ void myLogCreateFileSink(Logger *logger, const char *pattern, size_t fileIndex)
 	LogSinkData sink = {
 		._pattern = pattern,
 		._type = SINK_FILE,
-		._customData = (void *)fileIndex,
+		._customData = (VOID *)fileIndex,
 	};
 
 	LOG_HW_CALL(flashClearFile(getDefaultFlashModule(), fileIndex));
@@ -69,21 +69,21 @@ void myLogCreateFileSink(Logger *logger, const char *pattern, size_t fileIndex)
 	logger->_sinks[logger->_numSinks++] = sink;
 }
 
-void myLogSetCallback(LogCallback callback)
+VOID myLogSetCallback(LogCallback callback)
 {
 	s_CurrentCallback = callback;
 }
 
-char *parseLog(const char *loggerName, const char *pattern, const char *level, const char *format, va_list args)
+STRING parseLog(const STRING loggerName, const STRING pattern, const STRING level, const STRING format, va_list args)
 {
-	char *log = (char *)malloc(sizeof(char) * MAX_LOG_SIZE);
-	size_t logIndex = 0;
-	Timer timeMs = getMsSinceBoot();
-	Timer minutes = floor(timeMs / 60000);
-	Timer seconds = floor(timeMs / 1000 - minutes * 60);
-	Timer miliseconds = floor(timeMs - minutes * 60000 - seconds * 1000);
+	STRING log = (STRING)malloc(sizeof(CHAR) * MAX_LOG_SIZE);
+	SIZE logIndex = 0;
+	TIME timeMs = getMsSinceBoot();
+	TIME minutes = floor(timeMs / 60000);
+	TIME seconds = floor(timeMs / 1000 - minutes * 60);
+	TIME miliseconds = floor(timeMs - minutes * 60000 - seconds * 1000);
 
-	for (size_t i = 0; pattern[i] != '\0'; i++)
+	for (SIZE i = 0; pattern[i] != '\0'; i++)
 	{
 		if (logIndex >= MAX_LOG_SIZE)
 		{
@@ -94,15 +94,15 @@ char *parseLog(const char *loggerName, const char *pattern, const char *level, c
 
 		if (pattern[i] == '%')
 		{
-			size_t tmpI = i + 1;
+			SIZE tmpI = i + 1;
 
 			if (pattern[tmpI] == 'M')
 			{
-				char buff[4];
+				CHAR buff[4];
 
-				size_t len = snprintf(buff, 4, "%u", minutes);
+				SIZE len = snprintf(buff, 4, "%u", minutes);
 
-				for (size_t j = 0; j < len; j++)
+				for (SIZE j = 0; j < len; j++)
 				{
 					log[logIndex] = buff[j];
 					logIndex++;
@@ -110,11 +110,11 @@ char *parseLog(const char *loggerName, const char *pattern, const char *level, c
 			}
 			else if (pattern[tmpI] == 'S')
 			{
-				char buff[4];
+				CHAR buff[4];
 
-				size_t len = snprintf(buff, 4, "%u", seconds);
+				SIZE len = snprintf(buff, 4, "%u", seconds);
 
-				for (size_t j = 0; j < len; j++)
+				for (SIZE j = 0; j < len; j++)
 				{
 					log[logIndex] = buff[j];
 					logIndex++;
@@ -122,11 +122,11 @@ char *parseLog(const char *loggerName, const char *pattern, const char *level, c
 			}
 			else if (pattern[tmpI] == 'm')
 			{
-				char buff[4];
+				CHAR buff[4];
 
-				size_t len = snprintf(buff, 4, "%u", miliseconds);
+				SIZE len = snprintf(buff, 4, "%u", miliseconds);
 
-				for (size_t j = 0; j < len; j++)
+				for (SIZE j = 0; j < len; j++)
 				{
 					log[logIndex] = buff[j];
 					logIndex++;
@@ -134,7 +134,7 @@ char *parseLog(const char *loggerName, const char *pattern, const char *level, c
 			}
 			else if (pattern[tmpI] == 'l')
 			{
-				for (size_t j = 0; level[j] != '\0'; j++)
+				for (SIZE j = 0; level[j] != '\0'; j++)
 				{
 					log[logIndex] = level[j];
 					logIndex++;
@@ -142,12 +142,12 @@ char *parseLog(const char *loggerName, const char *pattern, const char *level, c
 			}
 			else if (pattern[tmpI] == 'c')
 			{
-				size_t len = vsnprintf(NULL, 0, format, args) + 1;
-				char *msg = malloc(len);
+				SIZE len = vsnprintf(NULL, 0, format, args) + 1;
+				STRING msg = malloc(len);
 
 				vsnprintf(msg, len, format, args);
 
-				for (size_t j = 0; msg[j] != '\0'; j++)
+				for (SIZE j = 0; msg[j] != '\0'; j++)
 				{
 					log[logIndex] = msg[j];
 					logIndex++;
@@ -157,7 +157,7 @@ char *parseLog(const char *loggerName, const char *pattern, const char *level, c
 			}
 			else if (pattern[tmpI] == 't')
 			{
-				for (size_t j = 0; loggerName[j] != '\0'; j++)
+				for (SIZE j = 0; loggerName[j] != '\0'; j++)
 				{
 					log[logIndex] = loggerName[j];
 					logIndex++;
@@ -178,21 +178,21 @@ char *parseLog(const char *loggerName, const char *pattern, const char *level, c
 	return log;
 }
 
-static void __log(Logger *logger, const char *level, const char *format, va_list args)
+static VOID __log(Logger *logger, const STRING level, const STRING format, va_list args)
 {
-	for (size_t i = 0; i < logger->_numSinks; i++)
+	for (SIZE i = 0; i < logger->_numSinks; i++)
 	{
-		char *log = parseLog(logger->_name, logger->_sinks[i]._pattern, level, format, args);
+		STRING log = parseLog(logger->_name, logger->_sinks[i]._pattern, level, format, args);
 
 		if (log)
 		{
 			switch (logger->_sinks[i]._type)
 			{
 			case SINK_CONSOLE:
-				logSerial(log);
+				consoleLog(log);
 				break;
 			case SINK_FILE:
-				LOG_HW_CALL(flashWriteFile(getDefaultFlashModule(), (size_t)logger->_sinks[i]._customData, log));
+				LOG_HW_CALL(flashWriteFile(getDefaultFlashModule(), (SIZE)logger->_sinks[i]._customData, log));
 				break;
 			default:
 				REPORT_ERROR("Unknown sink type");
@@ -204,7 +204,7 @@ static void __log(Logger *logger, const char *level, const char *format, va_list
 	}
 }
 
-void myLog(Logger *logger, const char *level, const char *format, ...)
+VOID myLog(Logger *logger, const STRING level, const STRING format, ...)
 {
 	va_list ap;
 
@@ -216,13 +216,13 @@ void myLog(Logger *logger, const char *level, const char *format, ...)
 Logger *myLogGetCoreLogger()
 {
 	static Logger logger;
-	static int initialized;
+	static BOOL initialized;
 
 	if (!initialized)
 	{
 		myLogCreateLogger(&logger, MY_LOG_CORE_NAME);
 
-		initialized = 1;
+		initialized = TRUE;
 	}
 
 	return &logger;

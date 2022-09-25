@@ -1,55 +1,41 @@
 #include "drivers/flash/flash_driver.h"
 #include "pico/stdlib.h"
-#include "hardware/flash.h"
-#include "hardware/sync.h"
+#include "drivers/gpio/onboard_flash_driver.h"
 #include <string.h>
 #include <stdlib.h>
 
-#define FLASH_WRITE_BUFFER_SIZE FLASH_PAGE_SIZE
-#define FLASH_BASE_OFFSET (FLASH_SECTOR_SIZE * (1 << 6u))
-#define FLASH_ROOT_BLOCK_SIZE FLASH_SECTOR_SIZE
-#define FLASH_FILE_SIZE (FLASH_SECTOR_SIZE * (1 << 6u))
-#define FLASH_UNINITIALIZED_STATE 0xffffffff
+#define FLASH_UNINITIALIZED_STATE 0xFFFFFFFF
 #define FLASH_INITIALIZED_STATE 0x01
 
-static const uint8_t *readFlash(FlashModule *flashModule, uint32_t offset)
+static UINT32 getFlashRootBlockSize()
 {
-    return (const uint8_t *)(XIP_BASE + FLASH_BASE_OFFSET + offset);
+    return flashSectorSize();
 }
 
-static void writeFlashPage(FlashModule *flashModule, uint32_t offset, const uint8_t *buffer)
+static UINT32 getFlashFileSize()
 {
-    uint32_t ints = save_and_disable_interrupts();
-    flash_range_program(FLASH_BASE_OFFSET + offset, buffer, FLASH_WRITE_BUFFER_SIZE);
-    restore_interrupts(ints);
+    return flashSectorSize() * (1 << 6);
 }
 
-static void eraseFlashSectors(FlashModule *flashModule, uint32_t offset, size_t size)
+static UINT32 getFlashFileAddressOffset(SIZE index)
 {
-    uint32_t ints = save_and_disable_interrupts();
-    flash_range_erase(FLASH_BASE_OFFSET + offset, size);
-    restore_interrupts(ints);
-}
-
-static uint32_t getFlashFileAddressOffset(size_t index)
-{
-    return FLASH_ROOT_BLOCK_SIZE + (FLASH_FILE_SIZE * index);
+    return getFlashRootBlockSize() + (getFlashFileSize() * index);
 }
 
 static void updateFlashFilesSizes(FlashModule *module)
 {
-    eraseFlashSectors(module, 0, FLASH_ROOT_BLOCK_SIZE);
+    eraseFlashSectors(0, getFlashRootBlockSize());
 
-    uint8_t *buffer = (uint8_t *)calloc(FLASH_WRITE_BUFFER_SIZE, sizeof(uint8_t));
+    BYTE *buffer = (BYTE *)calloc(flashWriteBufferSize(), sizeof(BYTE));
 
     memcpy(buffer, &module->_fileSystem, sizeof(module->_fileSystem));
 
-    writeFlashPage(module, 0, buffer);
+    writeFlashPage(0, buffer);
 
     free(buffer);
 }
 
-static void writeFlashBuffer(FlashModule *module, size_t fileIndex, const uint8_t *data, size_t size)
+static void writeFlashBuffer(FlashModule *module, SIZE fileIndex, const BYTE *data, SIZE size)
 {
     _FlashFile *fileInfo = &module->_fileSystem._files[fileIndex];
     _FlashFileBuffer *fileBuffer = &module->_filesBuffers[fileIndex];
@@ -64,7 +50,9 @@ FUNCRESULT flashInit(FlashModule *flashModule)
 
     flashModule->_isInitialized = true;
 
-    const uint8_t *filesData = readFlash(flashModule, 0);
+    const BYTE *filesData;
+
+    readFlash(0, &filesData);
 
     memcpy(&flashModule->_fileSystem, filesData, sizeof(flashModule->_fileSystem));
 
@@ -76,10 +64,10 @@ FUNCRESULT flashInit(FlashModule *flashModule)
         updateFlashFilesSizes(flashModule);
     }
 
-    for (size_t i = 0; i < FLASH_FILES_COUNT; i++)
+    for (SIZE i = 0; i < FLASH_FILES_COUNT; i++)
     {
         flashModule->_filesBuffers[i]._bufferSize = 0;
-        flashModule->_filesBuffers[i]._buffer = (uint8_t *)calloc(FLASH_WRITE_BUFFER_SIZE, sizeof(uint8_t));
+        flashModule->_filesBuffers[i]._buffer = (BYTE *)calloc(flashWriteBufferSize(), sizeof(BYTE));
     }
 
     return SUC_OK;
@@ -88,7 +76,7 @@ FUNCRESULT flashInit(FlashModule *flashModule)
 FlashModule *getDefaultFlashModule()
 {
     static FlashModule module;
-    static bool isInitialized = false;
+    static BOOL isInitialized = false;
 
     if (!isInitialized)
     {
@@ -100,14 +88,14 @@ FlashModule *getDefaultFlashModule()
     return &module;
 }
 
-FUNCRESULT flashWriteFile(FlashModule *module, size_t fileIndex, const char *msg)
+FUNCRESULT flashWriteFile(FlashModule *module, SIZE fileIndex, const CHAR *msg)
 {
-    return flashWriteFileBuff(module, fileIndex, (const uint8_t *)msg, strlen(msg));
+    return flashWriteFileBuff(module, fileIndex, (const BYTE *)msg, strlen(msg));
 }
 
-FUNCRESULT flashWriteFileBuff(FlashModule *module, size_t fileIndex, const uint8_t *buffer, size_t size)
+FUNCRESULT flashWriteFileBuff(FlashModule *module, SIZE fileIndex, const BYTE *buffer, SIZE size)
 {
-    if (!module || fileIndex >= FLASH_FILE_SIZE || !buffer || size == 0)
+    if (!module || fileIndex >= getFlashFileSize() || !buffer || size == 0)
     {
         return ERR_INVALIDARG;
     }
@@ -125,21 +113,21 @@ FUNCRESULT flashWriteFileBuff(FlashModule *module, size_t fileIndex, const uint8
         return ERR_POINTER;
     }
 
-    if (size + fileBuffer->_bufferSize > FLASH_WRITE_BUFFER_SIZE)
+    if (size + fileBuffer->_bufferSize > flashWriteBufferSize())
     {
-        size_t buffOffset = FLASH_WRITE_BUFFER_SIZE - fileBuffer->_bufferSize;
+        SIZE buffOffset = flashWriteBufferSize() - fileBuffer->_bufferSize;
 
         memcpy(fileBuffer->_buffer + fileBuffer->_bufferSize, buffer, buffOffset);
         fileBuffer->_bufferSize += buffOffset;
 
         updateFlashFilesSizes(module);
-        writeFlashPage(module, getFlashFileAddressOffset(fileIndex) + fileInfo->_size, fileBuffer->_buffer);
+        writeFlashPage(getFlashFileAddressOffset(fileIndex) + fileInfo->_size, fileBuffer->_buffer);
 
-        memset(fileBuffer->_buffer, 0, FLASH_WRITE_BUFFER_SIZE);
+        memset(fileBuffer->_buffer, 0, flashWriteBufferSize());
         fileBuffer->_bufferSize = 0;
-        fileInfo->_size += FLASH_WRITE_BUFFER_SIZE;
+        fileInfo->_size += flashWriteBufferSize();
 
-        size_t newSize = size - buffOffset;
+        SIZE newSize = size - buffOffset;
 
         if (newSize > 0)
         {
@@ -159,9 +147,9 @@ FUNCRESULT flashWriteFileBuff(FlashModule *module, size_t fileIndex, const uint8
     }
 }
 
-FUNCRESULT flashClearFile(FlashModule *module, size_t fileIndex)
+FUNCRESULT flashClearFile(FlashModule *module, SIZE fileIndex)
 {
-    if (!module || fileIndex >= FLASH_FILE_SIZE)
+    if (!module || fileIndex >= getFlashFileSize())
     {
         return ERR_INVALIDARG;
     }
@@ -178,7 +166,7 @@ FUNCRESULT flashClearFile(FlashModule *module, size_t fileIndex)
         return ERR_POINTER;
     }
 
-    eraseFlashSectors(module, getFlashFileAddressOffset(fileIndex), FLASH_FILE_SIZE);
+    eraseFlashSectors(getFlashFileAddressOffset(fileIndex), getFlashFileSize());
 
     fileInfo->_size = 0;
 
@@ -187,7 +175,7 @@ FUNCRESULT flashClearFile(FlashModule *module, size_t fileIndex)
     return SUC_OK;
 }
 
-FUNCRESULT flashGetFile(FlashModule *module, size_t fileIndex, const uint8_t **buffer_ptr, size_t *size)
+FUNCRESULT flashGetFile(FlashModule *module, SIZE fileIndex, const BYTE **buffer_ptr, SIZE *size)
 {
     if (!module || fileIndex >= FLASH_FILES_COUNT || !buffer_ptr || !size)
     {
@@ -206,7 +194,7 @@ FUNCRESULT flashGetFile(FlashModule *module, size_t fileIndex, const uint8_t **b
         return ERR_POINTER;
     }
 
-    *buffer_ptr = readFlash(module, getFlashFileAddressOffset(fileIndex));
+    readFlash(getFlashFileAddressOffset(fileIndex), buffer_ptr);
     *size = fileInfo->_size;
 
     return SUC_OK;
@@ -224,11 +212,11 @@ FUNCRESULT flashTerminate(FlashModule *module)
         return ERR_UNINITIALIZED;
     }
 
-    for (size_t i = 0; i < FLASH_FILES_COUNT; i++)
+    for (SIZE i = 0; i < FLASH_FILES_COUNT; i++)
     {
         if (module->_filesBuffers[i]._bufferSize > 0)
         {
-            writeFlashPage(module, getFlashFileAddressOffset(i) + module->_fileSystem._files[i]._size, module->_filesBuffers[i]._buffer);
+            writeFlashPage(getFlashFileAddressOffset(i) + module->_fileSystem._files[i]._size, module->_filesBuffers[i]._buffer);
 
             module->_fileSystem._files[i]._size += module->_filesBuffers[i]._bufferSize;
             module->_filesBuffers[i]._bufferSize = 0;

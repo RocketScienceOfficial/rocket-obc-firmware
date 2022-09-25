@@ -1,9 +1,8 @@
 #include "drivers/sd/sd_driver.h"
 #include "hw_config.h"
-#include <stdbool.h>
 #include <string.h>
 
-static _SDFile *__getSDFileByName(SDCard *sdCard, const char *name)
+static _SDFile *__getSDFileByName(SDCard *sdCard, const STRING name)
 {
     for (size_t i = 0; i < sdCard->_filesCount; ++i)
     {
@@ -44,12 +43,12 @@ FUNCRESULT sdInit(SDCard *sdCard)
         return ERR_FAIL;
     }
 
-    sdCard->_isInitialized = true;
+    sdCard->_isInitialized = TRUE;
 
     return SUC_OK;
 }
 
-FUNCRESULT sdInitFile(SDCard *sdCard, const char *fileName)
+FUNCRESULT sdInitFile(SDCard *sdCard, const STRING fileName)
 {
     if (!sdCard || !fileName)
     {
@@ -61,14 +60,17 @@ FUNCRESULT sdInitFile(SDCard *sdCard, const char *fileName)
         return ERR_UNINITIALIZED;
     }
 
-    _SDFile f = {._name = fileName, ._isOpened = 0};
+    _SDFile f = {
+        ._name = fileName,
+        ._isOpened = 0,
+    };
 
     sdCard->_files[sdCard->_filesCount++] = f;
 
     return SUC_OK;
 }
 
-FUNCRESULT sdBegin(SDCard *sdCard, const char *fileName)
+FUNCRESULT sdBegin(SDCard *sdCard, const STRING fileName)
 {
     if (!sdCard || !fileName)
     {
@@ -100,7 +102,7 @@ FUNCRESULT sdBegin(SDCard *sdCard, const char *fileName)
 
     if (fr != FR_OK && fr != FR_EXIST)
     {
-        sdFile->_isOpened = false;
+        sdFile->_isOpened = FALSE;
 
         return ERR_FAIL;
     }
@@ -108,7 +110,7 @@ FUNCRESULT sdBegin(SDCard *sdCard, const char *fileName)
     return SUC_OK;
 }
 
-FUNCRESULT sdWrite(SDCard *sdCard, const char *msg, const char *fileName)
+FUNCRESULT sdWrite(SDCard *sdCard, const STRING msg, const STRING fileName)
 {
     if (!sdCard || !msg || !fileName)
     {
@@ -136,7 +138,7 @@ FUNCRESULT sdWrite(SDCard *sdCard, const char *msg, const char *fileName)
 
     if (!f)
     {
-        sdFile->_isOpened = false;
+        sdFile->_isOpened = FALSE;
 
         return ERR_POINTER;
     }
@@ -145,7 +147,7 @@ FUNCRESULT sdWrite(SDCard *sdCard, const char *msg, const char *fileName)
 
     if (ret < 0)
     {
-        sdFile->_isOpened = false;
+        sdFile->_isOpened = FALSE;
 
         return ERR_FAIL;
     }
@@ -153,7 +155,7 @@ FUNCRESULT sdWrite(SDCard *sdCard, const char *msg, const char *fileName)
     return SUC_OK;
 }
 
-FUNCRESULT sdEnd(SDCard *sdCard, const char *fileName)
+FUNCRESULT sdEnd(SDCard *sdCard, const STRING fileName)
 {
     if (!sdCard || !fileName)
     {
@@ -181,7 +183,7 @@ FUNCRESULT sdEnd(SDCard *sdCard, const char *fileName)
 
     if (!f)
     {
-        sdFile->_isOpened = false;
+        sdFile->_isOpened = FALSE;
 
         return ERR_POINTER;
     }
@@ -190,17 +192,17 @@ FUNCRESULT sdEnd(SDCard *sdCard, const char *fileName)
 
     if (fr != FR_OK)
     {
-        sdFile->_isOpened = false;
+        sdFile->_isOpened = FALSE;
 
         return ERR_FAIL;
     }
 
-    sdFile->_isOpened = false;
+    sdFile->_isOpened = FALSE;
 
     return SUC_OK;
 }
 
-FUNCRESULT sdClearFile(SDCard *sdCard, const char *fileName)
+FUNCRESULT sdClearFile(SDCard *sdCard, const STRING fileName)
 {
     if (!sdCard || !fileName)
     {
@@ -248,7 +250,7 @@ FUNCRESULT sdTerminate(SDCard *sdCard)
         return ERR_FAIL;
     }
 
-    sdCard->_isInitialized = false;
+    sdCard->_isInitialized = FALSE;
 
     return SUC_OK;
 }

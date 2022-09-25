@@ -1,22 +1,21 @@
 #pragma once
 
-#include "utils/errors_types.h"
-#include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
+#include "tools/typedefs.h"
+#include "drivers/gpio/gpio_typedefs.h"
+#include "drivers/gpio/i2c_driver.h"
 
 /**
  * @brief Raw accelerometer data
  */
 typedef struct MPU6050RawData
 {
-    int16_t accel_x;
-    int16_t accel_y;
-    int16_t accel_z;
-    int16_t rot_x;
-    int16_t rot_y;
-    int16_t rot_z;
-    int16_t temperature;
+    INT16 accel_x;
+    INT16 accel_y;
+    INT16 accel_z;
+    INT16 rot_x;
+    INT16 rot_y;
+    INT16 rot_z;
+    INT16 temperature;
 } MPU6050RawData;
 
 /**
@@ -24,13 +23,13 @@ typedef struct MPU6050RawData
  */
 typedef struct MPU6050Data
 {
-    float accel_x;
-    float accel_y;
-    float accel_z;
-    float rot_x;
-    float rot_y;
-    float rot_z;
-    float temperature;
+    FLOAT accel_x;
+    FLOAT accel_y;
+    FLOAT accel_z;
+    FLOAT rot_x;
+    FLOAT rot_y;
+    FLOAT rot_z;
+    FLOAT temperature;
 } MPU6050Data;
 
 /**
@@ -38,9 +37,9 @@ typedef struct MPU6050Data
  */
 typedef struct MPU6050Config
 {
-    int _i2c;
-    float _accelLBS;
-    float _gryoLBS;
+    I2CInstance _i2c;
+    FLOAT _accelLBS;
+    FLOAT _gryoLBS;
 } MPU6050Config;
 
 /**
@@ -55,7 +54,7 @@ typedef struct MPU6050Config
  * @param gyroSensLevel Gyroscope sensitivity level (0 - 3)
  * @return Result code.
  */
-FUNCRESULT mpu6050Init(MPU6050Config *config, int i2c, int sda, int scl, int lpFilter, int accelSensLevel, int gyroSensLevel);
+FUNCRESULT mpu6050Init(MPU6050Config *config, I2CInstance i2c, PinNumber sda, PinNumber scl, UINT8 lpFilter, UINT8 accelSensLevel, UINT8 gyroSensLevel);
 
 /**
  * @brief Checks if the accelerometer is initialized
@@ -64,7 +63,7 @@ FUNCRESULT mpu6050Init(MPU6050Config *config, int i2c, int sda, int scl, int lpF
  * @param available Is Initialized
  * @return Result code.
  */
-FUNCRESULT mpu6050Check(MPU6050Config *config, bool *result);
+FUNCRESULT mpu6050Check(MPU6050Config *config, BOOL *result);
 
 /**
  * @brief Read raw accelerometer data
