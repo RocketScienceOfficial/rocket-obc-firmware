@@ -4,9 +4,7 @@ set(LIB_GENERAL_NAME "${MODULE_NAME}_${LIB_NAME}_lib")
 
 add_library(${LIB_GENERAL_NAME} STATIC
     include/${MODULE_NAME}/${LIB_NAME}/logger.h
-    include/${MODULE_NAME}/${LIB_NAME}/recorder.h
     src/logger.c
-    src/recorder.c
 )
 
 target_link_libraries(kernel_logging_lib PRIVATE kernel_console_lib drivers_lib)

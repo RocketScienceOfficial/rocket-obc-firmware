@@ -8,7 +8,6 @@
 #include "measurements_manager.h"
 #include "tools/time_tracker.h"
 #include "kernel/logging/logger.h"
-#include "kernel/logging/recorder.h"
 #include "kernel/console/console_output.h"
 #include "shared/functions_utils.h"
 #include "shared/commands_utils.h"
@@ -29,7 +28,6 @@ int main()
     }
 
     myLogCreateFileSink(myLogGetCoreLogger(), DEFAULT_LOG_SERIAL_PATTERN, LOG_FILE_INDEX);
-    myLogCreateFileSink(myLogGetRecordLogger(), "%c\n", RECORD_FILE_INDEX);
 
     MY_LOG_CORE_INFO("Initializing...");
 

@@ -1,6 +1,5 @@
 #include "kernel/commands/commands.h"
 #include "kernel/logging/logger.h"
-#include "kernel/logging/recorder.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -9,12 +8,9 @@ static SIZE s_CommandSize;
 
 BOOL registerCommand(CommandData *command)
 {
-    FUNCTION_PROFILE_BEGIN();
-
     if (!command)
     {
         MY_LOG_CORE_ERROR("Invalid input");
-        FUNCTION_PROFILE_END();
 
         return FALSE;
     }
@@ -22,7 +18,6 @@ BOOL registerCommand(CommandData *command)
     if (s_CommandSize >= COMMANDS_MAX_COUNT)
     {
         MY_LOG_CORE_ERROR("Commands are full!");
-        FUNCTION_PROFILE_END();
 
         return FALSE;
     }
@@ -30,19 +25,14 @@ BOOL registerCommand(CommandData *command)
     s_Commands[s_CommandSize] = *command;
     s_CommandSize++;
 
-    FUNCTION_PROFILE_END();
-
     return TRUE;
 }
 
 CommandData *parseCommand(STRING *tokens, SIZE tokensSize, CommandArgs *args_out_ptr)
 {
-    FUNCTION_PROFILE_BEGIN();
-
     if (!tokens || tokensSize == 0 || !args_out_ptr)
     {
         MY_LOG_CORE_ERROR("Invalid input");
-        FUNCTION_PROFILE_END();
 
         return NULL;
     }
@@ -82,8 +72,6 @@ CommandData *parseCommand(STRING *tokens, SIZE tokensSize, CommandArgs *args_out
 
         MY_LOG_CORE_INFO("Command arguments size: %d", args_out_ptr->size);
 
-        FUNCTION_PROFILE_END();
-
         return command;
     }
     else
@@ -92,20 +80,15 @@ CommandData *parseCommand(STRING *tokens, SIZE tokensSize, CommandArgs *args_out
 
         args_out_ptr->size = 0;
 
-        FUNCTION_PROFILE_END();
-
         return NULL;
     }
 }
 
 BOOL executeCommand(CommandData *command, CommandArgs *args)
 {
-    FUNCTION_PROFILE_BEGIN();
-
     if (!command || !args)
     {
         MY_LOG_CORE_ERROR("Invalid input");
-        FUNCTION_PROFILE_END();
 
         return FALSE;
     }
@@ -115,8 +98,6 @@ BOOL executeCommand(CommandData *command, CommandArgs *args)
     command->func(args->args, args->size);
 
     MY_LOG_CORE_INFO("Command executed: %s", command->name);
-
-    FUNCTION_PROFILE_END();
 
     return TRUE;
 }
@@ -135,12 +116,9 @@ BOOL checkArgsCount(SIZE expectedCount, SIZE actualCount, STRING *output_ptr)
 
 BOOL commandClearArgs(CommandArgs *args)
 {
-    FUNCTION_PROFILE_BEGIN();
-
     if (!args)
     {
         MY_LOG_CORE_ERROR("Invalid input");
-        FUNCTION_PROFILE_END();
 
         return FALSE;
     }
@@ -156,8 +134,6 @@ BOOL commandClearArgs(CommandArgs *args)
 
         args->size = 0;
     }
-
-    FUNCTION_PROFILE_END();
 
     return TRUE;
 }
