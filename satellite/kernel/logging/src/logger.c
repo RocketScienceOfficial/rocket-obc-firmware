@@ -64,7 +64,7 @@ VOID myLogCreateFileSink(Logger *logger, const STRING pattern, SIZE fileIndex)
 		._customData = (VOID *)fileIndex,
 	};
 
-	LOG_HW_CALL(flashClearFile(getDefaultFlashModule(), fileIndex));
+	LOG_HW_CALL(flashClearFile(flashGetDefaultModule(), fileIndex));
 
 	logger->_sinks[logger->_numSinks++] = sink;
 }
@@ -192,7 +192,7 @@ static VOID __log(Logger *logger, const STRING level, const STRING format, va_li
 				consoleLog(log);
 				break;
 			case SINK_FILE:
-				LOG_HW_CALL(flashWriteFile(getDefaultFlashModule(), (SIZE)logger->_sinks[i]._customData, log));
+				LOG_HW_CALL(flashWriteFile(flashGetDefaultModule(), (SIZE)logger->_sinks[i]._customData, log));
 				break;
 			default:
 				REPORT_ERROR("Unknown sink type");

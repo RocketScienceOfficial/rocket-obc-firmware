@@ -18,8 +18,8 @@ typedef struct RadioUtilPacketData
     INT32 signalStrength;
 } RadioUtilPacketData;
 
-void initializeRadio(SX1278Pinout *pinout);
+VOID initializeRadio(SX1278Pinout *pinout);
 BOOL checkRadioPacket(RadioUtilPacketData *packet);
-void sendRadioPacket(RadioBody *body);
-void sendRadioRemoteCommand(STRING msg);
-void radioRemoteCommandCallback(BYTE *msg, SIZE size);
+VOID sendRadioPacket(RadioBody *body);
+VOID sendRadioRemoteCommand(STRING msg);
+VOID radioRemoteCommandCallback(BYTE *msg, SIZE size);

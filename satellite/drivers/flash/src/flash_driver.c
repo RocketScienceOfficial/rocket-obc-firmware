@@ -73,7 +73,7 @@ FUNCRESULT flashInit(FlashModule *flashModule)
     return SUC_OK;
 }
 
-FlashModule *getDefaultFlashModule()
+FlashModule *flashGetDefaultModule()
 {
     static FlashModule module;
     static BOOL isInitialized = false;
@@ -223,6 +223,8 @@ FUNCRESULT flashTerminate(FlashModule *module)
         }
 
         free(module->_filesBuffers[i]._buffer);
+
+        module->_filesBuffers[i]._buffer = NULL;
     }
 
     updateFlashFilesSizes(module);

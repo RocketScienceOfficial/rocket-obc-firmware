@@ -18,4 +18,4 @@ typedef struct TickData
 /**
  * @brief Tick in loop to make sure it's running.
  */
-void tick(TickData *data);
+VOID tick(TickData *data);

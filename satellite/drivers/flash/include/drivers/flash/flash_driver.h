@@ -82,7 +82,7 @@ FUNCRESULT flashInit(FlashModule *flashModule);
  *
  * @return Pointer to default Flash Module
  */
-FlashModule *getDefaultFlashModule();
+FlashModule *flashGetDefaultModule();
 
 /**
  * @brief Write data to flash module. Only 256 byte pages are allowed to write, so data is buffered internally.

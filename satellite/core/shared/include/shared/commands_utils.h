@@ -2,6 +2,6 @@
 
 #include "tools/typedefs.h"
 
-void initializeCommands();
+VOID initializeCommands();
 BOOL consoleAvailable();
-void checkCommand();
+VOID checkCommand();

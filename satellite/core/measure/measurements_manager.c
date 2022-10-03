@@ -50,6 +50,7 @@ VOID takeMeasurements(MeasurementData *data_out)
     if (ENABLE_ACCELEROMETER)
     {
         MPU6050RawData mpu6050RawData = {0};
+        
         FUNC_CALL(mpu6050ReadRaw(&s_AccelerometerConfig, &mpu6050RawData));
         FUNC_CALL(mpu6050ConvertData(&s_AccelerometerConfig, &mpu6050RawData, &accelerometerData));
 

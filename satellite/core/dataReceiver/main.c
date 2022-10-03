@@ -1,17 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 #include "pico/stdlib.h"
 #include "config.h"
 #include "radio_controller.h"
 #include "receiver_logger.h"
-#include "kernel/logging/logger.h"
-#include "kernel/console/console_output.h"
 #include "shared/functions_utils.h"
 #include "shared/commands_utils.h"
 #include "shared/radio_utils.h"
 #include "shared/tick.h"
+#include "kernel/logging/logger.h"
+#include "kernel/console/console_output.h"
 
 static RadioUtilPacketData s_Packet;
 static TickData s_TickData;
@@ -32,7 +31,7 @@ int main()
 
     MY_LOG_CORE_INFO("Everything is ready!");
 
-    while (true)
+    while (TRUE)
     {
         if (consoleAvailable())
         {
@@ -44,6 +43,7 @@ int main()
             if (s_Packet.body.command == MEASUREMENTS_RADIO_COMMAND_ID)
             {
                 MeasurementData measurement = {0};
+                
                 memcpy(&measurement, &s_Packet.body.payload, s_Packet.body.payloadSize);
 
                 ReceiverSendData data = {

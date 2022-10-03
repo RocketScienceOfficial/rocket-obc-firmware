@@ -7,19 +7,19 @@ static INT32 s_ConsoleChar;
 static ConsoleInput s_ConsoleInput;
 static ConsoleTokens s_ConsoleTokens;
 
-void initializeCommands()
+VOID initializeCommands()
 {
     registerDefaultConsoleCommands();
 }
 
-bool consoleAvailable()
+BOOL consoleAvailable()
 {
     s_ConsoleChar = consoleCheckInput();
 
     return s_ConsoleChar != 0;
 }
 
-void checkCommand()
+VOID checkCommand()
 {
     consoleProcessCharacter(s_ConsoleChar, &s_ConsoleInput, &s_ConsoleTokens);
 

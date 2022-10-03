@@ -8,7 +8,7 @@
 
 static SX1278Data s_LoraData;
 
-void initializeRadio(SX1278Pinout *pinout)
+VOID initializeRadio(SX1278Pinout *pinout)
 {
     loraInit(&s_LoraData, pinout);
     loraBegin(&s_LoraData, RADIO_FREQUENCY_HZ);
@@ -17,7 +17,7 @@ void initializeRadio(SX1278Pinout *pinout)
     loraSetSignalBandwidth(&s_LoraData, RADIO_SIGNAL_BANDWIDTH);
 }
 
-bool checkRadioPacket(RadioUtilPacketData *packet)
+BOOL checkRadioPacket(RadioUtilPacketData *packet)
 {
     SIZE packetSize = loraParsePacket(&s_LoraData, 0);
 
@@ -58,7 +58,7 @@ bool checkRadioPacket(RadioUtilPacketData *packet)
     return FALSE;
 }
 
-void sendRadioPacket(RadioBody *body)
+VOID sendRadioPacket(RadioBody *body)
 {
     BYTE *packetBuffer;
     SIZE packetBufferSize = 0;
@@ -72,7 +72,7 @@ void sendRadioPacket(RadioBody *body)
     free(packetBuffer);
 }
 
-void sendRadioRemoteCommand(STRING msg)
+VOID sendRadioRemoteCommand(STRING msg)
 {
     RadioBody body = {
         .command = COMMANDS_RADIO_COMMAND_ID,
@@ -83,12 +83,12 @@ void sendRadioRemoteCommand(STRING msg)
     sendRadioPacket(&body);
 }
 
-void radioRemoteCommandCallback(BYTE *msg, SIZE size)
+VOID radioRemoteCommandCallback(BYTE *msg, SIZE size)
 {
     ConsoleInput input = {0};
     ConsoleTokens tokens = {0};
 
-    for (int i = 0; i < size; i++)
+    for (INT32 i = 0; i < size; i++)
     {
         consoleProcessCharacter(msg[i], &input, &tokens);
     }

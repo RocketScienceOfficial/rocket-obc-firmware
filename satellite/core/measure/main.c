@@ -1,18 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 #include "pico/stdlib.h"
 #include "config.h"
 #include "radio_controller.h"
 #include "measurements_manager.h"
 #include "tools/time_tracker.h"
-#include "kernel/logging/logger.h"
-#include "kernel/console/console_output.h"
 #include "shared/functions_utils.h"
 #include "shared/commands_utils.h"
 #include "shared/radio_utils.h"
 #include "shared/tick.h"
+#include "kernel/logging/logger.h"
+#include "kernel/console/console_output.h"
 
 static RadioUtilPacketData s_Packet;
 static TIME s_TimerOffset;
@@ -39,7 +38,7 @@ int main()
 
     MY_LOG_CORE_INFO("Everything is ready!");
 
-    while (true)
+    while (TRUE)
     {
         if (consoleAvailable())
         {
