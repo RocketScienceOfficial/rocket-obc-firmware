@@ -2,11 +2,7 @@
 
 cd `dirname $0`/..
 
-sudo apt install nodejs cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib build-essential ninja-build
-
-cd telemetry/server
-npm install
-cd -
+sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib build-essential ninja-build
 
 git submodule update --init --recursive
 

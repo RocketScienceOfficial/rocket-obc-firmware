@@ -8,8 +8,4 @@ cd scripts
 call build.bat
 cd ..
 
-cd telemetry\server
-call npm install
-cd ..
-
 popd

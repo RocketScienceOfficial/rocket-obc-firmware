@@ -98,7 +98,7 @@ VOID serializeRadioPacket(RadioBody *body, BYTE **buffer_out_ptr, SIZE *size_out
 
     if (!clearParity(&parity))
     {
-        return ERR_FAIL;
+        return;
     }
 
     SIZE bufferSize = headerSize + bodySize;
@@ -122,7 +122,7 @@ VOID deserializeRadioPacket(BYTE *buffer, SIZE size, RadioBody *body_out, BOOL *
 
     if (!encryptDecrypt(buffer, size, RADIO_PACKET_KEY, sizeof(RADIO_PACKET_KEY) / sizeof(BYTE)))
     {
-        return ERR_UNEXPECTED;
+        return;
     }
 
     SIZE currentBufferOffset = 0;
