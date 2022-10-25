@@ -9,7 +9,5 @@ jobs:
       - name: Verify
         uses: actions/checkout@v2
       - name: Build
-        working-directory: ./scripts
-        run: |
-          bash ./setup.sh
+        run: ./scripts/setup.sh
         shell: bash
