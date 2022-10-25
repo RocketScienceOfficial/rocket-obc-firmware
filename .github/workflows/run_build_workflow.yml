@@ -11,6 +11,6 @@ jobs:
       - name: Build
         working-directory: .
         run: |
-          ls
+          sed -i -e 's/\r$//' ./scripts/setup.sh
           ./scripts/setup.sh
         shell: bash
