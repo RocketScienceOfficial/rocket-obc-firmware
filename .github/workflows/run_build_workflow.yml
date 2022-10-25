@@ -7,5 +7,7 @@ jobs:
       - name: Verify
         uses: actions/checkout@v2
       - name: Build
-        run: ./scripts/setup.sh
+        run: |
+          chmod +x ./scripts/setup.sh
+          ./scripts/setup.sh
         shell: bash
