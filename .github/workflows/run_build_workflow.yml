@@ -11,6 +11,5 @@ jobs:
       - name: Build
         working-directory: ./scripts
         run: |
-          chmod +x ./setup.sh
           bash ./setup.sh
         shell: bash
