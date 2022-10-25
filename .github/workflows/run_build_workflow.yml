@@ -1,5 +1,7 @@
 name: Run Build
+
 on: [push]
+
 jobs:
   Run-Tests:
     runs-on: ubuntu-20.04
@@ -9,6 +11,7 @@ jobs:
       - name: Build
         working-directory: ./scripts
         run: |
+          ls
           chmod +x ./setup.sh
           ./setup.sh
         shell: bash
