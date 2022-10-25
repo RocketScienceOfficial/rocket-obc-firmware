@@ -1,11 +1,8 @@
 #pragma once
 
-#include "pico/stdlib.h"
-#include "pico/binary_info.h"
-#include "hardware/gpio.h"
-#include "hardware/spi.h"
-#include <stdint.h>
-#include <stdbool.h>
+#include "tools/typedefs.h"
+#include "drivers/gpio/gpio_driver.h"
+#include "drivers/gpio/spi_driver.h"
 
 #define LORA_DEFAULT_TX_POWER 17
 #define LORA_MAX_INSTANCES 2
@@ -18,14 +15,14 @@
  */
 typedef struct SX1278Pinout
 {
-    int spi;
-    int sck;
-    int miso;
-    int mosi;
-    int cs;
-    int ss;
-    int reset;
-    int dio0;
+    SPIInstance spi;
+    PinNumber sck;
+    PinNumber miso;
+    PinNumber mosi;
+    PinNumber cs;
+    PinNumber ss;
+    PinNumber reset;
+    PinNumber dio0;
 } SX1278Pinout;
 
 /**
@@ -34,61 +31,60 @@ typedef struct SX1278Pinout
 typedef struct SX1278Data
 {
     SX1278Pinout _pinout;
-    int _txPower;
-    long _frequency;
-    int _packetIndex;
-    int _implicitHeaderMode;
-    void (*_onReceive)(int);
-    void (*_onTxDone)();
+    INT32 _txPower;
+    UINT64 _frequency;
+    INT32 _packetIndex;
+    BOOL _implicitHeaderMode;
+    VOID(*_onReceive)
+    (INT32);
+    VOID(*_onTxDone)
+    ();
 } SX1278Data;
 
-void loraInit(SX1278Data *data, SX1278Pinout *pinout);
-int loraBegin(SX1278Data *data, long frequency);
-void loraEnd(SX1278Data *data);
-int loraBeginPacket(SX1278Data *data, int implicitHeader);
-int loraEndPacket(SX1278Data *data, bool async);
-int loraParsePacket(SX1278Data *data, int size);
-int loraPacketRssi(SX1278Data *data);
-float loraPacketSnr(SX1278Data *data);
-long loraPacketFrequencyError(SX1278Data *data);
-int loraRssi(SX1278Data *data);
-size_t loraWrite(SX1278Data *data, uint8_t byte);
-size_t loraWrite_s(SX1278Data *data, const uint8_t *buffer, size_t size);
-size_t loraWrite_str(SX1278Data *data, const char *str);
-size_t loraWrite_str_s(SX1278Data *data, const char *buffer, size_t size);
-int loraAvailable(SX1278Data *data);
-int loraRead(SX1278Data *data);
-int loraPeek(SX1278Data *data);
-void loraFlush(SX1278Data *data);
-void loraOnReceive(SX1278Data *data, void (*callback)(int));
-void loraOnTxDone(SX1278Data *data, void (*callback)());
-void loraReceive(SX1278Data *data, int size);
-void loraIdle(SX1278Data *data);
-void loraSleep(SX1278Data *data);
-void loraSetTxPower(SX1278Data *data, int level);
-void loraSetFrequency(SX1278Data *data, long frequency);
-void loraSetSpreadingFactor(SX1278Data *data, int sf);
-void loraSetSignalBandwidth(SX1278Data *data, long sbw);
-void loraSetCodingRate4(SX1278Data *data, int denominator);
-void loraSetPreambleLength(SX1278Data *data, long length);
-void loraSetSyncWord(SX1278Data *data, int sw);
-void loraEnableCrc(SX1278Data *data);
-void loraDisableCrc(SX1278Data *data);
-void loraEnableInvertIQ(SX1278Data *data);
-void loraDisableInvertIQ(SX1278Data *data);
-void loraSetOCP(SX1278Data *data, uint8_t mA);
-void loraSetGain(SX1278Data *data, uint8_t gain);
-uint8_t loraRandom(SX1278Data *data);
-void loraSetSPIFrequency(SX1278Data *data, uint32_t frequency);
-void loraDumpRegisters(SX1278Data *data, uint8_t buffer[128]);
-void __loraExplicitHeaderMode(SX1278Data *data);
-void __loraImplicitHeaderMode(SX1278Data *data);
-void __loraHandleDio0Rise(SX1278Data *data);
-bool __loraIsTransmitting(SX1278Data *data);
-int __loraGetSpreadingFactor(SX1278Data *data);
-long __loraGetSignalBandwidth(SX1278Data *data);
-void __loraSetLdoFlag(SX1278Data *data);
-uint8_t __loraReadRegister(SX1278Data *data, uint8_t address);
-void __loraWriteRegister(SX1278Data *data, uint8_t address, uint8_t value);
-uint8_t __loraSingleTransfer(SX1278Data *data, uint8_t address, uint8_t value);
-void __loraOnDio0Rise(uint, uint32_t);
+FUNCRESULT sx1278Init(SX1278Data *data, SX1278Pinout *pinout);
+FUNCRESULT sx1278Begin(SX1278Data *data, UINT64 frequency);
+FUNCRESULT sx1278BeginPacket(SX1278Data *data, BOOL implicitHeader);
+FUNCRESULT sx1278EndPacket(SX1278Data *data, BOOL async);
+
+FUNCRESULT sx1278ParsePacket(SX1278Data *data, SIZE size, SIZE* packetLengthOut);
+FUNCRESULT sx1278PacketRssi(SX1278Data *data, INT32 *rssi);
+FUNCRESULT sx1278PacketSnr(SX1278Data *data, FLOAT *snr);
+FUNCRESULT sx1278PacketFrequencyError(SX1278Data *data, INT64 *error);
+FUNCRESULT sx1278Rssi(SX1278Data *data, INT32 *rssi);
+
+FUNCRESULT sx1278Write(SX1278Data *data, BYTE byte);
+FUNCRESULT sx1278Write_s(SX1278Data *data, const BYTE *buffer, SIZE size);
+FUNCRESULT sx1278Write_str(SX1278Data *data, const STRING str);
+FUNCRESULT sx1278Write_str_s(SX1278Data *data, const BYTE *buffer, SIZE size);
+
+FUNCRESULT sx1278Available(SX1278Data *data, BOOL *available);
+FUNCRESULT sx1278Read(SX1278Data *data, BYTE *dataOut);
+FUNCRESULT sx1278Peek(SX1278Data *data, BYTE *dataOut);
+
+FUNCRESULT sx1278Idle(SX1278Data *data);
+FUNCRESULT sx1278Sleep(SX1278Data *data);
+
+FUNCRESULT sx1278SetTxPower(SX1278Data *data, INT32 level);
+FUNCRESULT sx1278SetFrequency(SX1278Data *data, UINT64 frequency);
+FUNCRESULT sx1278SetSpreadingFactor(SX1278Data *data, INT32 sf);
+FUNCRESULT sx1278SetSignalBandwidth(SX1278Data *data, INT64 sbw);
+FUNCRESULT sx1278SetCodingRate4(SX1278Data *data, INT32 denominator);
+FUNCRESULT sx1278SetPreambleLength(SX1278Data *data, INT64 length);
+FUNCRESULT sx1278SetSyncWord(SX1278Data *data, INT32 sw);
+FUNCRESULT sx1278EnableCrc(SX1278Data *data);
+FUNCRESULT sx1278DisableCrc(SX1278Data *data);
+FUNCRESULT sx1278EnableInvertIQ(SX1278Data *data);
+FUNCRESULT sx1278DisableInvertIQ(SX1278Data *data);
+FUNCRESULT sx1278SetOCP(SX1278Data *data, BYTE mA);
+FUNCRESULT sx1278SetGain(SX1278Data *data, BYTE gain);
+
+VOID __sx1278ExplicitHeaderMode(SX1278Data *data);
+VOID __sx1278ImplicitHeaderMode(SX1278Data *data);
+BOOL __sx1278IsTransmitting(SX1278Data *data);
+INT32 __sx1278GetSpreadingFactor(SX1278Data *data);
+INT64 __sx1278GetSignalBandwidth(SX1278Data *data);
+VOID __sx1278SetLdoFlag(SX1278Data *data);
+BYTE __sx1278ReadRegister(SX1278Data *data, BYTE address);
+VOID __sx1278WriteRegister(SX1278Data *data, BYTE address, BYTE value);
+BYTE __sx1278SingleTransfer(SX1278Data *data, BYTE address, BYTE value);
+VOID __sx1278OnDio0Rise(UINT32 gpio, UINT32 events);

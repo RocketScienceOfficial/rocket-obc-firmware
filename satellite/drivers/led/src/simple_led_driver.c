@@ -3,13 +3,10 @@
 
 FUNCRESULT ledInit(PinNumber pin)
 {
-    gpio_init(pin);
-    gpio_set_dir(pin, GPIO_OUT);
-
-    return SUC_OK;
+    return gpioInitPin(pin, GPIO_OUTPUT);
 }
 
 FUNCRESULT setLedState(PinNumber pin, BOOL state)
 {
-    gpio_put(pin, state);
+    return gpioSetPinState(pin, state ? GPIO_HIGH : GPIO_LOW);
 }

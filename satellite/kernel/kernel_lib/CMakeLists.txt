@@ -1,8 +1,9 @@
-add_library(kernel_lib main.c)
+set(LIB_GENERAL_NAME kernel_lib)
 
-target_link_libraries(kernel_lib INTERFACE
+add_library(${LIB_GENERAL_NAME} main.c)
+
+target_link_libraries(${LIB_GENERAL_NAME} INTERFACE
     kernel_logging_lib
     kernel_commands_lib
-    kernel_console_lib
     kernel_services_lib
 )

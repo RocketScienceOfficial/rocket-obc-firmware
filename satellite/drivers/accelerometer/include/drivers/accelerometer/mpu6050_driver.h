@@ -1,7 +1,7 @@
 #pragma once
 
 #include "tools/typedefs.h"
-#include "drivers/gpio/gpio_typedefs.h"
+#include "drivers/gpio/gpio_driver.h"
 #include "drivers/gpio/i2c_driver.h"
 
 /**
@@ -33,7 +33,7 @@ typedef struct MPU6050Data
 } MPU6050Data;
 
 /**
- * @brief Accelerometer config data. All changes are done internally, so keep it just for reference!
+ * \brief Accelerometer config data. All changes are done internally, so keep it just for reference!
  */
 typedef struct MPU6050Config
 {

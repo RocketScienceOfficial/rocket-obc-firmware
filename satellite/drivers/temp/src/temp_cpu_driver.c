@@ -1,5 +1,5 @@
 #include "drivers/temp/temp_cpu_driver.h"
-#include "drivers/gpio/gpio_typedefs.h"
+#include "drivers/gpio/gpio_driver.h"
 #include "drivers/gpio/adc_driver.h"
 
 FUNCRESULT cpuTempInit()

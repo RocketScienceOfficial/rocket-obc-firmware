@@ -1,7 +1,7 @@
 #pragma once
 
 #include "tools/typedefs.h"
-#include "drivers/gpio/gpio_typedefs.h"
+#include "drivers/gpio/gpio_driver.h"
 
 /**
  * @brief Initialize LED on pin.

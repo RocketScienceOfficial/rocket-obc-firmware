@@ -1,6 +1,6 @@
 #include "kernel/logging/logger.h"
-#include "kernel/console/console_output.h"
-#include "drivers/flash/flash_driver.h"
+#include "drivers/console/console_output.h"
+#include "drivers/storage/flash_driver.h"
 #include "tools/time_tracker.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -9,13 +9,13 @@
 static LogCallback s_CurrentCallback;
 
 #define REPORT_ERROR(msg) consoleLogError(msg)
-#define LOG_HW_CALL(func)                                                                                    \
-	{                                                                                                        \
-		FUNCRESULT result = func;                                                                            \
-		if (FUNCFAILED(result))                                                                              \
-		{                                                                                                    \
-			consoleLogError("Hardware function with code failed: %d at '%s:%d'", result, __FILE__, __LINE__); \
-		}                                                                                                    \
+#define LOG_DRIVER_CALL(func)                                                                                                 \
+	{                                                                                                                         \
+		FUNCRESULT result = func;                                                                                             \
+		if (FUNCFAILED(result))                                                                                               \
+		{                                                                                                                     \
+			consoleLogError("Logger crashed! Hardware function with code failed: %d at '%s:%d'", result, __FILE__, __LINE__); \
+		}                                                                                                                     \
 	}
 
 VOID myLogCreateLogger(Logger *logger, const STRING name)
@@ -64,7 +64,7 @@ VOID myLogCreateFileSink(Logger *logger, const STRING pattern, SIZE fileIndex)
 		._customData = (VOID *)fileIndex,
 	};
 
-	LOG_HW_CALL(flashClearFile(flashGetDefaultModule(), fileIndex));
+	LOG_DRIVER_CALL(flashClearFile(flashGetDefaultModule(), fileIndex));
 
 	logger->_sinks[logger->_numSinks++] = sink;
 }
@@ -192,7 +192,7 @@ static VOID __log(Logger *logger, const STRING level, const STRING format, va_li
 				consoleLog(log);
 				break;
 			case SINK_FILE:
-				LOG_HW_CALL(flashWriteFile(flashGetDefaultModule(), (SIZE)logger->_sinks[i]._customData, log));
+				LOG_DRIVER_CALL(flashWriteFile(flashGetDefaultModule(), (SIZE)logger->_sinks[i]._customData, log));
 				break;
 			default:
 				REPORT_ERROR("Unknown sink type");

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gpio_typedefs.h"
+#include "gpio_driver.h"
 #include "tools/typedefs.h"
 
 /**

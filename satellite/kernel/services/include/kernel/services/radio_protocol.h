@@ -66,10 +66,8 @@ typedef struct _RadioPacket
  * @param body_in Body of radio packet.
  * @param buffer_out_ptr Pointer to buffer.
  * @param size_out Size of buffer.
- *
- * @return Result code.
  */
-FUNCRESULT serializeRadioPacket(RadioBody *body, BYTE **buffer_out_ptr, SIZE *size_out);
+VOID serializeRadioPacket(RadioBody *body, BYTE **buffer_out_ptr, SIZE *size_out);
 
 /**
  * @brief Deserialize radio packet.
@@ -78,15 +76,12 @@ FUNCRESULT serializeRadioPacket(RadioBody *body, BYTE **buffer_out_ptr, SIZE *si
  * @param size_in Size of buffer.
  * @param body_out Body of radio packet.
  * @param validationResult_out Validation result.
- *
- * @return Result code.
  */
-FUNCRESULT deserializeRadioPacket(BYTE *buffer, SIZE size, RadioBody *body_out, BOOL *validationResult);
+VOID deserializeRadioPacket(BYTE *buffer, SIZE size, RadioBody *body_out, BOOL *validationResult);
 
 /**
  * @brief Clears radio body. (i.a payload)
  *
  * @param body Radio body to clear
- * @return Result code.
  */
-FUNCRESULT radioClearPacket(RadioBody *body);
+VOID radioClearPacket(RadioBody *body);

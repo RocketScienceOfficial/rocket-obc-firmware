@@ -1,12 +1,15 @@
-add_library(core_shared STATIC
-    include/shared/commands_utils.h
-    include/shared/functions_utils.h
-    include/shared/measurements_utils.h
-    include/shared/radio_utils.h
-    include/shared/tick.h
+set(MODULE_NAME core)
+set(LIB_NAME shared)
+set(LIB_GENERAL_NAME "${MODULE_NAME}_${LIB_NAME}_lib")
+
+add_library(${LIB_GENERAL_NAME} STATIC
+    include/${LIB_NAME}/commands_utils.h
+    include/${LIB_NAME}/measurements_utils.h
+    include/${LIB_NAME}/radio_utils.h
+    include/${LIB_NAME}/tick.h
     src/commands_utils.c
     src/radio_utils.c
     src/tick.c
 )
 
-target_include_directories(core_shared PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(${LIB_GENERAL_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

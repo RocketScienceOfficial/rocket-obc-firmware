@@ -1,9 +1,9 @@
 #include "shared/commands_utils.h"
-#include "kernel/console/console_input.h"
+#include "drivers/console/console_input.h"
 #include "kernel/commands/commands.h"
 #include "kernel/commands/default_commands.h"
 
-static INT32 s_ConsoleChar;
+static UINT32 s_ConsoleChar;
 static ConsoleInput s_ConsoleInput;
 static ConsoleTokens s_ConsoleTokens;
 
@@ -21,7 +21,7 @@ BOOL consoleAvailable()
 
 VOID checkCommand()
 {
-    consoleProcessCharacter(s_ConsoleChar, &s_ConsoleInput, &s_ConsoleTokens);
+    consoleInputProcessCharacter(s_ConsoleChar, &s_ConsoleInput, &s_ConsoleTokens);
 
     if (s_ConsoleTokens.size > 0)
     {
@@ -34,6 +34,6 @@ VOID checkCommand()
             commandClearArgs(&args);
         }
         
-        consoleClear(&s_ConsoleInput, &s_ConsoleTokens);
+        consoleInputClear(&s_ConsoleInput, &s_ConsoleTokens);
     }
 }

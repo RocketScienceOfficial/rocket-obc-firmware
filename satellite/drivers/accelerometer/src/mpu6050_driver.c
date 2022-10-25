@@ -153,7 +153,7 @@ FUNCRESULT mpu6050ReadRaw(MPU6050Config *config, MPU6050RawData *data)
 static FLOAT convertAcceleration(MPU6050Config *config, INT16 raw, INT16 offset, FLOAT scale)
 {
     FLOAT calcScale = scale * config->_accelLBS;
-    FLOAT calcOffset = scale * ((FLOAT)offset) / ACCEL_LBS_0;
+    FLOAT calcOffset = scale * ((FLOAT)offset) / config->_accelLBS;
 
     return ((FLOAT)raw) * calcScale - calcOffset;
 }

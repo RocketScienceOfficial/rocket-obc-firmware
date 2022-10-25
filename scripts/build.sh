@@ -17,8 +17,7 @@ if [ ! -d executables ]; then
    mkdir executables
 fi
 
-cp build/core/dataReceiver/dataReceiver.uf2 executables/dataReceiver.uf2
-cp build/core/measure/measure.uf2 executables/measure.uf2
+cp build/core/ground_station/ground_station.uf2 executables/ground_station.uf2
+cp build/core/satellite/satellite.uf2 executables/satellite.uf2
 cp build/core/prototyping/prototyping.uf2 executables/prototyping.uf2
-cp build/tests/_runners/dynamic/dynamic_tests_runner.uf2 executables/dynamic_tests_runner.uf2
-cp build/tests/_runners/static/static_tests_runner.uf2 executables/static_tests_runner.uf2
+cp build/tests/tests_runner/tests_runner.uf2 executables/tests_runner.uf2

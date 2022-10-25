@@ -1,6 +1,6 @@
 #include "drivers/lora/sx1278_driver.h"
+#include "pico/stdlib.h"
 #include <string.h>
-#include <stddef.h>
 
 #define REG_FIFO 0x00
 #define REG_OP_MODE 0x01
@@ -57,11 +57,13 @@
 
 #define MAX_PKT_LENGTH 255
 
-static SX1278Data *s_LoraDatas[LORA_MAX_INSTANCES];
-static size_t s_LoraDatasCount = 0;
-
-void loraInit(SX1278Data *data, SX1278Pinout *pinout)
+FUNCRESULT sx1278Init(SX1278Data *data, SX1278Pinout *pinout)
 {
+    if (!data || !pinout)
+    {
+        return ERR_INVALIDARG;
+    }
+
     data->_pinout = *pinout;
     data->_txPower = LORA_DEFAULT_TX_POWER;
     data->_frequency = 0;
@@ -70,127 +72,114 @@ void loraInit(SX1278Data *data, SX1278Pinout *pinout)
     data->_onReceive = NULL;
     data->_onTxDone = NULL;
 
-    s_LoraDatas[s_LoraDatasCount] = data;
-    s_LoraDatasCount++;
+    return SUC_OK;
 }
 
-int loraBegin(SX1278Data *data, long frequency)
+FUNCRESULT sx1278Begin(SX1278Data *data, UINT64 frequency)
 {
-    gpio_init(data->_pinout.ss);
-    gpio_set_dir(data->_pinout.ss, GPIO_OUT);
-    gpio_put(data->_pinout.ss, 1);
+    gpioInitPin(data->_pinout.ss, GPIO_OUTPUT);
+    gpioSetPinState(data->_pinout.ss, GPIO_HIGH);
 
     if (data->_pinout.reset != -1)
     {
-        gpio_init(data->_pinout.reset);
-        gpio_set_dir(data->_pinout.reset, GPIO_OUT);
+        gpioInitPin(data->_pinout.reset, GPIO_OUTPUT);
 
-        gpio_put(data->_pinout.reset, 0);
+        gpioSetPinState(data->_pinout.reset, GPIO_LOW);
         sleep_ms(10);
-        gpio_put(data->_pinout.reset, 1);
+
+        gpioSetPinState(data->_pinout.reset, GPIO_HIGH);
         sleep_ms(10);
     }
 
-    spi_init(data->_pinout.spi == 0 ? spi0 : spi1, 12500);
-    gpio_set_function(data->_pinout.miso, GPIO_FUNC_SPI);
-    gpio_set_function(data->_pinout.sck, GPIO_FUNC_SPI);
-    gpio_set_function(data->_pinout.mosi, GPIO_FUNC_SPI);
+    spiInitAll(data->_pinout.spi, 12500);
+    spiInitPins(data->_pinout.spi, data->_pinout.miso, data->_pinout.mosi, data->_pinout.sck, data->_pinout.cs);
 
-    gpio_init(data->_pinout.cs);
-    gpio_set_dir(data->_pinout.cs, GPIO_OUT);
-    gpio_put(data->_pinout.cs, 1);
-
-    uint8_t version = __loraReadRegister(data, REG_VERSION);
+    BYTE version = __sx1278ReadRegister(data, REG_VERSION);
 
     if (version != 0x12)
     {
-        return 0;
+        return ERR_UNEXPECTED;
     }
 
-    loraSleep(data);
+    sx1278Sleep(data);
 
-    loraSetFrequency(data, frequency);
+    sx1278SetFrequency(data, frequency);
 
-    __loraWriteRegister(data, REG_FIFO_TX_BASE_ADDR, 0);
-    __loraWriteRegister(data, REG_FIFO_RX_BASE_ADDR, 0);
-    __loraWriteRegister(data, REG_LNA, __loraReadRegister(data, REG_LNA) | 0x03);
-    __loraWriteRegister(data, REG_MODEM_CONFIG_3, 0x04);
+    __sx1278WriteRegister(data, REG_FIFO_TX_BASE_ADDR, 0);
+    __sx1278WriteRegister(data, REG_FIFO_RX_BASE_ADDR, 0);
+    __sx1278WriteRegister(data, REG_LNA, __sx1278ReadRegister(data, REG_LNA) | 0x03);
+    __sx1278WriteRegister(data, REG_MODEM_CONFIG_3, 0x04);
 
-    loraSetTxPower(data, data->_txPower);
+    sx1278SetTxPower(data, data->_txPower);
 
-    loraIdle(data);
+    sx1278Idle(data);
 
-    return 1;
+    return SUC_OK;
 }
 
-void loraEnd(SX1278Data *data)
+FUNCRESULT sx1278BeginPacket(SX1278Data *data, BOOL implicitHeader)
 {
-    loraSleep(data);
-
-    spi_deinit(data->_pinout.spi == 0 ? spi0 : spi1);
-}
-
-int loraBeginPacket(SX1278Data *data, int implicitHeader)
-{
-    if (__loraIsTransmitting(data))
+    if (__sx1278IsTransmitting(data))
     {
-        return 0;
+        return ERR_ACCESSDENIED;
     }
 
-    loraIdle(data);
+    sx1278Idle(data);
 
     if (implicitHeader)
     {
-        __loraImplicitHeaderMode(data);
+        __sx1278ImplicitHeaderMode(data);
     }
     else
     {
-        __loraExplicitHeaderMode(data);
+        __sx1278ExplicitHeaderMode(data);
     }
 
-    __loraWriteRegister(data, REG_FIFO_ADDR_PTR, 0);
-    __loraWriteRegister(data, REG_PAYLOAD_LENGTH, 0);
+    __sx1278WriteRegister(data, REG_FIFO_ADDR_PTR, 0);
+    __sx1278WriteRegister(data, REG_PAYLOAD_LENGTH, 0);
 
-    return 1;
+    return SUC_OK;
 }
 
-int loraEndPacket(SX1278Data *data, bool async)
+FUNCRESULT sx1278EndPacket(SX1278Data *data, BOOL async)
 {
-    if ((async) && (data->_onTxDone))
-        __loraWriteRegister(data, REG_DIO_MAPPING_1, 0x40);
+    if (async && data->_onTxDone)
+    {
+        __sx1278WriteRegister(data, REG_DIO_MAPPING_1, 0x40);
+    }
 
-    __loraWriteRegister(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_TX);
+    __sx1278WriteRegister(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_TX);
 
     if (!async)
     {
-        while ((__loraReadRegister(data, REG_IRQ_FLAGS) & IRQ_TX_DONE_MASK) == 0)
+        while ((__sx1278ReadRegister(data, REG_IRQ_FLAGS) & IRQ_TX_DONE_MASK) == 0)
         {
             sleep_ms(0);
         }
 
-        __loraWriteRegister(data, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
+        __sx1278WriteRegister(data, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
     }
 
-    return 1;
+    return SUC_OK;
 }
 
-int loraParsePacket(SX1278Data *data, int size)
+FUNCRESULT sx1278ParsePacket(SX1278Data *data, SIZE size, SIZE *packetLengthOut)
 {
-    int packetLength = 0;
-    int irqFlags = __loraReadRegister(data, REG_IRQ_FLAGS);
+    SIZE packetLength = 0;
+    INT32 irqFlags = __sx1278ReadRegister(data, REG_IRQ_FLAGS);
 
     if (size > 0)
     {
-        __loraImplicitHeaderMode(data);
-        __loraWriteRegister(data, REG_PAYLOAD_LENGTH, size & 0xff);
+        __sx1278ImplicitHeaderMode(data);
+        __sx1278WriteRegister(data, REG_PAYLOAD_LENGTH, size & 0xff);
     }
     else
     {
-        __loraExplicitHeaderMode(data);
+        __sx1278ExplicitHeaderMode(data);
     }
 
-    __loraWriteRegister(data, REG_IRQ_FLAGS, irqFlags);
-    __loraWriteRegister(data, REG_IRQ_FLAGS, irqFlags);
+    __sx1278WriteRegister(data, REG_IRQ_FLAGS, irqFlags);
+    __sx1278WriteRegister(data, REG_IRQ_FLAGS, irqFlags);
 
     if ((irqFlags & IRQ_RX_DONE_MASK) && (irqFlags & IRQ_PAYLOAD_CRC_ERROR_MASK) == 0)
     {
@@ -198,195 +187,172 @@ int loraParsePacket(SX1278Data *data, int size)
 
         if (data->_implicitHeaderMode)
         {
-            packetLength = __loraReadRegister(data, REG_PAYLOAD_LENGTH);
+            packetLength = __sx1278ReadRegister(data, REG_PAYLOAD_LENGTH);
         }
         else
         {
-            packetLength = __loraReadRegister(data, REG_RX_NB_BYTES);
+            packetLength = __sx1278ReadRegister(data, REG_RX_NB_BYTES);
         }
 
-        __loraWriteRegister(data, REG_FIFO_ADDR_PTR, __loraReadRegister(data, REG_FIFO_RX_CURRENT_ADDR));
+        __sx1278WriteRegister(data, REG_FIFO_ADDR_PTR, __sx1278ReadRegister(data, REG_FIFO_RX_CURRENT_ADDR));
 
-        loraIdle(data);
+        sx1278Idle(data);
     }
-    else if (__loraReadRegister(data, REG_OP_MODE) != (MODE_LONG_RANGE_MODE | MODE_RX_SINGLE))
+    else if (__sx1278ReadRegister(data, REG_OP_MODE) != (MODE_LONG_RANGE_MODE | MODE_RX_SINGLE))
     {
-        __loraWriteRegister(data, REG_FIFO_ADDR_PTR, 0);
-
-        __loraWriteRegister(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_RX_SINGLE);
+        __sx1278WriteRegister(data, REG_FIFO_ADDR_PTR, 0);
+        __sx1278WriteRegister(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_RX_SINGLE);
     }
 
-    return packetLength;
+    *packetLengthOut = packetLength;
+
+    return SUC_OK;
 }
 
-int loraPacketRssi(SX1278Data *data)
+FUNCRESULT sx1278PacketRssi(SX1278Data *data, INT32 *rssi)
 {
-    return (__loraReadRegister(data, REG_PKT_RSSI_VALUE) - (data->_frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
+    *rssi = (__sx1278ReadRegister(data, REG_PKT_RSSI_VALUE) - (data->_frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
+
+    return SUC_OK;
 }
 
-float loraPacketSnr(SX1278Data *data)
+FUNCRESULT sx1278PacketSnr(SX1278Data *data, FLOAT *snr)
 {
-    return ((int8_t)__loraReadRegister(data, REG_PKT_SNR_VALUE)) * 0.25;
+    *snr = ((UINT8)__sx1278ReadRegister(data, REG_PKT_SNR_VALUE)) * 0.25;
+
+    return SUC_OK;
 }
 
-long loraPacketFrequencyError(SX1278Data *data)
+FUNCRESULT sx1278PacketFrequencyError(SX1278Data *data, INT64 *error)
 {
-    int32_t freqError = 0;
-    freqError = (int32_t)(__loraReadRegister(data, REG_FREQ_ERROR_MSB) & 0x111);
+    INT32 freqError = 0;
+    freqError = (INT32)(__sx1278ReadRegister(data, REG_FREQ_ERROR_MSB) & 0x111);
     freqError <<= 8L;
-    freqError += (int32_t)(__loraReadRegister(data, REG_FREQ_ERROR_MID));
+    freqError += (INT32)(__sx1278ReadRegister(data, REG_FREQ_ERROR_MID));
     freqError <<= 8L;
-    freqError += (int32_t)(__loraReadRegister(data, REG_FREQ_ERROR_LSB));
+    freqError += (INT32)(__sx1278ReadRegister(data, REG_FREQ_ERROR_LSB));
 
-    if (__loraReadRegister(data, REG_FREQ_ERROR_MSB) & 0x1000)
+    if (__sx1278ReadRegister(data, REG_FREQ_ERROR_MSB) & 0x1000)
     {
         freqError -= 524288;
     }
 
-    const float fXtal = 32E6;
-    const float fError = (((float)(freqError) * (1L << 24)) / fXtal) * (__loraGetSignalBandwidth(data) / 500000.0f);
+    const FLOAT fXtal = 32E6;
+    const FLOAT fError = (((FLOAT)(freqError) * (1L << 24)) / fXtal) * (__sx1278GetSignalBandwidth(data) / 500000.0f);
 
-    return (long)(fError);
+    *error = (long)(fError);
+
+    return SUC_OK;
 }
 
-int loraRssi(SX1278Data *data)
+FUNCRESULT sx1278Rssi(SX1278Data *data, INT32 *rssi)
 {
-    return (__loraReadRegister(data, REG_RSSI_VALUE) - (data->_frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
+    *rssi = (__sx1278ReadRegister(data, REG_RSSI_VALUE) - (data->_frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
+
+    return SUC_OK;
 }
 
-size_t loraWrite(SX1278Data *data, uint8_t byte)
+FUNCRESULT sx1278Write(SX1278Data *data, BYTE byte)
 {
-    return loraWrite_s(data, &byte, sizeof(byte));
+    return sx1278Write_s(data, &byte, sizeof(byte));
 }
 
-size_t loraWrite_s(SX1278Data *data, const uint8_t *buffer, size_t size)
+FUNCRESULT sx1278Write_s(SX1278Data *data, const BYTE *buffer, SIZE size)
 {
-    int currentLength = __loraReadRegister(data, REG_PAYLOAD_LENGTH);
+    SIZE currentLength = __sx1278ReadRegister(data, REG_PAYLOAD_LENGTH);
 
     if ((currentLength + size) > MAX_PKT_LENGTH)
     {
         size = MAX_PKT_LENGTH - currentLength;
     }
 
-    for (size_t i = 0; i < size; i++)
+    for (SIZE i = 0; i < size; i++)
     {
-        __loraWriteRegister(data, REG_FIFO, buffer[i]);
+        __sx1278WriteRegister(data, REG_FIFO, buffer[i]);
     }
 
-    __loraWriteRegister(data, REG_PAYLOAD_LENGTH, currentLength + size);
+    __sx1278WriteRegister(data, REG_PAYLOAD_LENGTH, currentLength + size);
 
-    return size;
+    return SUC_OK;
 }
 
-size_t loraWrite_str(SX1278Data *data, const char *str)
+FUNCRESULT sx1278Write_str(SX1278Data *data, const STRING str)
 {
     if (str == NULL)
-        return 0;
-
-    return loraWrite_s(data, (const uint8_t *)str, strlen(str));
-}
-
-size_t loraWrite_str_s(SX1278Data *data, const char *buffer, size_t size)
-{
-    return loraWrite_s(data, (const uint8_t *)buffer, size);
-}
-
-int loraAvailable(SX1278Data *data)
-{
-    return (__loraReadRegister(data, REG_RX_NB_BYTES) - data->_packetIndex);
-}
-
-int loraRead(SX1278Data *data)
-{
-    if (!loraAvailable(data))
     {
-        return -1;
+        return ERR_INVALIDARG;
+    }
+
+    return sx1278Write_s(data, (const STRING)str, strlen(str));
+}
+
+FUNCRESULT sx1278Write_str_s(SX1278Data *data, const BYTE *buffer, SIZE size)
+{
+    return sx1278Write_s(data, (const BYTE *)buffer, size);
+}
+
+FUNCRESULT sx1278Available(SX1278Data *data, BOOL *available)
+{
+    *available = (__sx1278ReadRegister(data, REG_RX_NB_BYTES) - data->_packetIndex);
+
+    return SUC_OK;
+}
+
+FUNCRESULT sx1278Read(SX1278Data *data, BYTE *dataOut)
+{
+    BOOL available = FALSE;
+
+    sx1278Available(data, &available);
+
+    if (!available)
+    {
+        return ERR_ACCESSDENIED;
     }
 
     data->_packetIndex++;
 
-    return __loraReadRegister(data, REG_FIFO);
+    *dataOut = __sx1278ReadRegister(data, REG_FIFO);
+
+    return SUC_OK;
 }
 
-int loraPeek(SX1278Data *data)
+FUNCRESULT sx1278Peek(SX1278Data *data, BYTE *dataOut)
 {
-    if (!loraAvailable(data))
+    BOOL available = FALSE;
+
+    sx1278Available(data, &available);
+
+    if (!available)
     {
-        return -1;
+        return ERR_ACCESSDENIED;
     }
 
-    int currentAddress = __loraReadRegister(data, REG_FIFO_ADDR_PTR);
+    BYTE currentAddress = __sx1278ReadRegister(data, REG_FIFO_ADDR_PTR);
 
-    uint8_t b = __loraReadRegister(data, REG_FIFO);
+    *dataOut = __sx1278ReadRegister(data, REG_FIFO);
 
-    __loraWriteRegister(data, REG_FIFO_ADDR_PTR, currentAddress);
+    __sx1278WriteRegister(data, REG_FIFO_ADDR_PTR, currentAddress);
 
-    return b;
+    return SUC_OK;
 }
 
-void loraFlush(SX1278Data *data)
+FUNCRESULT sx1278Idle(SX1278Data *data)
 {
+    __sx1278WriteRegister(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
+
+    return SUC_OK;
 }
 
-void loraOnReceive(SX1278Data *data, void (*callback)(int))
+FUNCRESULT sx1278Sleep(SX1278Data *data)
 {
-    data->_onReceive = callback;
+    __sx1278WriteRegister(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
 
-    if (callback)
-    {
-        gpio_set_irq_enabled_with_callback(data->_pinout.dio0, GPIO_IRQ_EDGE_RISE, true, &__loraOnDio0Rise);
-    }
-    else
-    {
-        gpio_set_irq_enabled(data->_pinout.dio0, GPIO_IRQ_EDGE_RISE, false);
-    }
+    return SUC_OK;
 }
 
-void loraOnTxDone(SX1278Data *data, void (*callback)())
+FUNCRESULT sx1278SetTxPower(SX1278Data *data, INT32 level)
 {
-    data->_onTxDone = callback;
-
-    if (callback)
-    {
-        gpio_set_irq_enabled_with_callback(data->_pinout.dio0, GPIO_IRQ_EDGE_RISE, true, &__loraOnDio0Rise);
-    }
-    else
-    {
-        gpio_set_irq_enabled(data->_pinout.dio0, GPIO_IRQ_EDGE_RISE, false);
-    }
-}
-
-void loraReceive(SX1278Data *data, int size)
-{
-    __loraWriteRegister(data, REG_DIO_MAPPING_1, 0x00);
-
-    if (size > 0)
-    {
-        __loraImplicitHeaderMode(data);
-
-        __loraWriteRegister(data, REG_PAYLOAD_LENGTH, size & 0xff);
-    }
-    else
-    {
-        __loraExplicitHeaderMode(data);
-    }
-
-    __loraWriteRegister(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_RX_CONTINUOUS);
-}
-
-void loraIdle(SX1278Data *data)
-{
-    __loraWriteRegister(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
-}
-
-void loraSleep(SX1278Data *data)
-{
-    __loraWriteRegister(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
-}
-
-void loraSetTxPower(SX1278Data *data, int level)
-{
-    int outputPin = PA_OUTPUT_RFO_PIN;
+    INT32 outputPin = PA_OUTPUT_RFO_PIN;
 
     if (PA_OUTPUT_RFO_PIN == outputPin)
     {
@@ -399,7 +365,7 @@ void loraSetTxPower(SX1278Data *data, int level)
             level = 14;
         }
 
-        __loraWriteRegister(data, REG_PA_CONFIG, 0x70 | level);
+        __sx1278WriteRegister(data, REG_PA_CONFIG, 0x70 | level);
     }
     else
     {
@@ -412,8 +378,8 @@ void loraSetTxPower(SX1278Data *data, int level)
 
             level -= 3;
 
-            __loraWriteRegister(data, REG_PA_DAC, 0x87);
-            loraSetOCP(data, 140);
+            __sx1278WriteRegister(data, REG_PA_DAC, 0x87);
+            sx1278SetOCP(data, 140);
         }
         else
         {
@@ -422,28 +388,32 @@ void loraSetTxPower(SX1278Data *data, int level)
                 level = 2;
             }
 
-            __loraWriteRegister(data, REG_PA_DAC, 0x84);
-            loraSetOCP(data, 100);
+            __sx1278WriteRegister(data, REG_PA_DAC, 0x84);
+            sx1278SetOCP(data, 100);
         }
 
-        __loraWriteRegister(data, REG_PA_CONFIG, PA_BOOST | (level - 2));
+        __sx1278WriteRegister(data, REG_PA_CONFIG, PA_BOOST | (level - 2));
     }
 
     data->_txPower = level;
+
+    return SUC_OK;
 }
 
-void loraSetFrequency(SX1278Data *data, long frequency)
+FUNCRESULT sx1278SetFrequency(SX1278Data *data, UINT64 frequency)
 {
     data->_frequency = frequency;
 
-    uint64_t frf = ((uint64_t)frequency << 19) / 32000000;
+    UINT64 frf = (frequency << 19) / 32000000;
 
-    __loraWriteRegister(data, REG_FRF_MSB, (uint8_t)(frf >> 16));
-    __loraWriteRegister(data, REG_FRF_MID, (uint8_t)(frf >> 8));
-    __loraWriteRegister(data, REG_FRF_LSB, (uint8_t)(frf >> 0));
+    __sx1278WriteRegister(data, REG_FRF_MSB, (BYTE)(frf >> 16));
+    __sx1278WriteRegister(data, REG_FRF_MID, (BYTE)(frf >> 8));
+    __sx1278WriteRegister(data, REG_FRF_LSB, (BYTE)(frf >> 0));
+
+    return SUC_OK;
 }
 
-void loraSetSpreadingFactor(SX1278Data *data, int sf)
+FUNCRESULT sx1278SetSpreadingFactor(SX1278Data *data, INT32 sf)
 {
     if (sf < 6)
     {
@@ -456,22 +426,24 @@ void loraSetSpreadingFactor(SX1278Data *data, int sf)
 
     if (sf == 6)
     {
-        __loraWriteRegister(data, REG_DETECTION_OPTIMIZE, 0xc5);
-        __loraWriteRegister(data, REG_DETECTION_THRESHOLD, 0x0c);
+        __sx1278WriteRegister(data, REG_DETECTION_OPTIMIZE, 0xc5);
+        __sx1278WriteRegister(data, REG_DETECTION_THRESHOLD, 0x0c);
     }
     else
     {
-        __loraWriteRegister(data, REG_DETECTION_OPTIMIZE, 0xc3);
-        __loraWriteRegister(data, REG_DETECTION_THRESHOLD, 0x0a);
+        __sx1278WriteRegister(data, REG_DETECTION_OPTIMIZE, 0xc3);
+        __sx1278WriteRegister(data, REG_DETECTION_THRESHOLD, 0x0a);
     }
 
-    __loraWriteRegister(data, REG_MODEM_CONFIG_2, (__loraReadRegister(data, REG_MODEM_CONFIG_2) & 0x0f) | ((sf << 4) & 0xf0));
-    __loraSetLdoFlag(data);
+    __sx1278WriteRegister(data, REG_MODEM_CONFIG_2, (__sx1278ReadRegister(data, REG_MODEM_CONFIG_2) & 0x0f) | ((sf << 4) & 0xf0));
+    __sx1278SetLdoFlag(data);
+
+    return SUC_OK;
 }
 
-void loraSetSignalBandwidth(SX1278Data *data, long sbw)
+FUNCRESULT sx1278SetSignalBandwidth(SX1278Data *data, INT64 sbw)
 {
-    int bw;
+    INT32 bw;
 
     if (sbw <= 7.8E3)
     {
@@ -514,11 +486,13 @@ void loraSetSignalBandwidth(SX1278Data *data, long sbw)
         bw = 9;
     }
 
-    __loraWriteRegister(data, REG_MODEM_CONFIG_1, (__loraReadRegister(data, REG_MODEM_CONFIG_1) & 0x0f) | (bw << 4));
-    __loraSetLdoFlag(data);
+    __sx1278WriteRegister(data, REG_MODEM_CONFIG_1, (__sx1278ReadRegister(data, REG_MODEM_CONFIG_1) & 0x0f) | (bw << 4));
+    __sx1278SetLdoFlag(data);
+
+    return SUC_OK;
 }
 
-void loraSetCodingRate4(SX1278Data *data, int denominator)
+FUNCRESULT sx1278SetCodingRate4(SX1278Data *data, INT32 denominator)
 {
     if (denominator < 5)
     {
@@ -529,47 +503,61 @@ void loraSetCodingRate4(SX1278Data *data, int denominator)
         denominator = 8;
     }
 
-    int cr = denominator - 4;
+    INT32 cr = denominator - 4;
 
-    __loraWriteRegister(data, REG_MODEM_CONFIG_1, (__loraReadRegister(data, REG_MODEM_CONFIG_1) & 0xf1) | (cr << 1));
+    __sx1278WriteRegister(data, REG_MODEM_CONFIG_1, (__sx1278ReadRegister(data, REG_MODEM_CONFIG_1) & 0xf1) | (cr << 1));
+
+    return SUC_OK;
 }
 
-void loraSetPreambleLength(SX1278Data *data, long length)
+FUNCRESULT sx1278SetPreambleLength(SX1278Data *data, INT64 length)
 {
-    __loraWriteRegister(data, REG_PREAMBLE_MSB, (uint8_t)(length >> 8));
-    __loraWriteRegister(data, REG_PREAMBLE_LSB, (uint8_t)(length >> 0));
+    __sx1278WriteRegister(data, REG_PREAMBLE_MSB, (BYTE)(length >> 8));
+    __sx1278WriteRegister(data, REG_PREAMBLE_LSB, (BYTE)(length >> 0));
+
+    return SUC_OK;
 }
 
-void loraSetSyncWord(SX1278Data *data, int sw)
+FUNCRESULT sx1278SetSyncWord(SX1278Data *data, INT32 sw)
 {
-    __loraWriteRegister(data, REG_SYNC_WORD, sw);
+    __sx1278WriteRegister(data, REG_SYNC_WORD, sw);
+
+    return SUC_OK;
 }
 
-void loraEnableCrc(SX1278Data *data)
+FUNCRESULT sx1278EnableCrc(SX1278Data *data)
 {
-    __loraWriteRegister(data, REG_MODEM_CONFIG_2, __loraReadRegister(data, REG_MODEM_CONFIG_2) | 0x04);
+    __sx1278WriteRegister(data, REG_MODEM_CONFIG_2, __sx1278ReadRegister(data, REG_MODEM_CONFIG_2) | 0x04);
+
+    return SUC_OK;
 }
 
-void loraDisableCrc(SX1278Data *data)
+FUNCRESULT sx1278DisableCrc(SX1278Data *data)
 {
-    __loraWriteRegister(data, REG_MODEM_CONFIG_2, __loraReadRegister(data, REG_MODEM_CONFIG_2) & 0xfb);
+    __sx1278WriteRegister(data, REG_MODEM_CONFIG_2, __sx1278ReadRegister(data, REG_MODEM_CONFIG_2) & 0xfb);
+
+    return SUC_OK;
 }
 
-void loraEnableInvertIQ(SX1278Data *data)
+FUNCRESULT sx1278EnableInvertIQ(SX1278Data *data)
 {
-    __loraWriteRegister(data, REG_INVERTIQ, 0x66);
-    __loraWriteRegister(data, REG_INVERTIQ2, 0x19);
+    __sx1278WriteRegister(data, REG_INVERTIQ, 0x66);
+    __sx1278WriteRegister(data, REG_INVERTIQ2, 0x19);
+
+    return SUC_OK;
 }
 
-void loraDisableInvertIQ(SX1278Data *data)
+FUNCRESULT sx1278DisableInvertIQ(SX1278Data *data)
 {
-    __loraWriteRegister(data, REG_INVERTIQ, 0x27);
-    __loraWriteRegister(data, REG_INVERTIQ2, 0x1d);
+    __sx1278WriteRegister(data, REG_INVERTIQ, 0x27);
+    __sx1278WriteRegister(data, REG_INVERTIQ2, 0x1d);
+
+    return SUC_OK;
 }
 
-void loraSetOCP(SX1278Data *data, uint8_t mA)
+FUNCRESULT sx1278SetOCP(SX1278Data *data, BYTE mA)
 {
-    uint8_t ocpTrim = 27;
+    BYTE ocpTrim = 27;
 
     if (mA <= 120)
     {
@@ -580,70 +568,54 @@ void loraSetOCP(SX1278Data *data, uint8_t mA)
         ocpTrim = (mA + 30) / 10;
     }
 
-    __loraWriteRegister(data, REG_OCP, 0x20 | (0x1F & ocpTrim));
+    __sx1278WriteRegister(data, REG_OCP, 0x20 | (0x1F & ocpTrim));
 }
 
-void loraSetGain(SX1278Data *data, uint8_t gain)
+FUNCRESULT sx1278SetGain(SX1278Data *data, BYTE gain)
 {
     if (gain > 6)
     {
         gain = 6;
     }
 
-    loraIdle(data);
+    sx1278Idle(data);
 
     if (gain == 0)
     {
-        __loraWriteRegister(data, REG_MODEM_CONFIG_3, 0x04);
+        __sx1278WriteRegister(data, REG_MODEM_CONFIG_3, 0x04);
     }
     else
     {
-        __loraWriteRegister(data, REG_MODEM_CONFIG_3, 0x00);
+        __sx1278WriteRegister(data, REG_MODEM_CONFIG_3, 0x00);
 
-        __loraWriteRegister(data, REG_LNA, 0x03);
+        __sx1278WriteRegister(data, REG_LNA, 0x03);
 
-        __loraWriteRegister(data, REG_LNA, __loraReadRegister(data, REG_LNA) | (gain << 5));
+        __sx1278WriteRegister(data, REG_LNA, __sx1278ReadRegister(data, REG_LNA) | (gain << 5));
     }
+
+    return SUC_OK;
 }
 
-uint8_t loraRandom(SX1278Data *data)
-{
-    return __loraReadRegister(data, REG_RSSI_WIDEBAND);
-}
-
-void loraSetSPIFrequency(SX1278Data *data, uint32_t frequency)
-{
-    spi_set_baudrate(data->_pinout.spi == 0 ? spi0 : spi1, frequency);
-}
-
-void loraDumpRegisters(SX1278Data *data, uint8_t buffer[128])
-{
-    for (int i = 0; i < 128; i++)
-    {
-        buffer[i] = __loraReadRegister(data, i);
-    }
-}
-
-void __loraExplicitHeaderMode(SX1278Data *data)
+VOID __sx1278ExplicitHeaderMode(SX1278Data *data)
 {
     data->_implicitHeaderMode = 0;
 
-    __loraWriteRegister(data, REG_MODEM_CONFIG_1, __loraReadRegister(data, REG_MODEM_CONFIG_1) & 0xfe);
+    __sx1278WriteRegister(data, REG_MODEM_CONFIG_1, __sx1278ReadRegister(data, REG_MODEM_CONFIG_1) & 0xfe);
 }
 
-void __loraImplicitHeaderMode(SX1278Data *data)
+VOID __sx1278ImplicitHeaderMode(SX1278Data *data)
 {
     data->_implicitHeaderMode = 1;
 
-    __loraWriteRegister(data, REG_MODEM_CONFIG_1, __loraReadRegister(data, REG_MODEM_CONFIG_1) | 0x01);
+    __sx1278WriteRegister(data, REG_MODEM_CONFIG_1, __sx1278ReadRegister(data, REG_MODEM_CONFIG_1) | 0x01);
 }
 
-void __loraHandleDio0Rise(SX1278Data *data)
+void __sx1278HandleDio0Rise(SX1278Data *data)
 {
-    int irqFlags = __loraReadRegister(data, REG_IRQ_FLAGS);
+    int irqFlags = __sx1278ReadRegister(data, REG_IRQ_FLAGS);
 
-    __loraWriteRegister(data, REG_IRQ_FLAGS, irqFlags);
-    __loraWriteRegister(data, REG_IRQ_FLAGS, irqFlags);
+    __sx1278WriteRegister(data, REG_IRQ_FLAGS, irqFlags);
+    __sx1278WriteRegister(data, REG_IRQ_FLAGS, irqFlags);
 
     if ((irqFlags & IRQ_PAYLOAD_CRC_ERROR_MASK) == 0)
     {
@@ -651,9 +623,9 @@ void __loraHandleDio0Rise(SX1278Data *data)
         {
             data->_packetIndex = 0;
 
-            int packetLength = data->_implicitHeaderMode ? __loraReadRegister(data, REG_PAYLOAD_LENGTH) : __loraReadRegister(data, REG_RX_NB_BYTES);
+            int packetLength = data->_implicitHeaderMode ? __sx1278ReadRegister(data, REG_PAYLOAD_LENGTH) : __sx1278ReadRegister(data, REG_RX_NB_BYTES);
 
-            __loraWriteRegister(data, REG_FIFO_ADDR_PTR, __loraReadRegister(data, REG_FIFO_RX_CURRENT_ADDR));
+            __sx1278WriteRegister(data, REG_FIFO_ADDR_PTR, __sx1278ReadRegister(data, REG_FIFO_RX_CURRENT_ADDR));
 
             if (data->_onReceive)
             {
@@ -670,29 +642,29 @@ void __loraHandleDio0Rise(SX1278Data *data)
     }
 }
 
-bool __loraIsTransmitting(SX1278Data *data)
+BOOL __sx1278IsTransmitting(SX1278Data *data)
 {
-    if ((__loraReadRegister(data, REG_OP_MODE) & MODE_TX) == MODE_TX)
+    if ((__sx1278ReadRegister(data, REG_OP_MODE) & MODE_TX) == MODE_TX)
     {
-        return true;
+        return TRUE;
     }
 
-    if (__loraReadRegister(data, REG_IRQ_FLAGS) & IRQ_TX_DONE_MASK)
+    if (__sx1278ReadRegister(data, REG_IRQ_FLAGS) & IRQ_TX_DONE_MASK)
     {
-        __loraWriteRegister(data, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
+        __sx1278WriteRegister(data, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
     }
 
-    return false;
+    return FALSE;
 }
 
-int __loraGetSpreadingFactor(SX1278Data *data)
+INT32 __sx1278GetSpreadingFactor(SX1278Data *data)
 {
-    return __loraReadRegister(data, REG_MODEM_CONFIG_2) >> 4;
+    return __sx1278ReadRegister(data, REG_MODEM_CONFIG_2) >> 4;
 }
 
-long __loraGetSignalBandwidth(SX1278Data *data)
+INT64 __sx1278GetSignalBandwidth(SX1278Data *data)
 {
-    uint8_t bw = (__loraReadRegister(data, REG_MODEM_CONFIG_1) >> 4);
+    BYTE bw = (__sx1278ReadRegister(data, REG_MODEM_CONFIG_1) >> 4);
 
     switch (bw)
     {
@@ -721,64 +693,37 @@ long __loraGetSignalBandwidth(SX1278Data *data)
     return -1;
 }
 
-void __loraSetLdoFlag(SX1278Data *data)
+VOID __sx1278SetLdoFlag(SX1278Data *data)
 {
-    long symbolDuration = 1000 / (__loraGetSignalBandwidth(data) / (1L << __loraGetSpreadingFactor(data)));
-
-    bool ldoOn = symbolDuration > 16;
-
-    uint8_t config3 = __loraReadRegister(data, REG_MODEM_CONFIG_3);
+    INT64 symbolDuration = 1000 / (__sx1278GetSignalBandwidth(data) / (1L << __sx1278GetSpreadingFactor(data)));
+    BOOL ldoOn = symbolDuration > 16;
+    BYTE config3 = __sx1278ReadRegister(data, REG_MODEM_CONFIG_3);
 
     config3 = ldoOn ? config3 | (1 << 3) : config3 & ~(1 << 3);
 
-    __loraWriteRegister(data, REG_MODEM_CONFIG_3, config3);
+    __sx1278WriteRegister(data, REG_MODEM_CONFIG_3, config3);
 }
 
-uint8_t __loraReadRegister(SX1278Data *data, uint8_t address)
+BYTE __sx1278ReadRegister(SX1278Data *data, BYTE address)
 {
-    return __loraSingleTransfer(data, address & 0x7f, 0x00);
+    return __sx1278SingleTransfer(data, address & 0x7f, 0x00);
 }
 
-void __loraWriteRegister(SX1278Data *data, uint8_t address, uint8_t value)
+VOID __sx1278WriteRegister(SX1278Data *data, BYTE address, BYTE value)
 {
-    __loraSingleTransfer(data, address | 0x80, value);
+    __sx1278SingleTransfer(data, address | 0x80, value);
 }
 
-uint8_t __loraSingleTransfer(SX1278Data *data, uint8_t address, uint8_t value)
+BYTE __sx1278SingleTransfer(SX1278Data *data, BYTE address, BYTE value)
 {
-    uint8_t response;
+    BYTE response;
 
-    gpio_put(data->_pinout.ss, 0);
+    gpioSetPinState(data->_pinout.ss, GPIO_LOW);
 
-    spi_write_blocking(data->_pinout.spi == 0 ? spi0 : spi1, &address, 1);
-    spi_write_read_blocking(data->_pinout.spi == 0 ? spi0 : spi1, &value, &response, 1);
+    spiWriteBlocking(data->_pinout.spi, &address, 1);
+    spiReadBlocking(data->_pinout.spi, value, &response, 1);
 
-    gpio_put(data->_pinout.ss, 1);
+    gpioSetPinState(data->_pinout.ss, GPIO_HIGH);
 
     return response;
-}
-
-static SX1278Data *__loraDataFromGPIO(uint gpio)
-{
-    for (size_t i = 0; i < s_LoraDatasCount; i++)
-    {
-        SX1278Data *d = s_LoraDatas[i];
-        SX1278Pinout _pinout = d->_pinout;
-
-        if (_pinout.cs == gpio || _pinout.miso == gpio || _pinout.mosi == gpio || _pinout.sck == gpio || _pinout.ss == gpio || _pinout.reset == gpio || _pinout.dio0 == gpio)
-        {
-            return d;
-        }
-    }
-
-    return NULL;
-}
-
-void __loraOnDio0Rise(uint gpio, uint32_t events)
-{
-    gpio_acknowledge_irq(gpio, events);
-
-    SX1278Data *data = __loraDataFromGPIO(gpio);
-
-    __loraHandleDio0Rise(data);
 }

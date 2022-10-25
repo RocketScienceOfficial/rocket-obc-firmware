@@ -1,5 +1,5 @@
 #include "drivers/uv/guva_s12sd_driver.h"
-#include "drivers/gpio/gpio_typedefs.h"
+#include "drivers/gpio/gpio_driver.h"
 
 FUNCRESULT guva_s12sd_Init(ADCInput input)
 {

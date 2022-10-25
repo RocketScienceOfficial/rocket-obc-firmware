@@ -73,10 +73,10 @@ FUNCRESULT i2cInitPins(I2CInstance i2c, PinNumber sda, PinNumber scl)
         return ERR_INVALIDARG;
     }
 
-    gpio_set_function(sda, GPIO_FUNC_I2C);
-    gpio_set_function(scl, GPIO_FUNC_I2C);
-    gpio_pull_up(sda);
-    gpio_pull_up(scl);
+    gpioSetPinFunction(sda, GPIO_FUNCTION_I2C);
+    gpioSetPinFunction(scl, GPIO_FUNCTION_I2C);
+    gpioPullUpPin(sda);
+    gpioPullUpPin(scl);
 
     return SUC_OK;
 }

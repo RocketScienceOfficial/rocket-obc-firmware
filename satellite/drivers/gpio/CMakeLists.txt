@@ -4,13 +4,14 @@ set(LIB_GENERAL_NAME "${MODULE_NAME}_${LIB_NAME}_lib")
 
 add_library(${LIB_GENERAL_NAME} STATIC
     include/${MODULE_NAME}/${LIB_NAME}/adc_driver.h
-    include/${MODULE_NAME}/${LIB_NAME}/gpio_typedefs.h
+    include/${MODULE_NAME}/${LIB_NAME}/gpio_driver.h
     include/${MODULE_NAME}/${LIB_NAME}/i2c_driver.h
     include/${MODULE_NAME}/${LIB_NAME}/onboard_flash_driver.h
     include/${MODULE_NAME}/${LIB_NAME}/pwm_driver.h
     include/${MODULE_NAME}/${LIB_NAME}/spi_driver.h
     include/${MODULE_NAME}/${LIB_NAME}/uart_driver.h
     src/adc_driver.c
+    src/gpio_driver.c
     src/i2c_driver.c
     src/onboard_flash_driver.c
     src/pwm_driver.c

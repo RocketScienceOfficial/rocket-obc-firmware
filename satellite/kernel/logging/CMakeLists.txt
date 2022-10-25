@@ -7,5 +7,5 @@ add_library(${LIB_GENERAL_NAME} STATIC
     src/logger.c
 )
 
-target_link_libraries(kernel_logging_lib PRIVATE kernel_console_lib drivers_lib)
+target_link_libraries(kernel_logging_lib PRIVATE drivers_lib)
 target_include_directories(${LIB_GENERAL_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

@@ -70,7 +70,7 @@ static const BYTE RADIO_PACKET_KEY[] = {
     0xa0,
 };
 
-FUNCRESULT serializeRadioPacket(RadioBody *body, BYTE **buffer_out_ptr, SIZE *size_out)
+VOID serializeRadioPacket(RadioBody *body, BYTE **buffer_out_ptr, SIZE *size_out)
 {
     SIZE bodySize = sizeof(BYTE) + sizeof(BYTE[3]) + sizeof(SIZE) + sizeof(BYTE) * body->payloadSize;
     BYTE bodyBuffer[bodySize];
@@ -82,7 +82,7 @@ FUNCRESULT serializeRadioPacket(RadioBody *body, BYTE **buffer_out_ptr, SIZE *si
 
     if (!calculateParity(bodyBuffer, bodySize, &parity))
     {
-        return ERR_FAIL;
+        return;
     }
 
     _RadioHeader header = {
@@ -110,13 +110,13 @@ FUNCRESULT serializeRadioPacket(RadioBody *body, BYTE **buffer_out_ptr, SIZE *si
 
     if (!encryptDecrypt(*buffer_out_ptr, bufferSize, RADIO_PACKET_KEY, sizeof(RADIO_PACKET_KEY) / sizeof(BYTE)))
     {
-        return ERR_UNEXPECTED;
+        return;
     }
 
-    return SUC_OK;
+    return;
 }
 
-FUNCRESULT deserializeRadioPacket(BYTE *buffer, SIZE size, RadioBody *body_out, BOOL *validationResult)
+VOID deserializeRadioPacket(BYTE *buffer, SIZE size, RadioBody *body_out, BOOL *validationResult)
 {
     _RadioPacket packet = {0};
 
@@ -141,7 +141,7 @@ FUNCRESULT deserializeRadioPacket(BYTE *buffer, SIZE size, RadioBody *body_out, 
 
         if (!calculateParity(buffer + bodyOffset, parityBufferSize, &parity))
         {
-            return ERR_FAIL;
+            return;
         }
 
         int comp = memcmp(packet._header._parity, parity.buffer, sizeof(BYTE) * packet._header._paritySize);
@@ -163,7 +163,7 @@ FUNCRESULT deserializeRadioPacket(BYTE *buffer, SIZE size, RadioBody *body_out, 
 
         if (!clearParity(&parity))
         {
-            return ERR_FAIL;
+            return;
         }
     }
     else
@@ -171,20 +171,18 @@ FUNCRESULT deserializeRadioPacket(BYTE *buffer, SIZE size, RadioBody *body_out, 
         *validationResult = false;
     }
 
-    return SUC_OK;
+    return;
 }
 
-FUNCRESULT radioClearPacket(RadioBody *body)
+VOID radioClearPacket(RadioBody *body)
 {
     if (!body)
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
     if (body->payload)
     {
         free(body->payload);
     }
-
-    return SUC_OK;
 }

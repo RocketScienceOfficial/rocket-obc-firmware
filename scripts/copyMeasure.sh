@@ -1,5 +1,0 @@
-#!/bin/bash
-
-cd `dirname $0`/../satellite
-
-sudo cp executables/measure.uf2 /dev/sdb1

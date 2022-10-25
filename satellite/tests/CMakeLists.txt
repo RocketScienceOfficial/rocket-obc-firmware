@@ -1,3 +1,11 @@
-add_subdirectory(_dependencies)
-add_subdirectory(lib)
-add_subdirectory(_runners)
+link_libraries(tools_lib)
+
+add_subdirectory(test_framework)
+
+link_libraries(test_framework)
+
+add_subdirectory(tools_tests)
+add_subdirectory(drivers_tests)
+add_subdirectory(kernel_tests)
+
+add_subdirectory(tests_runner)
