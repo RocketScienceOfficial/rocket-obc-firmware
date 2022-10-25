@@ -2,12 +2,13 @@ name: Run Build
 on: [push]
 jobs:
   Run-Tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Verify
         uses: actions/checkout@v2
       - name: Build
+        working-directory: ./scripts
         run: |
-          chmod +x ./scripts/setup.sh
-          ./scripts/setup.sh
+          chmod +x ./setup.sh
+          ./setup.sh
         shell: bash
