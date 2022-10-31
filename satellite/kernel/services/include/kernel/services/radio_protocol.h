@@ -2,6 +2,8 @@
 
 #include "tools/typedefs.h"
 
+#define RADIO_PACKET_SIGNATURE_LENGTH 16
+
 /**
  * @brief Header of radio packet. (INTERNAL USE)
  */
@@ -16,6 +18,11 @@ typedef struct _RadioHeader
      * @brief Parity.
      */
     BYTE *_parity;
+
+    /**
+     * @brief Radio packet signature.
+     */
+    BYTE _signature[RADIO_PACKET_SIGNATURE_LENGTH];
 } _RadioHeader;
 
 /**
@@ -61,26 +68,29 @@ typedef struct _RadioPacket
 } _RadioPacket;
 
 /**
- * @brief Serialize radio packet.
+ * @brief Serialize and encrypt radio packet.
  *
  * @param body_in Body of radio packet.
  * @param buffer_out_ptr Pointer to buffer.
  * @param size_out Size of buffer.
+ *
+ * @return True if success.
  */
-VOID serializeRadioPacket(RadioBody *body, BYTE **buffer_out_ptr, SIZE *size_out);
+BOOL serializeRadioPacket(RadioBody *body, BYTE **buffer_out_ptr, SIZE *size_out);
 
 /**
- * @brief Deserialize radio packet.
+ * @brief Deserialize and decrypt radio packet.
  *
  * @param buffer_in Buffer.
  * @param size_in Size of buffer.
  * @param body_out Body of radio packet.
- * @param validationResult_out Validation result.
+ *
+ * @return True if success.
  */
-VOID deserializeRadioPacket(BYTE *buffer, SIZE size, RadioBody *body_out, BOOL *validationResult);
+BOOL deserializeRadioPacket(BYTE *buffer, SIZE size, RadioBody *body_out);
 
 /**
- * @brief Clears radio body. (i.a payload)
+ * @brief Clears radio body. (i.e payload)
  *
  * @param body Radio body to clear
  */

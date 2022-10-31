@@ -15,8 +15,6 @@ typedef enum LoggerSinkType
     SINK_FILE,
 } LoggerSinkType;
 
-typedef VOID (*LogCallback)();
-
 /**
  * @brief Data structure for a sink. (INTERNAL USE)
  */
@@ -106,6 +104,9 @@ STRING parseLog(const STRING loggerName, const STRING pattern, const STRING leve
  */
 VOID myLog(Logger *logger, const STRING level, const STRING format, ...);
 
+/**
+ * @brief Get default logger.
+ */
 Logger *myLogGetCoreLogger();
 
 #define MY_LOG_LEVEL_INFO "INFO"

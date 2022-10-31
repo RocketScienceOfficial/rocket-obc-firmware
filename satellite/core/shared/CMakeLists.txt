@@ -6,10 +6,8 @@ add_library(${LIB_GENERAL_NAME} STATIC
     include/${LIB_NAME}/commands_utils.h
     include/${LIB_NAME}/measurements_utils.h
     include/${LIB_NAME}/radio_utils.h
-    include/${LIB_NAME}/tick.h
     src/commands_utils.c
     src/radio_utils.c
-    src/tick.c
 )
 
 target_include_directories(${LIB_GENERAL_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

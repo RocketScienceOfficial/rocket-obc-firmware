@@ -3,7 +3,7 @@
 #include "kernel/commands/commands.h"
 #include "kernel/commands/default_commands.h"
 
-static UINT32 s_ConsoleChar;
+static INT32 s_ConsoleChar;
 static ConsoleInput s_ConsoleInput;
 static ConsoleTokens s_ConsoleTokens;
 

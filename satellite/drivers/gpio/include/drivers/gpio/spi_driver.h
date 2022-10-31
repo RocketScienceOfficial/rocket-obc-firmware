@@ -98,11 +98,22 @@ FUNCRESULT spiWriteBlocking(SPIInstance spi, BYTE *data, SIZE size);
  *
  * @param spi SPI Instance.
  * @param repeatedTXData Buffer to data to write.
- * @param destination Data pointer to read to.
+ * @param destination Data pointer to read from.
  * @param size Size of data to receive.
  * @return Result code.
  */
 FUNCRESULT spiReadBlocking(SPIInstance spi, BYTE repeatedTXData, BYTE *destination, SIZE size);
+
+/**
+ * @brief Write and read from SPI with blocking.
+ *
+ * @param spi SPI Instance.
+ * @param data Data pointer to write.
+ * @param destination Data pointer to read from.
+ * @param size Size of data.
+ * @return Result code.
+ */
+FUNCRESULT spiWriteReadBlocking(SPIInstance spi, BYTE *data, BYTE *destination, SIZE size);
 
 /**
  * @brief Check if SPI device is valid.

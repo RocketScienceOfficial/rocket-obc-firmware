@@ -10,16 +10,18 @@ static SX1278Data s_LoraData;
 
 VOID initializeRadio(SX1278Pinout *pinout)
 {
-    DRIVER_CALL(sx1278Init(&s_LoraData, pinout));
-    DRIVER_CALL(sx1278Begin(&s_LoraData, RADIO_FREQUENCY_HZ));
+    DRIVER_CALL(sx1278Init(&s_LoraData, pinout, RADIO_FREQUENCY_HZ));
     DRIVER_CALL(sx1278SetTxPower(&s_LoraData, RADIO_DBM));
     DRIVER_CALL(sx1278SetSpreadingFactor(&s_LoraData, RADIO_SPREADING_FACTOR));
     DRIVER_CALL(sx1278SetSignalBandwidth(&s_LoraData, RADIO_SIGNAL_BANDWIDTH));
+
+    MY_LOG_CORE_INFO("Radio initialized!");
 }
 
 BOOL checkRadioPacket(RadioUtilPacketData *packet)
 {
     SIZE packetSize = 0;
+
     DRIVER_CALL(sx1278ParsePacket(&s_LoraData, 0, &packetSize));
 
     if (packetSize)
@@ -28,8 +30,8 @@ BOOL checkRadioPacket(RadioUtilPacketData *packet)
 
         BYTE buffer[packetSize];
         SIZE i = 0;
-
         BOOL available = FALSE;
+
         DRIVER_CALL(sx1278Available(&s_LoraData, &available));
 
         while (available)
@@ -42,10 +44,24 @@ BOOL checkRadioPacket(RadioUtilPacketData *packet)
 
         packet->body = (RadioBody){0};
 
-        DRIVER_CALL(sx1278Rssi(&s_LoraData, &packet->signalStrength));
+        INT32 rssi = 0;
 
-        BOOL packetValidation = FALSE;
-        deserializeRadioPacket(buffer, packetSize, &packet->body, &packetValidation);
+        DRIVER_CALL(sx1278Rssi(&s_LoraData, &rssi));
+
+        if (rssi < RADIO_MIN_RSSI)
+        {
+            DRIVER_CALL(sx1278SetSpreadingFactor(&s_LoraData, RADIO_ERROR_SPREADING_FACTOR));
+            DRIVER_CALL(sx1278SetSignalBandwidth(&s_LoraData, RADIO_ERROR_SIGNAL_BANDWIDTH));
+        }
+        else
+        {
+            DRIVER_CALL(sx1278SetSpreadingFactor(&s_LoraData, RADIO_SPREADING_FACTOR));
+            DRIVER_CALL(sx1278SetSignalBandwidth(&s_LoraData, RADIO_SIGNAL_BANDWIDTH));
+        }
+
+        packet->signalStrength = rssi;
+
+        BOOL packetValidation = deserializeRadioPacket(buffer, packetSize, &packet->body);
 
         if (packetValidation)
         {
@@ -69,13 +85,20 @@ VOID sendRadioPacket(RadioBody *body)
     BYTE *packetBuffer;
     SIZE packetBufferSize = 0;
 
-    serializeRadioPacket(body, &packetBuffer, &packetBufferSize);
+    BOOL serializationResult = serializeRadioPacket(body, &packetBuffer, &packetBufferSize);
 
-    DRIVER_CALL(sx1278BeginPacket(&s_LoraData, FALSE));
-    DRIVER_CALL(sx1278Write_str_s(&s_LoraData, packetBuffer, packetBufferSize));
-    DRIVER_CALL(sx1278EndPacket(&s_LoraData, FALSE));
+    if (serializationResult)
+    {
+        DRIVER_CALL(sx1278WriteBuffer(&s_LoraData, packetBuffer, packetBufferSize));
 
-    free(packetBuffer);
+        free(packetBuffer);
+
+        MY_LOG_CORE_INFO("Packet sent!");
+    }
+    else
+    {
+        MY_LOG_CORE_ERROR("Packet serialization failed!");
+    }
 }
 
 VOID sendRadioRemoteCommand(STRING msg)
@@ -94,7 +117,7 @@ VOID radioRemoteCommandCallback(BYTE *msg, SIZE size)
     ConsoleInput input = {0};
     ConsoleTokens tokens = {0};
 
-    for (INT32 i = 0; i < size; i++)
+    for (SIZE i = 0; i < size; i++)
     {
         DRIVER_CALL(consoleInputProcessCharacter(msg[i], &input, &tokens));
     }

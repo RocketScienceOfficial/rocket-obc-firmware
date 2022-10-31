@@ -1,5 +1,4 @@
 #include "drivers/led/simple_led_driver.h"
-#include "pico/stdlib.h"
 
 FUNCRESULT ledInit(PinNumber pin)
 {

@@ -4,12 +4,6 @@
 #include "drivers/gpio/gpio_driver.h"
 #include "drivers/gpio/spi_driver.h"
 
-#define LORA_DEFAULT_TX_POWER 17
-#define LORA_MAX_INSTANCES 2
-
-#define PA_OUTPUT_RFO_PIN 0
-#define PA_OUTPUT_PA_BOOST_PIN 1
-
 /**
  * @brief Pinout data to use in the radio.
  */
@@ -22,7 +16,6 @@ typedef struct SX1278Pinout
     PinNumber cs;
     PinNumber ss;
     PinNumber reset;
-    PinNumber dio0;
 } SX1278Pinout;
 
 /**
@@ -35,34 +28,22 @@ typedef struct SX1278Data
     UINT64 _frequency;
     INT32 _packetIndex;
     BOOL _implicitHeaderMode;
-    VOID(*_onReceive)
-    (INT32);
-    VOID(*_onTxDone)
-    ();
 } SX1278Data;
 
-FUNCRESULT sx1278Init(SX1278Data *data, SX1278Pinout *pinout);
-FUNCRESULT sx1278Begin(SX1278Data *data, UINT64 frequency);
-FUNCRESULT sx1278BeginPacket(SX1278Data *data, BOOL implicitHeader);
-FUNCRESULT sx1278EndPacket(SX1278Data *data, BOOL async);
+FUNCRESULT sx1278Init(SX1278Data *data, SX1278Pinout *pinout, UINT64 frequency);
 
+FUNCRESULT sx1278WriteBuffer(SX1278Data *data, const BYTE *buffer, SIZE size);
+FUNCRESULT sx1278Available(SX1278Data *data, BOOL *available);
 FUNCRESULT sx1278ParsePacket(SX1278Data *data, SIZE size, SIZE* packetLengthOut);
+FUNCRESULT sx1278Read(SX1278Data *data, BYTE *dataOut);
+FUNCRESULT sx1278Peek(SX1278Data *data, BYTE *dataOut);
+FUNCRESULT sx1278Idle(SX1278Data *data);
+FUNCRESULT sx1278Sleep(SX1278Data *data);
+
 FUNCRESULT sx1278PacketRssi(SX1278Data *data, INT32 *rssi);
 FUNCRESULT sx1278PacketSnr(SX1278Data *data, FLOAT *snr);
 FUNCRESULT sx1278PacketFrequencyError(SX1278Data *data, INT64 *error);
 FUNCRESULT sx1278Rssi(SX1278Data *data, INT32 *rssi);
-
-FUNCRESULT sx1278Write(SX1278Data *data, BYTE byte);
-FUNCRESULT sx1278Write_s(SX1278Data *data, const BYTE *buffer, SIZE size);
-FUNCRESULT sx1278Write_str(SX1278Data *data, const STRING str);
-FUNCRESULT sx1278Write_str_s(SX1278Data *data, const BYTE *buffer, SIZE size);
-
-FUNCRESULT sx1278Available(SX1278Data *data, BOOL *available);
-FUNCRESULT sx1278Read(SX1278Data *data, BYTE *dataOut);
-FUNCRESULT sx1278Peek(SX1278Data *data, BYTE *dataOut);
-
-FUNCRESULT sx1278Idle(SX1278Data *data);
-FUNCRESULT sx1278Sleep(SX1278Data *data);
 
 FUNCRESULT sx1278SetTxPower(SX1278Data *data, INT32 level);
 FUNCRESULT sx1278SetFrequency(SX1278Data *data, UINT64 frequency);
@@ -87,4 +68,3 @@ VOID __sx1278SetLdoFlag(SX1278Data *data);
 BYTE __sx1278ReadRegister(SX1278Data *data, BYTE address);
 VOID __sx1278WriteRegister(SX1278Data *data, BYTE address, BYTE value);
 BYTE __sx1278SingleTransfer(SX1278Data *data, BYTE address, BYTE value);
-VOID __sx1278OnDio0Rise(UINT32 gpio, UINT32 events);

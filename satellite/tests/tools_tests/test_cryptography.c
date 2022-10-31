@@ -9,8 +9,8 @@ MY_TEST_FUNC(CRYPTOGRAPHY_TEST_NAME, 1)
     BYTE buffer2[] = "Hello World!";
     const BYTE key[] = {0x30, 0x3A};
 
-    MY_ASSERT(encryptDecrypt(buffer2, sizeof(buffer2) / sizeof(BYTE), key, sizeof(key) / sizeof(BYTE)));
-    MY_ASSERT(encryptDecrypt(buffer2, sizeof(buffer2) / sizeof(BYTE), key, sizeof(key) / sizeof(BYTE)));
+    MY_ASSERT(encryptDecryptXOR(buffer2, sizeof(buffer2) / sizeof(BYTE), key, sizeof(key) / sizeof(BYTE)));
+    MY_ASSERT(encryptDecryptXOR(buffer2, sizeof(buffer2) / sizeof(BYTE), key, sizeof(key) / sizeof(BYTE)));
     MY_ASSERT(strcmp(buffer, buffer2) == 0);
 
     MY_TEST_END();
@@ -22,8 +22,8 @@ MY_TEST_FUNC(CRYPTOGRAPHY_TEST_NAME, 2)
     BYTE buffer2[] = "Hello World!";
     const BYTE key[] = {0x48, 0x7D, 0x25};
 
-    MY_ASSERT(encryptDecrypt(buffer2, sizeof(buffer2) / sizeof(BYTE), key, sizeof(key) / sizeof(BYTE)));
-    MY_ASSERT(encryptDecrypt(buffer2, sizeof(buffer2) / sizeof(BYTE), key, sizeof(key) / sizeof(BYTE)));
+    MY_ASSERT(encryptDecryptXOR(buffer2, sizeof(buffer2) / sizeof(BYTE), key, sizeof(key) / sizeof(BYTE)));
+    MY_ASSERT(encryptDecryptXOR(buffer2, sizeof(buffer2) / sizeof(BYTE), key, sizeof(key) / sizeof(BYTE)));
     MY_ASSERT(strcmp(buffer, buffer2) == 0);
 
     MY_TEST_END();
@@ -35,8 +35,8 @@ MY_TEST_FUNC(CRYPTOGRAPHY_TEST_NAME, 3)
     BYTE buffer2[] = "Hello World!";
     const BYTE key[] = {0x21, 0x2F, 0x5B, 0x7B};
 
-    MY_ASSERT(encryptDecrypt(buffer2, sizeof(buffer2) / sizeof(BYTE), key, sizeof(key) / sizeof(BYTE)));
-    MY_ASSERT(encryptDecrypt(buffer2, sizeof(buffer2) / sizeof(BYTE), key, sizeof(key) / sizeof(BYTE)));
+    MY_ASSERT(encryptDecryptXOR(buffer2, sizeof(buffer2) / sizeof(BYTE), key, sizeof(key) / sizeof(BYTE)));
+    MY_ASSERT(encryptDecryptXOR(buffer2, sizeof(buffer2) / sizeof(BYTE), key, sizeof(key) / sizeof(BYTE)));
     MY_ASSERT(strcmp(buffer, buffer2) == 0);
 
     MY_TEST_END();
@@ -83,7 +83,7 @@ MY_TEST_FUNC(CRYPTOGRAPHY_TEST_NAME, 6)
 
 MY_TEST_FUNC(CRYPTOGRAPHY_TEST_NAME, 7)
 {
-    MY_ASSERT(encryptDecrypt(NULL, 0, NULL, 0) == FALSE);
+    MY_ASSERT(encryptDecryptXOR(NULL, 0, NULL, 0) == FALSE);
     MY_ASSERT(calculateParityRows(NULL, 0, NULL) == FALSE);
     MY_ASSERT(calculateParityColumns(NULL, 0, NULL) == FALSE);
     MY_ASSERT(calculateParity(NULL, 0, NULL) == FALSE);

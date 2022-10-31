@@ -17,7 +17,7 @@ static SIZE count1Bits(BYTE n)
     return count;
 }
 
-BOOL encryptDecrypt(BYTE *buffer, SIZE size, const BYTE *key, SIZE keySize)
+BOOL encryptDecryptXOR(BYTE *buffer, SIZE size, const BYTE *key, SIZE keySize)
 {
     if (!buffer || size == 0 || !key || keySize == 0)
     {

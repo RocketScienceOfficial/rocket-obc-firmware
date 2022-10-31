@@ -5,26 +5,24 @@
 #include "config.h"
 #include "radio_controller.h"
 #include "measurements_manager.h"
-#include "tools/time_tracker.h"
+#include "mission_control.h"
 #include "shared/commands_utils.h"
 #include "shared/radio_utils.h"
-#include "shared/tick.h"
+#include "tools/time_tracker.h"
 #include "kernel/logging/logger.h"
 #include "drivers/console/console_output.h"
 
+#include "drivers/storage/flash_driver.h"
+#include "drivers/storage/sd_driver.h"
+
 static RadioUtilPacketData s_Packet;
 static TIME s_TimerOffset;
-static TickData s_TickData;
 
 int main()
 {
     stdio_init_all();
 
-    if (DEBUG_MODE)
-    {
-        myLogCreateConsoleSink(myLogGetCoreLogger(), DEFAULT_LOG_SERIAL_PATTERN);
-    }
-
+    myLogCreateConsoleSink(myLogGetCoreLogger(), DEFAULT_LOG_SERIAL_PATTERN);
     myLogCreateFileSink(myLogGetCoreLogger(), DEFAULT_LOG_SERIAL_PATTERN, LOG_FILE_INDEX);
 
     MY_LOG_CORE_INFO("Initializing...");
@@ -37,7 +35,7 @@ int main()
 
     MY_LOG_CORE_INFO("Everything is ready!");
 
-    while (TRUE)
+    while (!isMissionCompleted())
     {
         if (consoleAvailable())
         {
@@ -65,7 +63,7 @@ int main()
                 .payloadSize = sizeof(measurements),
             };
 
-            uint8_t *buffer = malloc(body.payloadSize);
+            BYTE *buffer = (BYTE *)malloc(body.payloadSize);
 
             memcpy(buffer, &measurements, body.payloadSize);
 
@@ -75,9 +73,24 @@ int main()
 
             free(buffer);
         }
-
-        tick(&s_TickData);
     }
+
+    flashTerminate(flashGetDefaultModule());
+
+    const BYTE *fileBuffer;
+    SIZE size = 0;
+
+    flashGetFile(flashGetDefaultModule(), LOG_FILE_INDEX, &fileBuffer, &size);
+
+    SDCard sdCard = {0};
+
+    sdInit(&sdCard);
+    sdInitFile(&sdCard, LOG_FILE_NAME);
+    sdClearFile(&sdCard, LOG_FILE_NAME);
+    sdBegin(&sdCard, LOG_FILE_NAME);
+    sdWrite(&sdCard, (STRING)fileBuffer, LOG_FILE_NAME);
+    sdEnd(&sdCard, LOG_FILE_NAME);
+    sdTerminate(&sdCard);
 
     return 0;
 }

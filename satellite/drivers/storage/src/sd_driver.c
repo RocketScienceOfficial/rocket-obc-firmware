@@ -143,7 +143,7 @@ FUNCRESULT sdWrite(SDCard *sdCard, const STRING msg, const STRING fileName)
         return ERR_POINTER;
     }
 
-    int ret = f_printf(f, msg);
+    INT32 ret = f_printf(f, msg);
 
     if (ret < 0)
     {

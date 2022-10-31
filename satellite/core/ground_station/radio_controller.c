@@ -11,6 +11,5 @@ SX1278Pinout getRadioPinout()
         .cs = SX1278_CS_GPIO,
         .ss = SX1278_SS_GPIO,
         .reset = SX1278_RESET_GPIO,
-        .dio0 = SX1278_DIO0_GPIO,
     };
 }

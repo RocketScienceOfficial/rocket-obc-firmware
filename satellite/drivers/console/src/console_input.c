@@ -5,14 +5,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-UINT32 consoleCheckInput()
+INT32 consoleCheckInput()
 {
-    UINT32 ch = getchar_timeout_us(0);
+    INT32 ch = getchar_timeout_us(0);
 
     return ch != PICO_ERROR_TIMEOUT ? ch : 0;
 }
 
-FUNCRESULT consoleInputProcessCharacter(UINT32 c, ConsoleInput *input, ConsoleTokens *tokens)
+FUNCRESULT consoleInputProcessCharacter(INT32 c, ConsoleInput *input, ConsoleTokens *tokens)
 {
     if (!input || !tokens)
     {

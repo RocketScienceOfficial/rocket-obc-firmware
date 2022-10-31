@@ -1,7 +1,5 @@
 #pragma once
 
-#define DEBUG_MODE 0
-
 #define ENABLE_RADIO 0
 #define ENABLE_SD 0
 #define ENABLE_BAROMETER 0
@@ -15,4 +13,4 @@
 #define MEASUREMENTS_FILE_INDEX 2
 #define MEASUREMENTS_FILE_NAME "measurements.csv"
 
-#define MEASUREMENTS_UPDATE_RATE_MS 100
+#define MEASUREMENTS_UPDATE_RATE_MS 5000

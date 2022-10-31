@@ -6,8 +6,6 @@
 #include <stdio.h>
 #include <math.h>
 
-static LogCallback s_CurrentCallback;
-
 #define REPORT_ERROR(msg) consoleLogError(msg)
 #define LOG_DRIVER_CALL(func)                                                                                                 \
 	{                                                                                                                         \
@@ -67,11 +65,6 @@ VOID myLogCreateFileSink(Logger *logger, const STRING pattern, SIZE fileIndex)
 	LOG_DRIVER_CALL(flashClearFile(flashGetDefaultModule(), fileIndex));
 
 	logger->_sinks[logger->_numSinks++] = sink;
-}
-
-VOID myLogSetCallback(LogCallback callback)
-{
-	s_CurrentCallback = callback;
 }
 
 STRING parseLog(const STRING loggerName, const STRING pattern, const STRING level, const STRING format, va_list args)

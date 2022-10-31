@@ -1,6 +1,5 @@
 #include "drivers/storage/flash_driver.h"
 #include "drivers/gpio/onboard_flash_driver.h"
-#include "pico/stdlib.h"
 #include <string.h>
 #include <stdlib.h>
 

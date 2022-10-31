@@ -10,8 +10,9 @@ static MPU6050Config s_AccelerometerConfig;
 
 #define MY_LOG_MEASURE_NAME "MEASURE_LOG"
 #define MY_LOG_MEASURE_PATTERN "%c;"
-#define MY_LOG_MEASURE_INT(value) myLog(&s_MeasureLogger, "", "%d", value)
-#define MY_LOG_MEASURE_FLOAT(value) myLog(&s_MeasureLogger, "", "%f", value)
+#define MY_LOG_MEASURE_INTERNAL(value, format) myLog(&s_MeasureLogger, "", format, value)
+#define MY_LOG_MEASURE_INT(value) MY_LOG_MEASURE_INTERNAL(value, "%d")
+#define MY_LOG_MEASURE_FLOAT(value) MY_LOG_MEASURE_INTERNAL(value, "%f")
 #define MY_LOG_MEASURE_END() myLog(&s_MeasureLogger, "", "\n")
 
 VOID initializeMeasurements()
@@ -29,32 +30,25 @@ VOID initializeMeasurements()
         DRIVER_CALL(mpu6050Init(&s_AccelerometerConfig, MPU6050_I2C, MPU6050_I2C_SDA_PIN, MPU6050_I2C_SCL_PIN, MPU6050_LP_FILTER_LEVEL, MPU6050_ACCEL_SENS_LEVEL, MPU6050_GYRO_SENS_LEVEL));
     }
 
-    if (ENABLE_GPS)
-    {
-    }
+    MY_LOG_CORE_INFO("Sensors initialized!");
 }
 
 VOID takeMeasurements(MeasurementData *data_out)
 {
     BMP280Data barometerData = {0};
     MPU6050Data accelerometerData = {0};
-    INT32 componentsStatus = 0;
 
     if (ENABLE_BAROMETER)
     {
         DRIVER_CALL(bmp280Read(&s_BarometerConfig, &barometerData));
-
-        componentsStatus |= COMPONENT_BAROMETER;
     }
 
     if (ENABLE_ACCELEROMETER)
     {
         MPU6050RawData mpu6050RawData = {0};
-        
+
         DRIVER_CALL(mpu6050ReadRaw(&s_AccelerometerConfig, &mpu6050RawData));
         DRIVER_CALL(mpu6050ConvertData(&s_AccelerometerConfig, &mpu6050RawData, &accelerometerData));
-
-        componentsStatus |= COMPONENT_ACCELEROMETER;
     }
 
     MY_LOG_MEASURE_INT(barometerData.pressure);
@@ -70,6 +64,5 @@ VOID takeMeasurements(MeasurementData *data_out)
     *data_out = (MeasurementData){
         .barometerData = barometerData,
         .accelerometerData = accelerometerData,
-        .componentsStatus = componentsStatus,
     };
 }

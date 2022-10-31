@@ -1,6 +1,5 @@
 #include "drivers/accelerometer/mpu6050_driver.h"
 #include "tools/constants.h"
-#include "pico/stdlib.h"
 #include <string.h>
 #include <stdio.h>
 

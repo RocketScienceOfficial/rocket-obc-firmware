@@ -46,6 +46,8 @@
 #define MODE_RX_SINGLE 0x06
 
 #define PA_BOOST 0x80
+#define PA_OUTPUT_RFO_PIN 0
+#define PA_OUTPUT_PA_BOOST_PIN 1
 
 #define IRQ_TX_DONE_MASK 0x08
 #define IRQ_PAYLOAD_CRC_ERROR_MASK 0x20
@@ -57,7 +59,9 @@
 
 #define MAX_PKT_LENGTH 255
 
-FUNCRESULT sx1278Init(SX1278Data *data, SX1278Pinout *pinout)
+#define LORA_DEFAULT_TX_POWER 17
+
+FUNCRESULT sx1278Init(SX1278Data *data, SX1278Pinout *pinout, UINT64 frequency)
 {
     if (!data || !pinout)
     {
@@ -66,17 +70,10 @@ FUNCRESULT sx1278Init(SX1278Data *data, SX1278Pinout *pinout)
 
     data->_pinout = *pinout;
     data->_txPower = LORA_DEFAULT_TX_POWER;
-    data->_frequency = 0;
+    data->_frequency = frequency;
     data->_packetIndex = 0;
     data->_implicitHeaderMode = 0;
-    data->_onReceive = NULL;
-    data->_onTxDone = NULL;
 
-    return SUC_OK;
-}
-
-FUNCRESULT sx1278Begin(SX1278Data *data, UINT64 frequency)
-{
     gpioInitPin(data->_pinout.ss, GPIO_OUTPUT);
     gpioSetPinState(data->_pinout.ss, GPIO_HIGH);
 
@@ -103,21 +100,20 @@ FUNCRESULT sx1278Begin(SX1278Data *data, UINT64 frequency)
 
     sx1278Sleep(data);
 
-    sx1278SetFrequency(data, frequency);
+    sx1278SetFrequency(data, data->_frequency);
+    sx1278SetTxPower(data, data->_txPower);
 
     __sx1278WriteRegister(data, REG_FIFO_TX_BASE_ADDR, 0);
     __sx1278WriteRegister(data, REG_FIFO_RX_BASE_ADDR, 0);
     __sx1278WriteRegister(data, REG_LNA, __sx1278ReadRegister(data, REG_LNA) | 0x03);
     __sx1278WriteRegister(data, REG_MODEM_CONFIG_3, 0x04);
 
-    sx1278SetTxPower(data, data->_txPower);
-
     sx1278Idle(data);
 
     return SUC_OK;
 }
 
-FUNCRESULT sx1278BeginPacket(SX1278Data *data, BOOL implicitHeader)
+FUNCRESULT sx1278WriteBuffer(SX1278Data *data, const BYTE *buffer, SIZE size)
 {
     if (__sx1278IsTransmitting(data))
     {
@@ -126,39 +122,36 @@ FUNCRESULT sx1278BeginPacket(SX1278Data *data, BOOL implicitHeader)
 
     sx1278Idle(data);
 
-    if (implicitHeader)
-    {
-        __sx1278ImplicitHeaderMode(data);
-    }
-    else
-    {
-        __sx1278ExplicitHeaderMode(data);
-    }
-
+    __sx1278ExplicitHeaderMode(data);
     __sx1278WriteRegister(data, REG_FIFO_ADDR_PTR, 0);
     __sx1278WriteRegister(data, REG_PAYLOAD_LENGTH, 0);
+
+    if (size > MAX_PKT_LENGTH)
+    {
+        size = MAX_PKT_LENGTH;
+    }
+
+    for (SIZE i = 0; i < size; i++)
+    {
+        __sx1278WriteRegister(data, REG_FIFO, buffer[i]);
+    }
+
+    __sx1278WriteRegister(data, REG_PAYLOAD_LENGTH, size);
+    __sx1278WriteRegister(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_TX);
+
+    while ((__sx1278ReadRegister(data, REG_IRQ_FLAGS) & IRQ_TX_DONE_MASK) == 0)
+    {
+        sleep_ms(0);
+    }
+
+    __sx1278WriteRegister(data, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
 
     return SUC_OK;
 }
 
-FUNCRESULT sx1278EndPacket(SX1278Data *data, BOOL async)
+FUNCRESULT sx1278Available(SX1278Data *data, BOOL *available)
 {
-    if (async && data->_onTxDone)
-    {
-        __sx1278WriteRegister(data, REG_DIO_MAPPING_1, 0x40);
-    }
-
-    __sx1278WriteRegister(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_TX);
-
-    if (!async)
-    {
-        while ((__sx1278ReadRegister(data, REG_IRQ_FLAGS) & IRQ_TX_DONE_MASK) == 0)
-        {
-            sleep_ms(0);
-        }
-
-        __sx1278WriteRegister(data, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
-    }
+    *available = (__sx1278ReadRegister(data, REG_RX_NB_BYTES) - data->_packetIndex);
 
     return SUC_OK;
 }
@@ -205,95 +198,6 @@ FUNCRESULT sx1278ParsePacket(SX1278Data *data, SIZE size, SIZE *packetLengthOut)
     }
 
     *packetLengthOut = packetLength;
-
-    return SUC_OK;
-}
-
-FUNCRESULT sx1278PacketRssi(SX1278Data *data, INT32 *rssi)
-{
-    *rssi = (__sx1278ReadRegister(data, REG_PKT_RSSI_VALUE) - (data->_frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
-
-    return SUC_OK;
-}
-
-FUNCRESULT sx1278PacketSnr(SX1278Data *data, FLOAT *snr)
-{
-    *snr = ((UINT8)__sx1278ReadRegister(data, REG_PKT_SNR_VALUE)) * 0.25;
-
-    return SUC_OK;
-}
-
-FUNCRESULT sx1278PacketFrequencyError(SX1278Data *data, INT64 *error)
-{
-    INT32 freqError = 0;
-    freqError = (INT32)(__sx1278ReadRegister(data, REG_FREQ_ERROR_MSB) & 0x111);
-    freqError <<= 8L;
-    freqError += (INT32)(__sx1278ReadRegister(data, REG_FREQ_ERROR_MID));
-    freqError <<= 8L;
-    freqError += (INT32)(__sx1278ReadRegister(data, REG_FREQ_ERROR_LSB));
-
-    if (__sx1278ReadRegister(data, REG_FREQ_ERROR_MSB) & 0x1000)
-    {
-        freqError -= 524288;
-    }
-
-    const FLOAT fXtal = 32E6;
-    const FLOAT fError = (((FLOAT)(freqError) * (1L << 24)) / fXtal) * (__sx1278GetSignalBandwidth(data) / 500000.0f);
-
-    *error = (long)(fError);
-
-    return SUC_OK;
-}
-
-FUNCRESULT sx1278Rssi(SX1278Data *data, INT32 *rssi)
-{
-    *rssi = (__sx1278ReadRegister(data, REG_RSSI_VALUE) - (data->_frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
-
-    return SUC_OK;
-}
-
-FUNCRESULT sx1278Write(SX1278Data *data, BYTE byte)
-{
-    return sx1278Write_s(data, &byte, sizeof(byte));
-}
-
-FUNCRESULT sx1278Write_s(SX1278Data *data, const BYTE *buffer, SIZE size)
-{
-    SIZE currentLength = __sx1278ReadRegister(data, REG_PAYLOAD_LENGTH);
-
-    if ((currentLength + size) > MAX_PKT_LENGTH)
-    {
-        size = MAX_PKT_LENGTH - currentLength;
-    }
-
-    for (SIZE i = 0; i < size; i++)
-    {
-        __sx1278WriteRegister(data, REG_FIFO, buffer[i]);
-    }
-
-    __sx1278WriteRegister(data, REG_PAYLOAD_LENGTH, currentLength + size);
-
-    return SUC_OK;
-}
-
-FUNCRESULT sx1278Write_str(SX1278Data *data, const STRING str)
-{
-    if (str == NULL)
-    {
-        return ERR_INVALIDARG;
-    }
-
-    return sx1278Write_s(data, (const STRING)str, strlen(str));
-}
-
-FUNCRESULT sx1278Write_str_s(SX1278Data *data, const BYTE *buffer, SIZE size)
-{
-    return sx1278Write_s(data, (const BYTE *)buffer, size);
-}
-
-FUNCRESULT sx1278Available(SX1278Data *data, BOOL *available)
-{
-    *available = (__sx1278ReadRegister(data, REG_RX_NB_BYTES) - data->_packetIndex);
 
     return SUC_OK;
 }
@@ -350,9 +254,52 @@ FUNCRESULT sx1278Sleep(SX1278Data *data)
     return SUC_OK;
 }
 
+FUNCRESULT sx1278PacketRssi(SX1278Data *data, INT32 *rssi)
+{
+    *rssi = (__sx1278ReadRegister(data, REG_PKT_RSSI_VALUE) - (data->_frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
+
+    return SUC_OK;
+}
+
+FUNCRESULT sx1278PacketSnr(SX1278Data *data, FLOAT *snr)
+{
+    *snr = ((UINT8)__sx1278ReadRegister(data, REG_PKT_SNR_VALUE)) * 0.25;
+
+    return SUC_OK;
+}
+
+FUNCRESULT sx1278PacketFrequencyError(SX1278Data *data, INT64 *error)
+{
+    INT32 freqError = 0;
+    freqError = (INT32)(__sx1278ReadRegister(data, REG_FREQ_ERROR_MSB) & 0x111);
+    freqError <<= 8L;
+    freqError += (INT32)(__sx1278ReadRegister(data, REG_FREQ_ERROR_MID));
+    freqError <<= 8L;
+    freqError += (INT32)(__sx1278ReadRegister(data, REG_FREQ_ERROR_LSB));
+
+    if (__sx1278ReadRegister(data, REG_FREQ_ERROR_MSB) & 0x1000)
+    {
+        freqError -= 524288;
+    }
+
+    const FLOAT fXtal = 32E6;
+    const FLOAT fError = (((FLOAT)(freqError) * (1L << 24)) / fXtal) * (__sx1278GetSignalBandwidth(data) / 500000.0f);
+
+    *error = (long)(fError);
+
+    return SUC_OK;
+}
+
+FUNCRESULT sx1278Rssi(SX1278Data *data, INT32 *rssi)
+{
+    *rssi = (__sx1278ReadRegister(data, REG_RSSI_VALUE) - (data->_frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
+
+    return SUC_OK;
+}
+
 FUNCRESULT sx1278SetTxPower(SX1278Data *data, INT32 level)
 {
-    INT32 outputPin = PA_OUTPUT_RFO_PIN;
+    INT32 outputPin = PA_OUTPUT_PA_BOOST_PIN;
 
     if (PA_OUTPUT_RFO_PIN == outputPin)
     {
@@ -610,38 +557,6 @@ VOID __sx1278ImplicitHeaderMode(SX1278Data *data)
     __sx1278WriteRegister(data, REG_MODEM_CONFIG_1, __sx1278ReadRegister(data, REG_MODEM_CONFIG_1) | 0x01);
 }
 
-void __sx1278HandleDio0Rise(SX1278Data *data)
-{
-    int irqFlags = __sx1278ReadRegister(data, REG_IRQ_FLAGS);
-
-    __sx1278WriteRegister(data, REG_IRQ_FLAGS, irqFlags);
-    __sx1278WriteRegister(data, REG_IRQ_FLAGS, irqFlags);
-
-    if ((irqFlags & IRQ_PAYLOAD_CRC_ERROR_MASK) == 0)
-    {
-        if ((irqFlags & IRQ_RX_DONE_MASK) != 0)
-        {
-            data->_packetIndex = 0;
-
-            int packetLength = data->_implicitHeaderMode ? __sx1278ReadRegister(data, REG_PAYLOAD_LENGTH) : __sx1278ReadRegister(data, REG_RX_NB_BYTES);
-
-            __sx1278WriteRegister(data, REG_FIFO_ADDR_PTR, __sx1278ReadRegister(data, REG_FIFO_RX_CURRENT_ADDR));
-
-            if (data->_onReceive)
-            {
-                data->_onReceive(packetLength);
-            }
-        }
-        else if ((irqFlags & IRQ_TX_DONE_MASK) != 0)
-        {
-            if (data->_onTxDone)
-            {
-                data->_onTxDone();
-            }
-        }
-    }
-}
-
 BOOL __sx1278IsTransmitting(SX1278Data *data)
 {
     if ((__sx1278ReadRegister(data, REG_OP_MODE) & MODE_TX) == MODE_TX)
@@ -721,7 +636,7 @@ BYTE __sx1278SingleTransfer(SX1278Data *data, BYTE address, BYTE value)
     gpioSetPinState(data->_pinout.ss, GPIO_LOW);
 
     spiWriteBlocking(data->_pinout.spi, &address, 1);
-    spiReadBlocking(data->_pinout.spi, value, &response, 1);
+    spiWriteReadBlocking(data->_pinout.spi, &value, &response, 1);
 
     gpioSetPinState(data->_pinout.ss, GPIO_HIGH);
 

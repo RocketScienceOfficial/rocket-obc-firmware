@@ -42,7 +42,7 @@ typedef struct ConsoleTokens
  *
  * @return ASCII Character if available, 0 otherwise.
  */
-UINT32 consoleCheckInput();
+INT32 consoleCheckInput();
 
 /**
  * @brief Processess the character.
@@ -53,7 +53,7 @@ UINT32 consoleCheckInput();
  *
  * @return Result code.
  */
-FUNCRESULT consoleInputProcessCharacter(UINT32 c, ConsoleInput *input, ConsoleTokens *tokens);
+FUNCRESULT consoleInputProcessCharacter(INT32 c, ConsoleInput *input, ConsoleTokens *tokens);
 
 /**
  * @brief Tokenizes the input.

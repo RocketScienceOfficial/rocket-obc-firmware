@@ -9,6 +9,8 @@ VOID consoleLog(const STRING format, ...)
     va_start(ap, format);
     vprintf(format, ap);
     va_end(ap);
+
+    fflush(stdout);
 }
 
 VOID consoleLogError(const STRING format, ...)
@@ -18,4 +20,6 @@ VOID consoleLogError(const STRING format, ...)
     va_start(ap, format);
     vprintf(format, ap);
     va_end(ap);
+
+    fflush(stdout);
 }

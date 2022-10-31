@@ -1,6 +1,5 @@
 #include "drivers/barometer/bmp280_driver.h"
 #include "pico/stdlib.h"
-#include <math.h>
 
 #define BMP280_ADDR _u(0x76)
 #define BMP280_REG_CONFIG _u(0xF5)
@@ -58,7 +57,7 @@ void bmp280ReadRaw(BMP280Config *config, INT32 *temp, INT32 *pressure)
 {
     BYTE buf[6];
     BYTE reg = BMP280_REG_PRESSURE_MSB;
-    i2cWriteBlocking(getI2C(config), BMP280_ADDR, &reg, 1, TRUE);
+    i2cWriteBlocking(config->_i2c, BMP280_ADDR, &reg, 1, TRUE);
     i2cReadBlocking(config->_i2c, BMP280_ADDR, buf, 6, FALSE);
 
     *pressure = (buf[0] << 12) | (buf[1] << 4) | (buf[2] >> 4);

@@ -26,7 +26,7 @@ typedef struct ParityData
  * @param key Key to encrypt or decrypt.
  * @param keySize Key size.
  */
-BOOL encryptDecrypt(BYTE *buffer, SIZE size, const BYTE *key, SIZE keySize);
+BOOL encryptDecryptXOR(BYTE *buffer, SIZE size, const BYTE *key, SIZE keySize);
 
 /**
  * @brief Calulates parity rows.

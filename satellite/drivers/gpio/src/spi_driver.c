@@ -118,9 +118,6 @@ FUNCRESULT spiInitPins(SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumbe
     gpioSetPinFunction(miso, GPIO_FUNCTION_SPI);
     gpioSetPinFunction(mosi, GPIO_FUNCTION_SPI);
     gpioSetPinFunction(sck, GPIO_FUNCTION_SPI);
-    gpioPullUpPin(miso);
-    gpioPullUpPin(mosi);
-    gpioPullUpPin(sck);
 
     gpioInitPin(cs, GPIO_OUTPUT);
     gpioSetPinState(cs, GPIO_HIGH);
@@ -135,7 +132,7 @@ FUNCRESULT spiWriteBlocking(SPIInstance spi, BYTE *data, SIZE size)
         return ERR_INVALIDARG;
     }
 
-    if (spiWriteBlocking(getSPI(spi), data, size) < 0)
+    if (spi_write_blocking(getSPI(spi), data, size) < 0)
     {
         return ERR_FAIL;
     }
@@ -151,6 +148,21 @@ FUNCRESULT spiReadBlocking(SPIInstance spi, BYTE repeatedTXData, BYTE *destinati
     }
 
     if (spi_read_blocking(getSPI(spi), repeatedTXData, destination, size) < 0)
+    {
+        return ERR_FAIL;
+    }
+
+    return SUC_OK;
+}
+
+FUNCRESULT spiWriteReadBlocking(SPIInstance spi, BYTE *data, BYTE *destination, SIZE size)
+{
+    if (!spiCheckInstance(spi) || !destination)
+    {
+        return ERR_INVALIDARG;
+    }
+
+    if (spi_write_read_blocking(getSPI(spi), data, destination, size) < 0)
     {
         return ERR_FAIL;
     }
