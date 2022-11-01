@@ -301,7 +301,7 @@ FUNCRESULT sx1278SetTxPower(SX1278Data *data, INT32 level)
 {
     INT32 outputPin = PA_OUTPUT_PA_BOOST_PIN;
 
-    if (PA_OUTPUT_RFO_PIN == outputPin)
+    if (outputPin == PA_OUTPUT_RFO_PIN)
     {
         if (level < 0)
         {

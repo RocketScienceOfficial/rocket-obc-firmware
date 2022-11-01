@@ -4,10 +4,12 @@ set(LIB_GENERAL_NAME "${LIB_NAME}_lib")
 add_library(${LIB_GENERAL_NAME} STATIC
     include/${LIB_NAME}/constants.h
     include/${LIB_NAME}/cryptography.h
+    include/${LIB_NAME}/filters.h
     include/${LIB_NAME}/multithreading.h
     include/${LIB_NAME}/time_tracker.h
     include/${LIB_NAME}/typedefs.h
     src/cryptography.c
+    src/filters.c
     src/multithreading.c
     src/time_tracker.c
     )
