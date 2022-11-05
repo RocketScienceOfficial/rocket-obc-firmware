@@ -1,8 +1,8 @@
 #include "drivers/battery/battery_driver.h"
 
-FUNCRESULT batteryInit(ADCInput input, BatteryData *data, VoltageLevel minVolts, VoltageLevel maxVolts)
+FUNCRESULT batteryInit(BatteryConfig *config, ADCInput input, VoltageLevel minVolts, VoltageLevel maxVolts)
 {
-    if (!data)
+    if (!config)
     {
         return ERR_INVALIDARG;
     }
@@ -12,22 +12,28 @@ FUNCRESULT batteryInit(ADCInput input, BatteryData *data, VoltageLevel minVolts,
         return ERR_FAIL;
     }
 
-    data->_minVolts = minVolts;
-    data->_maxVolts = maxVolts;
+    config->_input = input;
+    config->_minVolts = minVolts;
+    config->_maxVolts = maxVolts;
 
     return SUC_OK;
 }
 
-FUNCRESULT batteryReadPercent(ADCInput input, BatteryData *data, FLOAT *percentage)
+FUNCRESULT batteryReadPercent(BatteryConfig *config, FLOAT *percentage)
 {
+    if (!config || !percentage)
+    {
+        return ERR_INVALIDARG;
+    }
+
     VoltageLevel voltage = 0;
 
-    if (FUNCFAILED(adcRead(input, &voltage)))
+    if (FUNCFAILED(adcRead(config->_input, &voltage)))
     {
         return ERR_FAIL;
     }
 
-    *percentage = 100 / (data->_maxVolts - data->_minVolts) * (voltage - data->_minVolts);
+    *percentage = 100 / (config->_maxVolts - config->_minVolts) * (voltage - config->_minVolts);
 
     return SUC_OK;
 }

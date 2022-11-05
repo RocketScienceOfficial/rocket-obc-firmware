@@ -3,7 +3,11 @@ set(LIB_NAME display)
 set(LIB_GENERAL_NAME "${MODULE_NAME}_${LIB_NAME}_lib")
 
 add_library(${LIB_GENERAL_NAME} STATIC
+    include/${MODULE_NAME}/${LIB_NAME}/lcd_16x2_i2c_driver.h
+    include/${MODULE_NAME}/${LIB_NAME}/ssd1306_driver.h
     include/${MODULE_NAME}/${LIB_NAME}/vga_driver.h
+    src/lcd_16x2_i2c_driver.c
+    src/ssd1306_driver.c
     src/vga_driver.c
     )
 

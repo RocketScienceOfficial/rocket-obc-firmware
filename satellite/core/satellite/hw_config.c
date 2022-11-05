@@ -26,6 +26,7 @@ socket, which SPI it is driven by, and how it is wired.
 */
 
 #include "pinout.h"
+#include "config.h"
 
 #include <string.h>
 //

@@ -7,3 +7,5 @@ sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-n
 git submodule update --init --recursive
 
 ./scripts/build.sh
+
+pip install -r ./scripts/requirements.txt

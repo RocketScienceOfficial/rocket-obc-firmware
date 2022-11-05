@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+typedef int8_t INT8;
 typedef uint8_t UINT8;
 typedef UINT8 BYTE;
 typedef char CHAR;

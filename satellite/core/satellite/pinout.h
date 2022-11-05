@@ -16,7 +16,6 @@
 #define SD_CARD_MOSI_GPIO 19
 #define SD_CARD_SCK_GPIO 18
 #define SD_CARD_CS_GPIO 17
-#define SD_CARD_FREQ_KHZ 1000
 
 #define SX1278_SPI 1
 #define SX1278_MISO_GPIO 12

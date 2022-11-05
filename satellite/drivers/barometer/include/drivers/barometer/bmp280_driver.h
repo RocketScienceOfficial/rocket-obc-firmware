@@ -5,23 +5,14 @@
 #include "drivers/gpio/i2c_driver.h"
 
 /**
- * @brief Barometer data
+ * @brief Configuration params for barometer. INTERNAL USE!
  */
-typedef struct BMP280Data
-{
-    FLOAT temperature;
-    INT32 pressure;
-} BMP280Data;
-
-/**
- * @brief Configuration params for barometer
- */
-typedef struct BMP280CalibParams
+typedef struct _BMP280CalibParams
 {
     UINT16 dig_t1;
     INT16 dig_t2;
     INT16 dig_t3;
-    
+
     UINT16 dig_p1;
     INT16 dig_p2;
     INT16 dig_p3;
@@ -31,7 +22,7 @@ typedef struct BMP280CalibParams
     INT16 dig_p7;
     INT16 dig_p8;
     INT16 dig_p9;
-} BMP280CalibParams;
+} _BMP280CalibParams;
 
 /**
  * @brief Barometer config data. All changes are done internally, so keep it just for reference!
@@ -39,8 +30,17 @@ typedef struct BMP280CalibParams
 typedef struct BMP280Config
 {
     I2CInstance _i2c;
-    BMP280CalibParams _calibParams;
+    _BMP280CalibParams _calibParams;
 } BMP280Config;
+
+/**
+ * @brief Barometer data
+ */
+typedef struct BMP280Data
+{
+    FLOAT temperature;
+    INT32 pressure;
+} BMP280Data;
 
 /**
  * @brief Initialize the barometer

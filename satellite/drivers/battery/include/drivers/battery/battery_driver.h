@@ -5,38 +5,31 @@
 #include "drivers/gpio/adc_driver.h"
 
 /**
- * @brief Data for battery use.
+ * @brief Battery config data.
  */
-typedef struct BatteryData
+typedef struct BatteryConfig
 {
-    /**
-     * @brief Minimum voltage - 0%. INTERNAL USE!
-     */
-    VoltageLevel _minVolts;
-
-    /**
-     * @brief Maximum voltage - 100%. INTERNAL USE!
-     */
-    VoltageLevel _maxVolts;
-} BatteryData;
+    ADCInput _input;        /** ADC input. INTERNAL USE! */
+    VoltageLevel _minVolts; /** Minimum voltage - 0%. INTERNAL USE! */
+    VoltageLevel _maxVolts; /** Maximum voltage - 100%. INTERNAL USE! */
+} BatteryConfig;
 
 /**
  * @brief Initialize battery.
- * 
+ *
+ * @param config Battery data pointer.
  * @param input ADC input.
- * @param data Battery data pointer.
  * @param minVolts Minimum volts of battery - 0%.
  * @param maxVolts Maximum volts of battery - 100%.
  * @return Result code.
  */
-FUNCRESULT batteryInit(ADCInput input, BatteryData *data, VoltageLevel minVolts, VoltageLevel maxVolts);
+FUNCRESULT batteryInit(BatteryConfig *config, ADCInput input, VoltageLevel minVolts, VoltageLevel maxVolts);
 
 /**
  * @brief Read battery percentage.
- * 
- * @param input ADC input.
- * @param data Battery data pointer.
- * @param percentage percentage of battery.
+ *
+ * @param config Battery data pointer.
+ * @param percentage Percentage of battery.
  * @return Result code.
  */
-FUNCRESULT batteryReadPercent(ADCInput input, BatteryData *data, FLOAT *percentage);
+FUNCRESULT batteryReadPercent(BatteryConfig *config, FLOAT *percentage);

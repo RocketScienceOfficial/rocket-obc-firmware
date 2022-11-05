@@ -19,4 +19,5 @@ typedef struct ExpFilterData
 } ExpFilterData;
 
 VOID filterAvg(AvgFilterData *data, FLOAT *v);
+VOID filterAvgWeight(AvgFilterData *data, FLOAT *v);
 VOID filterExp(ExpFilterData *data, FLOAT *v, FLOAT alpha, FLOAT beta);

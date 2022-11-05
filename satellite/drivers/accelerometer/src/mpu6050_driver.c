@@ -1,7 +1,5 @@
 #include "drivers/accelerometer/mpu6050_driver.h"
 #include "tools/constants.h"
-#include <string.h>
-#include <stdio.h>
 
 #define MPU6050_ADDR 0x68
 #define ACCEL_LBS_0 16384.0
@@ -88,12 +86,12 @@ FUNCRESULT mpu6050Init(MPU6050Config *config, I2CInstance i2c, PinNumber sda, Pi
         return ERR_INVALIDARG;
     }
 
-    memset(config, 0, sizeof(MPU6050Config));
-
     config->_i2c = i2c;
 
-    i2cInitAll(config->_i2c, 400 * 1000);
-    i2cInitPins(config->_i2c, sda, scl);
+    if (FUNCFAILED(i2cInitAll(config->_i2c, 400 * 1000)) || FUNCFAILED(i2cInitPins(config->_i2c, sda, scl)))
+    {
+        return ERR_FAIL;
+    }
 
     BOOL result;
 

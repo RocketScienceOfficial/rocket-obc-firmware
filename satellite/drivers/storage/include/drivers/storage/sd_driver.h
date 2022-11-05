@@ -13,20 +13,9 @@
  */
 typedef struct _SDFile
 {
-    /**
-     * @brief File name.
-     */
-    STRING _name;
-
-    /**
-     * @brief File instance
-     */
-    FIL _file;
-
-    /**
-     * @brief Is file opened
-     */
-    BOOL _isOpened;
+    STRING _name;   /** File name. */
+    FIL _file;      /** File instance. */
+    BOOL _isOpened; /** Is file opened. */
 } _SDFile;
 
 /**
@@ -34,24 +23,10 @@ typedef struct _SDFile
  */
 typedef struct SDCard
 {
-    /**
-     * @brief Is SD card initialized
-     */
-    BOOL _isInitialized;
-    /**
-     * @brief SD Card instance.
-     */
-    sd_card_t *_sd;
-
-    /**
-     * @brief SD Card files.
-     */
-    _SDFile _files[SD_FILES_MAX_COUNT];
-
-    /**
-     * @brief SD Card files count.
-     */
-    SIZE _filesCount;
+    BOOL _isInitialized;                /** Is SD card initialized. */
+    sd_card_t *_sd;                     /** SD Card instance. */
+    _SDFile _files[SD_FILES_MAX_COUNT]; /** SD Card files. */
+    SIZE _filesCount;                   /** SD Card files count. */
 } SDCard;
 
 /**

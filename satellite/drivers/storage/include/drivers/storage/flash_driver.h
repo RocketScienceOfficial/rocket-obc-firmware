@@ -9,10 +9,7 @@
  */
 typedef struct _FlashFile
 {
-    /**
-     * @brief File size.
-     */
-    SIZE _size;
+    SIZE _size; /** File size. */
 
 } _FlashFile;
 
@@ -21,15 +18,8 @@ typedef struct _FlashFile
  */
 typedef struct _FlashFileBuffer
 {
-    /**
-     * @brief Buffer to write (Flash only allows to write 256 byte pages!).
-     */
-    BYTE *_buffer;
-
-    /**
-     * @brief Buffer size.
-     */
-    SIZE _bufferSize;
+    BYTE *_buffer;    /** Buffer to write (Flash only allows to write 256 byte pages!). */
+    SIZE _bufferSize; /** Buffer size. */
 } _FlashFileBuffer;
 
 /**
@@ -37,15 +27,8 @@ typedef struct _FlashFileBuffer
  */
 typedef struct _FlashFileSystem
 {
-    /**
-     * @brief Is file system initialized.
-     */
-    UINT32 _initializationState;
-
-    /**
-     * @brief Flash files.
-     */
-    _FlashFile _files[FLASH_FILES_COUNT];
+    UINT32 _initializationState;          /** Is file system initialized. */
+    _FlashFile _files[FLASH_FILES_COUNT]; /** Flash files. */
 } _FlashFileSystem;
 
 /**
@@ -53,20 +36,9 @@ typedef struct _FlashFileSystem
  */
 typedef struct FlashModule
 {
-    /**
-     * @brief Is Flash module initialized.
-     */
-    BOOL _isInitialized;
-
-    /**
-     * @brief Flash files.
-     */
-    _FlashFileSystem _fileSystem;
-
-    /**
-     * @brief Flash files buffers.
-     */
-    _FlashFileBuffer _filesBuffers[FLASH_FILES_COUNT];
+    BOOL _isInitialized;                               /** Is Flash module initialized. */
+    _FlashFileSystem _fileSystem;                      /** Flash files. */
+    _FlashFileBuffer _filesBuffers[FLASH_FILES_COUNT]; /** Flash files buffers. */
 } FlashModule;
 
 /**

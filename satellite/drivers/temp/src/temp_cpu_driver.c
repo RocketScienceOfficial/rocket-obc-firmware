@@ -16,6 +16,11 @@ FUNCRESULT cpuTempInit()
 
 FUNCRESULT cpuTempReadTemp(FLOAT *temp)
 {
+    if (!temp)
+    {
+        return ERR_INVALIDARG;
+    }
+
     VoltageLevel voltage = 0;
 
     if (FUNCFAILED(adcRead(ADC_TEMP_INPUT, &voltage)))

@@ -111,7 +111,7 @@ FUNCRESULT i2cReadTimeout(I2CInstance i2c, BYTE address, BYTE *destination, SIZE
     return SUC_OK;
 }
 
-FUNCRESULT i2cWriteBlocking(I2CInstance i2c, BYTE address, BYTE *data, SIZE size, BOOL nostop)
+FUNCRESULT i2cWriteBlocking(I2CInstance i2c, BYTE address, const BYTE *data, SIZE size, BOOL nostop)
 {
     if (!i2cCheckInstance(i2c) || !data)
     {

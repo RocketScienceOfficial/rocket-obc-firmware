@@ -91,7 +91,7 @@ FUNCRESULT spiInitPins(SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumbe
  * @param size Size of data.
  * @return Result code.
  */
-FUNCRESULT spiWriteBlocking(SPIInstance spi, BYTE *data, SIZE size);
+FUNCRESULT spiWriteBlocking(SPIInstance spi, const BYTE *data, SIZE size);
 
 /**
  * @brief Read from SPI with blocking.
@@ -113,7 +113,7 @@ FUNCRESULT spiReadBlocking(SPIInstance spi, BYTE repeatedTXData, BYTE *destinati
  * @param size Size of data.
  * @return Result code.
  */
-FUNCRESULT spiWriteReadBlocking(SPIInstance spi, BYTE *data, BYTE *destination, SIZE size);
+FUNCRESULT spiWriteReadBlocking(SPIInstance spi, const BYTE *data, BYTE *destination, SIZE size);
 
 /**
  * @brief Check if SPI device is valid.

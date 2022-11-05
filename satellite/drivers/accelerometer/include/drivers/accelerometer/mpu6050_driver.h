@@ -5,6 +5,16 @@
 #include "drivers/gpio/i2c_driver.h"
 
 /**
+ * @brief Accelerometer config data. All changes are done internally, so keep it just for reference!
+ */
+typedef struct MPU6050Config
+{
+    I2CInstance _i2c;
+    FLOAT _accelLBS;
+    FLOAT _gryoLBS;
+} MPU6050Config;
+
+/**
  * @brief Raw accelerometer data
  */
 typedef struct MPU6050RawData
@@ -31,16 +41,6 @@ typedef struct MPU6050Data
     FLOAT rot_z;
     FLOAT temperature;
 } MPU6050Data;
-
-/**
- * @brief Accelerometer config data. All changes are done internally, so keep it just for reference!
- */
-typedef struct MPU6050Config
-{
-    I2CInstance _i2c;
-    FLOAT _accelLBS;
-    FLOAT _gryoLBS;
-} MPU6050Config;
 
 /**
  * @brief Initialize the accelerometer

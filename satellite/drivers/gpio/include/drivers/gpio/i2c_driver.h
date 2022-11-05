@@ -100,7 +100,7 @@ FUNCRESULT i2cReadTimeout(I2CInstance i2c, BYTE address, BYTE *destination, SIZE
  * @param nostop No stop.
  * @return Result code.
  */
-FUNCRESULT i2cWriteBlocking(I2CInstance i2c, BYTE address, BYTE *data, SIZE size, BOOL nostop);
+FUNCRESULT i2cWriteBlocking(I2CInstance i2c, BYTE address, const BYTE *data, SIZE size, BOOL nostop);
 
 /**
  * @brief Read from I2C with blocking.

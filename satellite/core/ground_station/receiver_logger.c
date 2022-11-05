@@ -21,13 +21,14 @@ VOID initializeReceiverLogger()
 VOID logReceiverData(ReceiverSendData *data)
 {
     MY_LOG_RECEIVER_DATA_BEGIN();
+    MY_LOG_RECEIVER_DATA_FLOAT(data->measurement.barometerData.temperature);
+    MY_LOG_RECEIVER_DATA_INT(data->measurement.barometerData.pressure);
     MY_LOG_RECEIVER_DATA_FLOAT(data->measurement.accelerometerData.accel_x);
     MY_LOG_RECEIVER_DATA_FLOAT(data->measurement.accelerometerData.accel_y);
     MY_LOG_RECEIVER_DATA_FLOAT(data->measurement.accelerometerData.accel_z);
     MY_LOG_RECEIVER_DATA_FLOAT(data->measurement.accelerometerData.rot_x);
     MY_LOG_RECEIVER_DATA_FLOAT(data->measurement.accelerometerData.rot_y);
     MY_LOG_RECEIVER_DATA_FLOAT(data->measurement.accelerometerData.rot_z);
-    MY_LOG_RECEIVER_DATA_INT(data->measurement.barometerData.pressure);
-    MY_LOG_RECEIVER_DATA_FLOAT(data->measurement.barometerData.temperature);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->measurement.accelerometerData.temperature);
     MY_LOG_RECEIVER_DATA_END();
 }

@@ -125,7 +125,7 @@ FUNCRESULT spiInitPins(SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumbe
     return SUC_OK;
 }
 
-FUNCRESULT spiWriteBlocking(SPIInstance spi, BYTE *data, SIZE size)
+FUNCRESULT spiWriteBlocking(SPIInstance spi, const BYTE *data, SIZE size)
 {
     if (!spiCheckInstance(spi) || !data)
     {
@@ -155,7 +155,7 @@ FUNCRESULT spiReadBlocking(SPIInstance spi, BYTE repeatedTXData, BYTE *destinati
     return SUC_OK;
 }
 
-FUNCRESULT spiWriteReadBlocking(SPIInstance spi, BYTE *data, BYTE *destination, SIZE size)
+FUNCRESULT spiWriteReadBlocking(SPIInstance spi, const BYTE *data, BYTE *destination, SIZE size)
 {
     if (!spiCheckInstance(spi) || !destination)
     {
