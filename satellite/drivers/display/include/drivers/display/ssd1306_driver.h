@@ -132,7 +132,7 @@ FUNCRESULT ssd1306DrawPixel(SSD1306Data *config, UINT32 x, UINT32 y);
  * @param y2 Y position of end point.
  * @return Result code.
  */
-FUNCRESULT ssd1306DrawLine(SSD1306Data *config, INT32 x1, INT32 y1, INT32 x2, INT32 y2);
+FUNCRESULT ssd1306DrawLine(SSD1306Data *config, UINT32 x1, UINT32 y1, UINT32 x2, UINT32 y2);
 
 /**
  * @brief Draw filled square at given position with given size.

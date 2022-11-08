@@ -3,7 +3,7 @@
 #include <string.h>
 #include "pico/stdlib.h"
 #include "config.h"
-#include "radio_controller.h"
+#include "pinout.h"
 #include "measurements_manager.h"
 #include "mission_control.h"
 #include "shared/commands_utils.h"
@@ -27,7 +27,15 @@ int main()
 
     MY_LOG_CORE_INFO("Initializing...");
 
-    SX1278Pinout loraPinout = getRadioPinout();
+    SX1278Pinout loraPinout = (SX1278Pinout){
+        .spi = SX1278_SPI,
+        .sck = SX1278_SCK_GPIO,
+        .miso = SX1278_MISO_GPIO,
+        .mosi = SX1278_MOSI_GPIO,
+        .cs = SX1278_CS_GPIO,
+        .ss = SX1278_SS_GPIO,
+        .reset = SX1278_RESET_GPIO,
+    };
 
     initializeCommands();
     initializeRadio(&loraPinout);
@@ -84,7 +92,7 @@ int main()
 
     SDCard sdCard = {0};
 
-    sdInit(&sdCard);
+    sdInit(&sdCard, 0);
     sdInitFile(&sdCard, LOG_FILE_NAME);
     sdClearFile(&sdCard, LOG_FILE_NAME);
     sdBegin(&sdCard, LOG_FILE_NAME);

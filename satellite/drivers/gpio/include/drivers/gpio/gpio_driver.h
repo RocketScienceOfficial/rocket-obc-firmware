@@ -50,6 +50,14 @@ typedef enum GPIOFunction
 #define INVALID_PIN_NUMBER 0xFFFFFFFF
 
 /**
+ * @brief Checks if pin is valid.
+ *
+ * @param pin Pin number.
+ * @return TRUE if pin is valid, FALSE otherwise.
+ */
+BOOL gpioIsPinValid(PinNumber pin);
+
+/**
  * @brief Initialize GPIO pin.
  *
  * @param pin Pin to initialize.
@@ -66,6 +74,15 @@ FUNCRESULT gpioInitPin(PinNumber pin, GPIODirection dir);
  * @return Result code.
  */
 FUNCRESULT gpioSetPinState(PinNumber pin, GPIOState state);
+
+/**
+ * @brief Gety state of GPIO pin.
+ *
+ * @param pin Pin to get state of.
+ * @param state State to get.
+ * @return Result code.
+ */
+FUNCRESULT gpioGetPinState(PinNumber pin, GPIOState *state);
 
 /**
  * @brief Set function of GPIO pin.

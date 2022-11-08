@@ -15,15 +15,8 @@ typedef void (*CommandFunction)(STRING *args, SIZE argc);
  */
 typedef struct CommandData
 {
-    /**
-     * @brief Command name.
-     */
-    STRING name;
-
-    /**
-     * @brief Command function.
-     */
-    CommandFunction func;
+    STRING name;          /** Command name. */
+    CommandFunction func; /** Command function. */
 } CommandData;
 
 /**
@@ -31,22 +24,14 @@ typedef struct CommandData
  */
 typedef struct CommandArgs
 {
-    /**
-     * @brief Command arguments.
-     */
-    STRING *args;
-
-    /**
-     * @brief Command arguments count.
-     */
-    SIZE size;
+    STRING *args; /** Command arguments. */
+    SIZE size;    /** Command arguments count. */
 } CommandArgs;
 
 /**
  * @brief Register command.
  *
  * @param command Command to register.
- *
  * @return True if command was registered successfully, false otherwise.
  */
 BOOL registerCommand(CommandData *command);
@@ -66,7 +51,6 @@ CommandData *parseCommand(STRING *tokens, SIZE tokensSize, CommandArgs *args_out
  *
  * @param command Command to execute.
  * @param args Args for command.
- *
  * @return True if command was executed successfully, false otherwise.
  */
 BOOL executeCommand(CommandData *command, CommandArgs *args);
@@ -85,5 +69,6 @@ BOOL checkArgsCount(SIZE expectedCount, SIZE actualCount, STRING *output_ptr);
  * @brief Clears command args.
  *
  * @param args Args to clear.
+ * @return True if args were cleared successfully, false otherwise.
  */
 BOOL commandClearArgs(CommandArgs *args);

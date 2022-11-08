@@ -5,7 +5,6 @@ add_executable(${EXE_NAME}
     hw_config.c
     measurements_manager.c
     mission_control.c
-    radio_controller.c
 )
 
 target_link_libraries(${EXE_NAME} PRIVATE core_shared_lib)

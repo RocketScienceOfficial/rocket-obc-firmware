@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
+
 include(pico-sdk/pico_sdk_init.cmake)
 
 project(trash_can C CXX ASM)

@@ -9,7 +9,38 @@ static const FLOAT MG995_MAX_ANGLE_DEG = 180.0f;
 
 FUNCRESULT mg995Init(PinNumber pin)
 {
-    return pwmInit(pin, MG995_FREQ_HZ);
+    if (FUNCFAILED(pwmInit(pin, MG995_FREQ_HZ)))
+    {
+        return ERR_FAIL;
+    }
+
+    BOOL connected = FALSE;
+
+    if (FUNCFAILED(mg995Check(pin, &connected)))
+    {
+        return ERR_UNEXPECTED;
+    }
+
+    if (!connected)
+    {
+        return ERR_ACCESSDENIED;
+    }
+
+    return SUC_OK;
+}
+
+FUNCRESULT mg995Check(PinNumber pin, BOOL *result)
+{
+    GPIOState state = GPIO_LOW;
+
+    if (FUNCFAILED(gpioGetPinState(pin, &state)))
+    {
+        return ERR_UNEXPECTED;
+    }
+
+    *result = state == GPIO_HIGH;
+
+    return SUC_OK;
 }
 
 FUNCRESULT mg995RotateAngle(PinNumber pin, FLOAT destAngleDegrees)

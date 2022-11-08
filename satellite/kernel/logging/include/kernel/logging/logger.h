@@ -20,20 +20,9 @@ typedef enum LoggerSinkType
  */
 typedef struct LogSinkData
 {
-    /**
-     * @brief Pattern of sink.
-     */
-    STRING _pattern;
-
-    /**
-     * @brief Type of sink.
-     */
-    LoggerSinkType _type;
-
-    /**
-     * @brief Custom data of sink.
-     */
-    VOID *_customData;
+    STRING _pattern;      /** Pattern of sink. */
+    LoggerSinkType _type; /** Type of sink. */
+    VOID *_customData;    /** Custom data of sink. */
 } LogSinkData;
 
 /**
@@ -41,21 +30,9 @@ typedef struct LogSinkData
  */
 typedef struct Logger
 {
-    /**
-     * @brief Name of logger.
-     */
-    STRING _name;
-
-    /**
-     * @brief Sinks of logger.
-     *
-     */
-    LogSinkData _sinks[MAX_LOGGER_SINKS];
-
-    /**
-     * @brief Number of sinks.
-     */
-    SIZE _numSinks;
+    STRING _name;                         /** Name of logger. */
+    LogSinkData _sinks[MAX_LOGGER_SINKS]; /** Sinks of logger. */
+    SIZE _numSinks;                       /** Number of sinks. */
 } Logger;
 
 /**

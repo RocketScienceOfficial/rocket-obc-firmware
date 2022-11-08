@@ -15,7 +15,7 @@ static _SDFile *__getSDFileByName(SDCard *sdCard, const STRING name)
     return NULL;
 }
 
-FUNCRESULT sdInit(SDCard *sdCard)
+FUNCRESULT sdInit(SDCard *sdCard, PinNumber checkPin)
 {
     if (!sdCard)
     {
@@ -23,6 +23,18 @@ FUNCRESULT sdInit(SDCard *sdCard)
     }
 
     if (sdCard->_isInitialized)
+    {
+        return ERR_ACCESSDENIED;
+    }
+
+    BOOL connected = FALSE;
+
+    if (FUNCFAILED(sdCheck(checkPin, &connected)))
+    {
+        return ERR_UNEXPECTED;
+    }
+
+    if (!connected)
     {
         return ERR_ACCESSDENIED;
     }
@@ -44,6 +56,20 @@ FUNCRESULT sdInit(SDCard *sdCard)
     }
 
     sdCard->_isInitialized = TRUE;
+
+    return SUC_OK;
+}
+
+FUNCRESULT sdCheck(PinNumber pin, BOOL *result)
+{
+    GPIOState state = GPIO_LOW;
+
+    if (FUNCFAILED(gpioGetPinState(pin, &state)))
+    {
+        return ERR_UNEXPECTED;
+    }
+
+    *result = state == GPIO_HIGH;
 
     return SUC_OK;
 }

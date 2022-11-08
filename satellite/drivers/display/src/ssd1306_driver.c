@@ -486,9 +486,9 @@ static const BYTE font_8x5[] =
         0x02,
 };
 
-static void __swap(INT32 *a, INT32 *b)
+static void __swap(UINT32 *a, UINT32 *b)
 {
-    INT32 *t = a;
+    UINT32 *t = a;
 
     *a = *b;
     *b = *t;
@@ -653,7 +653,7 @@ FUNCRESULT ssd1306DrawPixel(SSD1306Data *config, UINT32 x, UINT32 y)
     return SUC_OK;
 }
 
-FUNCRESULT ssd1306DrawLine(SSD1306Data *config, INT32 x1, INT32 y1, INT32 x2, INT32 y2)
+FUNCRESULT ssd1306DrawLine(SSD1306Data *config, UINT32 x1, UINT32 y1, UINT32 x2, UINT32 y2)
 {
     if (x1 > x2)
     {
@@ -668,7 +668,7 @@ FUNCRESULT ssd1306DrawLine(SSD1306Data *config, INT32 x1, INT32 y1, INT32 x2, IN
             __swap(&y1, &y2);
         }
 
-        for (INT32 i = y1; i <= y2; ++i)
+        for (UINT32 i = y1; i <= y2; ++i)
         {
             if (FUNCFAILED(ssd1306DrawPixel(config, x1, i)))
             {
@@ -678,11 +678,11 @@ FUNCRESULT ssd1306DrawLine(SSD1306Data *config, INT32 x1, INT32 y1, INT32 x2, IN
     }
     else
     {
-        FLOAT m = (FLOAT)(y2 - y1) / (FLOAT)(x2 - x1);
+        FLOAT m = (FLOAT)((INT32)y2 - (INT32)y1) / (FLOAT)((INT32)x2 - (INT32)x1);
 
-        for (INT32 i = x1; i <= x2; ++i)
+        for (UINT32 i = x1; i <= x2; ++i)
         {
-            FLOAT y = m * (FLOAT)(i - x1) + (FLOAT)y1;
+            FLOAT y = m * (FLOAT)((INT32)i - (INT32)x1) + (FLOAT)y1;
 
             if (FUNCFAILED(ssd1306DrawPixel(config, i, (UINT32)y)))
             {

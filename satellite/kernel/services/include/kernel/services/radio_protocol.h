@@ -9,20 +9,9 @@
  */
 typedef struct _RadioHeader
 {
-    /**
-     * @brief Parity Size.
-     */
-    SIZE _paritySize;
-
-    /**
-     * @brief Parity.
-     */
-    BYTE *_parity;
-
-    /**
-     * @brief Radio packet signature.
-     */
-    BYTE _signature[RADIO_PACKET_SIGNATURE_LENGTH];
+    SIZE _paritySize;                               /** Parity Size. */
+    BYTE *_parity;                                  /** Parity. */
+    BYTE _signature[RADIO_PACKET_SIGNATURE_LENGTH]; /** Radio packet signature. */
 } _RadioHeader;
 
 /**
@@ -30,25 +19,10 @@ typedef struct _RadioHeader
  */
 typedef struct RadioBody
 {
-    /**
-     * @brief Packet command.
-     */
-    BYTE command;
-
-    /**
-     * @brief Padding to align struct. Don't use it.
-     */
-    BYTE _padding[3];
-
-    /**
-     * @brief Payload size.
-     */
-    SIZE payloadSize;
-
-    /**
-     * @brief Packet payload.
-     */
-    BYTE *payload;
+    BYTE command;     /** Packet command. */
+    BYTE _padding[3]; /** Padding to align struct. Don't use it. */
+    SIZE payloadSize; /** Payload size. */
+    BYTE *payload;    /** Packet payload. */
 } RadioBody;
 
 /**
@@ -56,15 +30,8 @@ typedef struct RadioBody
  */
 typedef struct _RadioPacket
 {
-    /**
-     * @brief Header.
-     */
-    _RadioHeader _header;
-
-    /**
-     * @brief Body.
-     */
-    RadioBody _body;
+    _RadioHeader _header; /** Header. */
+    RadioBody _body;      /** Body. */
 } _RadioPacket;
 
 /**
@@ -79,7 +46,7 @@ typedef struct _RadioPacket
 BOOL serializeRadioPacket(RadioBody *body, BYTE **buffer_out_ptr, SIZE *size_out);
 
 /**
- * @brief Deserialize and decrypt radio packet.
+ * @brief Deserialize and decrypt radio packet. Remeber to call radioClearPacket() on packet body after processing.
  *
  * @param buffer_in Buffer.
  * @param size_in Size of buffer.

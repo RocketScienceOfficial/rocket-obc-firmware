@@ -1,8 +1,18 @@
 #include "drivers/gpio/gpio_driver.h"
 #include "pico/stdlib.h"
 
+BOOL gpioIsPinValid(PinNumber pin)
+{
+    return pin >= 0 && pin <= 28;
+}
+
 FUNCRESULT gpioInitPin(PinNumber pin, GPIODirection dir)
 {
+    if (!gpioIsPinValid(pin))
+    {
+        return ERR_INVALIDARG;
+    }
+
     gpio_init(pin);
     gpio_set_dir(pin, dir == GPIO_INPUT ? GPIO_IN : GPIO_OUT);
 
@@ -11,13 +21,35 @@ FUNCRESULT gpioInitPin(PinNumber pin, GPIODirection dir)
 
 FUNCRESULT gpioSetPinState(PinNumber pin, GPIOState state)
 {
+    if (!gpioIsPinValid(pin))
+    {
+        return ERR_INVALIDARG;
+    }
+
     gpio_put(pin, state == GPIO_HIGH ? 1 : 0);
+
+    return SUC_OK;
+}
+
+FUNCRESULT gpioGetPinState(PinNumber pin, GPIOState *state)
+{
+    if (!gpioIsPinValid(pin))
+    {
+        return ERR_INVALIDARG;
+    }
+
+    gpio_get(pin) ? (*state = GPIO_HIGH) : (*state = GPIO_LOW);
 
     return SUC_OK;
 }
 
 FUNCRESULT gpioSetPinFunction(PinNumber pin, GPIOFunction function)
 {
+    if (!gpioIsPinValid(pin))
+    {
+        return ERR_INVALIDARG;
+    }
+
     INT32 func = 0;
 
     switch (function)
@@ -54,6 +86,11 @@ FUNCRESULT gpioSetPinFunction(PinNumber pin, GPIOFunction function)
 
 FUNCRESULT gpioPullUpPin(PinNumber pin)
 {
+    if (!gpioIsPinValid(pin))
+    {
+        return ERR_INVALIDARG;
+    }
+
     gpio_pull_up(pin);
 
     return SUC_OK;
