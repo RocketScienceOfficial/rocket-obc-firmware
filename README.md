@@ -1,10 +1,10 @@
-# CanSat
+# Project Rocket
 
 ## Overview
 
 ***
 
-Project for the [CanSat](https://www.esa.int/Education/CanSat) satellite.
+Project for the rocket system.
 
 ## Required Software
 
