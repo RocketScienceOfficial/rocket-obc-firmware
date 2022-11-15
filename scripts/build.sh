@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd `dirname $0`/../satellite
+cd `dirname $0`/../obc
 
 if [ ! -d build ]; then
    mkdir build

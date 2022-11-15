@@ -1,6 +1,6 @@
 @echo off
 
-pushd %~dp0\..\satellite
+pushd %~dp0\..\obc
 
 if not exist build mkdir build
 
