@@ -5,7 +5,7 @@ add_executable(${EXE_NAME}
     receiver_logger.c
 )
 
-target_link_libraries(${EXE_NAME} PRIVATE core_shared_lib)
+target_link_libraries(${EXE_NAME} PRIVATE core_common_lib)
 
 pico_enable_stdio_usb(${EXE_NAME} 1)
 pico_enable_stdio_uart(${EXE_NAME} 0)

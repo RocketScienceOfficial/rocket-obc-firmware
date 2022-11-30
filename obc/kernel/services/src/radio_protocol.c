@@ -1,5 +1,6 @@
 #include "kernel/services/radio_protocol.h"
-#include "tools/cryptography.h"
+#include "crypto/parity_check.h"
+#include "crypto/xor_encryption.h"
 #include <string.h>
 #include <stdlib.h>
 

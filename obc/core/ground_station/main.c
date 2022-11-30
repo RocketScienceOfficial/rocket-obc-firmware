@@ -5,8 +5,8 @@
 #include "config.h"
 #include "pinout.h"
 #include "receiver_logger.h"
-#include "shared/commands_utils.h"
-#include "shared/radio_utils.h"
+#include "common/commands_utils.h"
+#include "common/radio_utils.h"
 #include "drivers/console/console_output.h"
 #include "kernel/logging/logger.h"
 

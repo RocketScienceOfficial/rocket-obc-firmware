@@ -14,6 +14,6 @@ target_link_libraries(${LIB_GENERAL_NAME} INTERFACE
     drivers_potentiometer_lib
     drivers_servo_lib
     drivers_storage_lib
-    drivers_temp_lib
+    drivers_tempr_lib
     drivers_uv_lib
 )

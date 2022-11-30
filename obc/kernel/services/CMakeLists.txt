@@ -8,4 +8,5 @@ add_library(${LIB_GENERAL_NAME} STATIC
     src/radio_protocol.c
 )
 
+target_link_libraries(${LIB_GENERAL_NAME} PRIVATE crypto_lib)
 target_include_directories(${LIB_GENERAL_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

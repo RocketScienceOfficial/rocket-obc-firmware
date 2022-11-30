@@ -9,5 +9,5 @@ add_library(${LIB_GENERAL_NAME} STATIC
     src/mpu6050_driver.c
 )
 
-target_link_libraries(${LIB_GENERAL_NAME} PUBLIC drivers_gpio_lib)
+target_link_libraries(${LIB_GENERAL_NAME} PUBLIC drivers_gpio_lib maths_lib)
 target_include_directories(${LIB_GENERAL_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

@@ -22,7 +22,7 @@ Project for the rocket system.
 1. Download the source code from GitHub or run the following command:
 
 ``` console
-$ git clone https://github.com/Filipeak/trash-can.git
+$ git clone https://github.com/Filipeak/project-rocket.git
 ```
 
 2. Run setup script:

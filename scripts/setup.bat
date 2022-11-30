@@ -4,10 +4,10 @@ pushd %~dp0\..
 
 git submodule update --init --recursive
 
-cd scripts
+cd obc\scripts
 call build.bat
 
 pip install -r requirements.txt
-cd ..
+cd ..\..
 
 popd

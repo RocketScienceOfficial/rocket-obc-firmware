@@ -7,7 +7,7 @@ add_library(${LIB_GENERAL_NAME} STATIC
     include/${MODULE_NAME}/${LIB_NAME}/default_commands.h
     src/commands.c
     src/default_commands.c
-    )
+)
 
 target_link_libraries(${LIB_GENERAL_NAME} PRIVATE kernel_logging_lib)
 target_include_directories(${LIB_GENERAL_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

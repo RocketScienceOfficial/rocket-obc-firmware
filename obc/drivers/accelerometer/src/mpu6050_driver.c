@@ -1,5 +1,5 @@
 #include "drivers/accelerometer/mpu6050_driver.h"
-#include "tools/constants.h"
+#include "maths/constants.h"
 
 #define MPU6050_ADDR 0x68
 #define ACCEL_LBS_0 16384.0

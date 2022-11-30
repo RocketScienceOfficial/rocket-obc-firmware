@@ -11,4 +11,13 @@ int main()
     sleep_ms(5000);
 
     myLogCreateConsoleSink(myLogGetCoreLogger(), DEFAULT_LOG_SERIAL_PATTERN);
+
+    while (TRUE)
+    {
+        MY_LOG_CORE_INFO("Hello, world!");
+
+        sleep_ms(1000);
+    }
+
+    return 0;
 }

@@ -14,7 +14,7 @@ add_subdirectory(lora)
 add_subdirectory(potentiometer)
 add_subdirectory(servo)
 add_subdirectory(storage)
-add_subdirectory(temp)
+add_subdirectory(tempr)
 add_subdirectory(uv)
 
 add_subdirectory(drivers_lib)

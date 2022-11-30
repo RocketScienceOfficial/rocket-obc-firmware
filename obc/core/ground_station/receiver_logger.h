@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shared/measurements_utils.h"
+#include "common/measurements_utils.h"
 #include "tools/typedefs.h"
 
 typedef struct ReceiverSendData

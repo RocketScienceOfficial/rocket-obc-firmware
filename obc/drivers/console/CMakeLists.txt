@@ -7,6 +7,6 @@ add_library(${LIB_GENERAL_NAME} STATIC
     include/${MODULE_NAME}/${LIB_NAME}/console_output.h
     src/console_input.c
     src/console_output.c
-    )
+)
 
 target_include_directories(${LIB_GENERAL_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

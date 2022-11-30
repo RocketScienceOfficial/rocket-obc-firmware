@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "console_input.h": "c",
+        "commands.h": "c",
+        "mission_control.h": "c",
+        "measurements_manager.h": "c"
+    }
+}
