@@ -7,15 +7,8 @@
  */
 typedef struct ParityData
 {
-    /**
-     * @brief Parity buffer.
-     */
-    BYTE *buffer;
-
-    /**
-     * @brief Parity size.
-     */
-    SIZE size;
+    BYTE *buffer; /** Parity buffer. */
+    SIZE size;    /** Parity size. */
 } ParityData;
 
 /**
