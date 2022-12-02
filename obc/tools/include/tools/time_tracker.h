@@ -1,6 +1,6 @@
 #pragma once
 
-#include "typedefs.h"
+#include <obc/api.h>
 
 /**
  * @brief Time tracker definition.

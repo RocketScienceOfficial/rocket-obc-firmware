@@ -1,5 +1,5 @@
 #include "test_cryptography.h"
-#include "tools/typedefs.h"
+#include <obc/api.h>
 #include "crypto/xor_encryption.h"
 #include "crypto/parity_check.h"
 #include <string.h>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tools/typedefs.h"
+#include <obc/api.h>
 
 /**
  * @brief Encrypt or decrypt data.

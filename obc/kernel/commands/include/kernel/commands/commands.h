@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tools/typedefs.h"
+#include <obc/api.h>
 
 #define COMMANDS_MAX_COUNT 16
 #define COMMAND_ARGUMENTS_COUNT_ERROR_MSG "Invalid arguments count!"

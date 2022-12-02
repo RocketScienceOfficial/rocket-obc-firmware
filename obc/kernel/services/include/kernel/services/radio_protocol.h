@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tools/typedefs.h"
+#include <obc/api.h>
 
 #define RADIO_PACKET_SIGNATURE_LENGTH 16
 

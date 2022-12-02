@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tools/typedefs.h"
+#include <obc/api.h>
 
 #define DEFAULT_LOG_SERIAL_PATTERN "[%t %l %M:%S:%m] %c\n"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tools/typedefs.h"
+#include <obc/api.h>
 #include "common/measurements_utils.h"
 
 VOID initializeMeasurements();

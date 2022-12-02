@@ -1,5 +1,5 @@
 #include "test_commands.h"
-#include "tools/typedefs.h"
+#include <obc/api.h>
 #include "kernel/commands/commands.h"
 #include "kernel/commands/default_commands.h"
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "kernel/logging/logger.h"
-#include "tools/typedefs.h"
+#include <obc/api.h>
 #include "tools/time_tracker.h"
 
 typedef INT32 TestResult;

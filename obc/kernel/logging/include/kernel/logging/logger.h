@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tools/typedefs.h"
+#include <obc/api.h>
 #include <stdarg.h>
 
 #define MAX_LOGGER_SINKS 4

@@ -1,5 +1,5 @@
 #pragma once
 
-#include "tools/typedefs.h"
+#include <obc/api.h>
 
 BOOL isMissionCompleted();

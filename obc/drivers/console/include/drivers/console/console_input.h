@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tools/typedefs.h"
+#include <obc/api.h>
 
 #define CONSOLE_ARGS_MAX_COUNT 8
 #define CONSOLE_INPUT_MAX_LENGTH 128

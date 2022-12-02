@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gpio_driver.h"
-#include "tools/typedefs.h"
+#include <obc/api.h>
 #include "tools/time_tracker.h"
 
 /**
@@ -116,7 +116,7 @@ FUNCRESULT i2cReadBlocking(I2CInstance i2c, BYTE address, BYTE *destination, SIZ
 
 /**
  * @brief Check if I2C device is valid.
- * 
+ *
  * @param i2c I2C Instance to check.
  * @param address Address of device.
  * @return True if device is valid

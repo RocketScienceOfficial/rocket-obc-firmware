@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tools/typedefs.h"
+#include <obc/api.h>
 #include "drivers/gpio/gpio_driver.h"
 #include "ff.h"
 #include "sd_card.h"

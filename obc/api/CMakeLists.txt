@@ -1,5 +1,5 @@
 set(LIB_NAME obc)
-set(LIB_GENERAL_NAME "api_lib")
+set(LIB_GENERAL_NAME api_lib)
 
 add_library(${LIB_GENERAL_NAME} INTERFACE
     include/${LIB_NAME}/api.h
@@ -7,6 +7,4 @@ add_library(${LIB_GENERAL_NAME} INTERFACE
     include/${LIB_NAME}/typedefs.h
 )
 
-target_include_directories(${LIB_GENERAL_NAME} INTERFACE .)
-
-link_libraries(${LIB_GENERAL_NAME})
+target_include_directories(${LIB_GENERAL_NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)

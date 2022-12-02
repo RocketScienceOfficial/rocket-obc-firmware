@@ -1,4 +1,4 @@
-link_libraries(tools_lib)
+link_libraries(api_lib)
 
 add_subdirectory(logging)
 

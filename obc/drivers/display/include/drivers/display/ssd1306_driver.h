@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "tools/typedefs.h"
+#include <obc/api.h>
 #include "drivers/gpio/i2c_driver.h"
 
 /**

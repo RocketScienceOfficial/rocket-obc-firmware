@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tools/typedefs.h"
+#include <obc/api.h>
 #include "drivers/lora/sx1278_driver.h"
 #include "kernel/services/radio_protocol.h"
 

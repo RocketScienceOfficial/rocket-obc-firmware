@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/measurements_utils.h"
-#include "tools/typedefs.h"
+#include <obc/api.h>
 
 typedef struct ReceiverSendData
 {
