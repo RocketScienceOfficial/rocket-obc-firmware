@@ -31,7 +31,7 @@ static FLOAT getGyroLBS(INT32 level)
                                                                                                     : 16.4));
 }
 
-static void mpu6050Reset(MPU6050Config *config, INT32 lpFilter, INT32 accelSensLevel, INT32 gyroSensLevel)
+static VOID mpu6050Reset(MPU6050Config *config, INT32 lpFilter, INT32 accelSensLevel, INT32 gyroSensLevel)
 {
     BYTE buf[] = {0x6B, 0x00};
     i2cWriteBlocking(config->_i2c, MPU6050_ADDR, buf, 2, FALSE);
@@ -50,7 +50,7 @@ static void mpu6050Reset(MPU6050Config *config, INT32 lpFilter, INT32 accelSensL
     i2cWriteBlocking(config->_i2c, MPU6050_ADDR, buf4, 2, FALSE);
 }
 
-static void mpu6050ReadRawValues(MPU6050Config *config, INT16 accel[3], INT16 gyro[3], INT16 *temp)
+static VOID mpu6050ReadRawValues(MPU6050Config *config, INT16 accel[3], INT16 gyro[3], INT16 *temp)
 {
     BYTE buffer[6];
 

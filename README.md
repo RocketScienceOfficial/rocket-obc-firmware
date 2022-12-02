@@ -14,6 +14,7 @@ Project for the rocket system.
 2. Ninja
 3. ARM Toolchain
 4. A compiler (GCC, Clang, MinGW, etc.)
+5. Docker
 
 ## Install
 

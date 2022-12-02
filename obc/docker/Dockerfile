@@ -1,5 +1,6 @@
 FROM ubuntu:latest
 
-RUN sudo apt-get update
-RUN sudo apt-get upgrade -y
-RUN sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib build-essential ninja-build -y
+RUN apt-get update && apt-get upgrade -y && apt install git gdb-multiarch cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib build-essential ninja-build -y
+
+VOLUME /root/env
+WORKDIR /root/env
