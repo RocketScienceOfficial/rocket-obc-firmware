@@ -18,6 +18,7 @@ add_subdirectory(api)
 
 add_subdirectory(tools)
 add_subdirectory(maths)
+add_subdirectory(ahrs)
 add_subdirectory(crypto)
 add_subdirectory(drivers)
 add_subdirectory(kernel)
