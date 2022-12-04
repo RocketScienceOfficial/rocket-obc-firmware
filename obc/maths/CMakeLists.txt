@@ -6,10 +6,12 @@ add_library(${LIB_GENERAL_NAME} STATIC
     include/${LIB_NAME}/exp_filter.h
     include/${LIB_NAME}/constants.h
     include/${LIB_NAME}/matrix.h
+    include/${LIB_NAME}/quaternion.h
     include/${LIB_NAME}/vector.h
     src/avg_filter.c
     src/exp_filter.c
     src/matrix.c
+    src/quaternion.c
     src/vector.c
 )
 
