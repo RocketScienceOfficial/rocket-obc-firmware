@@ -11,7 +11,6 @@ pico_sdk_init()
 
 add_subdirectory(lib)
 
-# add_subdirectory(boot)
 add_subdirectory(debug)
 
 add_subdirectory(api)
