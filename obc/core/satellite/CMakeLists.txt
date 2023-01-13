@@ -4,7 +4,6 @@ add_executable(${EXE_NAME}
     main.c
     hw_config.c
     measurements_manager.c
-    mission_control.c
 )
 
 target_link_libraries(${EXE_NAME} PRIVATE core_common_lib)

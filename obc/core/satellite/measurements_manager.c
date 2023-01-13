@@ -1,6 +1,8 @@
 #include "measurements_manager.h"
 #include "pinout.h"
 #include "config.h"
+#include "drivers/accelerometer/mpu6050_driver.h"
+#include "drivers/barometer/bmp280_driver.h"
 #include "kernel/logging/logger.h"
 #include "kernel/services/driver_calling.h"
 
@@ -32,7 +34,7 @@ VOID takeMeasurements(MeasurementData *data_out)
     MPU6050Data accelerometerData = {0};
 
     DRIVER_CALL(bmp280Read(&s_BarometerConfig, &barometerData));
-    
+
     MPU6050RawData mpu6050RawData = {0};
 
     DRIVER_CALL(mpu6050ReadRaw(&s_AccelerometerConfig, &mpu6050RawData));
@@ -48,8 +50,5 @@ VOID takeMeasurements(MeasurementData *data_out)
     MY_LOG_MEASURE_FLOAT(accelerometerData.rot_z);
     MY_LOG_MEASURE_END();
 
-    *data_out = (MeasurementData){
-        .barometerData = barometerData,
-        .accelerometerData = accelerometerData,
-    };
+    *data_out = (MeasurementData){0};
 }

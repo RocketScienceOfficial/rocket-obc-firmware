@@ -3,6 +3,22 @@
         "console_input.h": "c",
         "commands.h": "c",
         "mission_control.h": "c",
-        "measurements_manager.h": "c"
+        "measurements_manager.h": "c",
+        "console_output.h": "c",
+        "stdlib.h": "c",
+        "time_tracker.h": "c",
+        "radio_utils.h": "c",
+        "commands_utils.h": "c",
+        "config.h": "c",
+        "quaternion.h": "c",
+        "stdio.h": "c",
+        "string.h": "c",
+        "vector.h": "c",
+        "api.h": "c",
+        "matrix.h": "c",
+        "mpu6050_driver.h": "c",
+        "logger.h": "c",
+        "receiver_logger.h": "c",
+        "gpio_driver.h": "c"
     }
 }

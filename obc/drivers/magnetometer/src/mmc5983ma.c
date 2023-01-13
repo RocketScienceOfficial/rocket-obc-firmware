@@ -1,0 +1,1 @@
+#include "drivers/magnetometer/mmc5983ma.h"

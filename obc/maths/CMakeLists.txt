@@ -3,14 +3,18 @@ set(LIB_GENERAL_NAME "${LIB_NAME}_lib")
 
 add_library(${LIB_GENERAL_NAME} STATIC
     include/${LIB_NAME}/avg_filter.h
-    include/${LIB_NAME}/exp_filter.h
     include/${LIB_NAME}/constants.h
+    include/${LIB_NAME}/exp_filter.h
+    include/${LIB_NAME}/kalman_filter.h
     include/${LIB_NAME}/matrix.h
+    include/${LIB_NAME}/pid_regulator.h
     include/${LIB_NAME}/quaternion.h
     include/${LIB_NAME}/vector.h
     src/avg_filter.c
     src/exp_filter.c
+    src/kalman_filter.c
     src/matrix.c
+    src/pid_regulator.c
     src/quaternion.c
     src/vector.c
 )

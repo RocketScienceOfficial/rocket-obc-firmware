@@ -1,5 +1,9 @@
 #pragma once
 
+/**
+ * INFO: https://github.com/akshayabali/pico-lora
+*/
+
 #include <obc/api.h>
 #include "drivers/gpio/gpio_driver.h"
 #include "drivers/gpio/spi_driver.h"

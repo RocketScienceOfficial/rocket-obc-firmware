@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd $(dirname $0)/../obc
+cd $(dirname $0)/..
 
 if [ ! -d build ]; then
    mkdir build

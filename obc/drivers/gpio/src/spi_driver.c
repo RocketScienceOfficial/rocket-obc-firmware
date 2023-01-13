@@ -115,12 +115,12 @@ FUNCRESULT spiInitPins(SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumbe
         return ERR_INVALIDARG;
     }
 
+    gpioInitPin(cs, GPIO_OUTPUT);
+    gpioSetPinState(cs, GPIO_HIGH);
+
     gpioSetPinFunction(miso, GPIO_FUNCTION_SPI);
     gpioSetPinFunction(mosi, GPIO_FUNCTION_SPI);
     gpioSetPinFunction(sck, GPIO_FUNCTION_SPI);
-
-    gpioInitPin(cs, GPIO_OUTPUT);
-    gpioSetPinState(cs, GPIO_HIGH);
 
     return SUC_OK;
 }

@@ -3,6 +3,9 @@
 #include <obc/api.h>
 #include "vector.h"
 
+/**
+ * @brief Matrix 2x2.
+ */
 typedef union mat2x2
 {
     struct
@@ -17,6 +20,9 @@ typedef union mat2x2
     };
 } mat2x2;
 
+/**
+ * @brief Matrix 3x3.
+ */
 typedef union mat3x3
 {
     struct
@@ -33,6 +39,9 @@ typedef union mat3x3
 
 } mat3x3;
 
+/**
+ * @brief Matrix 4x4.
+ */
 typedef union mat4x4
 {
     struct
@@ -49,31 +58,40 @@ typedef union mat4x4
     };
 } mat4x4;
 
-typedef struct matNxM
+/**
+ * @brief Matrix of M by N dimensions.
+ */
+typedef struct matMxN
 {
-    FLOAT *data;
+    FLOAT **data;
     SIZE rows;
     SIZE cols;
-} matNxM;
+} matMxN;
 
 mat2x2 mat2x2Add(mat2x2 a, mat2x2 b);
 mat2x2 mat2x2Sub(mat2x2 a, mat2x2 b);
 mat2x2 mat2x2MulNum(FLOAT n, mat2x2 m);
 mat2x2 mat2x2Mul(mat2x2 a, mat2x2 b);
+mat2x2 mat2x2Transpose(mat2x2 m);
 
 mat3x3 mat3x3Add(mat3x3 a, mat3x3 b);
 mat3x3 mat3x3Sub(mat3x3 a, mat3x3 b);
 mat3x3 mat3x3MulNum(FLOAT n, mat3x3 m);
 mat3x3 mat3x3Mul(mat3x3 a, mat3x3 b);
+mat3x3 mat3x3Transpose(mat3x3 m);
 
 mat4x4 mat4x4Add(mat4x4 a, mat4x4 b);
 mat4x4 mat4x4Sub(mat4x4 a, mat4x4 b);
 mat4x4 mat4x4MulNum(FLOAT n, mat4x4 m);
 mat4x4 mat4x4Mul(mat4x4 a, mat4x4 b);
+mat4x4 mat4x4Transpose(mat4x4 m);
 
-matNxM matNxMAdd(matNxM a, matNxM b);
-matNxM matNxMSub(matNxM a, matNxM b);
-matNxM matNxMMulNum(FLOAT n, matNxM m);
-matNxM matNxMMul(matNxM a, matNxM b);
-matNxM vecToMat(vecN v);
-void matNxMFree(matNxM *m);
+matMxN matMxNCreate(SIZE m, SIZE n);
+VOID matMxNFree(matMxN m);
+matMxN matMxNAdd(matMxN a, matMxN b);
+matMxN matMxNSub(matMxN a, matMxN b);
+matMxN matMxNMulNum(FLOAT n, matMxN m);
+matMxN matMxNMul(matMxN a, matMxN b);
+matMxN matMxNTranspose(matMxN m);
+matMxN vecToMat(vecN v);
+VOID vecToMatRef(matMxN* matRef, vecN v);

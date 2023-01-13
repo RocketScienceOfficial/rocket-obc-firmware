@@ -1,13 +1,32 @@
 #pragma once
 
-#include "drivers/barometer/bmp280_driver.h"
-#include "drivers/accelerometer/mpu6050_driver.h"
+#include <obc/api.h>
 
 /**
  * @brief Single measurement data structure.
  */
 typedef struct MeasurementData
 {
-    BMP280Data barometerData;      // Barometer data.
-    MPU6050Data accelerometerData; // Accelerometer data.
+    FLOAT accel_x;
+    FLOAT accel_y;
+    FLOAT accel_z;
+    FLOAT vel_x;
+    FLOAT vel_y;
+    FLOAT vel_z;
+    FLOAT pos_x;
+    FLOAT pos_y;
+    FLOAT pos_z;
+    FLOAT roll;
+    FLOAT pitch;
+    FLOAT yaw;
+    FLOAT latitude;
+    FLOAT longtitude;
+    FLOAT altitude;
+    FLOAT temperature;
+    FLOAT pressure;
+    FLOAT humidity;
+    INT32 radioSignalStrength;
+    FLOAT cpuTemp;
+    FLOAT batteryPercentage;
+    FLOAT fuelPercentage;
 } MeasurementData;

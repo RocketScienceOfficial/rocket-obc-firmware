@@ -10,15 +10,8 @@
  */
 typedef struct ConsoleInput
 {
-    /**
-     * @brief Current characters
-     */
-    CHAR _cmd[CONSOLE_INPUT_MAX_LENGTH];
-
-    /**
-     * @brief Current characters length
-     */
-    SIZE _cmdSize;
+    CHAR _cmd[CONSOLE_INPUT_MAX_LENGTH]; /** Current characters. */
+    SIZE _cmdSize;                       /** Current characters length. */
 } ConsoleInput;
 
 /**
@@ -26,23 +19,18 @@ typedef struct ConsoleInput
  */
 typedef struct ConsoleTokens
 {
-    /**
-     * @brief Two-dimensional array of tokens.
-     */
-    STRING *tokens;
-
-    /**
-     * @brief Number of tokens.
-     */
-    SIZE size;
+    STRING *tokens; /** Two-dimensional array of tokens. */
+    SIZE size;      /** Number of tokens. */
 } ConsoleTokens;
 
 /**
  * @brief Checks if the input is available.
  *
- * @return ASCII Character if available, 0 otherwise.
+ * @param chr Pointer to the character to store the result in.
+ *
+ * @return True if available.
  */
-INT32 consoleCheckInput();
+BOOL consoleCheckInput(INT32 *chr);
 
 /**
  * @brief Processess the character.

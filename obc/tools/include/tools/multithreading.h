@@ -2,10 +2,7 @@
 
 #include <obc/api.h>
 
-/**
- * @brief Type for thread function.
- */
-typedef void (*PicoCoreFunction)(void);
+typedef void (*PicoCoreFunction)(void); /** Type for thread function.*/
 
 /**
  * @brief Starts Core 1.

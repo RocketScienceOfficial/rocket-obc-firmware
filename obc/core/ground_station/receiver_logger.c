@@ -18,17 +18,30 @@ VOID initializeReceiverLogger()
     myLogCreateConsoleSink(&s_Logger, MY_LOG_RECEIVER_DATA_PATTERN);
 }
 
-VOID logReceiverData(ReceiverSendData *data)
+VOID logReceiverData(MeasurementData *data)
 {
     MY_LOG_RECEIVER_DATA_BEGIN();
-    MY_LOG_RECEIVER_DATA_FLOAT(data->measurement.barometerData.temperature);
-    MY_LOG_RECEIVER_DATA_INT(data->measurement.barometerData.pressure);
-    MY_LOG_RECEIVER_DATA_FLOAT(data->measurement.accelerometerData.accel_x);
-    MY_LOG_RECEIVER_DATA_FLOAT(data->measurement.accelerometerData.accel_y);
-    MY_LOG_RECEIVER_DATA_FLOAT(data->measurement.accelerometerData.accel_z);
-    MY_LOG_RECEIVER_DATA_FLOAT(data->measurement.accelerometerData.rot_x);
-    MY_LOG_RECEIVER_DATA_FLOAT(data->measurement.accelerometerData.rot_y);
-    MY_LOG_RECEIVER_DATA_FLOAT(data->measurement.accelerometerData.rot_z);
-    MY_LOG_RECEIVER_DATA_FLOAT(data->measurement.accelerometerData.temperature);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->accel_x);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->accel_y);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->accel_z);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->vel_x);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->vel_y);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->vel_z);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->pos_x);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->pos_y);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->pos_z);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->roll);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->pitch);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->yaw);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->latitude);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->longtitude);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->altitude);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->temperature);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->pressure);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->humidity);
+    MY_LOG_RECEIVER_DATA_INT(data->radioSignalStrength);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->cpuTemp);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->batteryPercentage);
+    MY_LOG_RECEIVER_DATA_FLOAT(data->fuelPercentage);
     MY_LOG_RECEIVER_DATA_END();
 }

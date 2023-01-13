@@ -2,10 +2,7 @@
 
 #include <obc/api.h>
 
-/**
- * @brief Time tracker definition.
- */
-typedef UINT32 TIME;
+typedef UINT32 TIME; /** Time tracker definition. */
 
 /**
  * @brief Gets the current time in milliseconds.

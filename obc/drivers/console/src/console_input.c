@@ -5,11 +5,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-INT32 consoleCheckInput()
+BOOL consoleCheckInput(INT32 *chr)
 {
-    INT32 ch = getchar_timeout_us(0);
+    *chr = getchar_timeout_us(0);
 
-    return ch != PICO_ERROR_TIMEOUT ? ch : 0;
+    return *chr != PICO_ERROR_TIMEOUT;
 }
 
 FUNCRESULT consoleInputProcessCharacter(INT32 c, ConsoleInput *input, ConsoleTokens *tokens)

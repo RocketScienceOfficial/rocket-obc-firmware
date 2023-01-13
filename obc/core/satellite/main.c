@@ -5,7 +5,6 @@
 #include "config.h"
 #include "pinout.h"
 #include "measurements_manager.h"
-#include "mission_control.h"
 #include "common/commands_utils.h"
 #include "common/radio_utils.h"
 #include "tools/time_tracker.h"
@@ -43,7 +42,7 @@ int main()
 
     MY_LOG_CORE_INFO("Everything is ready!");
 
-    while (!isMissionCompleted())
+    while (TRUE)
     {
         if (consoleAvailable())
         {

@@ -20,8 +20,8 @@
  */
 typedef struct RadioUtilPacketData
 {
-    RadioBody body;       // Packet body.
-    INT32 signalStrength; // RSSI.
+    RadioBody body;       /** Packet body. */
+    INT32 signalStrength; /** RSSI. */
 } RadioUtilPacketData;
 
 /**

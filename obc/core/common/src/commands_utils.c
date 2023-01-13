@@ -14,9 +14,7 @@ VOID initializeCommands()
 
 BOOL consoleAvailable()
 {
-    s_ConsoleChar = consoleCheckInput();
-
-    return s_ConsoleChar != 0;
+    return consoleCheckInput(&s_ConsoleChar);
 }
 
 VOID checkCommand()

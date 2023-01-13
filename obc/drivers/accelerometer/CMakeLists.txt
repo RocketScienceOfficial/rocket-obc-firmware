@@ -4,8 +4,10 @@ set(LIB_GENERAL_NAME "${MODULE_NAME}_${LIB_NAME}_lib")
 
 add_library(${LIB_GENERAL_NAME} STATIC
     include/${MODULE_NAME}/${LIB_NAME}/bmi088_driver.h
+    include/${MODULE_NAME}/${LIB_NAME}/h3lis331dl_driver.h
     include/${MODULE_NAME}/${LIB_NAME}/mpu6050_driver.h
     src/bmi088_driver.c
+    src/h3lis331dl_driver.c
     src/mpu6050_driver.c
 )
 

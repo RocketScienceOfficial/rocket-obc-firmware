@@ -2,21 +2,21 @@
 #include <stdlib.h>
 #include <string.h>
 #include "pico/stdlib.h"
-#include "config.h"
 #include "pinout.h"
 #include "receiver_logger.h"
 #include "common/commands_utils.h"
 #include "common/radio_utils.h"
 #include "drivers/console/console_output.h"
 #include "kernel/logging/logger.h"
+#include "tools/time_tracker.h"
 
 static RadioUtilPacketData s_Packet;
+static TIME s_TimerOffset;
 
 int main()
 {
     stdio_init_all();
-
-    sleep_ms(7000);
+    sleep_ms(5000);
 
     myLogCreateConsoleSink(myLogGetCoreLogger(), DEFAULT_LOG_SERIAL_PATTERN);
 
@@ -33,39 +33,47 @@ int main()
     };
 
     initializeCommands();
-    initializeRadio(&loraPinout);
+    // initializeRadio(&loraPinout);
     initializeReceiverLogger();
 
     MY_LOG_CORE_INFO("Everything is ready!");
 
     while (TRUE)
     {
-        if (consoleAvailable())
+        if (runEvery(1000, &s_TimerOffset))
         {
-            checkCommand();
+            MeasurementData measurement = (MeasurementData){
+                .accel_x = 0,
+                .accel_y = 0,
+                .accel_z = 9.8f,
+                .cpuTemp = 20.1f,
+            };
+            
+            logReceiverData(&measurement);
         }
 
-        if (checkRadioPacket(&s_Packet))
-        {
-            if (s_Packet.body.command == MEASUREMENTS_RADIO_COMMAND_ID)
-            {
-                MeasurementData measurement = {0};
+        // if (consoleAvailable())
+        // {
+        //     checkCommand();
+        // }
 
-                memcpy(&measurement, &s_Packet.body.payload, s_Packet.body.payloadSize);
+        // if (checkRadioPacket(&s_Packet))
+        // {
+        //     if (s_Packet.body.command == MEASUREMENTS_RADIO_COMMAND_ID)
+        //     {
+        //         MeasurementData measurement = {0};
 
-                ReceiverSendData data = {
-                    .measurement = measurement,
-                };
+        //         memcpy(&measurement, &s_Packet.body.payload, s_Packet.body.payloadSize);
 
-                logReceiverData(&data);
-            }
-            else if (s_Packet.body.command == COMMANDS_RADIO_COMMAND_ID)
-            {
-                radioRemoteCommandCallback(s_Packet.body.payload, s_Packet.body.payloadSize);
-            }
+        //         logReceiverData(&measurement);
+        //     }
+        //     else if (s_Packet.body.command == COMMANDS_RADIO_COMMAND_ID)
+        //     {
+        //         radioRemoteCommandCallback(s_Packet.body.payload, s_Packet.body.payloadSize);
+        //     }
 
-            radioClearPacket(&s_Packet.body);
-        }
+        //     radioClearPacket(&s_Packet.body);
+        // }
     }
 
     return 0;

@@ -1,6 +1,6 @@
 @echo off
 
-pushd %~dp0\..\obc
+pushd %~dp0\..
 
 if not exist build mkdir build
 
