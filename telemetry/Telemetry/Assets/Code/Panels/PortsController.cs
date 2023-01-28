@@ -15,6 +15,7 @@ public class PortsController : MonoBehaviour
     {
         m_RefreshButton.onClick.AddListener(() => FetchPorts());
         m_SerialPortController.OnConnected += (sender, args) => FetchPorts();
+        m_SerialPortController.OnDisconnected += (sender, args) => FetchPorts();
 
         FetchPorts();
     }

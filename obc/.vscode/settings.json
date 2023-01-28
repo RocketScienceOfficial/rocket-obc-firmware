@@ -19,6 +19,9 @@
         "mpu6050_driver.h": "c",
         "logger.h": "c",
         "receiver_logger.h": "c",
-        "gpio_driver.h": "c"
+        "gpio_driver.h": "c",
+        "bmi088_driver.h": "c",
+        "spi.h": "c",
+        "mmc5983ma_driver.h": "c"
     }
 }

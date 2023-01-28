@@ -26,6 +26,8 @@ public class SerialPortController : MonoBehaviour
 
     private readonly Queue<string> _serialReadQueue = new();
     private readonly object _serialReadQueueLock = new();
+    private bool _closePort;
+    private readonly object _closePortLock = new();
     private SerialPort _currentSerialPort;
     private Thread _serialReadThread;
 
@@ -48,6 +50,16 @@ public class SerialPortController : MonoBehaviour
                 OnReadData?.Invoke(this, new OnReadDataEventArgs { Data = _serialReadQueue.Dequeue() });
             }
         }
+
+        lock (_closePortLock)
+        {
+            if (_closePort)
+            {
+                Disconnect();
+
+                _closePort = false;
+            }
+        }
     }
 
     public void Connect(string port)
@@ -63,6 +75,8 @@ public class SerialPortController : MonoBehaviour
                 StopBits = StopBits.One,
                 RtsEnable = true,
                 DtrEnable = true,
+                ReadTimeout = 1000,
+                WriteTimeout = 1000,
             };
 
             _currentSerialPort.Open();
@@ -117,7 +131,16 @@ public class SerialPortController : MonoBehaviour
                 }
             }
             catch (TimeoutException) { }
-            catch (IOException) { }
+            catch (InvalidOperationException) { }
+            catch (IOException)
+            {
+                lock (_closePortLock)
+                {
+                    _closePort = true;
+                }
+
+                break;
+            }
         }
     }
 

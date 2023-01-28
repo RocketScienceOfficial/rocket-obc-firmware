@@ -2,64 +2,56 @@
 #include "hardware/spi.h"
 #include <stdio.h>
 
-#define SPI spi_default
-#define MISO PICO_DEFAULT_SPI_RX_PIN
-#define MOSI PICO_DEFAULT_SPI_TX_PIN
-#define SCK PICO_DEFAULT_SPI_SCK_PIN
-#define CS PICO_DEFAULT_SPI_RX_PIN
+#include "drivers/accelerometer/bmi088_driver.h"
+#include "maths/kalman_filter.h"
 
-static uint8_t readReg(uint8_t addr)
-{
-    uint8_t data[2];
-
-    addr = addr | 0x80;
-
-    gpio_put(CS, 0);
-    spi_write_blocking(SPI, &addr, 1);
-    spi_read_blocking(SPI, 0, data, 2);
-    gpio_put(CS, 1);
-
-    return data[1];
-}
-
-static void writeReg(uint8_t addr, uint8_t data)
-{
-    addr = addr & 0x7F;
-
-    uint8_t buff[2];
-    buff[0] = addr;
-    buff[1] = data;
-
-    gpio_put(CS, 0);
-    spi_write_blocking(SPI, buff, 2);
-    gpio_put(CS, 1);
-}
+#define SPI spi0
+#define ACCEL_CS 1
+#define GYRO_CS 5
+#define SCK 2
+#define MOSI 3
+#define MISO 4
 
 int main()
 {
     stdio_init_all();
     sleep_ms(5000);
 
-    spi_init(SPI, 10000000);
+    BMI088AccelConfig accelConfig;
 
-    gpio_set_function(MISO, GPIO_FUNC_SPI);
-    gpio_set_function(MOSI, GPIO_FUNC_SPI);
-    gpio_set_function(SCK, GPIO_FUNC_SPI);
+    bmi088AccelInit(&accelConfig, 0, MISO, MOSI, ACCEL_CS, SCK);
+    bmi088AccelSetConf(&accelConfig, BMI088_ACCEL_ODR_1600HZ, BMI088_ACCEL_OSR_4);
+    bmi088AccelSetRange(&accelConfig, BMI088_ACCEL_RANGE_4G);
 
-    gpio_init(CS);
-    gpio_set_dir(CS, GPIO_OUT);
-    gpio_put(CS, 1);
+    BMI088GyroConfig gyroConfig;
 
-    sleep_ms(1000);
+    bmi088GyroInit(&gyroConfig, 0, MISO, MOSI, GYRO_CS, SCK);
+    bmi088GyroSetBandwidth(&gyroConfig, BMI088_GYRO_ODR_2000_BW_523HZ);
+    bmi088GyroSetRange(&gyroConfig, BMI088_GYRO_RANGE_250DPS);
 
-    printf("ID: %d\n", readReg(0x00));
-    sleep_ms(1000);
-    printf("ID: %d\n", readReg(0x00));
-    sleep_ms(1000);
-
-    while (1)
+    while (TRUE)
     {
-        tight_loop_contents();
+        BMI088AccelData accelData;
+        BMI088GyroData gyroData;
+
+        bmi088AccelRead(&accelConfig, &accelData);
+        bmi088GyroRead(&gyroConfig, &gyroData);
+
+        KalmanOutputData kalmanData;
+
+        kalmanUpdate(&kalmanData, accelData.accel);
+
+        printf("Accel X: %f\n", accelData.accel.x);
+        printf("Accel Y: %f\n", accelData.accel.y);
+        printf("Accel Z: %f\n", accelData.accel.z);
+        printf("Kalman Accel X: %f\n", kalmanData.acc.x);
+        printf("Kalman Accel Y: %f\n", kalmanData.acc.y);
+        printf("Kalman Accel Z: %f\n", kalmanData.acc.z);
+        printf("Gyro X: %f\n", gyroData.gyro.x);
+        printf("Gyro Y: %f\n", gyroData.gyro.y);
+        printf("Gyro Z: %f\n", gyroData.gyro.z);
+
+        sleep_ms(100);
     }
 
     return 0;

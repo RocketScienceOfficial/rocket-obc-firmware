@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 using UnityEngine;
@@ -27,7 +26,7 @@ public class RLFileSaver : DataRecipient
         var datetime = DateTime.Now;
         var path = FILES_DIR + $"RealTimeFlightLog_{datetime.Hour}{datetime.Minute}{datetime.Second}.csv";
 
-        EnsureDirectoryExists(path);
+        IOUtils.EnsureDirectoryExists(path);
 
         _writer = new StreamWriter(path);
     }
@@ -39,28 +38,18 @@ public class RLFileSaver : DataRecipient
             _writer.Close();
             _writer = null;
 
-            var startInfo = new ProcessStartInfo
-            {
-                WindowStyle = ProcessWindowStyle.Hidden,
-                CreateNoWindow = true,
-                UseShellExecute = false,
-                FileName = "cmd.exe",
-                Arguments = "/C cd Utils && python reportGen.py",
-            };
+            //var startInfo = new ProcessStartInfo
+            //{
+            //    WindowStyle = ProcessWindowStyle.Hidden,
+            //    CreateNoWindow = true,
+            //    UseShellExecute = false,
+            //    FileName = "cmd.exe",
+            //    Arguments = "/C cd Utils && python reportGen.py",
+            //};
 
-            var process = Process.Start(startInfo);
+            //var process = Process.Start(startInfo);
 
-            process.WaitForExit();
-        }
-    }
-
-    private void EnsureDirectoryExists(string filePath)
-    {
-        var fi = new FileInfo(filePath);
-
-        if (!fi.Directory.Exists)
-        {
-            Directory.CreateDirectory(fi.DirectoryName);
+            //process.WaitForExit();
         }
     }
 
@@ -103,7 +92,7 @@ public class RLFileSaver : DataRecipient
             WriteFileValue(data.batteryPercentage);
             WriteFileValue(data.fuelPercentage);
 
-            _writer.Write(_csvBuilder.ToString());
+            _writer.WriteLine(_csvBuilder.ToString());
             _csvBuilder.Clear();
         }
     }

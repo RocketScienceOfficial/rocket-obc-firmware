@@ -10,6 +10,7 @@
 typedef struct BME688Config
 {
     SPIInstance _spi;
+    PinNumber cs;
 } BME688Config;
 
 /**
