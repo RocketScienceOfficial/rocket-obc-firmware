@@ -2,18 +2,11 @@
 
 #include <obc/api.h>
 
-/**
- * @brief Type for GPIO pin number.
- */
-typedef UINT32 PinNumber;
+typedef UINT32 PinNumber;   /** Type for GPIO pin number */
+typedef float VoltageLevel; /** Type for voltage level */
 
 /**
- * @brief Type for voltage level.
- */
-typedef float VoltageLevel;
-
-/**
- * @brief Type for GPIO pin mode.
+ * @brief Type for GPIO pin mode
  */
 typedef enum GPIODirection
 {
@@ -22,7 +15,7 @@ typedef enum GPIODirection
 } GPIODirection;
 
 /**
- * @brief Type for GPIO pin state.
+ * @brief Type for GPIO pin state
  */
 typedef enum GPIOState
 {
@@ -31,7 +24,7 @@ typedef enum GPIOState
 } GPIOState;
 
 /**
- * @brief Type for GPIO pin function.
+ * @brief Type for GPIO pin function
  */
 typedef enum GPIOFunction
 {
@@ -45,58 +38,58 @@ typedef enum GPIOFunction
 } GPIOFunction;
 
 /**
- * @brief Number for invalid pin.
+ * @brief Number for invalid pin
  */
 #define INVALID_PIN_NUMBER 0xFFFFFFFF
 
 /**
- * @brief Checks if pin is valid.
+ * @brief Checks if pin is valid
  *
- * @param pin Pin number.
- * @return TRUE if pin is valid, FALSE otherwise.
+ * @param pin Pin number
+ * @return TRUE if pin is valid, FALSE otherwise
  */
 BOOL gpioIsPinValid(PinNumber pin);
 
 /**
- * @brief Initialize GPIO pin.
+ * @brief Initialize GPIO pin
  *
- * @param pin Pin to initialize.
- * @param dir Direction of pin.
- * @return Result code.
+ * @param pin Pin to initialize
+ * @param dir Direction of pin
+ * @return Result code
  */
 FUNCRESULT gpioInitPin(PinNumber pin, GPIODirection dir);
 
 /**
- * @brief Set state of GPIO pin.
+ * @brief Set state of GPIO pin
  *
- * @param pin Pin to set state.
- * @param state State to set.
- * @return Result code.
+ * @param pin Pin to set state
+ * @param state State to set
+ * @return Result code
  */
 FUNCRESULT gpioSetPinState(PinNumber pin, GPIOState state);
 
 /**
- * @brief Gety state of GPIO pin.
+ * @brief Gety state of GPIO pin
  *
- * @param pin Pin to get state of.
- * @param state State to get.
- * @return Result code.
+ * @param pin Pin to get state of
+ * @param state State to get
+ * @return Result code
  */
 FUNCRESULT gpioGetPinState(PinNumber pin, GPIOState *state);
 
 /**
- * @brief Set function of GPIO pin.
+ * @brief Set function of GPIO pin
  *
- * @param pin Pin to set function.
- * @param function Function to set.
- * @return Result code.
+ * @param pin Pin to set function
+ * @param function Function to set
+ * @return Result code
  */
 FUNCRESULT gpioSetPinFunction(PinNumber pin, GPIOFunction function);
 
 /**
- * @brief Pull up GPIO pin.
+ * @brief Pull GPIO pin up
  *
- * @param pin Pin to pull up.
- * @return Result code.
+ * @param pin Pin to pull up
+ * @return Result code
  */
 FUNCRESULT gpioPullUpPin(PinNumber pin);

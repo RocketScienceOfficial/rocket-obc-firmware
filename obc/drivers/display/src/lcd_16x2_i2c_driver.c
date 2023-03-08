@@ -10,33 +10,20 @@ const int LCD_FUNCTIONSET = 0x20;
 const int LCD_SETCGRAMADDR = 0x40;
 const int LCD_SETDDRAMADDR = 0x80;
 
-// flags for display entry mode
 const int LCD_ENTRYSHIFTINCREMENT = 0x01;
 const int LCD_ENTRYLEFT = 0x02;
-
-// flags for display and cursor control
 const int LCD_BLINKON = 0x01;
 const int LCD_CURSORON = 0x02;
 const int LCD_DISPLAYON = 0x04;
-
-// flags for display and cursor shift
 const int LCD_MOVERIGHT = 0x04;
 const int LCD_DISPLAYMOVE = 0x08;
-
-// flags for function set
 const int LCD_5x10DOTS = 0x04;
 const int LCD_2LINE = 0x08;
 const int LCD_8BITMODE = 0x10;
-
-// flag for backlight control
 const int LCD_BACKLIGHT = 0x08;
-
 const int LCD_ENABLE_BIT = 0x04;
-
-// By default these LCD display drivers are on bus ADDRess 0x27
 static int ADDR = 0x27;
 
-// Modes for __lcdSendByte
 #define LCD_CHARACTER 1
 #define LCD_COMMAND 0
 
@@ -81,7 +68,7 @@ FUNCRESULT lcdInit(LCDConfig *config, I2CInstance i2c, PinNumber sda, PinNumber 
         return ERR_INVALIDARG;
     }
 
-    if (FUNCFAILED(i2cInitAll(i2c, 100 * 1000)) || FUNCFAILED(i2cInitPins(i2c, sda, scl)))
+    if (FUNCFAILED(i2cInitPins(i2c, sda, scl)))
     {
         return ERR_FAIL;
     }

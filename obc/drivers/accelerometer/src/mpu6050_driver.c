@@ -88,7 +88,7 @@ FUNCRESULT mpu6050Init(MPU6050Config *config, I2CInstance i2c, PinNumber sda, Pi
 
     config->_i2c = i2c;
 
-    if (FUNCFAILED(i2cInitAll(config->_i2c, 400 * 1000)) || FUNCFAILED(i2cInitPins(config->_i2c, sda, scl)))
+    if (FUNCFAILED(i2cInitPins(config->_i2c, sda, scl)))
     {
         return ERR_FAIL;
     }

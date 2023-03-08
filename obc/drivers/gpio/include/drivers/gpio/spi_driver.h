@@ -4,24 +4,24 @@
 #include <obc/api.h>
 
 /**
- * @brief I2C instance.
+ * @brief SPI instance.
  */
 typedef UINT8 SPIInstance;
 
 /**
- * @brief I2C baud rate.
+ * @brief SPI baud rate.
  */
 typedef UINT32 SPIBaudRate;
 
 /**
- * @brief I2C invalid instance.
+ * @brief SPI invalid instance.
  */
 #define SPI_INSTANCE_INVALID 0xFF
 
 /**
- * @brief Checks if I2C is valid.
+ * @brief Checks if SPI is valid.
  *
- * @param instance I2C Instance.
+ * @param instance SPI Instance.
  * @return True if instance is valid.
  */
 BOOL spiCheckInstance(SPIInstance spi);

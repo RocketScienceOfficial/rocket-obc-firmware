@@ -7,7 +7,7 @@ FUNCRESULT batteryInit(BatteryConfig *config, ADCInput input, VoltageLevel minVo
         return ERR_INVALIDARG;
     }
 
-    if (FUNCFAILED(adcInitAll()) || FUNCFAILED(adcInitPin(input)))
+    if (FUNCFAILED(adcInitPin(input)))
     {
         return ERR_FAIL;
     }

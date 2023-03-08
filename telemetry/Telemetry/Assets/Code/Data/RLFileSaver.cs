@@ -17,8 +17,8 @@ public class RLFileSaver : DataRecipient
 
     private void Start()
     {
-        m_SerialPortController.OnConnected += (sender, args) => CreateFile();
-        m_SerialPortController.OnDisconnected += (sender, args) => CloseFile();
+        //m_SerialPortController.OnConnected += (sender, args) => CreateFile();
+        //m_SerialPortController.OnDisconnected += (sender, args) => CloseFile();
     }
 
     private void CreateFile()

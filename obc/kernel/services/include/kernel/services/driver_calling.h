@@ -4,7 +4,7 @@
 #include "kernel/logging/logger.h"
 
 /**
- * @brief Call a function which returns FUNCRESULT and handle result.
+ * @brief Call a function which returns FUNCRESULT and handle result
  */
 #define DRIVER_CALL(func)                                                                                       \
     {                                                                                                           \

@@ -8,7 +8,7 @@ FUNCRESULT guva_s12sd_Init(GUVA_S12SD_Config *config, ADCInput input)
         return ERR_INVALIDARG;
     }
 
-    if (FUNCFAILED(adcInitAll()) || FUNCFAILED(adcInitPin(input)))
+    if (FUNCFAILED(adcInitPin(input)))
     {
         return ERR_FAIL;
     }

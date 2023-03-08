@@ -7,6 +7,7 @@ target_link_libraries(${LIB_GENERAL_NAME} INTERFACE
     drivers_barometer_lib
     drivers_battery_lib
     drivers_console_lib
+    drivers_cpu_lib
     drivers_display_lib
     drivers_gps_lib
     drivers_led_lib
@@ -14,6 +15,5 @@ target_link_libraries(${LIB_GENERAL_NAME} INTERFACE
     drivers_potentiometer_lib
     drivers_servo_lib
     drivers_storage_lib
-    drivers_tempr_lib
     drivers_uv_lib
 )

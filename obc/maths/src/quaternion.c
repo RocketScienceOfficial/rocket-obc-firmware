@@ -1,64 +1,76 @@
 #include "maths/quaternion.h"
 #include "maths/constants.h"
+#include "maths/math_utils.h"
 #include <math.h>
 
-quat quatAdd(quat a, quat b)
+VOID quatAdd(quat *a, quat *b)
 {
-    return (quat){.q1 = a.q1 + b.q1, .q2 = a.q2 + b.q2, .q3 = a.q3 + b.q3, .q4 = a.q4 + b.q4};
+    a->q1 += b->q1;
+    a->q2 += b->q2;
+    a->q3 += b->q3;
+    a->q4 += b->q4;
 }
 
-quat quatSub(quat a, quat b)
+VOID quatSub(quat *a, quat *b)
 {
-    return (quat){.q1 = a.q1 - b.q1, .q2 = a.q2 - b.q2, .q3 = a.q3 - b.q3, .q4 = a.q4 - b.q4};
+    a->q1 -= b->q1;
+    a->q2 -= b->q2;
+    a->q3 -= b->q3;
+    a->q4 -= b->q4;
 }
 
-quat quatMulNum(FLOAT n, quat q)
+VOID quatMulNum(FLOAT n, quat *q)
 {
-    return (quat){.q1 = n * q.q1, .q2 = n * q.q2, .q3 = n * q.q3, .q4 = n * q.q4};
+    q->q1 *= n;
+    q->q2 *= n;
+    q->q3 *= n;
+    q->q4 *= n;
 }
 
-quat quatMul(quat a, quat b)
+VOID quatMul(quat *res, quat *a, quat *b)
 {
-    return (quat){
-        .q1 = a.q1 * b.q1 - a.q2 * b.q2 - a.q3 * b.q3 - a.q4 * b.q4,
-        .q2 = a.q1 * b.q2 + a.q2 * b.q1 + a.q3 * b.q4 - a.q4 * b.q3,
-        .q3 = a.q1 * b.q3 - a.q2 * b.q4 + a.q3 * b.q1 + a.q4 * b.q2,
-        .q4 = a.q1 * b.q4 + a.q2 * b.q3 - a.q3 * b.q2 + a.q4 * b.q1,
-    };
+    res->q1 = a->q1 * b->q1 - a->q2 * b->q2 - a->q3 * b->q3 - a->q4 * b->q4;
+    res->q2 = a->q1 * b->q2 + a->q2 * b->q1 + a->q3 * b->q4 - a->q4 * b->q3;
+    res->q3 = a->q1 * b->q3 - a->q2 * b->q4 + a->q3 * b->q1 + a->q4 * b->q2;
+    res->q4 = a->q1 * b->q4 + a->q2 * b->q3 - a->q3 * b->q2 + a->q4 * b->q1;
 }
 
-FLOAT quatNorm(quat q)
+FLOAT quatNorm(quat *q)
 {
-    return sqrt(q.q1 * q.q1 + q.q2 * q.q2 + q.q3 * q.q3 + q.q4 * q.q4);
+    return sqrt(q->q1 * q->q1 + q->q2 * q->q2 + q->q3 * q->q3 + q->q4 * q->q4);
 }
 
-quat quatConjugate(quat q)
+VOID quatConjugate(quat *q)
 {
-    return (quat){
-        .q1 = q.q1,
-        .q2 = -q.q2,
-        .q3 = -q.q3,
-        .q4 = -q.q4,
-    };
+    q->q2 = -q->q2;
+    q->q3 = -q->q3;
+    q->q4 = -q->q4;
 }
 
-quat quatInverse(quat q)
+VOID quatInverse(quat *q)
 {
-    FLOAT norm = quatNorm(q);
+    FLOAT normInv = fastInverseSqrt(q->q1 * q->q1 + q->q2 * q->q2 + q->q3 * q->q3 + q->q4 * q->q4);
+    FLOAT normInv2 = normInv * normInv;
 
-    return quatMulNum(1 / (norm * norm), quatConjugate(q));
+    q->q1 *= normInv2;
+    q->q2 *= -normInv2;
+    q->q3 *= -normInv2;
+    q->q4 *= -normInv2;
 }
 
-quat quatNormalize(quat q)
+VOID quatNormalize(quat *q)
 {
-    return quatMulNum(1 / quatNorm(q), q);
+    FLOAT normInv = fastInverseSqrt(q->q1 * q->q1 + q->q2 * q->q2 + q->q3 * q->q3 + q->q4 * q->q4);
+
+    q->q1 *= normInv;
+    q->q2 *= normInv;
+    q->q3 *= normInv;
+    q->q4 *= normInv;
 }
 
-vec3 quatToEuler(quat q)
+VOID quatToEuler(vec3 *res, quat *q)
 {
-    return (vec3){
-        .x = RAD_2_DEG(atan2(2 * (q.q1 * q.q2 + q.q3 * q.q4), 1 - 2 * (q.q2 * q.q2 + q.q3 * q.q3))),
-        .y = RAD_2_DEG(asin(2 * (q.q1 * q.q3 - q.q4 * q.q2))),
-        .z = RAD_2_DEG(atan2(2 * (q.q1 * q.q4 + q.q2 * q.q3), 1 - 2 * (q.q3 * q.q3 + q.q4 * q.q4))),
-    };
+    res->x = RAD_2_DEG(atan2(2 * (q->q1 * q->q2 + q->q3 * q->q4), 1 - 2 * (q->q2 * q->q2 + q->q3 * q->q3)));
+    res->y = RAD_2_DEG(asin(clampValue(2 * (q->q1 * q->q3 - q->q2 * q->q4), -1, 1)));
+    res->z = RAD_2_DEG(atan2(2 * (q->q1 * q->q4 + q->q2 * q->q3), 1 - 2 * (q->q3 * q->q3 + q->q4 * q->q4)));
 }

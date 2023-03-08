@@ -1,5 +1,9 @@
 #pragma once
 
+/**
+ * REF: https://github.com/BoschSensortec/BME68x-Sensor-API
+*/
+
 #include <obc/api.h>
 #include "drivers/gpio/gpio_driver.h"
 #include "drivers/gpio/spi_driver.h"

@@ -3,70 +3,131 @@
 #include <obc/api.h>
 
 /**
- * @brief Vector 2D.
-*/
+ * @brief Vector 2D
+ */
 typedef struct vec2
 {
     FLOAT x, y;
 } vec2;
 
 /**
- * @brief Vector 3D.
-*/
+ * @brief Vector 3D
+ */
 typedef struct vec3
 {
     FLOAT x, y, z;
 } vec3;
 
 /**
- * @brief Vector 4D.
-*/
-typedef struct vec4
-{
-    FLOAT x, y, z, w;
-} vec4;
+ * @brief Add vectors
+ *
+ * @param a Vector to add to
+ * @param b Second vector
+ */
+VOID vec2Add(vec2 *a, vec2 *b);
 
 /**
- * @brief Vector of N dimensions.
-*/
-typedef struct vecN
-{
-    FLOAT *data;
-    SIZE size;
-} vecN;
+ * @brief Subtract vectors
+ *
+ * @param a Vector to subtract from
+ * @param b Second vector
+ */
+VOID vec2Sub(vec2 *a, vec2 *b);
 
-vec2 vec2Add(vec2 a, vec2 b);
-vec2 vec2Sub(vec2 a, vec2 b);
-FLOAT vec2Magnitude(vec2 v);
-vec2 vec2Normalize(vec2 v);
-vec2 vec2MulNum(FLOAT n, vec2 b);
-vec2 vec2Dot(vec2 a, vec2 b);
-vecN vec2ToVecN(vec2 v);
-VOID vec2ToVecNRef(vecN* vRef, vec2 v);
+/**
+ * @brief Calculate vector norm (length)
+ *
+ * @param v Vector
+ * @return Vector norm
+ */
+FLOAT vec2Magnitude(vec2 *v);
 
-vec3 vec3Add(vec3 a, vec3 b);
-vec3 vec3Sub(vec3 a, vec3 b);
-FLOAT vec3Magnitude(vec3 v);
-vec3 vec3Normalize(vec3 v);
-vec3 vec3MulNum(FLOAT n, vec3 b);
-vec3 vec3Dot(vec3 a, vec3 b);
-vecN vec3ToVecN(vec3 v);
-VOID vec3ToVecNRef(vecN* vRef, vec3 v);
+/**
+ * @brief Normalize vector
+ *
+ * @param v Vector to normalize
+ */
+VOID vec2Normalize(vec2 *v);
 
-vec4 vec4Add(vec4 a, vec4 b);
-vec4 vec4Sub(vec4 a, vec4 b);
-FLOAT vec4Magnitude(vec4 v);
-vec4 vec4Normalize(vec4 v);
-vec4 vec4MulNum(FLOAT n, vec4 b);
-vec4 vec4Dot(vec4 a, vec4 b);
-vecN vec4ToVecN(vec4 v);
-VOID vec4ToVecNRef(vecN* vRef, vec4 v);
+/**
+ * @brief Multiply vector by a number
+ *
+ * @param n Number
+ * @param v Vector to multiply
+ */
+VOID vec2MulNum(FLOAT n, vec2 *v);
 
-vecN vecNCreate(SIZE size);
-VOID vecNFree(vecN v);
-vecN vecNAdd(vecN a, vecN b);
-vecN vecNSub(vecN a, vecN b);
-FLOAT vecNMagnitude(vecN v);
-vecN vecNNormalize(vecN v);
-vecN vecNMulNum(FLOAT n, vecN b);
-vecN vecNDot(vecN a, vecN b);
+/**
+ * @brief Multiply vectors
+ *
+ * @param res Result of multiplication
+ * @param a First vector
+ * @param b Second vector
+ */
+VOID vec2Dot(vec2 *res, vec2 *a, vec2 *b);
+
+/**
+ * @brief Calculate vectors dot sum
+ *
+ * @param a First vector
+ * @param b Second vector
+ * @return Result of multiplication
+ */
+FLOAT vec2DotSum(vec2 *a, vec2 *b);
+
+/**
+ * @brief Add vectors
+ *
+ * @param a Vector to add to
+ * @param b Second vector
+ */
+VOID vec3Add(vec3 *a, vec3 *b);
+
+/**
+ * @brief Add vectors
+ *
+ * @param a Vector to subtract from
+ * @param b Second vector
+ */
+VOID vec3Sub(vec3 *a, vec3 *b);
+
+/**
+ * @brief Calculate vector norm (length)
+ *
+ * @param v Vector
+ * @return Vector norm
+ */
+FLOAT vec3Magnitude(vec3 *v);
+
+/**
+ * @brief Normalize vector
+ *
+ * @param v Vector to normalize
+ */
+VOID vec3Normalize(vec3 *v);
+
+/**
+ * @brief Multiply vector by a number
+ *
+ * @param n Number
+ * @param v Vector to multiply
+ */
+VOID vec3MulNum(FLOAT n, vec3 *v);
+
+/**
+ * @brief Multiply vectors
+ *
+ * @param res Result of multiplication
+ * @param a First vector
+ * @param b Second vector
+ */
+VOID vec3Dot(vec3 *res, vec3 *a, vec3 *b);
+
+/**
+ * @brief Calculate vectors dot sum
+ *
+ * @param a First vector
+ * @param b Second vector
+ * @return Result of multiplication
+ */
+FLOAT vec3DotSum(vec3 *a, vec3 *b);

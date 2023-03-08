@@ -1,26 +1,39 @@
 #pragma once
 
 /**
- * INFO: https://www.kalmanfilter.net
+ * REF: https://www.kalmanfilter.net
+ * REF: https://www.bzarg.com/p/how-a-kalman-filter-works-in-pictures/
  */
 
 #include <obc/api.h>
 #include "maths/vector.h"
 
+typedef struct KalmanDataIMU
+{
+} KalmanDataIMU;
+
 /**
  * @brief Kalman filter output data
  */
-typedef struct KalmanOutputData
+typedef struct KalmanOutputDataIMU
 {
-    vec3 acc; /** Acceleration vector. */
-    vec3 vel; /** Velocity vector. */
-    vec3 pos; /** Position vector.*/
-} KalmanOutputData;
+    vec3 acc; /** Acceleration vector */
+    vec3 vel; /** Velocity vector */
+    vec3 pos; /** Position vector */
+} KalmanOutputDataIMU;
 
 /**
- * @brief Update Kalman filter.
+ * @brief Initialize Kalman filter for IMU
  *
- * @param output Kalman filter output data.
- * @param acc Acceleration vector.
+ * @param data Kalman filter data
  */
-VOID kalmanUpdate(KalmanOutputData *output, vec3 acc);
+VOID kalmanInitIMU(KalmanDataIMU *data);
+
+/**
+ * @brief Update Kalman filter for IMU
+ *
+ * @param data Kalman filter data
+ * @param output Kalman filter output data
+ * @param acc Acceleration vector
+ */
+VOID kalmanUpdateIMU(KalmanDataIMU *data, KalmanOutputDataIMU *output, vec3 acc);

@@ -1,10 +1,10 @@
-#include "drivers/tempr/tempr_cpu_driver.h"
+#include "drivers/cpu/cpu_temp_driver.h"
 #include "drivers/gpio/gpio_driver.h"
 #include "drivers/gpio/adc_driver.h"
 
 FUNCRESULT cpuTempInit()
 {
-    if (FUNCFAILED(adcInitAll()) || FUNCFAILED(adcInitPin(ADC_TEMP_INPUT)))
+    if (FUNCFAILED(adcInitPin(ADC_TEMP_INPUT)))
     {
         return ERR_FAIL;
     }

@@ -2,28 +2,28 @@
 
 #include <obc/api.h>
 
-typedef void (*PicoCoreFunction)(void); /** Type for thread function.*/
+typedef void (*PicoCoreFunction)(void); /** Type for thread function */
 
 /**
- * @brief Starts Core 1.
+ * @brief Starts Core 1
  *
- * @param function Function to start on new core.
- * @return true if success.
+ * @param function Function to start on new core
+ * @return true if success
  */
 BOOL startCore1(PicoCoreFunction function);
 
 /**
- * @brief Sends data to other core.
+ * @brief Sends data to other core
  *
- * @param data Data to send.
- * @return true if success.
+ * @param data Data to send
+ * @return true if success
  */
 BOOL sendToOtherCore(UINT32 data);
 
 /**
- * @brief Receives data from other core.
+ * @brief Receives data from other core
  *
- * @param data Data to receive.
- * @return true if success.
+ * @param data Data to receive
+ * @return true if success
  */
 BOOL receiveFromOtherCore(UINT32 *data);

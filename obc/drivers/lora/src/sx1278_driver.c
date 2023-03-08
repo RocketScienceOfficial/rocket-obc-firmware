@@ -88,7 +88,6 @@ FUNCRESULT sx1278Init(SX1278Data *data, SX1278Pinout *pinout, UINT64 frequency)
         sleep_ms(10);
     }
 
-    spiInitAll(data->_pinout.spi, 12500);
     spiInitPins(data->_pinout.spi, data->_pinout.miso, data->_pinout.mosi, data->_pinout.sck, data->_pinout.cs);
 
     BYTE version = __sx1278ReadRegister(data, REG_VERSION);

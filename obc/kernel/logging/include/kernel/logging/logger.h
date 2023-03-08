@@ -7,7 +7,7 @@
 #define MAX_LOG_SIZE 256
 
 /**
- * @brief Types of sinks.
+ * @brief Types of sinks
  */
 typedef enum LoggerSinkType
 {
@@ -16,13 +16,13 @@ typedef enum LoggerSinkType
 } LoggerSinkType;
 
 /**
- * @brief Data structure for a sink. (INTERNAL USE)
+ * @brief Data structure for a sink (INTERNAL USE)
  */
 typedef struct LogSinkData
 {
-    STRING _pattern;      /** Pattern of sink. */
-    LoggerSinkType _type; /** Type of sink. */
-    VOID *_customData;    /** Custom data of sink. */
+    STRING _pattern;      /** Pattern of sink */
+    LoggerSinkType _type; /** Type of sink */
+    VOID *_customData;    /** Custom data of sink */
 } LogSinkData;
 
 /**
@@ -30,59 +30,59 @@ typedef struct LogSinkData
  */
 typedef struct Logger
 {
-    STRING _name;                         /** Name of logger. */
-    LogSinkData _sinks[MAX_LOGGER_SINKS]; /** Sinks of logger. */
-    SIZE _numSinks;                       /** Number of sinks. */
+    STRING _name;                         /** Name of logger */
+    LogSinkData _sinks[MAX_LOGGER_SINKS]; /** Sinks of logger */
+    SIZE _numSinks;                       /** Number of sinks */
 } Logger;
 
 /**
- * @brief Creates a logger.
+ * @brief Creates a logger
  *
- * @param logger Logger data to setup.
- * @param name Logger name.
+ * @param logger Logger data to setup
+ * @param name Logger name
  */
 VOID myLogCreateLogger(Logger *logger, const STRING name);
 
 /**
- * @brief Creates a console sink.
+ * @brief Creates a console sink
  *
- * @param logger Logger to add sink to.
- * @param pattern Pattern of sink.
+ * @param logger Logger to add sink to
+ * @param pattern Pattern of sink
  */
 VOID myLogCreateConsoleSink(Logger *logger, const STRING pattern);
 
 /**
- * @brief Creates a file sink.
+ * @brief Creates a file sink
  *
- * @param logger Logger to add sink to.
- * @param pattern Pattern of sink.
+ * @param logger Logger to add sink to
+ * @param pattern Pattern of sink
  */
 VOID myLogCreateFileSink(Logger *logger, const STRING pattern, SIZE fileIndex);
 
 /**
- * @brief Parses a log.
+ * @brief Parses a log
  *
- * @param loggerName Name of logger.
- * @param pattern Pattern of log.
- * @param level Level of log.
- * @param format Format of log.
- * @param args Arguments of log.
- * @return CHAR* Parsed log.
+ * @param loggerName Name of logger
+ * @param pattern Pattern of log
+ * @param level Level of log
+ * @param format Format of log
+ * @param args Arguments of log
+ * @return CHAR* Parsed log
  */
 STRING parseLog(const STRING loggerName, const STRING pattern, const STRING level, const STRING format, va_list args);
 
 /**
- * @brief Logs a message.
+ * @brief Logs a message
  *
- * @param loggerName Name of logger.
- * @param level Level of log.
- * @param format Format of log.
- * @param ... Arguments of log.
+ * @param loggerName Name of logger
+ * @param level Level of log
+ * @param format Format of log
+ * @param ... Arguments of log
  */
 VOID myLog(Logger *logger, const STRING level, const STRING format, ...);
 
 /**
- * @brief Get default logger.
+ * @brief Get default logger
  */
 Logger *myLogGetCoreLogger();
 

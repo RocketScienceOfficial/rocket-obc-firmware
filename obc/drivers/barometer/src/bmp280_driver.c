@@ -163,7 +163,7 @@ FUNCRESULT bmp280Init(BMP280Config *config, I2CInstance i2c, PinNumber sda, PinN
 
     config->_i2c = i2c;
 
-    if (FUNCFAILED(i2cInitAll(i2c, 100 * 1000)) || FUNCFAILED(i2cInitPins(i2c, sda, scl)))
+    if (FUNCFAILED(i2cInitPins(i2c, sda, scl)))
     {
         return ERR_FAIL;
     }

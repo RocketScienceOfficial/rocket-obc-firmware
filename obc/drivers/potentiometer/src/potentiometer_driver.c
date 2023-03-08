@@ -7,7 +7,7 @@ FUNCRESULT potentiometerInit(PotentiometerConfig *config, ADCInput input)
         return ERR_INVALIDARG;
     }
 
-    if (FUNCFAILED(adcInitAll()) || FUNCFAILED(adcInitPin(input)))
+    if (FUNCFAILED(adcInitPin(input)))
     {
         return ERR_FAIL;
     }

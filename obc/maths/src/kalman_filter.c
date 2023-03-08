@@ -1,8 +1,9 @@
 #include "maths/kalman_filter.h"
-#include "maths/matrix.h"
-#include "maths/vector.h"
 
-VOID kalmanUpdate(KalmanOutputData *output, vec3 acc)
+VOID kalmanInitIMU(KalmanDataIMU *data)
 {
-    matMxN state = matMxNCreate(9, 9);
+}
+
+VOID kalmanUpdateIMU(KalmanDataIMU *data, KalmanOutputDataIMU *output, vec3 acc)
+{
 }

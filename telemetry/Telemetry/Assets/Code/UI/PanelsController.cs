@@ -12,6 +12,7 @@ public class PanelsController : MonoBehaviour
     [SerializeField] private GameObject m_MapPanel;
     [SerializeField] private GameObject m_3DPanel;
     [SerializeField] private GameObject m_CamPanel;
+    [SerializeField] private GameObject m_OrientationPanel;
     [SerializeField] private GameObject m_PortSelectionPanel;
 
     [Header("Tabs")]
@@ -20,6 +21,7 @@ public class PanelsController : MonoBehaviour
     [SerializeField] private UITab m_MapTab;
     [SerializeField] private UITab m_3DTab;
     [SerializeField] private UITab m_CamTab;
+    [SerializeField] private UITab m_OrientationTab;
 
     private void Awake()
     {
@@ -39,6 +41,7 @@ public class PanelsController : MonoBehaviour
         m_MapPanel.SetActive(false);
         m_3DPanel.SetActive(false);
         m_CamPanel.SetActive(false);
+        m_OrientationPanel.SetActive(false);
         m_PortSelectionPanel.SetActive(false);
 
         m_DashboardTab.SetActivation(false);
@@ -46,6 +49,7 @@ public class PanelsController : MonoBehaviour
         //m_MapTab.SetActivation(false);
         m_3DTab.SetActivation(false);
         //m_CamTab.SetActivation(false);
+        m_OrientationTab.SetActivation(false);
     }
 
     public void ActivatePanel(Panel panel, bool activation)
@@ -79,6 +83,11 @@ public class PanelsController : MonoBehaviour
 
                 //m_CamTab.SetActivation(true);
                 break;
+            case Panel.Orientation:
+                panelObj = m_OrientationPanel;
+
+                m_OrientationTab.SetActivation(true);
+                break;
             case Panel.PortSelection:
                 panelObj = m_PortSelectionPanel;
                 break;
@@ -97,5 +106,6 @@ public enum Panel
     Map,
     Render,
     Cam,
+    Orientation,
     PortSelection
 }

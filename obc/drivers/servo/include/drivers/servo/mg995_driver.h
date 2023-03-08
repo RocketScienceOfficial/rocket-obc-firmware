@@ -12,11 +12,11 @@
 FUNCRESULT mg995Init(PinNumber pin);
 
 /**
- * @brief Check if servo is connected.
+ * @brief Check if servo is connected
  *
- * @param pin GPIO pin to use for servo.
- * @param result Result of check.
- * @return Result code.
+ * @param pin GPIO pin to use for servo
+ * @param result Result of check
+ * @return Result code
  */
 FUNCRESULT mg995Check(PinNumber pin, BOOL *result);
 

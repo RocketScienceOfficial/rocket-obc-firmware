@@ -3,7 +3,7 @@
 #include <obc/api.h>
 
 /**
- * @brief Single measurement data structure.
+ * @brief Single measurement data structure
  */
 typedef struct MeasurementData
 {

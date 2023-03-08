@@ -1,7 +1,8 @@
 #pragma once
 
 /**
- * INFO: https://github.com/akshayabali/pico-lora
+ * REF: https://github.com/akshayabali/pico-lora
+ * REF: https://github.com/sandeepmistry/arduino-LoRa
 */
 
 #include <obc/api.h>
@@ -9,7 +10,7 @@
 #include "drivers/gpio/spi_driver.h"
 
 /**
- * @brief Pinout data to use in the radio.
+ * @brief Pinout data to use in the radio
  */
 typedef struct SX1278Pinout
 {

@@ -22,6 +22,12 @@
         "gpio_driver.h": "c",
         "bmi088_driver.h": "c",
         "spi.h": "c",
-        "mmc5983ma_driver.h": "c"
+        "mmc5983ma_driver.h": "c",
+        "cpu_temp_driver.h": "c",
+        "kalman_filter.h": "c",
+        "constants.h": "c",
+        "adc_driver.h": "c",
+        "madgwick_filter.h": "c",
+        "avg_filter.h": "c"
     }
 }
