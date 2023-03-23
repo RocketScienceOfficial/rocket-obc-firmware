@@ -75,27 +75,6 @@ BOOL spiCheckSCK(SPIInstance spi, PinNumber sck)
     }
 }
 
-BOOL spiCheckCS(SPIInstance spi, PinNumber cs)
-{
-    if (!spiCheckInstance(spi))
-    {
-        return FALSE;
-    }
-
-    if (spi == 0)
-    {
-        return cs == 1 || cs == 5 || cs == 17;
-    }
-    else if (spi == 1)
-    {
-        return cs == 9 || cs == 13;
-    }
-    else
-    {
-        return FALSE;
-    }
-}
-
 FUNCRESULT spiInitAll(SPIInstance spi, SPIBaudRate baudrate)
 {
     if (!spiCheckInstance(spi))
@@ -110,7 +89,7 @@ FUNCRESULT spiInitAll(SPIInstance spi, SPIBaudRate baudrate)
 
 FUNCRESULT spiInitPins(SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber sck, PinNumber cs)
 {
-    if (!spiCheckInstance(spi) || !spiCheckMISO(spi, miso) || !spiCheckMOSI(spi, mosi) || !spiCheckSCK(spi, sck) || !spiCheckCS(spi, cs))
+    if (!spiCheckInstance(spi) || !spiCheckMISO(spi, miso) || !spiCheckMOSI(spi, mosi) || !spiCheckSCK(spi, sck))
     {
         return ERR_INVALIDARG;
     }

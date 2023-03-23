@@ -1,7 +1,7 @@
 #pragma once
 
 #include <obc/api.h>
-#include "drivers/lora/sx1278_driver.h"
+#include "drivers/lora/sx127X_driver.h"
 #include "kernel/services/radio_protocol.h"
 
 #define RADIO_DBM 20
@@ -29,7 +29,7 @@ typedef struct RadioUtilPacketData
  *
  * @param pinout Radio pinout
  */
-VOID initializeRadio(SX1278Pinout *pinout);
+VOID initializeRadio(SX127XPinout *pinout);
 
 /**
  * @brief Check if radio packet is available

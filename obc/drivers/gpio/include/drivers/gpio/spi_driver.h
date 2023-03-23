@@ -54,15 +54,6 @@ BOOL spiCheckMOSI(SPIInstance spi, PinNumber mosi);
 BOOL spiCheckSCK(SPIInstance spi, PinNumber sck);
 
 /**
- * @brief Checks if SPI CS pin is valid.
- *
- * @param spi SPI instance.
- * @param cs CS pin.
- * @return True if cs is valid.
- */
-BOOL spiCheckCS(SPIInstance spi, PinNumber cs);
-
-/**
  * @brief Initialize SPI instance.
  *
  * @param spi SPI Instance.

@@ -10,11 +10,8 @@ set(CMAKE_CXX_STANDARD 17)
 pico_sdk_init()
 
 add_subdirectory(lib)
-
 add_subdirectory(debug)
-
 add_subdirectory(api)
-
 add_subdirectory(tools)
 add_subdirectory(maths)
 add_subdirectory(ahrs)
@@ -22,5 +19,4 @@ add_subdirectory(crypto)
 add_subdirectory(drivers)
 add_subdirectory(kernel)
 add_subdirectory(core)
-
 add_subdirectory(tests)

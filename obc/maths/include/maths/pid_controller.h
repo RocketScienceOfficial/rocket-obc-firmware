@@ -3,9 +3,9 @@
 #include <obc/api.h>
 
 /**
- * @brief PID regulator data
+ * @brief PID controller data
  */
-typedef struct PIDRegulatorData
+typedef struct PIDControllerData
 {
     FLOAT kp;        /** KP Factor */
     FLOAT ki;        /** KI Factor */
@@ -13,25 +13,25 @@ typedef struct PIDRegulatorData
     FLOAT dt;        /** Time step */
     FLOAT lastError; /** Last error */
     FLOAT integral;  /** Integral */
-} PIDRegulatorData;
+} PIDControllerData;
 
 /**
- * @brief Initialize PID regulator
+ * @brief Initialize PID controller
  *
- * @param pid PID regulator data
+ * @param pid PID controller data
  * @param kp Proportional gain
  * @param ki Integral gain
  * @param kd Derivative gain
  * @param dt Time step
  */
-VOID pidRegulatorInit(PIDRegulatorData *pid, FLOAT kp, FLOAT ki, FLOAT kd, FLOAT dt);
+VOID pidControllerInit(PIDControllerData *pid, FLOAT kp, FLOAT ki, FLOAT kd, FLOAT dt);
 
 /**
- * @brief Update PID regulator
+ * @brief Update PID controller
  *
- * @param pid PID regulator data
+ * @param pid PID controller data
  * @param expected Expected value (Setpoint)
  * @param actual Actual value
  * @return Control signal
  */
-FLOAT pidRegulatorUpdate(PIDRegulatorData *pid, FLOAT expected, FLOAT actual);
+FLOAT pidControllerUpdate(PIDControllerData *pid, FLOAT expected, FLOAT actual);

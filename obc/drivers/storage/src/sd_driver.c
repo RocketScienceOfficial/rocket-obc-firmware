@@ -29,15 +29,15 @@ FUNCRESULT sdInit(SDCard *sdCard, PinNumber checkPin)
 
     BOOL connected = FALSE;
 
-    if (FUNCFAILED(sdCheck(checkPin, &connected)))
-    {
-        return ERR_UNEXPECTED;
-    }
+    // if (FUNCFAILED(sdCheck(checkPin, &connected)))
+    // {
+    //     return ERR_UNEXPECTED;
+    // }
 
-    if (!connected)
-    {
-        return ERR_ACCESSDENIED;
-    }
+    // if (!connected)
+    // {
+    //     return ERR_ACCESSDENIED;
+    // }
 
     memset(sdCard, 0, sizeof(SDCard));
 

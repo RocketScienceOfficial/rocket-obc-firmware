@@ -57,10 +57,10 @@ typedef struct MPU6050Data
 FUNCRESULT mpu6050Init(MPU6050Config *config, I2CInstance i2c, PinNumber sda, PinNumber scl, UINT8 lpFilter, UINT8 accelSensLevel, UINT8 gyroSensLevel);
 
 /**
- * @brief Checks if the accelerometer is initialized
+ * @brief Checks if the accelerometer is plugged in
  *
  * @param config Accelerometer config data
- * @param available Is Initialized
+ * @param available Is plugged in
  * @return Result code.
  */
 FUNCRESULT mpu6050Check(MPU6050Config *config, BOOL *result);
@@ -69,17 +69,7 @@ FUNCRESULT mpu6050Check(MPU6050Config *config, BOOL *result);
  * @brief Read raw accelerometer data
  *
  * @param config Accelerometer config data
- * @param data Returns raw accelerometer data
+ * @param data Accelerometer data
  * @return Result code.
  */
-FUNCRESULT mpu6050ReadRaw(MPU6050Config *config, MPU6050RawData *data);
-
-/**
- * @brief Read converted accelerometer data
- *
- * @param config Accelerometer config data
- * @param inData Raw accelerometer data
- * @param outData Returns converted accelerometer data
- * @return Result code.
- */
-FUNCRESULT mpu6050ConvertData(MPU6050Config *config, MPU6050RawData *inData, MPU6050Data *outData);
+FUNCRESULT mpu6050Read(MPU6050Config *config, MPU6050Data *data);

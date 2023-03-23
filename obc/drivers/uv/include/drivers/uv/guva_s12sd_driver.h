@@ -8,7 +8,7 @@
  */
 typedef struct GUVA_S12SD_Config
 {
-    ADCInput _input; /** ADC input */
+    ADCInput input; /** ADC input */
 } GUVA_S12SD_Config;
 
 /**

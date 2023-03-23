@@ -30,25 +30,5 @@ VOID initializeMeasurements()
 
 VOID takeMeasurements(MeasurementData *data_out)
 {
-    BMP280Data barometerData = {0};
-    MPU6050Data accelerometerData = {0};
-
-    DRIVER_CALL(bmp280Read(&s_BarometerConfig, &barometerData));
-
-    MPU6050RawData mpu6050RawData = {0};
-
-    DRIVER_CALL(mpu6050ReadRaw(&s_AccelerometerConfig, &mpu6050RawData));
-    DRIVER_CALL(mpu6050ConvertData(&s_AccelerometerConfig, &mpu6050RawData, &accelerometerData));
-
-    MY_LOG_MEASURE_INT(barometerData.pressure);
-    MY_LOG_MEASURE_FLOAT(barometerData.temperature);
-    MY_LOG_MEASURE_FLOAT(accelerometerData.accel_x);
-    MY_LOG_MEASURE_FLOAT(accelerometerData.accel_y);
-    MY_LOG_MEASURE_FLOAT(accelerometerData.accel_z);
-    MY_LOG_MEASURE_FLOAT(accelerometerData.rot_x);
-    MY_LOG_MEASURE_FLOAT(accelerometerData.rot_y);
-    MY_LOG_MEASURE_FLOAT(accelerometerData.rot_z);
-    MY_LOG_MEASURE_END();
-
     *data_out = (MeasurementData){0};
 }

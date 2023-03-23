@@ -13,7 +13,7 @@ FUNCRESULT potentiometerInit(PotentiometerConfig *config, ADCInput input)
     }
     else
     {
-        config->_input = input;
+        config->input = input;
 
         return SUC_OK;
     }
@@ -28,7 +28,7 @@ FUNCRESULT potentiometerReadPercent(PotentiometerConfig *config, FLOAT *percenta
 
     VoltageLevel voltage = 0;
 
-    if (FUNCFAILED(adcRead(config->_input, &voltage)))
+    if (FUNCFAILED(adcRead(config->input, &voltage)))
     {
         return ERR_FAIL;
     }

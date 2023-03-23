@@ -2,7 +2,7 @@
 
 #include "test_framework.h"
 
-#define CRYPTOGRAPHY_TEST_NAME maths
+#define CRYPTOGRAPHY_TEST_NAME crypto
 
 MY_TEST_FUNC(CRYPTOGRAPHY_TEST_NAME, 1);
 MY_TEST_FUNC(CRYPTOGRAPHY_TEST_NAME, 2);

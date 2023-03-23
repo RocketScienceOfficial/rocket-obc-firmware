@@ -28,6 +28,19 @@
         "constants.h": "c",
         "adc_driver.h": "c",
         "madgwick_filter.h": "c",
-        "avg_filter.h": "c"
+        "avg_filter.h": "c",
+        "spi_driver.h": "c",
+        "hw_config.h": "c",
+        "sd_driver.h": "c",
+        "pinout.h": "c",
+        "test_cryptography.h": "c",
+        "test_commands.h": "c",
+        "test_logger.h": "c",
+        "pio.h": "c",
+        "clocks.h": "c",
+        "ws2812_driver.pio.h": "c",
+        "nmea_parser.h": "c",
+        "u_blox_neo_m9n_driver.h": "c",
+        "w2812_driver.h": "c"
     }
 }

@@ -3,8 +3,8 @@ set(LIB_NAME lora)
 set(LIB_GENERAL_NAME "${MODULE_NAME}_${LIB_NAME}_lib")
 
 add_library(${LIB_GENERAL_NAME} STATIC
-    include/${MODULE_NAME}/${LIB_NAME}/sx1278_driver.h
-    src/sx1278_driver.c
+    include/${MODULE_NAME}/${LIB_NAME}/sx127X_driver.h
+    src/sx127X_driver.c
 )
 
 target_link_libraries(${LIB_GENERAL_NAME} PUBLIC pico_stdlib drivers_gpio_lib)

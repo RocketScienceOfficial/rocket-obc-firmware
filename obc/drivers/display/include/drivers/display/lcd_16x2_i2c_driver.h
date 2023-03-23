@@ -1,10 +1,8 @@
-/**
- * Taken from:
- *
- * https://github.com/raspberrypi/pico-examples/tree/develop/i2c/lcd_1602_i2c
- */
-
 #pragma once
+
+/**
+ * REF: https://github.com/raspberrypi/pico-examples/tree/develop/i2c/lcd_1602_i2c
+ */
 
 #include <obc/api.h>
 #include "drivers/gpio/i2c_driver.h"

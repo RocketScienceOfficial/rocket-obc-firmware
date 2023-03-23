@@ -4,7 +4,9 @@ set(LIB_GENERAL_NAME "${MODULE_NAME}_${LIB_NAME}_lib")
 
 add_library(${LIB_GENERAL_NAME} STATIC
     include/${MODULE_NAME}/${LIB_NAME}/u_blox_neo_m9n_driver.h
+    include/${MODULE_NAME}/${LIB_NAME}/nmea_parser.h
     src/u_blox_neo_m9n_driver.c
+    src/nmea_parser.c
 )
 
 target_link_libraries(${LIB_GENERAL_NAME} PUBLIC drivers_gpio_lib)

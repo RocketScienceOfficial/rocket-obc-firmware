@@ -2,9 +2,6 @@
 #include "maths/constants.h"
 
 #define MPU6050_ADDR 0x68
-#define ACCEL_LBS_0 16384.0
-#define N_AXIS 3
-#define DEFAULT_SCALE 1
 #define AX_OFFSET 552
 #define AY_OFFSET -241
 #define AZ_OFFSET -3185
@@ -14,8 +11,6 @@
 #define GX_SCALE 0.99764
 #define GY_SCALE 1.0
 #define GZ_SCALE 1.01037
-#define GYRO_BAND 35
-#define BIAS_COUNT 5000
 
 static FLOAT getAccelLBS(INT32 level)
 {
@@ -125,28 +120,6 @@ FUNCRESULT mpu6050Check(MPU6050Config *config, BOOL *result)
     return SUC_OK;
 }
 
-FUNCRESULT mpu6050ReadRaw(MPU6050Config *config, MPU6050RawData *data)
-{
-    if (!config || !data)
-    {
-        return ERR_INVALIDARG;
-    }
-
-    INT16 acceleration[3], gyro[3], temp;
-
-    mpu6050ReadRawValues(config, acceleration, gyro, &temp);
-
-    data->accel_x = acceleration[0];
-    data->accel_y = acceleration[1];
-    data->accel_z = acceleration[2];
-    data->rot_x = gyro[0];
-    data->rot_y = gyro[1];
-    data->rot_z = gyro[2];
-    data->temperature = temp;
-
-    return SUC_OK;
-}
-
 static FLOAT convertAcceleration(MPU6050Config *config, INT16 raw, INT16 offset, FLOAT scale)
 {
     FLOAT calcScale = scale * config->_accelLBS;
@@ -167,20 +140,24 @@ static FLOAT convertTemperature(INT16 raw)
     return (FLOAT)raw / 340.0 + 36.53;
 }
 
-FUNCRESULT mpu6050ConvertData(MPU6050Config *config, MPU6050RawData *inData, MPU6050Data *outData)
+FUNCRESULT mpu6050Read(MPU6050Config *config, MPU6050Data *data)
 {
-    if (!config || !inData || !outData)
+    if (!config || !data)
     {
         return ERR_INVALIDARG;
     }
 
-    outData->accel_x = convertAcceleration(config, inData->accel_x, AX_OFFSET, AX_SCALE);
-    outData->accel_y = convertAcceleration(config, inData->accel_y, AY_OFFSET, AY_SCALE);
-    outData->accel_z = convertAcceleration(config, inData->accel_z, AZ_OFFSET, AZ_SCALE);
-    outData->rot_x = convertGyro(config, inData->rot_x, GX_SCALE);
-    outData->rot_y = convertGyro(config, inData->rot_y, GY_SCALE);
-    outData->rot_z = convertGyro(config, inData->rot_z, GZ_SCALE);
-    outData->temperature = convertTemperature(inData->temperature);
+    INT16 acceleration[3], gyro[3], temp;
+
+    mpu6050ReadRawValues(config, acceleration, gyro, &temp);
+
+    data->accel_x = convertAcceleration(config, acceleration[0], AX_OFFSET, AX_SCALE);
+    data->accel_y = convertAcceleration(config, acceleration[1], AY_OFFSET, AY_SCALE);
+    data->accel_z = convertAcceleration(config, acceleration[2], AZ_OFFSET, AZ_SCALE);
+    data->rot_x = convertGyro(config, gyro[0], GX_SCALE);
+    data->rot_y = convertGyro(config, gyro[1], GY_SCALE);
+    data->rot_z = convertGyro(config, gyro[2], GZ_SCALE);
+    data->temperature = convertTemperature(temp);
 
     return SUC_OK;
 }

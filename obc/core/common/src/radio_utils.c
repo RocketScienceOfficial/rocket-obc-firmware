@@ -6,14 +6,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-static SX1278Data s_LoraData;
+static SX127XData s_LoraData;
 
-VOID initializeRadio(SX1278Pinout *pinout)
+VOID initializeRadio(SX127XPinout *pinout)
 {
-    DRIVER_CALL(sx1278Init(&s_LoraData, pinout, RADIO_FREQUENCY_HZ));
-    DRIVER_CALL(sx1278SetTxPower(&s_LoraData, RADIO_DBM));
-    DRIVER_CALL(sx1278SetSpreadingFactor(&s_LoraData, RADIO_SPREADING_FACTOR));
-    DRIVER_CALL(sx1278SetSignalBandwidth(&s_LoraData, RADIO_SIGNAL_BANDWIDTH));
+    DRIVER_CALL(sx127XInit(&s_LoraData, pinout, RADIO_FREQUENCY_HZ));
+    DRIVER_CALL(sx127XSetTxPower(&s_LoraData, RADIO_DBM));
+    DRIVER_CALL(sx127XSetSpreadingFactor(&s_LoraData, RADIO_SPREADING_FACTOR));
+    DRIVER_CALL(sx127XSetSignalBandwidth(&s_LoraData, RADIO_SIGNAL_BANDWIDTH));
 
     MY_LOG_CORE_INFO("Radio initialized!");
 }
@@ -22,7 +22,7 @@ BOOL checkRadioPacket(RadioUtilPacketData *packet)
 {
     SIZE packetSize = 0;
 
-    DRIVER_CALL(sx1278ParsePacket(&s_LoraData, 0, &packetSize));
+    DRIVER_CALL(sx127XParsePacket(&s_LoraData, 0, &packetSize));
 
     if (packetSize)
     {
@@ -32,12 +32,12 @@ BOOL checkRadioPacket(RadioUtilPacketData *packet)
         SIZE i = 0;
         BOOL available = FALSE;
 
-        DRIVER_CALL(sx1278Available(&s_LoraData, &available));
+        DRIVER_CALL(sx127XAvailable(&s_LoraData, &available));
 
         while (available)
         {
-            DRIVER_CALL(sx1278Read(&s_LoraData, &buffer[i]));
-            DRIVER_CALL(sx1278Available(&s_LoraData, &available));
+            DRIVER_CALL(sx127XRead(&s_LoraData, &buffer[i]));
+            DRIVER_CALL(sx127XAvailable(&s_LoraData, &available));
 
             i++;
         }
@@ -46,17 +46,17 @@ BOOL checkRadioPacket(RadioUtilPacketData *packet)
 
         INT32 rssi = 0;
 
-        DRIVER_CALL(sx1278Rssi(&s_LoraData, &rssi));
+        DRIVER_CALL(sx127XRssi(&s_LoraData, &rssi));
 
         if (rssi < RADIO_MIN_RSSI)
         {
-            DRIVER_CALL(sx1278SetSpreadingFactor(&s_LoraData, RADIO_ERROR_SPREADING_FACTOR));
-            DRIVER_CALL(sx1278SetSignalBandwidth(&s_LoraData, RADIO_ERROR_SIGNAL_BANDWIDTH));
+            DRIVER_CALL(sx127XSetSpreadingFactor(&s_LoraData, RADIO_ERROR_SPREADING_FACTOR));
+            DRIVER_CALL(sx127XSetSignalBandwidth(&s_LoraData, RADIO_ERROR_SIGNAL_BANDWIDTH));
         }
         else
         {
-            DRIVER_CALL(sx1278SetSpreadingFactor(&s_LoraData, RADIO_SPREADING_FACTOR));
-            DRIVER_CALL(sx1278SetSignalBandwidth(&s_LoraData, RADIO_SIGNAL_BANDWIDTH));
+            DRIVER_CALL(sx127XSetSpreadingFactor(&s_LoraData, RADIO_SPREADING_FACTOR));
+            DRIVER_CALL(sx127XSetSignalBandwidth(&s_LoraData, RADIO_SIGNAL_BANDWIDTH));
         }
 
         packet->signalStrength = rssi;
@@ -89,7 +89,7 @@ VOID sendRadioPacket(RadioBody *body)
 
     if (serializationResult)
     {
-        DRIVER_CALL(sx1278WriteBuffer(&s_LoraData, packetBuffer, packetBufferSize));
+        DRIVER_CALL(sx127XWriteBuffer(&s_LoraData, packetBuffer, packetBufferSize));
 
         free(packetBuffer);
 

@@ -8,7 +8,7 @@
  */
 typedef struct PotentiometerConfig
 {
-    ADCInput _input; /** ADC input */
+    ADCInput input; /** ADC input */
 } PotentiometerConfig;
 
 /**

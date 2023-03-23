@@ -14,7 +14,7 @@ FUNCRESULT guva_s12sd_Init(GUVA_S12SD_Config *config, ADCInput input)
     }
     else
     {
-        config->_input = input;
+        config->input = input;
 
         return SUC_OK;
     }
@@ -29,7 +29,7 @@ FUNCRESULT guva_s12sd_ReadUVIndex(GUVA_S12SD_Config *config, UINT32 *uvIndex)
 
     VoltageLevel voltage = 0;
 
-    if (FUNCFAILED(adcRead(config->_input, &voltage)))
+    if (FUNCFAILED(adcRead(config->input, &voltage)))
     {
         return ERR_FAIL;
     }

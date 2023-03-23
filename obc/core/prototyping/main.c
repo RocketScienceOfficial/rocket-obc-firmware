@@ -1,19 +1,27 @@
 #include "pico/stdlib.h"
 #include "hardware/spi.h"
 #include <stdio.h>
-
+#include <string.h>
 #include "maths/constants.h"
-#include "drivers/cpu/cpu_temp_driver.h"
-#include "drivers/accelerometer/bmi088_driver.h"
 #include "maths/kalman_filter.h"
 #include "ahrs/madgwick_filter.h"
+#include "common/radio_utils.h"
+#include "kernel/logging/logger.h"
+#include "drivers/cpu/cpu_temp_driver.h"
+#include "drivers/accelerometer/bmi088_driver.h"
+#include "drivers/console/console_output.h"
+#include "drivers/gps/u_blox_neo_m9n_driver.h"
+#include "drivers/led/w2812_driver.h"
+#include "drivers/storage/sd_driver.h"
 
 #define SPI spi0
-#define ACCEL_CS 1
-#define GYRO_CS 5
-#define SCK 2
-#define MOSI 3
-#define MISO 4
+#define ACCEL_CS 11
+#define GYRO_CS 10
+#define SCK 18
+#define MOSI 19
+#define MISO 16
+
+static RadioUtilPacketData s_Packet;
 
 int main()
 {

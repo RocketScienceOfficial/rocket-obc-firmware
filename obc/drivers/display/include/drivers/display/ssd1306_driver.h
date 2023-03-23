@@ -1,10 +1,8 @@
-/**
- * Taken from:
- *
- * https://github.com/daschr/pico-ssd1306
- */
-
 #pragma once
+
+/**
+ * REF: https://github.com/daschr/pico-ssd1306
+ */
 
 #include <obc/api.h>
 #include "drivers/gpio/i2c_driver.h"
@@ -38,9 +36,9 @@ typedef enum SSD1306Command
  */
 typedef struct SSD1306Data
 {
-    UINT8 width;     /** Width of display. */
-    UINT8 height;    /** Height of display. */
-    UINT8 pages;     /** Stores pages of display (calculated on initialization. */
+    UINT8 width;      /** Width of display. */
+    UINT8 height;     /** Height of display. */
+    UINT8 pages;      /** Stores pages of display (calculated on initialization. */
     BYTE address;     /** I2C address of display. */
     I2CInstance i2c;  /** I2C connection instance. */
     BOOL externalVCC; /** Whether display uses external VCC. */

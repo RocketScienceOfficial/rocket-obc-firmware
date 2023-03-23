@@ -1,6 +1,6 @@
 #include "maths/pid_controller.h"
 
-VOID pidRegulatorInit(PIDRegulatorData* pid, FLOAT kp, FLOAT ki, FLOAT kd, FLOAT dt)
+VOID pidControllerInit(PIDControllerData *pid, FLOAT kp, FLOAT ki, FLOAT kd, FLOAT dt)
 {
     pid->kp = kp;
     pid->ki = ki;
@@ -10,10 +10,10 @@ VOID pidRegulatorInit(PIDRegulatorData* pid, FLOAT kp, FLOAT ki, FLOAT kd, FLOAT
     pid->integral = 0;
 }
 
-FLOAT pidRegulatorUpdate(PIDRegulatorData* pid, FLOAT expected, FLOAT actual)
+FLOAT pidControllerUpdate(PIDControllerData *pid, FLOAT expected, FLOAT actual)
 {
     FLOAT error = expected - actual;
-    
+
     pid->integral += error * pid->dt;
 
     FLOAT p = pid->kp * error;
