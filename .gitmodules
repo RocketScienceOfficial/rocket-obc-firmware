@@ -1,6 +1,6 @@
-[submodule "obc/pico-sdk"]
-	path = obc/pico-sdk
+[submodule "vendor/pico-sdk"]
+	path = vendor/pico-sdk
 	url = https://github.com/raspberrypi/pico-sdk
-[submodule "obc/debug/picoprobe"]
-	path = obc/debug/picoprobe
+[submodule "vendor/picoprobe"]
+	path = vendor/picoprobe
 	url = https://github.com/raspberrypi/picoprobe

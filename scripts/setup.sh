@@ -6,7 +6,6 @@ sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-n
 
 git submodule update --init --recursive
 
-./obc/scripts/build.sh
+./scripts/build.sh
 
-pip install -r ./obc/utils/requirements.txt
-pip install -r ./telemetry/Telemetry/Utils/requirements.txt
+pip install -r ./utils/requirements.txt
