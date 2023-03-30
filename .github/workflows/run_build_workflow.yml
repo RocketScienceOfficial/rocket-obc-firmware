@@ -12,6 +12,6 @@ jobs:
         working-directory: .
         run: |
           sed -i -e 's/\r$//' ./scripts/setup.sh
-          sed -i -e 's/\r$//' ./obc/scripts/build.sh
+          sed -i -e 's/\r$//' ./scripts/build.sh
           ./scripts/setup.sh
         shell: bash
