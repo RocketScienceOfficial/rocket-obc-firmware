@@ -24,6 +24,8 @@
 #define INT_2_THS 0x36
 #define INT_2_DURATION 0x37
 
+#define RESOLUTION_DIVIDER 32768.0f
+
 FUNCRESULT h3lis331dlInit(H3lis331dlConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
 {
     config->spi = spi;
@@ -31,8 +33,6 @@ FUNCRESULT h3lis331dlInit(H3lis331dlConfig *config, SPIInstance spi, PinNumber m
     config->rangeFactor = 0;
 
     spiInitPins(spi, miso, mosi, sck, cs);
-
-    gpioSetPinState(cs, FALSE);
 
     return SUC_OK;
 }
@@ -48,7 +48,7 @@ FUNCRESULT h3lis331dlSetPower(H3lis331dlConfig *config, BOOL power)
 {
     BYTE data = __h3lis331dlReadReg(config, CTRL_REG1);
 
-    data &= ~(0b111 << 5);
+    data &= 0x1F;
 
     if (power)
     {
@@ -64,7 +64,7 @@ FUNCRESULT h3lis331dlSetODR(H3lis331dlConfig *config, H3lis331dlODR odr)
 {
     BYTE data = __h3lis331dlReadReg(config, CTRL_REG1);
 
-    data &= ~(0b11 << 3);
+    data &= 0xE7;
     data |= (odr << 3);
 
     __h3lis331dlWriteReg(config, CTRL_REG1, data);
@@ -76,7 +76,7 @@ FUNCRESULT h3lis331dlSetRange(H3lis331dlConfig *config, H3lis331dlRange range)
 {
     BYTE data = __h3lis331dlReadReg(config, CTRL_REG4);
 
-    data &= ~(0b11 << 4);
+    data &= 0xCF;
     data |= (range << 4);
 
     __h3lis331dlWriteReg(config, CTRL_REG4, data);
@@ -84,13 +84,13 @@ FUNCRESULT h3lis331dlSetRange(H3lis331dlConfig *config, H3lis331dlRange range)
     switch (range)
     {
     case H3LIS331DL_RANGE_100G:
-        config->rangeFactor = 0.00305176f;
+        config->rangeFactor = 100.0f / RESOLUTION_DIVIDER;
         break;
     case H3LIS331DL_RANGE_200G:
-        config->rangeFactor = 0.00610352f;
+        config->rangeFactor = 200.0f / RESOLUTION_DIVIDER;
         break;
     case H3LIS331DL_RANGE_400G:
-        config->rangeFactor = 0.01220703f;
+        config->rangeFactor = 400.0f / RESOLUTION_DIVIDER;
         break;
     default:
         break;

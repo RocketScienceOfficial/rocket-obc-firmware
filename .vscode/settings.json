@@ -44,6 +44,8 @@
         "w2812_driver.h": "c",
         "battery_driver.h": "c",
         "h3lis331dl_driver.h": "c",
-        "bme688_driver.h": "c"
+        "bme688_driver.h": "c",
+        "simple_led_driver.h": "c",
+        "cstdio": "c"
     }
 }

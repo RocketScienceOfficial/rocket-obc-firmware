@@ -17,11 +17,19 @@ FUNCRESULT ws2812Init(PinNumber pin, BOOL rgbw)
     return SUC_OK;
 }
 
-FUNCRESULT ws2812SetPixel(UINT32 color)
+FUNCRESULT ws2812SetColors(WS2812COLOR *colors, SIZE count)
 {
-    pio_sm_put_blocking(WS2812_PIO, WS2812_SM, color << 8u);
+    for (SIZE i = 0; i < count; i++)
+    {
+        __ws2812SendColor(colors[i]);
+    }
 
     return SUC_OK;
+}
+
+VOID __ws2812SendColor(UINT32 color)
+{
+    pio_sm_put_blocking(WS2812_PIO, WS2812_SM, color << 8u);
 }
 
 WS2812COLOR ws2812GetColor(UINT8 r, UINT8 g, UINT8 b)

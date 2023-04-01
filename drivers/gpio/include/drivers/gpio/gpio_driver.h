@@ -3,7 +3,7 @@
 #include <obc/api.h>
 
 typedef UINT32 PinNumber;   /** Type for GPIO pin number */
-typedef float VoltageLevel; /** Type for voltage level */
+typedef FLOAT VoltageLevel; /** Type for voltage level */
 
 /**
  * @brief Type for GPIO pin mode

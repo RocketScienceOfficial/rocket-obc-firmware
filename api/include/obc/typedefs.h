@@ -13,9 +13,11 @@ typedef uint32_t UINT32;
 typedef int64_t INT64;
 typedef uint64_t UINT64;
 typedef size_t SIZE;
+typedef UINT8 SIZE8;
 typedef UINT8 BYTE;
 
 typedef float FLOAT;
+typedef long double DOUBLE;
 
 typedef void VOID;
 

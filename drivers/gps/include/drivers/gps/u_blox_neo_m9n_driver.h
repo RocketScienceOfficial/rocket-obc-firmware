@@ -11,8 +11,8 @@
  */
 typedef struct UBloxNeoM9NConfig
 {
-    SPIInstance spi; /** SPI */
-    PinNumber cs;    /** CS */
+    SPIInstance _spi; /** SPI */
+    PinNumber _cs;    /** CS */
 } UBloxNeoM9NConfig;
 
 /**
@@ -20,9 +20,9 @@ typedef struct UBloxNeoM9NConfig
  */
 typedef struct UBloxNeoM9NData
 {
-    BOOL isValid;                            /** Is current data valid */
+    BOOL _isValid;                           /** Is current data valid */
     BYTE sentence[NMEA_SENTENCE_MAX_LENGTH]; /** Sentence buffer */
-    SIZE currentIndex;                       /** Current index of buffer */
+    SIZE _currentIndex;                      /** Current index of buffer */
     BOOL isFinishedSentence;                 /** Is current sentence ready */
 } UBloxNeoM9NData;
 
@@ -46,7 +46,7 @@ FUNCRESULT uBloxNeoM9NInit(UBloxNeoM9NConfig *config, SPIInstance spi, PinNumber
  * @param data The data of the u-blox NEO-M9N GPS module.
  * @return Result code
  */
-FUNCRESULT uBloxNeoM9NRead(UBloxNeoM9NConfig *config, UBloxNeoM9NData *data);
+FUNCRESULT uBloxNeoM9NReadData(UBloxNeoM9NConfig *config, UBloxNeoM9NData *data);
 
 /**
  * @brief Reads a byte from the u-blox NEO-M9N GPS module.

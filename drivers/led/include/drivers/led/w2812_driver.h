@@ -4,10 +4,11 @@
  * REF: https://www.youtube.com/watch?v=rHoFqKGOPRI
  * REF: https://github.com/raspberrypi/pico-examples/tree/master/pio/ws2812
  */
+
 #include <obc/api.h>
 #include "drivers/gpio/gpio_driver.h"
 
-typedef UINT32 WS2812COLOR; /** Color typedef. */
+typedef UINT32 WS2812COLOR; /** WS2812 color */
 
 /**
  * @brief Initializes WS2812 LED strip
@@ -19,15 +20,24 @@ typedef UINT32 WS2812COLOR; /** Color typedef. */
 FUNCRESULT ws2812Init(PinNumber pin, BOOL rgbw);
 
 /**
+ * @brief Sets colors of all LEDs
+ *
+ * @param colors Array of colors
+ * @param count Number of colors
+ * @return Result code
+ */
+FUNCRESULT ws2812SetColors(WS2812COLOR *colors, SIZE count);
+
+/**
  * @brief Sets color of a single LED
  *
  * @param color Color
  * @return Result code
  */
-FUNCRESULT ws2812SetPixel(WS2812COLOR color);
+VOID __ws2812SendColor(WS2812COLOR color);
 
 /**
- * @brief Get Color from RGB values
+ * @brief Get Color from RGB values. Disabled color is 0. To control brightness adjust each component.
  *
  * @param r Red value
  * @param g Green value

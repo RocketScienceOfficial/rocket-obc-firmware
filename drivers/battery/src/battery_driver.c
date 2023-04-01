@@ -1,6 +1,6 @@
 #include "drivers/battery/battery_driver.h"
 
-FUNCRESULT batteryInit(BatteryConfig *config, ADCInput input, VoltageLevel minVolts, VoltageLevel maxVolts)
+FUNCRESULT batteryInit(BatteryConfig *config, ADCInput input, BatteryInterval *intervals, SIZE8 intervalsCount)
 {
     if (!config)
     {
@@ -13,8 +13,8 @@ FUNCRESULT batteryInit(BatteryConfig *config, ADCInput input, VoltageLevel minVo
     }
 
     config->_input = input;
-    config->_minVolts = minVolts;
-    config->_maxVolts = maxVolts;
+    config->_intervals = intervals;
+    config->_intervalsCount = intervalsCount;
 
     return SUC_OK;
 }
@@ -33,7 +33,15 @@ FUNCRESULT batteryReadPercent(BatteryConfig *config, FLOAT *percentage)
         return ERR_FAIL;
     }
 
-    *percentage = 100 / (config->_maxVolts - config->_minVolts) * (voltage - config->_minVolts);
+    for (SIZE8 i = 0; i < config->_intervalsCount; i++)
+    {
+        if (voltage >= config->_intervals[i].minVolts && voltage <= config->_intervals[i].maxVolts)
+        {
+            *percentage = (config->_intervals[i].maxPercent - config->_intervals[i].minPercent) / (config->_intervals[i].maxVolts - config->_intervals[i].minVolts) * (voltage - config->_intervals[i].minVolts) + config->_intervals[i].minPercent;
 
-    return SUC_OK;
+            return SUC_OK;
+        }
+    }
+
+    return ERR_UNEXPECTED;
 }

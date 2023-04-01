@@ -9,7 +9,7 @@
 /**
  * @brief NMEA sentence IDs
  */
-typedef enum NMEASentenceId
+typedef enum NMEASentence
 {
     NMEA_SENTENCE_UNKNOWN = -1,
     NMEA_SENTENCE_GBS,
@@ -22,13 +22,14 @@ typedef enum NMEASentenceId
     NMEA_SENTENCE_RMC,
     NMEA_SENTENCE_VTG,
     NMEA_SENTENCE_ZDA,
-} NMEASentenceId;
+} NMEASentence;
 
 /**
  * @brief NMEA talker IDs
  */
 typedef enum NMEATalker
 {
+    NMEA_TALKER_UNKNOWN = -1,
     NMEA_TALKER_GPS_SBAS,
     NMEA_TALKER_GLONASS,
     NMEA_TALKER_GALILEO,
@@ -42,25 +43,53 @@ typedef enum NMEATalker
  */
 typedef struct NMEATime
 {
-    BYTE hour;
-    BYTE minute;
-    BYTE second;
-    BYTE hundredth;
+    UINT8 hour;
+    UINT8 minute;
+    UINT8 second;
+    UINT8 hundredth;
 } NMEATime;
+
+/**
+ * @brief NMEA date structure
+ */
+typedef struct NMEADate
+{
+    UINT8 day;
+    UINT8 month;
+    UINT8 year;
+} NMEADate;
+
+/**
+ * @brief NMEA satellite structure
+ */
+typedef struct NMEASatellite
+{
+    INT32 svid;
+    INT32 elv;
+    INT32 az;
+    INT32 cno;
+} NMEASatellite;
+
+/**
+ * @brief NMEA latitude/longtitude type
+ */
+typedef DOUBLE NMEALatLon;
 
 /**
  * @brief NMEA structure for GBS sentence
  */
 typedef struct NMEASentence_GBS
 {
-    NMEATime time; /** UTC Time */
-    FLOAT errLat;  /** Expected error in latitude */
-    FLOAT errLon;  /** Expected error in longtitude */
-    FLOAT errAlt;  /** Expected error in altitude */
-    INT32 svid;    /** Satellite ID of most likely failed satellite */
-    FLOAT prob;    /** Probability of missed detection */
-    FLOAT bias;    /** Estimated bias of satellite */
-    FLOAT stddev;  /** Standard deviation of estimated bias */
+    NMEATime time;
+    FLOAT errLat;
+    FLOAT errLon;
+    FLOAT errAlt;
+    INT32 svid;
+    FLOAT prob;
+    FLOAT bias;
+    FLOAT stddev;
+    INT32 systemId;
+    INT32 signalId;
 } NMEASentence_GBS;
 
 /**
@@ -68,11 +97,11 @@ typedef struct NMEASentence_GBS
  */
 typedef struct NMEASentence_GGA
 {
-    NMEATime time; /** UTC Time */
-    FLOAT lat;     /** Latitude */
-    CHAR NS;       /** North/South indicator */
-    FLOAT lon;     /** Longtitude */
-    CHAR EW;       /** East/West indicator */
+    NMEATime time;
+    NMEALatLon lat;
+    CHAR NS;
+    NMEALatLon lon;
+    CHAR EW;
     INT32 quality;
     INT32 numSV;
     FLOAT HDOP;
@@ -86,9 +115,9 @@ typedef struct NMEASentence_GGA
 
 typedef struct NMEASentence_GLL
 {
-    FLOAT lat;
+    NMEALatLon lat;
     CHAR NS;
-    FLOAT lon;
+    NMEALatLon lon;
     CHAR EW;
     NMEATime time;
     CHAR status;
@@ -98,9 +127,9 @@ typedef struct NMEASentence_GLL
 typedef struct NMEASentence_GNS
 {
     NMEATime time;
-    FLOAT lat;
+    NMEALatLon lat;
     CHAR NS;
-    FLOAT lon;
+    NMEALatLon lon;
     CHAR EW;
     CHAR posMode;
     INT32 numSV;
@@ -140,13 +169,7 @@ typedef struct NMEASentence_GSV
     INT32 numMsg;
     INT32 msgNum;
     INT32 numSV;
-    struct satellite
-    {
-        INT32 svid;
-        INT32 elv;
-        INT32 az;
-        INT32 cno;
-    } satellites[4];
+    NMEASatellite satellites[4];
     INT32 signalId;
 } NMEASentence_GSV;
 
@@ -154,18 +177,13 @@ typedef struct NMEASentence_RMC
 {
     NMEATime time;
     CHAR status;
-    FLOAT lat;
+    NMEALatLon lat;
     CHAR NS;
-    FLOAT lon;
+    NMEALatLon lon;
     CHAR EW;
     FLOAT spd;
     FLOAT cog;
-    struct
-    {
-        BYTE day;
-        BYTE month;
-        BYTE year;
-    } date;
+    NMEADate date;
     FLOAT mv;
     CHAR mvEW;
     CHAR posMode;
@@ -199,139 +217,133 @@ typedef struct NMEASentence_ZDA
  * @brief Check if the sentence is valid
  *
  * @param sentence Sentence to check
- * @param length Length of the sentence
  * @return True if the sentence is valid, false otherwise
  */
-BOOL nmeaCheckSentence(const BYTE *sentence, SIZE length);
+BOOL nmeaCheckSentence(const STRING sentence);
 
 /**
- * @brief Scan the sentence and parse it
+ * @brief Scan the sentence and parse it. Use following format specifiers:
+ * - i: integer
+ * - f: float
+ * - c: char
+ * - s: string
+ * - l: latitude or longtitude
+ * - d: date
+ * - t: time
+ * - _: skip
  *
  * @param sentence Sentence to parse
- * @param length Length of the sentence
  * @param format Format string
  * @param ... Arguments
  * @return True if the sentence was parsed successfully, false otherwise
  */
-BOOL nmeaScan(const BYTE *sentence, SIZE length, const CHAR *format, ...);
+BOOL nmeaScan(const STRING sentence, const STRING format, ...);
 
 /**
  * @brief Get the sentence ID
  *
  * @param sentence Sentence to parse
- * @param length Length of the sentence
  * @return Sentence ID
  */
-NMEASentenceId nmeaGetSentenceId(const BYTE *sentence, SIZE length);
+NMEASentence nmeaGetSentenceId(const STRING sentence);
 
 /**
  * @brief Get the talker ID
  *
  * @param sentence Sentence to parse
- * @param length Length of the sentence
  * @return Talker ID
  */
-NMEATalker nmeaGetTalkerId(const BYTE *sentence, SIZE length);
+NMEATalker nmeaGetTalkerId(const STRING sentence);
 
 /**
  * @brief Parse the GBS sentence
  *
  * @param sentence Sentence to parse
- * @param length Length of the sentence
- * @param gbs GBS sentence structure
+ * @param frame GBS sentence structure
  * @return True if the sentence was parsed successfully, false otherwise
  */
-BOOL nmeaParse_GBS(const BYTE *sentence, SIZE length, NMEASentence_GBS *gbs);
+BOOL nmeaParse_GBS(const STRING sentence, NMEASentence_GBS *frame);
 
 /**
  * @brief Parse the GGA sentence
  *
  * @param sentence Sentence to parse
- * @param length Length of the sentence
- * @param gga GGA sentence structure
+ * @param frame GGA sentence structure
  * @return True if the sentence was parsed successfully, false otherwise
  */
-BOOL nmeaParse_GGA(const BYTE *sentence, SIZE length, NMEASentence_GGA *gga);
+BOOL nmeaParse_GGA(const STRING sentence, NMEASentence_GGA *frame);
 
 /**
  * @brief Parse the GLL sentence
  *
  * @param sentence Sentence to parse
- * @param length Length of the sentence
- * @param gll GLL sentence structure
+ * @param frame GLL sentence structure
  * @return True if the sentence was parsed successfully, false otherwise
  */
-BOOL nmeaParse_GLL(const BYTE *sentence, SIZE length, NMEASentence_GLL *gll);
+BOOL nmeaParse_GLL(const STRING sentence, NMEASentence_GLL *frame);
 
 /**
  * @brief Parse the GNS sentence
  *
  * @param sentence Sentence to parse
- * @param length Length of the sentence
- * @param gns GNS sentence structure
+ * @param frame GNS sentence structure
  * @return True if the sentence was parsed successfully, false otherwise
  */
-BOOL nmeaParse_GNS(const BYTE *sentence, SIZE length, NMEASentence_GNS *gns);
+BOOL nmeaParse_GNS(const STRING sentence, NMEASentence_GNS *frame);
 
 /**
  * @brief Parse the GSA sentence
  *
  * @param sentence Sentence to parse
- * @param length Length of the sentence
- * @param gsa GSA sentence structure
+ * @param frame GSA sentence structure
  * @return True if the sentence was parsed successfully, false otherwise
  */
-BOOL nmeaParse_GSA(const BYTE *sentence, SIZE length, NMEASentence_GSA *gsa);
+BOOL nmeaParse_GSA(const STRING sentence, NMEASentence_GSA *frame);
 
 /**
  * @brief Parse the GST sentence
  *
  * @param sentence Sentence to parse
- * @param length Length of the sentence
- * @param gst GST sentence structure
+ * @param frame GST sentence structure
  * @return True if the sentence was parsed successfully, false otherwise
  */
-BOOL nmeaParse_GST(const BYTE *sentence, SIZE length, NMEASentence_GST *gst);
+BOOL nmeaParse_GST(const STRING sentence, NMEASentence_GST *frame);
 
 /**
  * @brief Parse the GSV sentence
  *
  * @param sentence Sentence to parse
- * @param length Length of the sentence
- * @param gsv GSV sentence structure
+ * @param frame GSV sentence structure
  * @return True if the sentence was parsed successfully, false otherwise
  */
-BOOL nmeaParse_GSV(const BYTE *sentence, SIZE length, NMEASentence_GSV *gsv);
+BOOL nmeaParse_GSV(const STRING sentence, NMEASentence_GSV *frame);
 
 /**
  * @brief Parse the RMC sentence
  *
  * @param sentence Sentence to parse
- * @param length Length of the sentence
- * @param rmc RMC sentence structure
+ * @param frame RMC sentence structure
  * @return True if the sentence was parsed successfully, false otherwise
  */
-BOOL nmeaParse_RMC(const BYTE *sentence, SIZE length, NMEASentence_RMC *rmc);
+BOOL nmeaParse_RMC(const STRING sentence, NMEASentence_RMC *frame);
 
 /**
  * @brief Parse the VTG sentence
  *
  * @param sentence Sentence to parse
- * @param length Length of the sentence
- * @param vtg VTG sentence structure
+ * @param frame VTG sentence structure
  * @return True if the sentence was parsed successfully, false otherwise
  */
-BOOL nmeaParse_VTG(const BYTE *sentence, SIZE length, NMEASentence_VTG *vtg);
+BOOL nmeaParse_VTG(const STRING sentence, NMEASentence_VTG *frame);
 
 /**
  * @brief Parse the ZDA sentence
  *
  * @param sentence Sentence to parse
- * @param length Length of the sentence
- * @param zda ZDA sentence structure
+ * @param frame ZDA sentence structure
  * @return True if the sentence was parsed successfully, false otherwise
  */
-BOOL nmeaParse_ZDA(const BYTE *sentence, SIZE length, NMEASentence_ZDA *zda);
+BOOL nmeaParse_ZDA(const STRING sentence, NMEASentence_ZDA *frame);
 
 /**
  * @brief Calculate the checksum of the sentence
@@ -340,4 +352,4 @@ BOOL nmeaParse_ZDA(const BYTE *sentence, SIZE length, NMEASentence_ZDA *zda);
  * @param length Length of the sentence
  * @return Checksum
  */
-BYTE __nmeaCalculateChecksum(const BYTE *sentence, SIZE length);
+UINT8 __nmeaCalculateChecksum(const STRING sentence, SIZE length);

@@ -18,4 +18,4 @@ FUNCRESULT ledInit(PinNumber pin);
  * @param state State of pin - on or off
  * @return Result Code
  */
-FUNCRESULT setLedState(PinNumber pin, BOOL state);
+FUNCRESULT ledSetState(PinNumber pin, BOOL state);
