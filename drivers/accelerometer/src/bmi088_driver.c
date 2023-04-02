@@ -99,9 +99,9 @@ FUNCRESULT bmi088AccelRead(BMI088AccelConfig *config, BMI088AccelData *data)
 
     __bmi088AccelReadRegs(config, ACC_DATA, buff, 6);
 
-    INT16 accelX = (buff[1] << 8) | buff[0];
-    INT16 accelY = (buff[3] << 8) | buff[2];
-    INT16 accelZ = (buff[5] << 8) | buff[4];
+    INT16 accelX = (INT16)((buff[1] << 8) | buff[0]);
+    INT16 accelY = (INT16)((buff[3] << 8) | buff[2]);
+    INT16 accelZ = (INT16)((buff[5] << 8) | buff[4]);
 
     data->accel.x = accelX / 32768.0f * config->rangeConstant;
     data->accel.y = accelY / 32768.0f * config->rangeConstant;
@@ -227,9 +227,9 @@ FUNCRESULT bmi088GyroRead(BMI088GyroConfig *config, BMI088GyroData *data)
 
     __bmi088GyroReadRegs(config, GYRO_RATE, buff, 6);
 
-    INT16 gyroX = (buff[1] << 8) | buff[0];
-    INT16 gyroY = (buff[3] << 8) | buff[2];
-    INT16 gyroZ = (buff[5] << 8) | buff[4];
+    INT16 gyroX = (INT16)((buff[1] << 8) | buff[0]);
+    INT16 gyroY = (INT16)((buff[3] << 8) | buff[2]);
+    INT16 gyroZ = (INT16)((buff[5] << 8) | buff[4]);
 
     data->gyro.x = (FLOAT)gyroX / 32767.0f * config->rangeConstant;
     data->gyro.y = (FLOAT)gyroY / 32767.0f * config->rangeConstant;

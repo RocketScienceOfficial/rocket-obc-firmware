@@ -98,11 +98,7 @@ FUNCRESULT bme688Init(BME688Config *config, SPIInstance spi, PinNumber miso, Pin
 
     spiInitPins(spi, miso, mosi, sck, cs);
 
-    __bme688SoftReset(config);
-
-    sleep_ms(1000);
-
-    __bme688SetPage(config, 1);
+    __bme688SetPage(config, 0);
 
     BYTE par_t1_lsb = __bme688ReadReg(config, CALIB_T1_LSB);
     BYTE par_t1_msb = __bme688ReadReg(config, CALIB_T1_MSB);
@@ -138,32 +134,35 @@ FUNCRESULT bme688Init(BME688Config *config, SPIInstance spi, PinNumber miso, Pin
     BYTE par_g2_lsb = __bme688ReadReg(config, CALIB_G2_LSB);
     BYTE par_g2_msb = __bme688ReadReg(config, CALIB_G2_MSB);
     BYTE par_g3_lsb = __bme688ReadReg(config, CALIB_G3_LSB);
+
+    __bme688SetPage(config, 1);
+
     BYTE par_res_heat_range = __bme688ReadReg(config, CALIB_RES_HEAT_RANGE);
     BYTE par_res_heat_val = __bme688ReadReg(config, CALIB_RES_HEAT_VAL);
 
-    config->par_t1 = (UINT16)(((UINT16)par_t1_msb << 8) | (UINT16)par_t1_lsb);
-    config->par_t2 = (UINT16)(((UINT16)par_t2_msb << 8) | (UINT16)par_t2_lsb);
-    config->par_t3 = (UINT8)par_t3_lsb;
-    config->par_p1 = (UINT16)(((UINT16)par_p1_msb << 8) | (UINT16)par_p1_lsb);
-    config->par_p2 = (UINT16)(((UINT16)par_p2_msb << 8) | (UINT16)par_p2_lsb);
-    config->par_p3 = (UINT8)par_p3_lsb;
-    config->par_p4 = (UINT16)(((UINT16)par_p4_msb << 8) | (UINT16)par_p4_lsb);
-    config->par_p5 = (UINT16)(((UINT16)par_p5_msb << 8) | (UINT16)par_p5_lsb);
-    config->par_p6 = (UINT8)par_p6_lsb;
-    config->par_p7 = (UINT8)par_p7_lsb;
-    config->par_p8 = (UINT16)(((UINT16)par_p8_msb << 8) | (UINT16)par_p8_lsb);
-    config->par_p9 = (UINT16)(((UINT16)par_p9_msb << 8) | (UINT16)par_p9_lsb);
-    config->par_p10 = (UINT8)par_p10_lsb;
-    config->par_h1 = (UINT16)(((UINT16)par_h1_msb << 4) | (par_h1_lsb & 0x0F));
-    config->par_h2 = (UINT16)(((UINT16)par_h2_msb << 4) | (par_h2_lsb >> 4));
-    config->par_h3 = (UINT8)par_h3_lsb;
-    config->par_h4 = (UINT8)par_h4_lsb;
-    config->par_h5 = (UINT8)par_h5_lsb;
+    config->par_t1 = (UINT16)((par_t1_msb << 8) | par_t1_lsb);
+    config->par_t2 = (INT16)((par_t2_msb << 8) | par_t2_lsb);
+    config->par_t3 = (INT8)par_t3_lsb;
+    config->par_p1 = (UINT16)((par_p1_msb << 8) | par_p1_lsb);
+    config->par_p2 = (INT16)((par_p2_msb << 8) | par_p2_lsb);
+    config->par_p3 = (INT8)par_p3_lsb;
+    config->par_p4 = (INT16)((par_p4_msb << 8) | par_p4_lsb);
+    config->par_p5 = (INT16)((par_p5_msb << 8) | par_p5_lsb);
+    config->par_p6 = (INT8)par_p6_lsb;
+    config->par_p7 = (INT8)par_p7_lsb;
+    config->par_p8 = (INT16)((par_p8_msb << 8) | par_p8_lsb);
+    config->par_p9 = (INT16)((par_p9_msb << 8) | par_p9_lsb);
+    config->par_p10 = (INT8)par_p10_lsb;
+    config->par_h1 = (UINT16)((par_h1_msb << 4) | (par_h1_lsb & 0x0F));
+    config->par_h2 = (UINT16)((par_h2_msb << 4) | (par_h2_lsb >> 4));
+    config->par_h3 = (INT8)par_h3_lsb;
+    config->par_h4 = (INT8)par_h4_lsb;
+    config->par_h5 = (INT8)par_h5_lsb;
     config->par_h6 = (UINT8)par_h6_lsb;
-    config->par_h7 = (UINT8)par_h7_lsb;
-    config->par_g1 = (UINT8)par_g1_lsb;
-    config->par_g2 = (UINT16)(((UINT16)par_g2_msb << 8) | (UINT16)par_g2_lsb);
-    config->par_g3 = (UINT8)par_g3_lsb;
+    config->par_h7 = (INT8)par_h7_lsb;
+    config->par_g1 = (INT8)par_g1_lsb;
+    config->par_g2 = (INT16)((par_g2_msb << 8) | par_g2_lsb);
+    config->par_g3 = (INT8)par_g3_lsb;
     config->res_heat_range = (UINT8)((par_res_heat_range & 0x30) >> 4);
     config->res_heat_val = (UINT8)par_res_heat_val;
 
@@ -183,16 +182,16 @@ FUNCRESULT bme688Read(BME688Config *config, BME688Data *data)
     BYTE gas_r_msb = __bme688ReadReg(config, GAS_R_MSB_0);
     BYTE gas_r_lsb = __bme688ReadReg(config, GAS_R_LSB_0);
 
-    UINT32 temp_adc = (UINT32)(((UINT32)temp_msb << 12) | ((UINT32)temp_lsb << 4) | ((UINT32)temp_xlsb >> 4));
-    UINT32 press_adc = (UINT32)(((UINT32)press_msb << 12) | ((UINT32)press_lsb << 4) | ((UINT32)press_xlsb >> 4));
-    UINT16 hum_adc = (UINT16)(((UINT32)hum_msb << 8) | (UINT32)hum_lsb);
-    UINT16 gas_resistance_adc = (UINT16)(((UINT32)gas_r_msb << 2) | (UINT32)(gas_r_lsb >> 6));
+    UINT32 temp_adc = (UINT32)((temp_msb << 12) | (temp_lsb << 4) | (temp_xlsb >> 4));
+    UINT32 press_adc = (UINT32)((press_msb << 12) | (press_lsb << 4) | (press_xlsb >> 4));
+    UINT16 hum_adc = (UINT16)((hum_msb << 8) | hum_lsb);
+    UINT16 gas_resistance_adc = (UINT16)((gas_r_msb << 2) | (gas_r_lsb >> 6));
     UINT8 gas_range_adc = (UINT8)(gas_r_lsb & 0x0F);
 
     FLOAT var1, var2, var3, var4, t_fine, temp_comp, press_comp, hum_comp, gas_res;
 
-    var1 = (((FLOAT)temp_adc / 16384.0f) - ((FLOAT)config->par_t1 / 1024.0f)) * (FLOAT)config->par_t2;
-    var2 = ((((FLOAT)temp_adc / 131072.0f) - ((FLOAT)config->par_t1 / 8192.0f)) * (((FLOAT)temp_adc / 131072.0f) - ((FLOAT)config->par_t1 / 8192.0f))) * ((FLOAT)config->par_t3 * 16.0f);
+    var1 = ((((FLOAT)temp_adc / 16384.0f) - ((FLOAT)config->par_t1 / 1024.0f)) * ((FLOAT)config->par_t2));
+    var2 = (((((FLOAT)temp_adc / 131072.0f) - ((FLOAT)config->par_t1 / 8192.0f)) * (((FLOAT)temp_adc / 131072.0f) - ((FLOAT)config->par_t1 / 8192.0f))) * ((FLOAT)config->par_t3 * 16.0f));
     t_fine = var1 + var2;
     temp_comp = t_fine / 5120.0f;
 
@@ -209,11 +208,20 @@ FUNCRESULT bme688Read(BME688Config *config, BME688Data *data)
     var3 = (press_comp / 256.0f) * (press_comp / 256.0f) * (press_comp / 256.0f) * (config->par_p10 / 131072.0f);
     press_comp = press_comp + (var1 + var2 + var3 + ((FLOAT)config->par_p7 * 128.0f)) / 16.0f;
 
-    var1 = hum_adc - (((FLOAT)config->par_h1 * 16.0f) + (((FLOAT)config->par_h3 / 2.0f) * temp_comp));
-    var2 = var1 * (((FLOAT)config->par_h2 / 262144.0f) * (1.0f + (((FLOAT)config->par_h4 / 16384.0f) * temp_comp) + (((FLOAT)config->par_h5 / 1048576.0f) * temp_comp * temp_comp)));
+    var1 = (FLOAT)((FLOAT)hum_adc) - (((FLOAT)config->par_h1 * 16.0f) + (((FLOAT)config->par_h3 / 2.0f) * temp_comp));
+    var2 = var1 * ((FLOAT)(((FLOAT)config->par_h2 / 262144.0f) * (1.0f + (((FLOAT)config->par_h4 / 16384.0f) * temp_comp) + (((FLOAT)config->par_h5 / 1048576.0f) * temp_comp * temp_comp))));
     var3 = (FLOAT)config->par_h6 / 16384.0f;
     var4 = (FLOAT)config->par_h7 / 2097152.0f;
     hum_comp = var2 + ((var3 + (var4 * temp_comp)) + var2 * var2);
+
+    // INT32 temp_scaled = (INT32)(temp_comp * 100.0f);
+    // INT32 var1h = (INT32)hum_adc - (INT32)((INT32)config->par_h1 << 4) - (((temp_scaled * (INT32)config->par_h3) / ((INT32)100)) >> 1);
+    // INT32 var2h = ((INT32)config->par_h2 * (((temp_scaled * (INT32)config->par_h4) / ((INT32)100)) + (((temp_scaled * ((temp_scaled * (INT32)config->par_h5) / ((INT32)100))) >> 6) / ((INT32)100)) + ((INT32)1 << 14))) >> 10;
+    // INT32 var3h = var1h * var2h;
+    // INT32 var4h = (((INT32)config->par_h6 << 7) + ((temp_scaled * (INT32)config->par_h7) / ((INT32)100))) >> 4;
+    // INT32 var5h = ((var3h >> 14) * (var3h >> 14)) >> 10;
+    // INT32 var6h = (var4h * var5h) >> 1;
+    // INT32 hum_comph = (((var3h + var6h) >> 10) * ((INT32)1000)) >> 12;
 
     UINT32 var1g = (UINT32)262144 >> gas_range_adc;
     INT32 var2g = (INT32)gas_resistance_adc - (INT32)512;
@@ -261,6 +269,7 @@ FUNCRESULT bme688SetHumidityOSR(BME688Config *config, BME688SensorOSR osr)
 {
     BYTE data = __bme688ReadReg(config, CTRL_HUM);
 
+    data &= 0xF8;
     data |= osr;
 
     __bme688WriteReg(config, CTRL_HUM, data);
@@ -304,12 +313,12 @@ FUNCRESULT bme688SetIIRFilter(BME688Config *config, BME688IIRFilterCoefficient f
     return SUC_OK;
 }
 
-VOID __bme688SetHeaterCurrent(BME688Config *config, BYTE index, FLOAT current)
+VOID __bme688SetHeaterCurrent(BME688Config *config, UINT8 index, FLOAT current)
 {
     __bme688WriteReg(config, IDAC_HEAT_X + index, (BYTE)(current * 8 - 1));
 }
 
-VOID __bme688SetTargetHeaterTemp(BME688Config *config, BYTE index, FLOAT targetTemp)
+VOID __bme688SetTargetHeaterTemp(BME688Config *config, UINT8 index, FLOAT targetTemp)
 {
     FLOAT ambTemp = 25.0f;
     FLOAT var1 = ((FLOAT)config->par_g1 / 16.0f) + 49.0;
@@ -322,7 +331,7 @@ VOID __bme688SetTargetHeaterTemp(BME688Config *config, BYTE index, FLOAT targetT
     __bme688WriteReg(config, RES_HEAT_X + index, res_heat_x);
 }
 
-VOID __bme688SetParallelSequences(BME688Config *config, BYTE index, BYTE sequences)
+VOID __bme688SetParallelSequences(BME688Config *config, UINT8 index, BYTE sequences)
 {
     if (config->currentMode == BME688_MODE_PARALLEL)
     {
@@ -330,7 +339,7 @@ VOID __bme688SetParallelSequences(BME688Config *config, BYTE index, BYTE sequenc
     }
 }
 
-VOID __bme688SetGasSensorHeaterOnTime(BME688Config *config, BYTE index, UINT16 time)
+VOID __bme688SetGasSensorHeaterOnTime(BME688Config *config, UINT8 index, UINT16 time)
 {
     UINT8 factor = 0;
     UINT8 durval;
@@ -394,42 +403,42 @@ VOID __bme688RunGas(BME688Config *config)
     __bme688WriteReg(config, CTRL_GAS_1, data);
 }
 
-BOOL __bme688IsDataReady(BME688Config *config, BYTE index)
+BOOL __bme688IsDataReady(BME688Config *config, UINT8 index)
 {
     return __bme688ReadReg(config, MEAS_STATUS_0 + index * 0x0B) & 0x80;
 }
 
-BOOL __bme688IsMeasuring(BME688Config *config, BYTE index)
+BOOL __bme688IsMeasuring(BME688Config *config, UINT8 index)
 {
     return __bme688ReadReg(config, MEAS_STATUS_0 + index * 0x0B) & 0x40;
 }
 
-BOOL __bme688IsConverting(BME688Config *config, BYTE index)
+BOOL __bme688IsConverting(BME688Config *config, UINT8 index)
 {
     return __bme688ReadReg(config, MEAS_STATUS_0 + index * 0x0B) & 0x20;
 }
 
-BYTE __bme688GetMeasurementIndex(BME688Config *config, BYTE index)
+BYTE __bme688GetMeasurementIndex(BME688Config *config, UINT8 index)
 {
     return __bme688ReadReg(config, MEAS_STATUS_0 + index * 0x0B) & 0x0F;
 }
 
-BOOL __bme688IsGasValid(BME688Config *config, BYTE index)
+BOOL __bme688IsGasValid(BME688Config *config, UINT8 index)
 {
     return __bme688ReadReg(config, GAS_R_LSB_0 + index * 0x0B) & 0x20;
 }
 
-BOOL __bme688IsHeaterStable(BME688Config *config, BYTE index)
+BOOL __bme688IsHeaterStable(BME688Config *config, UINT8 index)
 {
     return __bme688ReadReg(config, GAS_R_LSB_0 + index * 0x0B) & 0x10;
 }
 
-BYTE __bme688GetMeasurementSequenceNumber(BME688Config *config, BYTE index)
+BYTE __bme688GetMeasurementSequenceNumber(BME688Config *config, UINT8 index)
 {
     return __bme688ReadReg(config, SUB_MEAS_INDEX_0 + index * 0x0B);
 }
 
-VOID __bme688SetPage(BME688Config *config, BYTE page)
+VOID __bme688SetPage(BME688Config *config, UINT8 page)
 {
     BYTE status = __bme688ReadReg(config, STATUS);
 
@@ -479,7 +488,7 @@ VOID __bme688WriteReg(BME688Config *config, BYTE address, BYTE data)
     gpioSetPinState(config->cs, GPIO_LOW);
 
     spiWriteBlocking(config->spi, &address, 1);
-    spiReadBlocking(config->spi, 0, &data, 1);
+    spiWriteBlocking(config->spi, &data, 1);
 
     gpioSetPinState(config->cs, GPIO_HIGH);
 }

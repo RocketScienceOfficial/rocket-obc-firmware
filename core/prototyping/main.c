@@ -33,33 +33,30 @@ int main()
     sleep_ms(5000);
 
     // ---------------------------------
-    // spiInitAll(0, 1 * 1000 * 1000);
-    // BME688Config bme688Config = {0};
-    // bme688Init(&bme688Config, 0, MISO, MOSI, SCK, 4);
-    // bme688SetHumidityOSR(&bme688Config, BME688_SENSOR_OSR_16X);
-    // bme688SetTemperatureOSR(&bme688Config, BME688_SENSOR_OSR_2X);
-    // bme688SetPressureOSR(&bme688Config, BME688_SENSOR_OSR_1X);
-    // bme688SetIIRFilter(&bme688Config, BME688_IIR_FILTER_COEFF_OFF);
-    // __bme688SetGasSensorHeaterOnTime(&bme688Config, 0, 100);
-    // __bme688SetTargetHeaterTemp(&bme688Config, 0, 300);
-    // __bme688SetHeaterProfile(&bme688Config, 0);
-    // __bme688RunGas(&bme688Config);
-    // bme688SetMode(&bme688Config, BME688_MODE_FORCED);
+    spiInitAll(0, 1 * 1000 * 1000);
+    BME688Config bme688Config = {0};
+    bme688Init(&bme688Config, 0, MISO, MOSI, SCK, 4);
+    bme688SetHumidityOSR(&bme688Config, BME688_SENSOR_OSR_16X);
+    bme688SetTemperatureOSR(&bme688Config, BME688_SENSOR_OSR_2X);
+    bme688SetPressureOSR(&bme688Config, BME688_SENSOR_OSR_1X);
+    bme688SetIIRFilter(&bme688Config, BME688_IIR_FILTER_COEFF_OFF);
+    __bme688SetGasSensorHeaterOnTime(&bme688Config, 0, 100);
+    __bme688SetTargetHeaterTemp(&bme688Config, 0, 300);
+    __bme688SetHeaterProfile(&bme688Config, 0);
+    __bme688RunGas(&bme688Config);
 
-    // while (TRUE)
-    // {
-    //     if (__bme688IsDataReady(&bme688Config, 0))
-    //     {
-    //         BME688Data data = {0};
-    //         bme688Read(&bme688Config, &data);
-    //         printf("Temperature: %f\n", data.temperature);
-    //         printf("Pressure: %f\n", data.pressure);
-    //         printf("Humidity: %f\n", data.humidity);
-    //         printf("Gas: %f\n", data.gas);
-    //     }
+    while (TRUE)
+    {
+        bme688SetMode(&bme688Config, BME688_MODE_FORCED);
+        sleep_ms(1000);
 
-    //     sleep_ms(10);
-    // }
+        BME688Data data = {0};
+        bme688Read(&bme688Config, &data);
+        printf("Temperature: %f\n", data.temperature);
+        printf("Pressure: %f\n", data.pressure);
+        printf("Humidity: %f\n", data.humidity);
+        printf("Gas: %f\n", data.gas);
+    }
     // ---------------------------------
 
     // ---------------------------------
@@ -82,7 +79,7 @@ int main()
     // spiInitAll(0, 1 * 1000 * 1000);
     // MMC5983MAConfig mmc5983maConfig = {0};
     // mmc5983maInit(&mmc5983maConfig, 0, MISO, MOSI, 12, SCK);
-    // mmc5983maSetBandwidth(&mmc5983maConfig, MMC5983MA_BW_100HZ);
+    // mmc5983maSetODR(&mmc5983maConfig, MMC5983MA_ODR_200HZ);
     // while (TRUE)
     // {
     //     MMC5983MAData magData = {0};
