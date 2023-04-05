@@ -33,7 +33,7 @@ int main()
         FLOAT percent = -1;
         batteryReadPercent(&batteryConfig, &percent);
 
-        printf("Battery: %f\n", percent);
+        printf("Battery: %f%\n", percent);
 
         sleep_ms(500);
     }

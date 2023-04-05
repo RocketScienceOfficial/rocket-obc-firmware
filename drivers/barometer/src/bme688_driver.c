@@ -208,20 +208,21 @@ FUNCRESULT bme688Read(BME688Config *config, BME688Data *data)
     var3 = (press_comp / 256.0f) * (press_comp / 256.0f) * (press_comp / 256.0f) * (config->par_p10 / 131072.0f);
     press_comp = press_comp + (var1 + var2 + var3 + ((FLOAT)config->par_p7 * 128.0f)) / 16.0f;
 
-    var1 = (FLOAT)((FLOAT)hum_adc) - (((FLOAT)config->par_h1 * 16.0f) + (((FLOAT)config->par_h3 / 2.0f) * temp_comp));
-    var2 = var1 * ((FLOAT)(((FLOAT)config->par_h2 / 262144.0f) * (1.0f + (((FLOAT)config->par_h4 / 16384.0f) * temp_comp) + (((FLOAT)config->par_h5 / 1048576.0f) * temp_comp * temp_comp))));
-    var3 = (FLOAT)config->par_h6 / 16384.0f;
-    var4 = (FLOAT)config->par_h7 / 2097152.0f;
-    hum_comp = var2 + ((var3 + (var4 * temp_comp)) + var2 * var2);
+    // var1 = (FLOAT)((FLOAT)hum_adc) - (((FLOAT)config->par_h1 * 16.0f) + (((FLOAT)config->par_h3 / 2.0f) * temp_comp));
+    // var2 = var1 * ((FLOAT)(((FLOAT)config->par_h2 / 262144.0f) * (1.0f + (((FLOAT)config->par_h4 / 16384.0f) * temp_comp) + (((FLOAT)config->par_h5 / 1048576.0f) * temp_comp * temp_comp))));
+    // var3 = (FLOAT)config->par_h6 / 16384.0f;
+    // var4 = (FLOAT)config->par_h7 / 2097152.0f;
+    // hum_comp = var2 + ((var3 + (var4 * temp_comp)) + var2 * var2);
 
-    // INT32 temp_scaled = (INT32)(temp_comp * 100.0f);
-    // INT32 var1h = (INT32)hum_adc - (INT32)((INT32)config->par_h1 << 4) - (((temp_scaled * (INT32)config->par_h3) / ((INT32)100)) >> 1);
-    // INT32 var2h = ((INT32)config->par_h2 * (((temp_scaled * (INT32)config->par_h4) / ((INT32)100)) + (((temp_scaled * ((temp_scaled * (INT32)config->par_h5) / ((INT32)100))) >> 6) / ((INT32)100)) + ((INT32)1 << 14))) >> 10;
-    // INT32 var3h = var1h * var2h;
-    // INT32 var4h = (((INT32)config->par_h6 << 7) + ((temp_scaled * (INT32)config->par_h7) / ((INT32)100))) >> 4;
-    // INT32 var5h = ((var3h >> 14) * (var3h >> 14)) >> 10;
-    // INT32 var6h = (var4h * var5h) >> 1;
-    // INT32 hum_comph = (((var3h + var6h) >> 10) * ((INT32)1000)) >> 12;
+    INT32 temp_scaled = (INT32)(temp_comp * 100.0f);
+    INT32 var1h = (INT32)hum_adc - (INT32)((INT32)config->par_h1 << 4) - (((temp_scaled * (INT32)config->par_h3) / ((INT32)100)) >> 1);
+    INT32 var2h = ((INT32)config->par_h2 * (((temp_scaled * (INT32)config->par_h4) / ((INT32)100)) + (((temp_scaled * ((temp_scaled * (INT32)config->par_h5) / ((INT32)100))) >> 6) / ((INT32)100)) + ((INT32)1 << 14))) >> 10;
+    INT32 var3h = var1h * var2h;
+    INT32 var4h = (((INT32)config->par_h6 << 7) + ((temp_scaled * (INT32)config->par_h7) / ((INT32)100))) >> 4;
+    INT32 var5h = ((var3h >> 14) * (var3h >> 14)) >> 10;
+    INT32 var6h = (var4h * var5h) >> 1;
+    INT32 hum_comph = (((var3h + var6h) >> 10) * ((INT32)1000)) >> 12;
+    hum_comp = (FLOAT)((FLOAT)hum_comph / 1000.0f);
 
     UINT32 var1g = (UINT32)262144 >> gas_range_adc;
     INT32 var2g = (INT32)gas_resistance_adc - (INT32)512;

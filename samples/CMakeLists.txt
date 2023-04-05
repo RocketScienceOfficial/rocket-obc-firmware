@@ -1,6 +1,7 @@
 add_subdirectory(battery)
 add_subdirectory(bme688)
 add_subdirectory(bmi088)
+add_subdirectory(detonator)
 add_subdirectory(flash)
 add_subdirectory(gpio)
 add_subdirectory(h3lis331dl)

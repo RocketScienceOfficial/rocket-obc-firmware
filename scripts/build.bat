@@ -25,6 +25,7 @@ copy build\tests\tests_runner\tests_runner.uf2 executables\tests\tests_runner.uf
 copy build\samples\battery\samples_battery.uf2 executables\samples\battery.uf2
 copy build\samples\bme688\samples_bme688.uf2 executables\samples\bme688.uf2
 copy build\samples\bmi088\samples_bmi088.uf2 executables\samples\bmi088.uf2
+copy build\samples\detonator\samples_detonator.uf2 executables\samples\detonator.uf2
 copy build\samples\flash\samples_flash.uf2 executables\samples\flash.uf2
 copy build\samples\gpio\samples_gpio.uf2 executables\samples\gpio.uf2
 copy build\samples\h3lis331dl\samples_h3lis331dl.uf2 executables\samples\h3lis331dl.uf2
