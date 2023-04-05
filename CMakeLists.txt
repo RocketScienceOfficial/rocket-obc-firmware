@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 include(vendor/pico-sdk/pico_sdk_init.cmake)
+include(Utils.cmake)
 
 project(obc C CXX ASM)
 
@@ -19,3 +20,4 @@ add_subdirectory(drivers)
 add_subdirectory(kernel)
 add_subdirectory(core)
 add_subdirectory(tests)
+add_subdirectory(samples)

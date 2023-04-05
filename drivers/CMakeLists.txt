@@ -1,7 +1,6 @@
 link_libraries(api_lib)
 
 add_subdirectory(gpio)
-
 add_subdirectory(accelerometer)
 add_subdirectory(barometer)
 add_subdirectory(battery)

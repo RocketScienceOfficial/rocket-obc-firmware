@@ -25,6 +25,8 @@ socket, which SPI it is driven by, and how it is wired.
 
 */
 
+#include "pinout.h"
+
 #include <string.h>
 //
 #include "my_debug.h"
@@ -42,10 +44,10 @@ void spi0_dma_isr();
 // selects.
 static spi_t spis[] = { // One for each SPI.
     {
-        .hw_inst = spi0, // SPI component
-        .miso_gpio = 16,
-        .mosi_gpio = 19,
-        .sck_gpio = 18,
+        .hw_inst = SD_SPI == 0 ? spi0 : spi1, // SPI component
+        .miso_gpio = SD_MISO_PIN,
+        .mosi_gpio = SD_MOSI_PIN,
+        .sck_gpio = SD_SCK_PIN,
         /* The choice of SD card matters! SanDisk runs at the highest speed. PNY
            can only mangage 5 MHz. Those are all I've tried. */
         //.baud_rate = 1000 * 1000,
@@ -61,11 +63,11 @@ static spi_t spis[] = { // One for each SPI.
 // Hardware Configuration of the SD Card "objects"
 static sd_card_t sd_cards[] = { // One for each SD card
     {
-        .pcName = "0:",             // Name used to mount device
-        .spi = &spis[0],            // Pointer to the SPI driving this card
-        .ss_gpio = 6, // 17,            // The SPI slave select GPIO for this SD card
-        .card_detect_gpio = 22,     // Card detect
-        .card_detected_true = -1,   // 1,  // What the GPIO read returns when a card is
+        .pcName = "0:",           // Name used to mount device
+        .spi = &spis[0],          // Pointer to the SPI driving this card
+        .ss_gpio = SD_CS_PIN,     // The SPI slave select GPIO for this SD card
+        .card_detect_gpio = 22,   // Card detect
+        .card_detected_true = -1, // 1,  // What the GPIO read returns when a card is
                                   //  present. Use -1 if there is no card detect.
         // Following attributes are dynamically assigned
         .m_Status = STA_NOINIT,

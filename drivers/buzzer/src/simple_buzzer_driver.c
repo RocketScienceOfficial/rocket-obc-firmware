@@ -3,7 +3,8 @@
 FUNCRESULT simpleBuzzerInit(PinNumber pin)
 {
     gpioInitPin(pin, GPIO_OUTPUT);
-    gpioSetPinState(pin, GPIO_LOW);
+    
+    simpleBuzzerSetActive(pin, FALSE);
 
     return SUC_OK;
 }

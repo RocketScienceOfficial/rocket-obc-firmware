@@ -1,0 +1,11 @@
+set(MODULE_NAME samples)
+set(LIB_NAME bmi088)
+set(EXE_NAME "${MODULE_NAME}_${LIB_NAME}")
+
+add_executable(${EXE_NAME}
+    main.c
+)
+
+target_link_libraries(${EXE_NAME} PRIVATE drivers_lib ahrs_lib maths_lib)
+
+add_pico_output(${EXE_NAME})

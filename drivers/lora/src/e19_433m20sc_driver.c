@@ -8,6 +8,8 @@ FUNCRESULT e19_433m20sc_Init(E19_433M20SC_Config *config, PinNumber rxen, PinNum
     gpioInitPin(rxen, GPIO_OUTPUT);
     gpioInitPin(txen, GPIO_OUTPUT);
 
+    e19_433m20sc_SetState(config, E19_433M20SC_STATE_OFF);
+
     return SUC_OK;
 }
 

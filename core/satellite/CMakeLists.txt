@@ -6,8 +6,4 @@ add_executable(${EXE_NAME}
     measurements_manager.c
 )
 
-target_link_libraries(${EXE_NAME} PRIVATE core_common_lib)
-
-pico_enable_stdio_usb(${EXE_NAME} 1)
-pico_enable_stdio_uart(${EXE_NAME} 0)
-pico_add_extra_outputs(${EXE_NAME})
+add_pico_output(${EXE_NAME})

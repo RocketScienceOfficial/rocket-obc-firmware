@@ -21,7 +21,7 @@ typedef struct UBloxNeoM9NConfig
 typedef struct UBloxNeoM9NData
 {
     BOOL _isValid;                           /** Is current data valid */
-    BYTE sentence[NMEA_SENTENCE_MAX_LENGTH]; /** Sentence buffer */
+    CHAR sentence[NMEA_SENTENCE_MAX_LENGTH]; /** Sentence buffer */
     SIZE _currentIndex;                      /** Current index of buffer */
     BOOL isFinishedSentence;                 /** Is current sentence ready */
 } UBloxNeoM9NData;

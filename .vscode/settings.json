@@ -46,6 +46,11 @@
         "h3lis331dl_driver.h": "c",
         "bme688_driver.h": "c",
         "simple_led_driver.h": "c",
-        "cstdio": "c"
+        "cstdio": "c",
+        "sx127x_driver.h": "c",
+        "simple_buzzer_driver.h": "c",
+        "e19_433m20sc_driver.h": "c",
+        "test_flash.h": "c",
+        "test_console.h": "c"
     }
 }

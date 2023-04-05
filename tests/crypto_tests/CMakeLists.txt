@@ -1,12 +1,11 @@
-set(EXE_NAME crypto_tests)
+set(MODULE_NAME tests)
+set(LIB_NAME crypto)
+set(LIB_GENERAL_NAME "${MODULE_NAME}_${LIB_NAME}")
 
-add_executable(${EXE_NAME}
-    main.c
+add_library(${LIB_GENERAL_NAME} STATIC
+    test_cryptography.h
     test_cryptography.c
 )
 
-target_link_libraries(${EXE_NAME} PRIVATE crypto_lib)
-
-pico_enable_stdio_usb(${EXE_NAME} 1)
-pico_enable_stdio_uart(${EXE_NAME} 0)
-pico_add_extra_outputs(${EXE_NAME})
+target_link_libraries(${LIB_GENERAL_NAME} PRIVATE crypto_lib)
+target_include_directories(${LIB_GENERAL_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

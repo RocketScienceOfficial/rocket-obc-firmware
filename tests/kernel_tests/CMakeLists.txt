@@ -1,14 +1,15 @@
-set(EXE_NAME kernel_tests)
+set(MODULE_NAME tests)
+set(LIB_NAME kernel)
+set(LIB_GENERAL_NAME "${MODULE_NAME}_${LIB_NAME}")
 
-add_executable(${EXE_NAME}
-    main.c
+add_library(${LIB_GENERAL_NAME} STATIC
+    test_commands.h
     test_commands.c
+    test_logger.h
     test_logger.c
+    test_radio_protocol.h
     test_radio_protocol.c
 )
 
-target_link_libraries(${EXE_NAME} PRIVATE kernel_lib pico_stdlib)
-
-pico_enable_stdio_usb(${EXE_NAME} 1)
-pico_enable_stdio_uart(${EXE_NAME} 0)
-pico_add_extra_outputs(${EXE_NAME})
+target_link_libraries(${LIB_GENERAL_NAME} PRIVATE kernel_lib)
+target_include_directories(${LIB_GENERAL_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

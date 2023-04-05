@@ -1,6 +1,6 @@
 @echo off
 
-pushd %~dp0\..\docker
+pushd %~dp0\..
 
 call docker build -t obc-env .
 
