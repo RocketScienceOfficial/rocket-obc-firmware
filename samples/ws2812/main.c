@@ -3,13 +3,13 @@
 
 #define PIN 15
 #define RGBW FALSE
-#define PIXELS_SIZE 5
+#define PIXELS_COUNT 5
 
 int main()
 {
     ws2812Init(PIN, RGBW);
 
-    WS2812COLOR colors[PIXELS_SIZE] = {
+    WS2812COLOR colors[PIXELS_COUNT] = {
         ws2812GetColor(255, 0, 0),
         ws2812GetColor(0, 255, 0),
         ws2812GetColor(0, 0, 255),
@@ -17,7 +17,7 @@ int main()
         ws2812GetColor(255, 255, 0),
     };
 
-    ws2812SetColors(colors, PIXELS_SIZE);
+    ws2812SetColors(colors, PIXELS_COUNT);
 
     while (TRUE)
     {

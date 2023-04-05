@@ -24,6 +24,8 @@ int main()
         MMC5983MAData magData = {0};
         mmc5983maRead(&mmc5983maConfig, &magData);
         
+        printf("X: %f, Y: %f, Z: %f\n", magData.mag.x, magData.mag.y, magData.mag.z);
+
         sleep_ms(50);
     }
 

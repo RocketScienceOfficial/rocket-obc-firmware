@@ -2,7 +2,7 @@
 #include "pico/stdlib.h"
 #include <stdio.h>
 
-#define PIN 15
+#define PIN 14
 
 int main()
 {

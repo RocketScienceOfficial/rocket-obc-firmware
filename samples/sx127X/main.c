@@ -1,5 +1,6 @@
 #include "drivers/lora/sx127X_driver.h"
 #include "pico/stdlib.h"
+#include <stdio.h>
 
 #define SPI 0
 #define SCK 18
@@ -24,7 +25,10 @@ int main()
         .mosi = MOSI,
         .reset = RESET,
     };
-    sx127XInit(&data, &pinout, 433E6);
+
+    FUNCRESULT code = sx127XInit(&data, &pinout, 433E6);
+    
+    printf("Result code of init: %d\n", code);
 
     while (TRUE)
     {

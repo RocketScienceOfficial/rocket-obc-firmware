@@ -26,6 +26,8 @@ int main()
         H3lis331dlData accelData = {0};
         h3lis331dlRead(&h3lis331dlConfig, &accelData);
 
+        printf("X: %f, Y: %f, Z: %f\n", accelData.accel.x, accelData.accel.y, accelData.accel.z);
+
         sleep_ms(50);
     }
 
