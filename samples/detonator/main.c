@@ -8,15 +8,7 @@ int main()
 {
     sleep_ms(10000);
 
-    detonatorActivate(PIN);
-
-    sleep_ms(1000);
-
-    detonatorActivate(PIN + 1);
-
-    sleep_ms(1000);
-
-    detonatorActivate(PIN + 2);
+    detonatorActivate(PIN, 1000);
 
     while (TRUE)
     {
