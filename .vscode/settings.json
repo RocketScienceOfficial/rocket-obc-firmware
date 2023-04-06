@@ -51,6 +51,10 @@
         "simple_buzzer_driver.h": "c",
         "e19_433m20sc_driver.h": "c",
         "test_flash.h": "c",
-        "test_console.h": "c"
+        "test_console.h": "c",
+        "flash_driver.h": "c",
+        "test_framework.h": "c",
+        "math.h": "c",
+        "functional": "c"
     }
 }

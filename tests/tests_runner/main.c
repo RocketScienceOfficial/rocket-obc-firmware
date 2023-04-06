@@ -9,6 +9,7 @@
 #include "test_radio_protocol.h"
 #include "test_console.h"
 #include "test_flash.h"
+#include "test_nmea.h"
 
 static VOID intialize();
 static VOID run();
@@ -16,7 +17,7 @@ static VOID run();
 int main()
 {
     stdio_init_all();
-    sleep_ms(5000);
+    sleep_ms(10000);
 
     intialize();
     run();
@@ -33,23 +34,17 @@ static VOID intialize()
 {
     myLogCreateConsoleSink(myLogGetCoreLogger(), DEFAULT_LOG_SERIAL_PATTERN);
 
-    MY_LOG_CORE_INFO("Initializing...");
-
-    MY_TESTS_BEGIN();
+    MY_TESTS_BEGIN("Initialization");
 
     MY_TEST_CASE_INIT_FUNC(COMMANDS_TEST_NAME);
     MY_TEST_CASE_INIT_FUNC(FLASH_TEST_NAME);
 
     MY_TESTS_END();
-
-    MY_LOG_CORE_INFO("Initialized!");
 }
 
 static VOID run()
 {
-    MY_LOG_CORE_INFO("Running tests...");
-
-    MY_TESTS_BEGIN();
+    MY_TESTS_BEGIN("Run");
 
     MY_TEST_CASE_FUNC(CRYPTOGRAPHY_TEST_NAME, 1);
     MY_TEST_CASE_FUNC(CRYPTOGRAPHY_TEST_NAME, 2);
@@ -75,7 +70,7 @@ static VOID run()
     MY_TEST_CASE_FUNC(CONSOLE_TEST_NAME, 2);
     MY_TEST_CASE_FUNC(CONSOLE_TEST_NAME, 3);
 
-    MY_TESTS_END();
+    MY_TEST_CASE_FUNC(NMEA_TEST_NAME, 1);
 
-    MY_LOG_CORE_INFO("Tests finished!");
+    MY_TESTS_END();
 }

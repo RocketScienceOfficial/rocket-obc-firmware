@@ -1,4 +1,4 @@
-link_libraries(api_lib)
+link_libraries(api_lib pico_stdlib)
 
 add_subdirectory(test_framework)
 

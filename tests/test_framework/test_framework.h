@@ -21,35 +21,36 @@ static TIME s_TestsStartTime;
 static INT32 s_FailedTests;
 static INT32 s_PassedTests;
 
-#define MY_TEST_CASE(func)                                                      \
+#define MY_TEST_CASE(func)                                                         \
+    {                                                                              \
+        TIME __startTime = getMsSinceBoot();                                       \
+        MY_LOG_CORE_INFO(" > Running test: %s", #func);                            \
+        TestResult __testResult = (func)();                                        \
+        TIME __testDuration = getMsSinceBoot() - __startTime;                      \
+        if (__testResult == MY_TEST_FAIL_CODE)                                     \
+        {                                                                          \
+            MY_LOG_CORE_ERROR(" > Test %s failed (%d ms)", #func, __testDuration); \
+            s_FailedTests++;                                                       \
+        }                                                                          \
+        else                                                                       \
+        {                                                                          \
+            MY_LOG_CORE_INFO(" > Test %s passed (%d ms)", #func, __testDuration);  \
+            s_PassedTests++;                                                       \
+        }                                                                          \
+    }
+#define MY_TESTS_BEGIN(section)                                                 \
     {                                                                           \
-        TIME __startTime = getMsSinceBoot();                                    \
-        MY_LOG_CORE_INFO("Running test: %s", #func);                            \
-        TestResult __testResult = (func)();                                     \
-        TIME __testDuration = getMsSinceBoot() - __startTime;                   \
-        if (__testResult == MY_TEST_FAIL_CODE)                                  \
-        {                                                                       \
-            MY_LOG_CORE_ERROR("Test %s failed (%d ms)", #func, __testDuration); \
-            s_FailedTests++;                                                    \
-        }                                                                       \
-        else                                                                    \
-        {                                                                       \
-            MY_LOG_CORE_INFO("Test %s passed (%d ms)", #func, __testDuration);  \
-            s_PassedTests++;                                                    \
-        }                                                                       \
+        MY_LOG_CORE_INFO("=========== Running tests: %s ===========", section); \
+        s_TestsStartTime = getMsSinceBoot();                                    \
+        s_FailedTests = 0;                                                      \
+        s_PassedTests = 0;                                                      \
     }
-#define MY_TESTS_BEGIN()                      \
-    {                                         \
-        MY_LOG_CORE_INFO("Running tests..."); \
-        s_TestsStartTime = getMsSinceBoot();  \
-        s_FailedTests = 0;                    \
-        s_PassedTests = 0;                    \
-    }
-#define MY_TESTS_END()                                                                            \
-    {                                                                                             \
-        MY_LOG_CORE_INFO("Finished running tests in %d ms", getMsSinceBoot() - s_TestsStartTime); \
-        MY_LOG_CORE_INFO("Passed tests: %d", s_PassedTests);                                      \
-        MY_LOG_CORE_INFO("Failed tests: %d", s_FailedTests);                                      \
+#define MY_TESTS_END()                                                                               \
+    {                                                                                                \
+        MY_LOG_CORE_INFO(" > Finished running tests in %d ms", getMsSinceBoot() - s_TestsStartTime); \
+        MY_LOG_CORE_INFO(" > Passed tests: %d", s_PassedTests);                                      \
+        MY_LOG_CORE_INFO(" > Failed tests: %d", s_FailedTests);                                      \
+        MY_LOG_CORE_INFO("=========== Finished tests ===========");                                  \
     }
 #define MY_TEST_CASE_INIT_FUNC_INTERNAL(name) MY_TEST_CASE((name##_init))
 #define MY_TEST_CASE_INIT_FUNC(name) MY_TEST_CASE_INIT_FUNC_INTERNAL(name)

@@ -112,7 +112,7 @@ FUNCRESULT flashWriteFileBuff(FlashModule *module, SIZE fileIndex, const BYTE *b
         return ERR_POINTER;
     }
 
-    if (size + fileBuffer->_bufferSize > flashWriteBufferSize())
+    if (size + fileBuffer->_bufferSize >= flashWriteBufferSize())
     {
         SIZE buffOffset = flashWriteBufferSize() - fileBuffer->_bufferSize;
 

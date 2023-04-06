@@ -7,6 +7,8 @@ add_library(${LIB_GENERAL_NAME} STATIC
     test_console.c
     test_flash.h
     test_flash.c
+    test_nmea.h
+    test_nmea.c
 )
 
 target_link_libraries(${LIB_GENERAL_NAME} PRIVATE drivers_lib)

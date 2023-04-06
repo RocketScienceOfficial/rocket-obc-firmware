@@ -12,7 +12,7 @@ int main()
     {
         int a = 2, b = 3;
 
-        printf("a + b = %d\n", a + b);
+        printf("2 + 3 = %d\n", a + b);
         
         sleep_ms(1000);
     }

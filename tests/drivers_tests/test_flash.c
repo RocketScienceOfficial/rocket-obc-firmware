@@ -1,6 +1,5 @@
 #include "test_flash.h"
 #include "drivers/storage/flash_driver.h"
-#include <obc/api.h>
 #include <stdio.h>
 #include <stdlib.h>
 

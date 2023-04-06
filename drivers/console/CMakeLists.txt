@@ -9,5 +9,4 @@ add_library(${LIB_GENERAL_NAME} STATIC
     src/console_output.c
 )
 
-target_link_libraries(${LIB_GENERAL_NAME} PRIVATE pico_stdlib)
 target_include_directories(${LIB_GENERAL_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

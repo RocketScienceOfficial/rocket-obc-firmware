@@ -1,7 +1,7 @@
 #pragma once
 
 /**
- * REF: https://github.com/kosma/minmea/tree/master
+ * REF: https://github.com/kosma/minmea
  */
 
 #include <obc/api.h>
