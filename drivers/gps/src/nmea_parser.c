@@ -104,6 +104,7 @@ BOOL nmeaScan(const STRING sentence, const STRING format, ...)
     CHAR field[32];
     SIZE8 fieldIndex = 0;
     SIZE8 index = 1;
+    BOOL valid = TRUE;
 
     for (SIZE8 i = 0; format[i] != '\0'; i++)
     {
@@ -111,10 +112,20 @@ BOOL nmeaScan(const STRING sentence, const STRING format, ...)
 
         fieldIndex = 0;
 
+        if (!valid)
+        {
+            break;
+        }
+
         for (; sentence[index] != ',' && sentence[index] != '*'; index++)
         {
             field[fieldIndex] = sentence[index];
             fieldIndex++;
+        }
+
+        if (sentence[index] == '*')
+        {
+            valid = FALSE;
         }
 
         index++;
@@ -254,6 +265,8 @@ BOOL nmeaScan(const STRING sentence, const STRING format, ...)
     }
 
     va_end(ap);
+
+    return TRUE;
 }
 
 NMEASentence nmeaGetSentenceId(const STRING sentence)
@@ -476,34 +489,6 @@ BOOL nmeaParse_GST(const STRING sentence, NMEASentence_GST *frame)
                   &frame->stdLat,
                   &frame->stdLong,
                   &frame->stdAlt))
-    {
-        return FALSE;
-    }
-}
-
-BOOL nmeaParse_GSV(const STRING sentence, NMEASentence_GSV *frame)
-{
-    if (!nmeaScan(sentence, "_iiiiiiiiiiiiiiiiiiii",
-                  &frame->numMsg,
-                  &frame->msgNum,
-                  &frame->numSV,
-                  &frame->satellites[0].svid,
-                  &frame->satellites[0].elv,
-                  &frame->satellites[0].az,
-                  &frame->satellites[0].cno,
-                  &frame->satellites[1].svid,
-                  &frame->satellites[1].elv,
-                  &frame->satellites[1].az,
-                  &frame->satellites[1].cno,
-                  &frame->satellites[2].svid,
-                  &frame->satellites[2].elv,
-                  &frame->satellites[2].az,
-                  &frame->satellites[2].cno,
-                  &frame->satellites[3].svid,
-                  &frame->satellites[3].elv,
-                  &frame->satellites[3].az,
-                  &frame->satellites[3].cno,
-                  &frame->signalId))
     {
         return FALSE;
     }

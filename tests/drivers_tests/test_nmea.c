@@ -16,8 +16,8 @@ MY_TEST_FUNC(NMEA_TEST_NAME, 1)
     MY_ASSERT(frame.time.minute == 27);
     MY_ASSERT(frame.time.second == 25);
     MY_ASSERT(frame.time.hundredth == 0);
-    MY_ASSERT(frame.lat == 47.2852331667f);
-    MY_ASSERT(frame.lon == 8.565265f);
+    MY_ASSERT(frame.lat == 47.28523316666666432);
+    MY_ASSERT(frame.lon == 8.565265);
     MY_ASSERT(frame.NS == 'N');
     MY_ASSERT(frame.EW == 'E');
     MY_ASSERT(frame.quality == 1);

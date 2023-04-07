@@ -18,7 +18,6 @@ typedef enum NMEASentence
     NMEA_SENTENCE_GNS,
     NMEA_SENTENCE_GSA,
     NMEA_SENTENCE_GST,
-    NMEA_SENTENCE_GSV,
     NMEA_SENTENCE_RMC,
     NMEA_SENTENCE_VTG,
     NMEA_SENTENCE_ZDA,
@@ -164,15 +163,6 @@ typedef struct NMEASentence_GST
     FLOAT stdAlt;
 } NMEASentence_GST;
 
-typedef struct NMEASentence_GSV
-{
-    INT32 numMsg;
-    INT32 msgNum;
-    INT32 numSV;
-    NMEASatellite satellites[4];
-    INT32 signalId;
-} NMEASentence_GSV;
-
 typedef struct NMEASentence_RMC
 {
     NMEATime time;
@@ -308,15 +298,6 @@ BOOL nmeaParse_GSA(const STRING sentence, NMEASentence_GSA *frame);
  * @return True if the sentence was parsed successfully, false otherwise
  */
 BOOL nmeaParse_GST(const STRING sentence, NMEASentence_GST *frame);
-
-/**
- * @brief Parse the GSV sentence
- *
- * @param sentence Sentence to parse
- * @param frame GSV sentence structure
- * @return True if the sentence was parsed successfully, false otherwise
- */
-BOOL nmeaParse_GSV(const STRING sentence, NMEASentence_GSV *frame);
 
 /**
  * @brief Parse the RMC sentence
