@@ -28,3 +28,25 @@ FLOAT clampValue(FLOAT value, FLOAT min, FLOAT max);
  * @return Height in meters
  */
 FLOAT heightFromBarometricFormula(FLOAT pressure, FLOAT temperature);
+
+/**
+ * @brief Calculate the distance between two points on the Earth's surface
+ *
+ * @param lat1 Latitude of point 1
+ * @param lon1 Longitude of point 1
+ * @param lat2 Latitude of point 2
+ * @param lon2 Longitude of point 2
+ * @return Distance in meters
+ */
+FLOAT distanceBetweenGeoPoints(FLOAT lat1, FLOAT lon1, FLOAT lat2, FLOAT lon2);
+
+/**
+ * @brief Calculate the bearing between two points on the Earth's surface
+ *
+ * @param lat1 Latitude of point 1
+ * @param lon1 Longitude of point 1
+ * @param lat2 Latitude of point 2
+ * @param lon2 Longitude of point 2
+ * @return Bearing in degrees
+ */
+FLOAT bearingBetweenGeoPoints(FLOAT lat1, FLOAT lon1, FLOAT lat2, FLOAT lon2);

@@ -1,4 +1,4 @@
-#include "maths/avg_filter.h"
+#include "filters/avg_filter.h"
 
 VOID filterAvg(AvgFilterData *data, FLOAT *v)
 {

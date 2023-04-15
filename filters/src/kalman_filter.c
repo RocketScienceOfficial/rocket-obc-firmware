@@ -1,4 +1,4 @@
-#include "maths/kalman_filter.h"
+#include "filters/kalman_filter.h"
 
 VOID kalmanInitIMU(KalmanDataIMU *data)
 {

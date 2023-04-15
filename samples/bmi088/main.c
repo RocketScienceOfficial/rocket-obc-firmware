@@ -18,11 +18,11 @@ int main()
 
     spiInitAll(SPI, 10 * 1000 * 1000);
 
-    MadgiwckFilterDataIMU madgwickFilterData;
+    MadgiwckFilterData madgwickFilterData;
     BMI088AccelConfig accelConfig;
     BMI088GyroConfig gyroConfig;
 
-    madgwickInitIMU(&madgwickFilterData, 5, 0.1);
+    madgwickInit(&madgwickFilterData, 5, 0.1);
 
     bmi088AccelInit(&accelConfig, SPI, MISO, MOSI, ACCEL_CS, SCK);
     bmi088AccelSetConf(&accelConfig, BMI088_ACCEL_ODR_1600HZ, BMI088_ACCEL_OSR_NORMAL);

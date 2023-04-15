@@ -309,10 +309,6 @@ NMEASentence nmeaGetSentenceId(const STRING sentence)
     {
         return NMEA_SENTENCE_GST;
     }
-    else if (strcmp(id, "GSV") == 0)
-    {
-        return NMEA_SENTENCE_GSV;
-    }
     else if (strcmp(id, "RMC") == 0)
     {
         return NMEA_SENTENCE_RMC;
