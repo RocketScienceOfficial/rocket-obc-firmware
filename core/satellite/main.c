@@ -22,7 +22,6 @@ int main()
     stdio_init_all();
 
     myLogCreateConsoleSink(myLogGetCoreLogger(), DEFAULT_LOG_SERIAL_PATTERN);
-    myLogCreateFileSink(myLogGetCoreLogger(), DEFAULT_LOG_SERIAL_PATTERN, LOG_FILE_INDEX);
 
     MY_LOG_CORE_INFO("Initializing...");
 
@@ -80,23 +79,6 @@ int main()
             free(buffer);
         }
     }
-
-    flashTerminate(flashGetDefaultModule());
-
-    const BYTE *fileBuffer;
-    SIZE size = 0;
-
-    flashGetFile(flashGetDefaultModule(), LOG_FILE_INDEX, &fileBuffer, &size);
-
-    SDCard sdCard = {0};
-
-    sdInit(&sdCard, 0);
-    sdInitFile(&sdCard, LOG_FILE_NAME);
-    sdClearFile(&sdCard, LOG_FILE_NAME);
-    sdBegin(&sdCard, LOG_FILE_NAME);
-    sdWrite(&sdCard, (STRING)fileBuffer, LOG_FILE_NAME);
-    sdEnd(&sdCard, LOG_FILE_NAME);
-    sdTerminate(&sdCard);
 
     return 0;
 }

@@ -1,20 +1,11 @@
 #include "kernel/logging/logger.h"
 #include "drivers/console/console_output.h"
-#include "drivers/storage/flash_driver.h"
 #include "tools/time_tracker.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
 #define REPORT_ERROR(msg) consoleLogError(msg)
-#define LOG_DRIVER_CALL(func)                                                                                                 \
-	{                                                                                                                         \
-		FUNCRESULT result = func;                                                                                             \
-		if (FUNCFAILED(result))                                                                                               \
-		{                                                                                                                     \
-			consoleLogError("Logger crashed! Hardware function with code failed: %d at '%s:%d'", result, __FILE__, __LINE__); \
-		}                                                                                                                     \
-	}
 
 VOID myLogCreateLogger(Logger *logger, const STRING name)
 {
@@ -43,26 +34,6 @@ VOID myLogCreateConsoleSink(Logger *logger, const STRING pattern)
 		._type = SINK_CONSOLE,
 		._customData = NULL,
 	};
-
-	logger->_sinks[logger->_numSinks++] = sink;
-}
-
-VOID myLogCreateFileSink(Logger *logger, const STRING pattern, SIZE fileIndex)
-{
-	if (!logger || !pattern || fileIndex >= FLASH_FILES_COUNT)
-	{
-		REPORT_ERROR("Invalid logger, pattern or fileName");
-
-		return;
-	}
-
-	LogSinkData sink = {
-		._pattern = pattern,
-		._type = SINK_FILE,
-		._customData = (VOID *)fileIndex,
-	};
-
-	LOG_DRIVER_CALL(flashClearFile(flashGetDefaultModule(), fileIndex));
 
 	logger->_sinks[logger->_numSinks++] = sink;
 }
@@ -183,9 +154,6 @@ static VOID __log(Logger *logger, const STRING level, const STRING format, va_li
 			{
 			case SINK_CONSOLE:
 				consoleLog(log);
-				break;
-			case SINK_FILE:
-				LOG_DRIVER_CALL(flashWriteFile(flashGetDefaultModule(), (SIZE)logger->_sinks[i]._customData, log));
 				break;
 			default:
 				REPORT_ERROR("Unknown sink type");

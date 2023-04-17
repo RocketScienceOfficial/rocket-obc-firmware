@@ -55,6 +55,12 @@
         "flash_driver.h": "c",
         "test_framework.h": "c",
         "math.h": "c",
-        "functional": "c"
+        "functional": "c",
+        "onboard_flash_driver.h": "c",
+        "array": "c",
+        "initializer_list": "c",
+        "utility": "c",
+        "measurements_utils.h": "c",
+        "test_nmea.h": "c"
     }
 }

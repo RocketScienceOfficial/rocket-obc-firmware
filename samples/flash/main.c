@@ -1,26 +1,24 @@
 #include "drivers/storage/flash_driver.h"
 #include "pico/stdlib.h"
 #include <stdio.h>
-
-#define FILE_INDEX 0
+#include <string.h>
 
 int main()
 {
     stdio_init_all();
-    sleep_ms(5000);
+    sleep_ms(10000);
 
-    flashInit(flashGetDefaultModule());
-    flashClearFile(flashGetDefaultModule(), FILE_INDEX);
-    flashWriteFile(flashGetDefaultModule(), FILE_INDEX, "Hello World!    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa END");
+    flashEraseSectors(0, 1);
+
+    BYTE *writeBuff = (BYTE *)malloc(256);
+    memcpy(writeBuff, "Hello World!    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa END", 256);
+    flashWritePage(0, (const BYTE *)writeBuff);
 
     const BYTE *buffer;
-    SIZE size;
-    flashGetFile(flashGetDefaultModule(), FILE_INDEX, &buffer, &size);
+    flashRead(0, &buffer);
+    printf("Read from flash: \n%s\n", buffer);
 
-    printf("Read from flash: %.*s\n", size, buffer);
-
-    flashClearFile(flashGetDefaultModule(), FILE_INDEX);
-    flashTerminate(flashGetDefaultModule());
+    flashEraseSectors(0, 1);
 
     while (TRUE)
     {

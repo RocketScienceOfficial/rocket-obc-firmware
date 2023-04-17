@@ -8,7 +8,6 @@
 #include "test_logger.h"
 #include "test_radio_protocol.h"
 #include "test_console.h"
-#include "test_flash.h"
 #include "test_nmea.h"
 
 static VOID intialize();
@@ -37,7 +36,6 @@ static VOID intialize()
     MY_TESTS_BEGIN("Initialization");
 
     MY_TEST_CASE_INIT_FUNC(COMMANDS_TEST_NAME);
-    MY_TEST_CASE_INIT_FUNC(FLASH_TEST_NAME);
 
     MY_TESTS_END();
 }
@@ -62,9 +60,6 @@ static VOID run()
 
     MY_TEST_CASE_FUNC(RADIO_PROTOCOL_TEST_NAME, 1);
     MY_TEST_CASE_FUNC(RADIO_PROTOCOL_TEST_NAME, 2);
-
-    MY_TEST_CASE_FUNC(FLASH_TEST_NAME, 1);
-    MY_TEST_CASE_FUNC(FLASH_TEST_NAME, 2);
 
     MY_TEST_CASE_FUNC(CONSOLE_TEST_NAME, 1);
     MY_TEST_CASE_FUNC(CONSOLE_TEST_NAME, 2);

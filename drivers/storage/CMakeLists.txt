@@ -10,4 +10,5 @@ add_library(${LIB_GENERAL_NAME} STATIC
 )
 
 target_link_libraries(${LIB_GENERAL_NAME} PUBLIC drivers_gpio_lib FatFs_SPI)
+target_link_libraries(${LIB_GENERAL_NAME} PRIVATE hardware_flash hardware_sync)
 target_include_directories(${LIB_GENERAL_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

@@ -8,4 +8,4 @@ git submodule update --init --recursive
 
 ./build.sh
 
-pip install -r ./requirements.txt
+pip install -r requirements.txt

@@ -12,7 +12,6 @@
 typedef enum LoggerSinkType
 {
     SINK_CONSOLE,
-    SINK_FILE,
 } LoggerSinkType;
 
 /**
@@ -50,14 +49,6 @@ VOID myLogCreateLogger(Logger *logger, const STRING name);
  * @param pattern Pattern of sink
  */
 VOID myLogCreateConsoleSink(Logger *logger, const STRING pattern);
-
-/**
- * @brief Creates a file sink
- *
- * @param logger Logger to add sink to
- * @param pattern Pattern of sink
- */
-VOID myLogCreateFileSink(Logger *logger, const STRING pattern, SIZE fileIndex);
 
 /**
  * @brief Parses a log
