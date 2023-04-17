@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd $(dirname $0)/..
+cd $(dirname $0)
 
 sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib build-essential ninja-build
 
