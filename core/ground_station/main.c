@@ -3,9 +3,9 @@
 #include <string.h>
 #include "pico/stdlib.h"
 #include "pinout.h"
-#include "receiver_logger.h"
-#include "common/commands_utils.h"
-#include "common/radio_utils.h"
+#include "core/common/measurements_utils.h"
+#include "core/common/commands_utils.h"
+#include "core/common/radio_utils.h"
 #include "drivers/console/console_output.h"
 #include "kernel/logging/logger.h"
 #include "tools/time_tracker.h"
@@ -33,7 +33,7 @@ int main()
 
     initializeCommands();
     // initializeRadio(&loraPinout);
-    initializeReceiverLogger();
+    initializeMeasurementLogger();
 
     MY_LOG_CORE_INFO("Everything is ready!");
 
@@ -48,7 +48,7 @@ int main()
                 .cpuTemp = 20.1f,
             };
             
-            logReceiverData(&measurement);
+            logMeasurementData(&measurement);
         }
 
         // if (consoleAvailable())

@@ -1,4 +1,4 @@
-#include "common/radio_utils.h"
+#include "core/common/radio_utils.h"
 #include "drivers/console/console_input.h"
 #include "kernel/logging/logger.h"
 #include "kernel/commands/commands.h"

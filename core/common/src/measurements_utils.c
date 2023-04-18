@@ -1,4 +1,4 @@
-#include "receiver_logger.h"
+#include "core/common/measurements_utils.h"
 #include "kernel/logging/logger.h"
 
 static Logger s_Logger;
@@ -12,15 +12,16 @@ static Logger s_Logger;
 #define MY_LOG_RECEIVER_DATA_INT(val) MY_LOG_RECEIVER_DATA_INTERNAL(val, "%d,")
 #define MY_LOG_RECEIVER_DATA_EMPTY() myLog(&s_Logger, "", ",")
 
-VOID initializeReceiverLogger()
+VOID initializeMeasurementLogger()
 {
     myLogCreateLogger(&s_Logger, MY_LOG_RECEIVER_DATA_NAME);
     myLogCreateConsoleSink(&s_Logger, MY_LOG_RECEIVER_DATA_PATTERN);
 }
 
-VOID logReceiverData(MeasurementData *data)
+VOID logMeasurementData(MeasurementData *data)
 {
     MY_LOG_RECEIVER_DATA_BEGIN();
+
     MY_LOG_RECEIVER_DATA_FLOAT(data->accel_x);
     MY_LOG_RECEIVER_DATA_FLOAT(data->accel_y);
     MY_LOG_RECEIVER_DATA_FLOAT(data->accel_z);
@@ -43,5 +44,6 @@ VOID logReceiverData(MeasurementData *data)
     MY_LOG_RECEIVER_DATA_FLOAT(data->cpuTemp);
     MY_LOG_RECEIVER_DATA_FLOAT(data->batteryPercentage);
     MY_LOG_RECEIVER_DATA_FLOAT(data->fuelPercentage);
+
     MY_LOG_RECEIVER_DATA_END();
 }

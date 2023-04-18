@@ -30,3 +30,15 @@ typedef struct MeasurementData
     FLOAT batteryPercentage;
     FLOAT fuelPercentage;
 } MeasurementData;
+
+/**
+ * @brief Initializes the measurements logger.
+ */
+VOID initializeMeasurementLogger();
+
+/**
+ * @brief Logs the measurement data.
+ *
+ * @param data The data to log.
+ */
+VOID logMeasurementData(MeasurementData *data);

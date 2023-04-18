@@ -1,4 +1,4 @@
-#include "common/commands_utils.h"
+#include "core/common/commands_utils.h"
 #include "drivers/console/console_input.h"
 #include "kernel/commands/commands.h"
 #include "kernel/commands/default_commands.h"
