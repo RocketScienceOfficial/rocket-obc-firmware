@@ -6,6 +6,12 @@
 #include <string.h>
 #include <math.h>
 
+typedef struct MeasurementData_FlashSave
+{
+    INT32 _startSeqeuence;
+    MeasurementData data;
+} MeasurementData_FlashSave;
+
 int main()
 {
     stdio_init_all();
@@ -14,15 +20,16 @@ int main()
     initializeMeasurementLogger();
 
     const SIZE dataSize = 256;
-    const SIZE singleDataSize = sizeof(MeasurementData);
+    const SIZE singleDataSize = sizeof(MeasurementData_FlashSave);
     const SIZE dataBytesSize = dataSize * singleDataSize;
 
-    MeasurementData *data = (MeasurementData *)malloc(dataBytesSize);
+    MeasurementData_FlashSave *data = (MeasurementData_FlashSave *)malloc(dataBytesSize);
 
     for (SIZE i = 0; i < dataSize; i++)
     {
-        data[i] = (MeasurementData){0};
-        data[i].accel_x = 100;
+        data[i] = (MeasurementData_FlashSave){0};
+        data[i]._startSeqeuence = 0xEEEEEEEE;
+        data[i].data.accel_x = 100;
     }
 
     BYTE *buffer = (BYTE *)data;
@@ -34,11 +41,21 @@ int main()
 
     const BYTE *newBuffer;
     flashRead(0, &newBuffer);
-    MeasurementData *newData = (MeasurementData *)newBuffer;
+    MeasurementData_FlashSave *newData = (MeasurementData_FlashSave *)newBuffer;
+    INT32 seq = 0, i = 0;
 
-    for (SIZE i = 0; i < dataSize; i++)
+    while (TRUE)
     {
-        logMeasurementData(&newData[i]);
+        memcpy(&seq, &newBuffer[i * sizeof(MeasurementData_FlashSave)], sizeof(INT32));
+
+        if (seq != 0xEEEEEEEE)
+        {
+            break;
+        }
+
+        logMeasurementData(&newData[i].data);
+
+        i++;
     }
 
     while (TRUE)

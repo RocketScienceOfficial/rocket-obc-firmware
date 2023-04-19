@@ -10,19 +10,19 @@ int main()
 
     flashEraseSectors(0, 1);
 
-    BYTE *writeBuff = (BYTE *)malloc(256);
-    memcpy(writeBuff, "Hello World!    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa END", 256);
-    flashWritePage(0, (const BYTE *)writeBuff);
+    const BYTE *writeBuffer = (const BYTE *)"Hello World!    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa END";
+    printf("Written to flash: \n%s\n\n", writeBuffer);
+    flashWritePage(0, writeBuffer);
 
-    const BYTE *buffer;
-    flashRead(0, &buffer);
-    printf("Read from flash: \n%s\n", buffer);
+    const BYTE *readBuffer;
+    flashRead(0, &readBuffer);
+    printf("Read from flash: \n%s\n", readBuffer);
 
     flashEraseSectors(0, 1);
 
     while (TRUE)
     {
-        sleep_ms(1000);
+        tight_loop_contents();
     }
 
     return 0;

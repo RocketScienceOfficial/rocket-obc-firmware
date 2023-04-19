@@ -48,4 +48,5 @@ cp build/samples/sd/samples_sd.uf2 executables/samples/sd.uf2
 cp build/samples/simple_buzzer/samples_simple_buzzer.uf2 executables/samples/simple_buzzer.uf2
 cp build/samples/sx127X/samples_sx127X.uf2 executables/samples/sx127X.uf2
 cp build/samples/ubx_neo_m9n/samples_ubx_neo_m9n.uf2 executables/samples/ubx_neo_m9n.uf2
-cp build/samples/ws2812/samples_ws2812.uf2 executables/samples/ws2812.uf2
+cp build/samples/ws2812/ws2812_reset/samples_ws2812_reset.uf2 executables/samples/ws2812_reset.uf2
+cp build/samples/ws2812/ws2812_static/samples_ws2812_static.uf2 executables/samples/ws2812_static.uf2
