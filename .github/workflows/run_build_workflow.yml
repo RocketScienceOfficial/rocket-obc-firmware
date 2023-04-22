@@ -11,7 +11,7 @@ jobs:
       - name: Build
         working-directory: .
         run: |
-          sudo sed -i -e 's/\r$//' ./setup.sh
-          sudo sed -i -e 's/\r$//' ./build.sh
-          ./setup.sh
+          sudo sed -i -e 's/\r$//' ./scripts/setup.sh
+          sudo sed -i -e 's/\r$//' ./scripts/build.sh
+          ./scripts/setup.sh
         shell: bash

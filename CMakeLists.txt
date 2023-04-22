@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 include(vendor/pico-sdk/pico_sdk_init.cmake)
-include(utils.cmake)
+include(cmake/utils.cmake)
 
 project(obc C CXX ASM)
 

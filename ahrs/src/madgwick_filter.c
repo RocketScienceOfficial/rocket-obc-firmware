@@ -43,7 +43,7 @@ VOID madgwickUpdateIMU(MadgiwckFilterData *data, vec3 gyroVec, vec3 accVec)
     s_Q = data->q;
     s_GyroDerivative = (quat){
         0.5f * (-gyroVec.x * s_Q.x - gyroVec.y * s_Q.y - gyroVec.z * s_Q.z),
-        0.5f * (gyroVec.x * s_Q.w + gyroVec.z * s_Q.y - gyroVec.z * s_Q.z),
+        0.5f * (gyroVec.x * s_Q.w + gyroVec.z * s_Q.y - gyroVec.y * s_Q.z),
         0.5f * (gyroVec.y * s_Q.w - gyroVec.z * s_Q.x + gyroVec.x * s_Q.z),
         0.5f * (gyroVec.z * s_Q.w + gyroVec.y * s_Q.x - gyroVec.x * s_Q.y),
     };
@@ -90,7 +90,7 @@ VOID madgwickUpdateMARG(MadgiwckFilterData *data, vec3 gyroVec, vec3 accVec, vec
     s_Q = data->q;
     s_GyroDerivative = (quat){
         0.5f * (-gyroVec.x * s_Q.x - gyroVec.y * s_Q.y - gyroVec.z * s_Q.z),
-        0.5f * (gyroVec.x * s_Q.w + gyroVec.z * s_Q.y - gyroVec.z * s_Q.z),
+        0.5f * (gyroVec.x * s_Q.w + gyroVec.z * s_Q.y - gyroVec.y * s_Q.z),
         0.5f * (gyroVec.y * s_Q.w - gyroVec.z * s_Q.x + gyroVec.x * s_Q.z),
         0.5f * (gyroVec.z * s_Q.w + gyroVec.y * s_Q.x - gyroVec.x * s_Q.y),
     };
