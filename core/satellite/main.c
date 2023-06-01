@@ -12,6 +12,14 @@
 static RadioUtilPacketData s_Packet;
 static TIME s_TimerOffset;
 
+VOID initSensors()
+{
+}
+
+VOID takeMeasurements(MeasurementData *measurements)
+{
+}
+
 int main()
 {
     stdio_init_all();
@@ -27,11 +35,15 @@ int main()
 
     initializeRadio(&loraPinout);
 
+    initSensors();
+
     while (TRUE)
     {
         if (runEvery(MEASUREMENTS_UPDATE_RATE_MS, &s_TimerOffset))
         {
             MeasurementData measurements = {0};
+
+            takeMeasurements(&measurements);
 
             RadioBody body = {
                 .command = MEASUREMENTS_RADIO_COMMAND_ID,

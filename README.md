@@ -2,8 +2,6 @@
 
 ## Overview
 
-***
-
 Project for the rocket system.
 
 ## Required Software
@@ -31,3 +29,19 @@ $ git clone https://github.com/Filipeak/project-rocket.git
 ``` console
 $ ./setup.sh
 ```
+
+3. Naming
+- Struct -> PascalCase
+- Struct Members -> camelCase
+- Union -> PascalCase
+- Union Members -> camelCase
+- Enum -> PascalCase
+- Enum Members -> SCREAMING_SNAKE_CASE
+- Typedef -> PascalCase
+- Functions -> camelCase
+- Local Variables -> camelCase
+- Static Variables -> s_camelCase
+- Global Variables -> Don't use them!
+- Pointers -> p_camelCase
+- Constants -> SCREAMING_SNAKE_CASE
+- Macros -> SCREAMING_SNAKE_CASE
