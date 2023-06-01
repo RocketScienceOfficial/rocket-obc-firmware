@@ -12,9 +12,9 @@ FUNCRESULT batteryInit(BatteryConfig *config, ADCInput input, BatteryInterval *i
         return ERR_FAIL;
     }
 
-    config->_input = input;
-    config->_intervals = intervals;
-    config->_intervalsCount = intervalsCount;
+    config->input = input;
+    config->intervals = intervals;
+    config->intervalsCount = intervalsCount;
 
     return SUC_OK;
 }
@@ -28,16 +28,16 @@ FUNCRESULT batteryReadPercent(BatteryConfig *config, FLOAT *percentage)
 
     VoltageLevel voltage = 0;
 
-    if (FUNCFAILED(adcRead(config->_input, &voltage)))
+    if (FUNCFAILED(adcRead(config->input, &voltage)))
     {
         return ERR_FAIL;
     }
 
-    for (SIZE8 i = 0; i < config->_intervalsCount; i++)
+    for (SIZE8 i = 0; i < config->intervalsCount; i++)
     {
-        if (voltage >= config->_intervals[i].minVolts && voltage <= config->_intervals[i].maxVolts)
+        if (voltage >= config->intervals[i].minVolts && voltage <= config->intervals[i].maxVolts)
         {
-            *percentage = (config->_intervals[i].maxPercent - config->_intervals[i].minPercent) / (config->_intervals[i].maxVolts - config->_intervals[i].minVolts) * (voltage - config->_intervals[i].minVolts) + config->_intervals[i].minPercent;
+            *percentage = (config->intervals[i].maxPercent - config->intervals[i].minPercent) / (config->intervals[i].maxVolts - config->intervals[i].minVolts) * (voltage - config->intervals[i].minVolts) + config->intervals[i].minPercent;
 
             return SUC_OK;
         }

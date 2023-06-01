@@ -6,7 +6,7 @@
 #define CTRL_REG3 0x22
 #define CTRL_REG4 0x23
 #define CTRL_REG5 0x24
-#define HP_FILTER_TEST 0x25
+#define HP_FILTER_RESET 0x25
 #define REFERENCE 0x26
 #define STATUS_REG 0x27
 #define OUT_X_L 0x28
@@ -24,6 +24,7 @@
 #define INT_2_THS 0x36
 #define INT_2_DURATION 0x37
 
+#define WHO_AM_I_VALUE 0x32
 #define RESOLUTION_DIVIDER 32768.0f
 
 FUNCRESULT h3lis331dlInit(H3lis331dlConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
@@ -32,54 +33,40 @@ FUNCRESULT h3lis331dlInit(H3lis331dlConfig *config, SPIInstance spi, PinNumber m
     config->cs = cs;
     config->rangeFactor = 0;
 
-    spiInitPins(spi, miso, mosi, sck, cs);
+    return spiInitPins(spi, miso, mosi, sck, cs);
+}
+
+FUNCRESULT h3lis331dlValidateId(H3lis331dlConfig *config, BOOL *valid)
+{
+    *valid = __h3lis331dlReadReg(config, WHO_AM_I) == WHO_AM_I_VALUE;
 
     return SUC_OK;
 }
 
-FUNCRESULT h3lis331dlWhoAmI(H3lis331dlConfig *config, BYTE *whoami)
+FUNCRESULT h3lis331dlSetPowerMode(H3lis331dlConfig *config, H3lis331dlPowerMode power)
 {
-    *whoami = __h3lis331dlReadReg(config, WHO_AM_I);
-
-    return SUC_OK;
-}
-
-FUNCRESULT h3lis331dlSetPower(H3lis331dlConfig *config, BOOL power)
-{
-    BYTE data = __h3lis331dlReadReg(config, CTRL_REG1);
-
-    data &= 0x1F;
-
-    if (power)
-    {
-        data |= 1 << 5;
-    }
-
-    __h3lis331dlWriteReg(config, CTRL_REG1, data);
+    FUNC_CHECK_BOOL(__h3lis331dlWriteRegField(config, CTRL_REG1, 3, 5, (BYTE)power));
 
     return SUC_OK;
 }
 
 FUNCRESULT h3lis331dlSetODR(H3lis331dlConfig *config, H3lis331dlODR odr)
 {
-    BYTE data = __h3lis331dlReadReg(config, CTRL_REG1);
+    FUNC_CHECK_BOOL(__h3lis331dlWriteRegField(config, CTRL_REG1, 2, 3, (BYTE)odr));
 
-    data &= 0xE7;
-    data |= (odr << 3);
+    return SUC_OK;
+}
 
-    __h3lis331dlWriteReg(config, CTRL_REG1, data);
+FUNCRESULT h3lis331dlSetHPCF(H3lis331dlConfig *config, H3lis331dlHPFc hpcf)
+{
+    FUNC_CHECK_BOOL(__h3lis331dlWriteRegField(config, CTRL_REG2, 2, 0, (BYTE)hpcf));
 
     return SUC_OK;
 }
 
 FUNCRESULT h3lis331dlSetRange(H3lis331dlConfig *config, H3lis331dlRange range)
 {
-    BYTE data = __h3lis331dlReadReg(config, CTRL_REG4);
-
-    data &= 0xCF;
-    data |= (range << 4);
-
-    __h3lis331dlWriteReg(config, CTRL_REG4, data);
+    FUNC_CHECK_BOOL(__h3lis331dlWriteRegField(config, CTRL_REG4, 2, 4, (BYTE)range));
 
     switch (range)
     {
@@ -93,20 +80,13 @@ FUNCRESULT h3lis331dlSetRange(H3lis331dlConfig *config, H3lis331dlRange range)
         config->rangeFactor = 400.0f / RESOLUTION_DIVIDER;
         break;
     default:
-        break;
+        return ERR_INVALIDARG;
     }
 
     return SUC_OK;
 }
 
-FUNCRESULT h3lis33dlStatus(H3lis331dlConfig *config, BYTE *status)
-{
-    *status = __h3lis331dlReadReg(config, STATUS_REG);
-
-    return SUC_OK;
-}
-
-FUNCRESULT h3lis331dlRead(H3lis331dlConfig *config, H3lis331dlData *data)
+FUNCRESULT h3lis331dlRead(H3lis331dlConfig *config, vec3 *accel)
 {
     BYTE buffer[6];
 
@@ -116,11 +96,38 @@ FUNCRESULT h3lis331dlRead(H3lis331dlConfig *config, H3lis331dlData *data)
     INT16 y = (INT16)((buffer[3] << 8) | buffer[2]);
     INT16 z = (INT16)((buffer[5] << 8) | buffer[4]);
 
-    data->accel.x = (FLOAT)x * config->rangeFactor;
-    data->accel.y = (FLOAT)y * config->rangeFactor;
-    data->accel.z = (FLOAT)z * config->rangeFactor;
+    accel->x = (FLOAT)x * config->rangeFactor;
+    accel->y = (FLOAT)y * config->rangeFactor;
+    accel->z = (FLOAT)z * config->rangeFactor;
 
     return SUC_OK;
+}
+
+BOOL __h3lis331dlWriteRegField(H3lis331dlConfig *config, BYTE address, UINT8 length, UINT8 offset, BYTE value)
+{
+    BYTE data = __h3lis331dlReadReg(config, address);
+
+    BYTE mask = 0xFF;
+    mask >>= offset;
+    mask <<= offset;
+    mask <<= 8 - offset - length;
+    mask >>= 8 - offset - length;
+
+    data &= ~mask;
+    data |= (value << offset);
+
+    __h3lis331dlWriteReg(config, address, data);
+
+#if OBC_DEBUG_MODE
+    BYTE read = __h3lis331dlReadReg(config, address);
+
+    if (read != data)
+    {
+        return FALSE;
+    }
+#endif
+
+    return TRUE;
 }
 
 BYTE __h3lis331dlReadReg(H3lis331dlConfig *config, BYTE address)

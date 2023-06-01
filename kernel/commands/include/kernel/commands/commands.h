@@ -8,7 +8,7 @@
 /**
  * @brief Command function structure
  */
-typedef void (*CommandFunction)(STRING *args, SIZE argc);
+typedef VOID (*CommandFunction)(STRING *args, SIZE argc);
 
 /**
  * @brief Command data structure

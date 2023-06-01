@@ -11,8 +11,8 @@
  */
 typedef struct UBloxNeoM9NConfig
 {
-    SPIInstance _spi; /** SPI */
-    PinNumber _cs;    /** CS */
+    SPIInstance spi; /** SPI */
+    PinNumber cs;    /** CS */
 } UBloxNeoM9NConfig;
 
 /**
@@ -20,9 +20,9 @@ typedef struct UBloxNeoM9NConfig
  */
 typedef struct UBloxNeoM9NData
 {
-    BOOL _isValid;                           /** Is current data valid */
+    BOOL isValid;                           /** Is current data valid */
     CHAR sentence[NMEA_SENTENCE_MAX_LENGTH]; /** Sentence buffer */
-    SIZE _currentIndex;                      /** Current index of buffer */
+    SIZE currentIndex;                      /** Current index of buffer */
     BOOL isFinishedSentence;                 /** Is current sentence ready */
 } UBloxNeoM9NData;
 

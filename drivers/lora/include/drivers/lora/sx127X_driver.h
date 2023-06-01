@@ -27,11 +27,11 @@ typedef struct SX127XPinout
  */
 typedef struct SX127XData
 {
-    SX127XPinout _pinout;     /** Pinout pointer */
-    INT32 _txPower;           /** Power */
-    UINT64 _frequency;        /** Frequency to work with */
-    INT32 _packetIndex;       /** Index of packet */
-    BOOL _implicitHeaderMode; /** Implicit header mode */
+    SX127XPinout pinout;     /** Pinout pointer */
+    INT32 txPower;           /** Power */
+    UINT64 frequency;        /** Frequency to work with */
+    INT32 packetIndex;       /** Index of packet */
+    BOOL implicitHeaderMode; /** Implicit header mode */
 } SX127XData;
 
 /**

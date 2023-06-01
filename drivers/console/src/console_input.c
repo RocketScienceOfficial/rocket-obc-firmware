@@ -26,7 +26,7 @@ FUNCRESULT consoleInputProcessCharacter(INT32 c, ConsoleInput *input, ConsoleTok
 
     if (c == '\r')
     {
-        if (strnlen(input->_cmd, sizeof(input->_cmd)) == 0)
+        if (strnlen(input->cmd, sizeof(input->cmd)) == 0)
         {
             return SUC_OK;
         }
@@ -37,9 +37,9 @@ FUNCRESULT consoleInputProcessCharacter(INT32 c, ConsoleInput *input, ConsoleTok
     }
     else
     {
-        if (input->_cmdSize < sizeof(input->_cmd) - 1)
+        if (input->cmdSize < sizeof(input->cmd) - 1)
         {
-            input->_cmd[input->_cmdSize++] = c;
+            input->cmd[input->cmdSize++] = c;
 
             return SUC_OK;
         }
@@ -60,7 +60,7 @@ FUNCRESULT consoleTokenizeInput(ConsoleInput *input, ConsoleTokens *tokens)
     tokens->tokens = (STRING *)malloc(CONSOLE_ARGS_MAX_COUNT * sizeof(STRING));
     tokens->size = 0;
 
-    STRING cmdn = strtok(input->_cmd, " ");
+    STRING cmdn = strtok(input->cmd, " ");
 
     while (cmdn != NULL)
     {
@@ -84,8 +84,8 @@ FUNCRESULT consoleInputClear(ConsoleInput *input, ConsoleTokens *tokens)
         return ERR_INVALIDARG;
     }
 
-    input->_cmdSize = 0;
-    memset(input->_cmd, 0, sizeof(input->_cmd));
+    input->cmdSize = 0;
+    memset(input->cmd, 0, sizeof(input->cmd));
 
     if (tokens->size > 0)
     {

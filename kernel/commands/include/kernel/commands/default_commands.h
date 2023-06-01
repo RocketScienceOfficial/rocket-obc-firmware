@@ -5,12 +5,12 @@
 /**
  * @brief Prints hello message to console
  */
-void helloCommand(STRING *args, SIZE argc);
+VOID helloCommand(STRING *args, SIZE argc);
 
 /**
  * @brief Prints hello message to console with name
  */
-void helloNameCommand(STRING *args, SIZE argc);
+VOID helloNameCommand(STRING *args, SIZE argc);
 
 /**
  * @brief Get size of default commands

@@ -10,6 +10,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 pico_sdk_init()
 
+add_compile_definitions(OBC_DEBUG_MODE=1)
+
 add_subdirectory(lib)
 add_subdirectory(api)
 add_subdirectory(tools)

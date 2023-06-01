@@ -20,9 +20,9 @@ typedef struct BatteryInterval
  */
 typedef struct BatteryConfig
 {
-    ADCInput _input;             /** ADC input */
-    BatteryInterval *_intervals; /** Battery intervals */
-    SIZE8 _intervalsCount;       /** Battery intervals count */
+    ADCInput input;             /** ADC input */
+    BatteryInterval *intervals; /** Battery intervals */
+    SIZE8 intervalsCount;       /** Battery intervals count */
 } BatteryConfig;
 
 /**

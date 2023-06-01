@@ -16,6 +16,7 @@
 #define INTERNAL_CONTROL_3 0x0C
 #define PRODUCT_ID 0x2F
 
+#define PRODUCT_ID_VALID 0x0C
 #define RESOLUTION 0.00006103515625f
 #define BASE_OFFSET 131072
 
@@ -27,6 +28,27 @@ FUNCRESULT mmc5983maInit(MMC5983MAConfig *config, SPIInstance spi, PinNumber mis
     spiInitPins(spi, miso, mosi, sck, cs);
 
     __mmc5983maWriteReg(config, INTERNAL_CONTROL_0, 0x20);
+
+    return SUC_OK;
+}
+
+FUNCRESULT mmc5983ValidateId(MMC5983MAConfig *config, BOOL *valid)
+{
+    *valid = __mmc5983maReadReg(config, PRODUCT_ID) == PRODUCT_ID_VALID;
+
+    return SUC_OK;
+}
+
+FUNCRESULT mmc5983maSetBandwidth(MMC5983MAConfig *config, MMC5983MABandwidth bandwidth)
+{
+    __mmc5983maWriteReg(config, INTERNAL_CONTROL_1, bandwidth);
+
+    return SUC_OK;
+}
+
+FUNCRESULT mmc5983maSetODR(MMC5983MAConfig *config, MMC5983ODR odr)
+{
+    __mmc5983maWriteReg(config, INTERNAL_CONTROL_2, odr == 0 ? 0 : (0x08 | odr));
 
     return SUC_OK;
 }
@@ -71,7 +93,7 @@ FUNCRESULT mmc5983maCalculateOffset(MMC5983MAConfig *config, vec3 *offset)
     return SUC_OK;
 }
 
-FUNCRESULT mmc5983maRead(MMC5983MAConfig *config, MMC5983MAData *data)
+FUNCRESULT mmc5983maRead(MMC5983MAConfig *config, vec3 *mag)
 {
     BYTE buffer[7];
 
@@ -81,9 +103,9 @@ FUNCRESULT mmc5983maRead(MMC5983MAConfig *config, MMC5983MAData *data)
     INT32 y = (UINT32)((buffer[2] << 10) | (buffer[3] << 2) | ((buffer[7] & 0x30) >> 4)) - BASE_OFFSET;
     INT32 z = (UINT32)((buffer[4] << 10) | (buffer[5] << 2) | ((buffer[7] & 0x0C) >> 2)) - BASE_OFFSET;
 
-    data->mag.x = (FLOAT)x * RESOLUTION;
-    data->mag.y = (FLOAT)y * RESOLUTION;
-    data->mag.z = (FLOAT)z * RESOLUTION;
+    mag->x = (FLOAT)x * RESOLUTION;
+    mag->y = (FLOAT)y * RESOLUTION;
+    mag->z = (FLOAT)z * RESOLUTION;
 
     return SUC_OK;
 }
@@ -93,38 +115,6 @@ FUNCRESULT mmc5983maReadTemp(MMC5983MAConfig *config, FLOAT *temp)
     BYTE rawTemp = __mmc5983maReadReg(config, T_OUT);
 
     *temp = 0.8f * (FLOAT)rawTemp - 75.0f;
-
-    return SUC_OK;
-}
-
-FUNCRESULT mmc5983ReadStatus(MMC5983MAConfig *config, BOOL *otpReadDone, BOOL *measTDone, BOOL *measMDone)
-{
-    BYTE data = __mmc5983maReadReg(config, STATUS);
-
-    *otpReadDone = (data & 0x10) >> 4;
-    *measTDone = (data & 0x02) >> 1;
-    *measMDone = (data & 0x01) >> 0;
-
-    return SUC_OK;
-}
-
-FUNCRESULT mmc5983maSetBandwidth(MMC5983MAConfig *config, MMC5983MABandwidth bandwidth)
-{
-    __mmc5983maWriteReg(config, INTERNAL_CONTROL_1, bandwidth);
-
-    return SUC_OK;
-}
-
-FUNCRESULT mmc5983maSetODR(MMC5983MAConfig *config, MMC5983ODR odr)
-{
-    __mmc5983maWriteReg(config, INTERNAL_CONTROL_2, odr == 0 ? 0 : (0x08 | odr));
-
-    return SUC_OK;
-}
-
-FUNCRESULT mmc5983maGetProductId(MMC5983MAConfig *config, BYTE *productId)
-{
-    *productId = __mmc5983maReadReg(config, PRODUCT_ID);
 
     return SUC_OK;
 }

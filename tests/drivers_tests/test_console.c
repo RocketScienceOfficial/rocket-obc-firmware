@@ -34,8 +34,8 @@ MY_TEST_FUNC(CONSOLE_TEST_NAME, 1)
 MY_TEST_FUNC(CONSOLE_TEST_NAME, 2)
 {
     ConsoleInput input = {
-        ._cmd = "hello world",
-        ._cmdSize = 11,
+        .cmd = "hello world",
+        .cmdSize = 11,
     };
     ConsoleTokens tokens = {0};
 

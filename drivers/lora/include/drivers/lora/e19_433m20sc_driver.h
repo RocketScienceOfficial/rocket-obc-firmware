@@ -8,8 +8,8 @@
  */
 typedef struct E19_433M20SC_Config
 {
-    PinNumber _rxen; /** Switch to enable receiving */
-    PinNumber _txen; /** Switch to enable transmitting */
+    PinNumber rxen; /** Switch to enable receiving */
+    PinNumber txen; /** Switch to enable transmitting */
 } E19_433M20SC_Config;
 
 /**

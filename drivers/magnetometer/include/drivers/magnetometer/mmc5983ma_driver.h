@@ -2,7 +2,7 @@
 
 /**
  * REF: https://github.com/kriswiner/MMC5983MA/tree/master
-*/
+ */
 
 #include <obc/api.h>
 #include "drivers/gpio/spi_driver.h"
@@ -17,14 +17,6 @@ typedef struct MMC5983MAConfig
     SPIInstance spi; /** SPI */
     PinNumber cs;    /** CS */
 } MMC5983MAConfig;
-
-/**
- * @brief MMC5983MA Magnetometer data
- */
-typedef struct MMC5983MAData
-{
-    vec3 mag; /** Magnetic field in miliGauss */
-} MMC5983MAData;
 
 /**
  * @brief MMC5983MA Magnetometer bandwidth
@@ -65,50 +57,13 @@ typedef enum MMC5983ODR
 FUNCRESULT mmc5983maInit(MMC5983MAConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck);
 
 /**
- * @brief MMC5983MA Magnetometer reset
+ * @brief Check if product id is valid
  *
  * @param config MMC5983MA configuration
+ * @param valid Validity
  * @return Result code
  */
-FUNCRESULT mmc5983maReset(MMC5983MAConfig *config);
-
-/**
- * @brief Calculate offsets of magnetometer
- *
- * @param config MMC5983MA configuration
- * @param offset Offset vector
- * @return Result code
- */
-FUNCRESULT mmc5983maCalculateOffset(MMC5983MAConfig *config, vec3 *offset);
-
-/**
- * @brief Read data from magnetometer
- *
- * @param config MMC5983MA configuration
- * @param data Data
- * @return Result code
- */
-FUNCRESULT mmc5983maRead(MMC5983MAConfig *config, MMC5983MAData *data);
-
-/**
- * @brief Read temperature from magnetometer
- *
- * @param config MMC5983MA configuration
- * @param temp Temperature
- * @return Result code
- */
-FUNCRESULT mmc5983maReadTemp(MMC5983MAConfig *config, FLOAT *temp);
-
-/**
- * @brief Read status from magnetometer
- *
- * @param config MMC5983MA configuration
- * @param otpReadDone OTP read done
- * @param measTDone Temperature measurement done
- * @param measMDone Magnetic field measurement done
- * @return Result code
- */
-FUNCRESULT mmc5983ReadStatus(MMC5983MAConfig *config, BOOL *otpReadDone, BOOL *measTDone, BOOL *measMDone);
+FUNCRESULT mmc5983ValidateId(MMC5983MAConfig *config, BOOL *valid);
 
 /**
  * @brief Set bandwidth of magnetometer
@@ -129,13 +84,39 @@ FUNCRESULT mmc5983maSetBandwidth(MMC5983MAConfig *config, MMC5983MABandwidth ban
 FUNCRESULT mmc5983maSetODR(MMC5983MAConfig *config, MMC5983ODR odr);
 
 /**
- * @brief Read product ID from magnetometer
+ * @brief MMC5983MA Magnetometer reset
  *
  * @param config MMC5983MA configuration
- * @param productId Product ID
  * @return Result code
  */
-FUNCRESULT mmc5983maGetProductId(MMC5983MAConfig *config, BYTE *productId);
+FUNCRESULT mmc5983maReset(MMC5983MAConfig *config);
+
+/**
+ * @brief Calculate offsets of magnetometer
+ *
+ * @param config MMC5983MA configuration
+ * @param offset Offset vector
+ * @return Result code
+ */
+FUNCRESULT mmc5983maCalculateOffset(MMC5983MAConfig *config, vec3 *offset);
+
+/**
+ * @brief Read data from magnetometer
+ *
+ * @param config MMC5983MA configuration
+ * @param mag Magnetic field in Gauss
+ * @return Result code
+ */
+FUNCRESULT mmc5983maRead(MMC5983MAConfig *config, vec3 *mag);
+
+/**
+ * @brief Read temperature from magnetometer
+ *
+ * @param config MMC5983MA configuration
+ * @param temp Temperature
+ * @return Result code
+ */
+FUNCRESULT mmc5983maReadTemp(MMC5983MAConfig *config, FLOAT *temp);
 
 /**
  * @brief Enable SET current

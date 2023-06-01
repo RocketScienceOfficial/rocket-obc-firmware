@@ -1,4 +1,4 @@
-link_libraries(api_lib pico_stdlib)
+link_libraries(api_lib drivers_lib kernel_lib pico_stdlib)
 
 add_subdirectory(battery)
 add_subdirectory(bme688)

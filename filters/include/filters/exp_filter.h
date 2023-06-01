@@ -7,18 +7,23 @@
  */
 typedef struct ExpFilterData
 {
-    FLOAT v1;    /** First value */
-    FLOAT b;     /** Filter coefficient */
-    BOOL v1Init; /** Is first value initialized */
-    BOOL bInit;  /** Is filter coefficient initialized */
+    FLOAT a;    /** Alpha value */
+    FLOAT v;    /** Last value */
+    BOOL vInit; /** Is last value initialized */
 } ExpFilterData;
 
 /**
- * @brief Exponential filter
+ * @brief Initialize exponential filter (smoothing)
  *
- * @param data Filter data
- * @param v Value to filter and the output value
+ * @param data Filter data pointer
  * @param alpha Alpha value
- * @param beta Beta value
  */
-VOID filterExp(ExpFilterData *data, FLOAT *v, FLOAT alpha, FLOAT beta);
+VOID filterExpInit(ExpFilterData *data, FLOAT a);
+
+/**
+ * @brief Exponential filter (smoothing)
+ *
+ * @param data Filter data pointer
+ * @param v Value to filter and the output value
+ */
+VOID filterExpUpdate(ExpFilterData *data, FLOAT *v);

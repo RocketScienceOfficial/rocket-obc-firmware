@@ -12,10 +12,7 @@
  */
 typedef struct LCDConfig
 {
-    /**
-     * @brief I2C bus. INTERNAL USE!
-     */
-    I2CInstance _i2c;
+    I2CInstance i2c; /** I2C */
 } LCDConfig;
 
 /**

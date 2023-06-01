@@ -21,10 +21,10 @@ int main()
 
     while (TRUE)
     {
-        MMC5983MAData magData = {0};
-        mmc5983maRead(&mmc5983maConfig, &magData);
+        vec3 mag = {0};
+        mmc5983maRead(&mmc5983maConfig, &mag);
         
-        printf("X: %f, Y: %f, Z: %f\n", magData.mag.x, magData.mag.y, magData.mag.z);
+        printf("X: %f, Y: %f, Z: %f\n", mag.x, mag.y, mag.z);
 
         sleep_ms(50);
     }

@@ -68,27 +68,27 @@ FUNCRESULT sx127XInit(SX127XData *data, SX127XPinout *pinout, UINT64 frequency)
         return ERR_INVALIDARG;
     }
 
-    data->_pinout = *pinout;
-    data->_txPower = LORA_DEFAULT_TX_POWER;
-    data->_frequency = frequency;
-    data->_packetIndex = 0;
-    data->_implicitHeaderMode = FALSE;
+    data->pinout = *pinout;
+    data->txPower = LORA_DEFAULT_TX_POWER;
+    data->frequency = frequency;
+    data->packetIndex = 0;
+    data->implicitHeaderMode = FALSE;
 
-    gpioInitPin(data->_pinout.cs, GPIO_OUTPUT);
-    gpioSetPinState(data->_pinout.cs, GPIO_HIGH);
+    gpioInitPin(data->pinout.cs, GPIO_OUTPUT);
+    gpioSetPinState(data->pinout.cs, GPIO_HIGH);
 
-    if (data->_pinout.reset != -1)
+    if (data->pinout.reset != -1)
     {
-        gpioInitPin(data->_pinout.reset, GPIO_OUTPUT);
+        gpioInitPin(data->pinout.reset, GPIO_OUTPUT);
 
-        gpioSetPinState(data->_pinout.reset, GPIO_LOW);
+        gpioSetPinState(data->pinout.reset, GPIO_LOW);
         sleep_ms(10);
 
-        gpioSetPinState(data->_pinout.reset, GPIO_HIGH);
+        gpioSetPinState(data->pinout.reset, GPIO_HIGH);
         sleep_ms(10);
     }
 
-    spiInitPins(data->_pinout.spi, data->_pinout.miso, data->_pinout.mosi, data->_pinout.sck, data->_pinout.cs);
+    spiInitPins(data->pinout.spi, data->pinout.miso, data->pinout.mosi, data->pinout.sck, data->pinout.cs);
 
     BYTE version = __sx127XReadRegister(data, REG_VERSION);
 
@@ -99,8 +99,8 @@ FUNCRESULT sx127XInit(SX127XData *data, SX127XPinout *pinout, UINT64 frequency)
 
     sx127XSleep(data);
 
-    sx127XSetFrequency(data, data->_frequency);
-    sx127XSetTxPower(data, data->_txPower);
+    sx127XSetFrequency(data, data->frequency);
+    sx127XSetTxPower(data, data->txPower);
 
     __sx127XWriteRegister(data, REG_FIFO_TX_BASE_ADDR, 0);
     __sx127XWriteRegister(data, REG_FIFO_RX_BASE_ADDR, 0);
@@ -150,7 +150,7 @@ FUNCRESULT sx127XWriteBuffer(SX127XData *data, const BYTE *buffer, SIZE size)
 
 FUNCRESULT sx127XAvailable(SX127XData *data, BOOL *available)
 {
-    *available = (__sx127XReadRegister(data, REG_RX_NB_BYTES) - data->_packetIndex);
+    *available = (__sx127XReadRegister(data, REG_RX_NB_BYTES) - data->packetIndex);
 
     return SUC_OK;
 }
@@ -175,9 +175,9 @@ FUNCRESULT sx127XParsePacket(SX127XData *data, SIZE size, SIZE *packetLengthOut)
 
     if ((irqFlags & IRQ_RX_DONE_MASK) && (irqFlags & IRQ_PAYLOAD_CRC_ERROR_MASK) == 0)
     {
-        data->_packetIndex = 0;
+        data->packetIndex = 0;
 
-        if (data->_implicitHeaderMode)
+        if (data->implicitHeaderMode)
         {
             packetLength = __sx127XReadRegister(data, REG_PAYLOAD_LENGTH);
         }
@@ -212,7 +212,7 @@ FUNCRESULT sx127XRead(SX127XData *data, BYTE *dataOut)
         return ERR_ACCESSDENIED;
     }
 
-    data->_packetIndex++;
+    data->packetIndex++;
 
     *dataOut = __sx127XReadRegister(data, REG_FIFO);
 
@@ -255,7 +255,7 @@ FUNCRESULT sx127XSleep(SX127XData *data)
 
 FUNCRESULT sx127XPacketRssi(SX127XData *data, INT32 *rssi)
 {
-    *rssi = (__sx127XReadRegister(data, REG_PKT_RSSI_VALUE) - (data->_frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
+    *rssi = (__sx127XReadRegister(data, REG_PKT_RSSI_VALUE) - (data->frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
 
     return SUC_OK;
 }
@@ -291,7 +291,7 @@ FUNCRESULT sx127XPacketFrequencyError(SX127XData *data, INT64 *error)
 
 FUNCRESULT sx127XRssi(SX127XData *data, INT32 *rssi)
 {
-    *rssi = (__sx127XReadRegister(data, REG_RSSI_VALUE) - (data->_frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
+    *rssi = (__sx127XReadRegister(data, REG_RSSI_VALUE) - (data->frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
 
     return SUC_OK;
 }
@@ -341,14 +341,14 @@ FUNCRESULT sx127XSetTxPower(SX127XData *data, INT32 level)
         __sx127XWriteRegister(data, REG_PA_CONFIG, PA_BOOST | (level - 2));
     }
 
-    data->_txPower = level;
+    data->txPower = level;
 
     return SUC_OK;
 }
 
 FUNCRESULT sx127XSetFrequency(SX127XData *data, UINT64 frequency)
 {
-    data->_frequency = frequency;
+    data->frequency = frequency;
 
     UINT64 frf = (frequency << 19) / 32000000;
 
@@ -544,14 +544,14 @@ FUNCRESULT sx127XSetGain(SX127XData *data, BYTE gain)
 
 VOID __sx127XExplicitHeaderMode(SX127XData *data)
 {
-    data->_implicitHeaderMode = FALSE;
+    data->implicitHeaderMode = FALSE;
 
     __sx127XWriteRegister(data, REG_MODEM_CONFIG_1, __sx127XReadRegister(data, REG_MODEM_CONFIG_1) & 0xfe);
 }
 
 VOID __sx127XImplicitHeaderMode(SX127XData *data)
 {
-    data->_implicitHeaderMode = TRUE;
+    data->implicitHeaderMode = TRUE;
 
     __sx127XWriteRegister(data, REG_MODEM_CONFIG_1, __sx127XReadRegister(data, REG_MODEM_CONFIG_1) | 0x01);
 }
@@ -632,12 +632,12 @@ BYTE __sx127XSingleTransfer(SX127XData *data, BYTE address, BYTE value)
 {
     BYTE response;
 
-    gpioSetPinState(data->_pinout.cs, GPIO_LOW);
+    gpioSetPinState(data->pinout.cs, GPIO_LOW);
 
-    spiWriteBlocking(data->_pinout.spi, &address, 1);
-    spiWriteReadBlocking(data->_pinout.spi, &value, &response, 1);
+    spiWriteBlocking(data->pinout.spi, &address, 1);
+    spiWriteReadBlocking(data->pinout.spi, &value, &response, 1);
 
-    gpioSetPinState(data->_pinout.cs, GPIO_HIGH);
+    gpioSetPinState(data->pinout.cs, GPIO_HIGH);
 
     return response;
 }

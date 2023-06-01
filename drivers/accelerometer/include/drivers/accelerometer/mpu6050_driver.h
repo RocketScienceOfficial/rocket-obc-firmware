@@ -9,9 +9,9 @@
  */
 typedef struct MPU6050Config
 {
-    I2CInstance _i2c;
-    FLOAT _accelLBS;
-    FLOAT _gryoLBS;
+    I2CInstance i2c;
+    FLOAT accelLBS;
+    FLOAT gryoLBS;
 } MPU6050Config;
 
 /**

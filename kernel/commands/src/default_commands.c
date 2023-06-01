@@ -7,12 +7,12 @@ static CommandData s_Commands[] = {
     {.name = "hello_name", .func = &helloNameCommand},
 };
 
-void helloCommand(STRING *args, SIZE argc)
+VOID helloCommand(STRING *args, SIZE argc)
 {
     MY_LOG_CORE_INFO("Hello");
 }
 
-void helloNameCommand(STRING *args, SIZE argc)
+VOID helloNameCommand(STRING *args, SIZE argc)
 {
     STRING error;
 

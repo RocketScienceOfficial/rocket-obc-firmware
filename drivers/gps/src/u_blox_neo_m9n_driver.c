@@ -4,8 +4,8 @@
 
 FUNCRESULT uBloxNeoM9NInit(UBloxNeoM9NConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
 {
-    config->_spi = spi;
-    config->_cs = cs;
+    config->spi = spi;
+    config->cs = cs;
 
     spiInitPins(spi, miso, mosi, sck, cs);
 
@@ -23,24 +23,24 @@ FUNCRESULT uBloxNeoM9NReadData(UBloxNeoM9NConfig *config, UBloxNeoM9NData *data)
 
     if (b == '$')
     {
-        data->_isValid = TRUE;
-        data->_currentIndex = 0;
+        data->isValid = TRUE;
+        data->currentIndex = 0;
         data->isFinishedSentence = FALSE;
 
         memset(data->sentence, 0, NMEA_SENTENCE_MAX_LENGTH);
     }
     else if (b == '\n')
     {
-        data->sentence[data->_currentIndex] = b;
-        data->sentence[data->_currentIndex + 1] = '\0';
-        data->_isValid = FALSE;
+        data->sentence[data->currentIndex] = b;
+        data->sentence[data->currentIndex + 1] = '\0';
+        data->isValid = FALSE;
         data->isFinishedSentence = TRUE;
     }
 
-    if (data->_isValid)
+    if (data->isValid)
     {
-        data->sentence[data->_currentIndex] = b;
-        data->_currentIndex++;
+        data->sentence[data->currentIndex] = b;
+        data->currentIndex++;
     }
 
     return SUC_OK;
@@ -50,16 +50,16 @@ BYTE __uBloxNeoM9NRead(UBloxNeoM9NConfig *config)
 {
     BYTE data;
 
-    gpioSetPinState(config->_cs, GPIO_LOW);
-    spiReadBlocking(config->_spi, 0, &data, 1);
-    gpioSetPinState(config->_cs, GPIO_HIGH);
+    gpioSetPinState(config->cs, GPIO_LOW);
+    spiReadBlocking(config->spi, 0, &data, 1);
+    gpioSetPinState(config->cs, GPIO_HIGH);
 
     return data;
 }
 
 VOID __uBloxNeoM9NWrite(UBloxNeoM9NConfig *config, BYTE data)
 {
-    gpioSetPinState(config->_cs, GPIO_LOW);
-    spiWriteBlocking(config->_spi, &data, 1);
-    gpioSetPinState(config->_cs, GPIO_HIGH);
+    gpioSetPinState(config->cs, GPIO_LOW);
+    spiWriteBlocking(config->spi, &data, 1);
+    gpioSetPinState(config->cs, GPIO_HIGH);
 }

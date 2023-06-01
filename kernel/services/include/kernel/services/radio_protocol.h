@@ -7,12 +7,12 @@
 /**
  * @brief Header of radio packet (INTERNAL USE)
  */
-typedef struct _RadioHeader
+typedef struct RadioHeader
 {
-    SIZE _paritySize;                               /** Parity Size */
-    BYTE *_parity;                                  /** Parity */
-    BYTE _signature[RADIO_PACKET_SIGNATURE_LENGTH]; /** Radio packet signature */
-} _RadioHeader;
+    SIZE paritySize;                               /** Parity Size */
+    BYTE *parity;                                  /** Parity */
+    BYTE signature[RADIO_PACKET_SIGNATURE_LENGTH]; /** Radio packet signature */
+} RadioHeader;
 
 /**
  * @brief Body of radio packet
@@ -28,11 +28,11 @@ typedef struct RadioBody
 /**
  * @brief Radio packet structure (INTERNAL USE)
  */
-typedef struct _RadioPacket
+typedef struct RadioPacket
 {
-    _RadioHeader _header; /** Header */
-    RadioBody _body;      /** Body */
-} _RadioPacket;
+    RadioHeader header; /** Header */
+    RadioBody body;     /** Body */
+} RadioPacket;
 
 /**
  * @brief Serialize and encrypt radio packet

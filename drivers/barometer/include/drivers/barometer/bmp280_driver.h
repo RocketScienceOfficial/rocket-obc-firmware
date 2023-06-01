@@ -7,7 +7,7 @@
 /**
  * @brief Configuration params for barometer. INTERNAL USE!
  */
-typedef struct _BMP280CalibParams
+typedef struct BMP280CalibParams
 {
     UINT16 dig_t1;
     INT16 dig_t2;
@@ -22,15 +22,15 @@ typedef struct _BMP280CalibParams
     INT16 dig_p7;
     INT16 dig_p8;
     INT16 dig_p9;
-} _BMP280CalibParams;
+} BMP280CalibParams;
 
 /**
  * @brief Barometer config data. All changes are done internally, so keep it just for reference!
  */
 typedef struct BMP280Config
 {
-    I2CInstance _i2c;
-    _BMP280CalibParams _calibParams;
+    I2CInstance i2c;
+    BMP280CalibParams calibParams;
 } BMP280Config;
 
 /**

@@ -16,8 +16,8 @@ VOID myLogCreateLogger(Logger *logger, const STRING name)
 		return;
 	}
 
-	logger->_name = name;
-	logger->_numSinks = 0;
+	logger->name = name;
+	logger->numSinks = 0;
 }
 
 VOID myLogCreateConsoleSink(Logger *logger, const STRING pattern)
@@ -30,12 +30,12 @@ VOID myLogCreateConsoleSink(Logger *logger, const STRING pattern)
 	}
 
 	LogSinkData sink = {
-		._pattern = pattern,
-		._type = SINK_CONSOLE,
-		._customData = NULL,
+		.pattern = pattern,
+		.type = SINK_CONSOLE,
+		.customData = NULL,
 	};
 
-	logger->_sinks[logger->_numSinks++] = sink;
+	logger->sinks[logger->numSinks++] = sink;
 }
 
 STRING parseLog(const STRING loggerName, const STRING pattern, const STRING level, const STRING format, va_list args)
@@ -144,13 +144,13 @@ STRING parseLog(const STRING loggerName, const STRING pattern, const STRING leve
 
 static VOID __log(Logger *logger, const STRING level, const STRING format, va_list args)
 {
-	for (SIZE i = 0; i < logger->_numSinks; i++)
+	for (SIZE i = 0; i < logger->numSinks; i++)
 	{
-		STRING log = parseLog(logger->_name, logger->_sinks[i]._pattern, level, format, args);
+		STRING log = parseLog(logger->name, logger->sinks[i].pattern, level, format, args);
 
 		if (log)
 		{
-			switch (logger->_sinks[i]._type)
+			switch (logger->sinks[i].type)
 			{
 			case SINK_CONSOLE:
 				consoleLog(log);

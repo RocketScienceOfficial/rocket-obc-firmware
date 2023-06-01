@@ -29,7 +29,7 @@ static int ADDR = 0x27;
 
 static BOOL __i2cWriteByte(LCDConfig *config, BYTE val)
 {
-    return FUNCSUCCESS(i2cWriteBlocking(config->_i2c, ADDR, &val, 1, FALSE));
+    return FUNCSUCCESS(i2cWriteBlocking(config->i2c, ADDR, &val, 1, FALSE));
 }
 
 static BOOL __lcdToggleEnable(LCDConfig *config, BYTE val)

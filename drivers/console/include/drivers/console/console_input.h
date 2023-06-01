@@ -10,8 +10,8 @@
  */
 typedef struct ConsoleInput
 {
-    CHAR _cmd[CONSOLE_INPUT_MAX_LENGTH]; /** Current characters. */
-    SIZE _cmdSize;                       /** Current characters length. */
+    CHAR cmd[CONSOLE_INPUT_MAX_LENGTH]; /** Current characters. */
+    SIZE cmdSize;                       /** Current characters length. */
 } ConsoleInput;
 
 /**

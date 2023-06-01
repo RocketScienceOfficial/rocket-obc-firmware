@@ -6,6 +6,6 @@ add_executable(${EXE_NAME}
     main.c
 )
 
-target_link_libraries(${EXE_NAME} PRIVATE drivers_lib ahrs_lib maths_lib)
+target_link_libraries(${EXE_NAME} PRIVATE ahrs_lib maths_lib)
 
 add_pico_output(${EXE_NAME})

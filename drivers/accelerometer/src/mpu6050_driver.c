@@ -29,20 +29,20 @@ static FLOAT getGyroLBS(INT32 level)
 static VOID mpu6050Reset(MPU6050Config *config, INT32 lpFilter, INT32 accelSensLevel, INT32 gyroSensLevel)
 {
     BYTE buf[] = {0x6B, 0x00};
-    i2cWriteBlocking(config->_i2c, MPU6050_ADDR, buf, 2, FALSE);
+    i2cWriteBlocking(config->i2c, MPU6050_ADDR, buf, 2, FALSE);
 
     BYTE buf2[] = {0x1A, lpFilter <= 6 ? lpFilter : 0x00};
-    i2cWriteBlocking(config->_i2c, MPU6050_ADDR, buf2, 2, FALSE);
+    i2cWriteBlocking(config->i2c, MPU6050_ADDR, buf2, 2, FALSE);
 
     BYTE buf3[] = {0x1B, gyroSensLevel == 1 ? 0x08 : gyroSensLevel == 2 ? 0x10
                                                  : gyroSensLevel == 3   ? 0x18
                                                                         : 0x00};
-    i2cWriteBlocking(config->_i2c, MPU6050_ADDR, buf3, 2, FALSE);
+    i2cWriteBlocking(config->i2c, MPU6050_ADDR, buf3, 2, FALSE);
 
     BYTE buf4[] = {0x1C, accelSensLevel == 1 ? 0x08 : accelSensLevel == 2 ? 0x10
                                                   : accelSensLevel == 3   ? 0x18
                                                                           : 0x00};
-    i2cWriteBlocking(config->_i2c, MPU6050_ADDR, buf4, 2, FALSE);
+    i2cWriteBlocking(config->i2c, MPU6050_ADDR, buf4, 2, FALSE);
 }
 
 static VOID mpu6050ReadRawValues(MPU6050Config *config, INT16 accel[3], INT16 gyro[3], INT16 *temp)
@@ -50,8 +50,8 @@ static VOID mpu6050ReadRawValues(MPU6050Config *config, INT16 accel[3], INT16 gy
     BYTE buffer[6];
 
     BYTE val = 0x3B;
-    i2cWriteBlocking(config->_i2c, MPU6050_ADDR, &val, 1, TRUE);
-    i2cReadBlocking(config->_i2c, MPU6050_ADDR, buffer, 6, FALSE);
+    i2cWriteBlocking(config->i2c, MPU6050_ADDR, &val, 1, TRUE);
+    i2cReadBlocking(config->i2c, MPU6050_ADDR, buffer, 6, FALSE);
 
     for (INT32 i = 0; i < 3; i++)
     {
@@ -59,8 +59,8 @@ static VOID mpu6050ReadRawValues(MPU6050Config *config, INT16 accel[3], INT16 gy
     }
 
     val = 0x43;
-    i2cWriteBlocking(config->_i2c, MPU6050_ADDR, &val, 1, TRUE);
-    i2cReadBlocking(config->_i2c, MPU6050_ADDR, buffer, 6, FALSE);
+    i2cWriteBlocking(config->i2c, MPU6050_ADDR, &val, 1, TRUE);
+    i2cReadBlocking(config->i2c, MPU6050_ADDR, buffer, 6, FALSE);
 
     for (INT32 i = 0; i < 3; i++)
     {
@@ -68,8 +68,8 @@ static VOID mpu6050ReadRawValues(MPU6050Config *config, INT16 accel[3], INT16 gy
     }
 
     val = 0x41;
-    i2cWriteBlocking(config->_i2c, MPU6050_ADDR, &val, 1, TRUE);
-    i2cReadBlocking(config->_i2c, MPU6050_ADDR, buffer, 6, FALSE);
+    i2cWriteBlocking(config->i2c, MPU6050_ADDR, &val, 1, TRUE);
+    i2cReadBlocking(config->i2c, MPU6050_ADDR, buffer, 6, FALSE);
 
     *temp = buffer[0] << 8 | buffer[1];
 }
@@ -81,9 +81,9 @@ FUNCRESULT mpu6050Init(MPU6050Config *config, I2CInstance i2c, PinNumber sda, Pi
         return ERR_INVALIDARG;
     }
 
-    config->_i2c = i2c;
+    config->i2c = i2c;
 
-    if (FUNCFAILED(i2cInitPins(config->_i2c, sda, scl)))
+    if (FUNCFAILED(i2cInitPins(config->i2c, sda, scl)))
     {
         return ERR_FAIL;
     }
@@ -100,8 +100,8 @@ FUNCRESULT mpu6050Init(MPU6050Config *config, I2CInstance i2c, PinNumber sda, Pi
         return ERR_UNINITIALIZED;
     }
 
-    config->_accelLBS = getAccelLBS(accelSensLevel);
-    config->_gryoLBS = getGyroLBS(gyroSensLevel);
+    config->accelLBS = getAccelLBS(accelSensLevel);
+    config->gryoLBS = getGyroLBS(gyroSensLevel);
 
     mpu6050Reset(config, lpFilter, accelSensLevel, gyroSensLevel);
 
@@ -115,22 +115,22 @@ FUNCRESULT mpu6050Check(MPU6050Config *config, BOOL *result)
         return ERR_INVALIDARG;
     }
 
-    *result = i2cCheckDevice(config->_i2c, MPU6050_ADDR);
+    *result = i2cCheckDevice(config->i2c, MPU6050_ADDR);
 
     return SUC_OK;
 }
 
 static FLOAT convertAcceleration(MPU6050Config *config, INT16 raw, INT16 offset, FLOAT scale)
 {
-    FLOAT calcScale = scale * config->_accelLBS;
-    FLOAT calcOffset = scale * ((FLOAT)offset) / config->_accelLBS;
+    FLOAT calcScale = scale * config->accelLBS;
+    FLOAT calcOffset = scale * ((FLOAT)offset) / config->accelLBS;
 
     return ((FLOAT)raw) * calcScale - calcOffset;
 }
 
 static FLOAT convertGyro(MPU6050Config *config, INT16 raw, FLOAT scale)
 {
-    FLOAT calcScale = scale * config->_gryoLBS;
+    FLOAT calcScale = scale * config->gryoLBS;
 
     return ((FLOAT)raw) * calcScale;
 }

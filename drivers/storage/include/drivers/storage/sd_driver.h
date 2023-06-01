@@ -12,22 +12,22 @@
 /**
  * @brief SD card file structure
  */
-typedef struct _SDFile
+typedef struct SDFile
 {
-    STRING _name;   /** File name */
-    FIL _file;      /** File instance */
-    BOOL _isOpened; /** Is file opened */
-} _SDFile;
+    STRING name;   /** File name */
+    FIL file;      /** File instance */
+    BOOL isOpened; /** Is file opened */
+} SDFile;
 
 /**
  * @brief SD card structure. All changes are done internally, so keep it just for reference!
  */
 typedef struct SDCard
 {
-    BOOL _isInitialized;                /** Is SD card initialized */
-    sd_card_t *_sd;                     /** SD Card instance */
-    _SDFile _files[SD_FILES_MAX_COUNT]; /** SD Card files */
-    SIZE _filesCount;                   /** SD Card files count */
+    BOOL isInitialized;               /** Is SD card initialized */
+    sd_card_t *sd;                    /** SD Card instance */
+    SDFile files[SD_FILES_MAX_COUNT]; /** SD Card files */
+    SIZE filesCount;                  /** SD Card files count */
 } SDCard;
 
 /**

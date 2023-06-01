@@ -34,22 +34,22 @@ int main()
 
     while (TRUE)
     {
-        BMI088AccelData accelData;
-        BMI088GyroData gyroData;
+        vec3 accel;
+        vec3 gyro;
         vec3 eulerData;
 
-        bmi088AccelRead(&accelConfig, &accelData);
-        bmi088GyroRead(&gyroConfig, &gyroData);
+        bmi088AccelRead(&accelConfig, &accel);
+        bmi088GyroRead(&gyroConfig, &gyro);
 
-        madgwickUpdateIMU(&madgwickFilterData, gyroData.gyro, accelData.accel);
+        madgwickUpdateIMU(&madgwickFilterData, gyro, accel);
         quatToEuler(&eulerData, &madgwickFilterData.q);
 
-        printf("Accel X: %f\n", accelData.accel.x);
-        printf("Accel Y: %f\n", accelData.accel.y);
-        printf("Accel Z: %f\n", accelData.accel.z);
-        printf("Gyro X: %f\n", RAD_2_DEG(gyroData.gyro.x));
-        printf("Gyro Y: %f\n", RAD_2_DEG(gyroData.gyro.y));
-        printf("Gyro Z: %f\n", RAD_2_DEG(gyroData.gyro.z));
+        printf("Accel X: %f\n", accel.x);
+        printf("Accel Y: %f\n", accel.y);
+        printf("Accel Z: %f\n", accel.z);
+        printf("Gyro X: %f\n", RAD_2_DEG(gyro.x));
+        printf("Gyro Y: %f\n", RAD_2_DEG(gyro.y));
+        printf("Gyro Z: %f\n", RAD_2_DEG(gyro.z));
         printf("MAD Gyro X: %f\n", eulerData.x);
         printf("MAD Gyro Y: %f\n", eulerData.y);
         printf("MAD Gyro Z: %f\n", eulerData.z);

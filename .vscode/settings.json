@@ -61,6 +61,8 @@
         "initializer_list": "c",
         "utility": "c",
         "measurements_utils.h": "c",
-        "test_nmea.h": "c"
+        "test_nmea.h": "c",
+        "*.tcc": "c",
+        "func_result.h": "c"
     }
 }

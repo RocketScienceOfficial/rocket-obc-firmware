@@ -21,14 +21,6 @@ typedef struct BMI088AccelConfig
 } BMI088AccelConfig;
 
 /**
- * @brief BMI088 accelerometer data
- */
-typedef struct BMI088AccelData
-{
-    vec3 accel; /** Acceleration in meters per second squared */
-} BMI088AccelData;
-
-/**
  * @brief BMI088 accelerometer range
  */
 typedef enum BMI088AccelRange
@@ -73,14 +65,6 @@ typedef struct BMI088GyroConfig
     PinNumber cs;        /** CS */
     FLOAT rangeConstant; /** Range constant */
 } BMI088GyroConfig;
-
-/**
- * @brief BMI088 gyroscope data
- */
-typedef struct BMI088GyroData
-{
-    vec3 gyro; /** Radians per second in each axis */
-} BMI088GyroData;
 
 /**
  * @brief BMI088 gyroscope range
@@ -142,13 +126,13 @@ FUNCRESULT bmi088AccelSetConf(BMI088AccelConfig *config, BMI088AccelODR odr, BMI
 FUNCRESULT bmi088AccelSetRange(BMI088AccelConfig *config, BMI088AccelRange range);
 
 /**
- * @brief Read BMI088 accelerometer data in meters per second squared
+ * @brief Read BMI088 accelerometer data
  *
  * @param config Configuration
- * @param data Data
+ * @param accel Acceleration in meters per second squared
  * @return Result code
  */
-FUNCRESULT bmi088AccelRead(BMI088AccelConfig *config, BMI088AccelData *data);
+FUNCRESULT bmi088AccelRead(BMI088AccelConfig *config, vec3 *accel);
 
 /**
  * @brief Soft reset BMI088 accelerometer
@@ -233,13 +217,13 @@ FUNCRESULT bmi088GyroSetBandwidth(BMI088GyroConfig *config, BMI088GyroBandwidth 
 FUNCRESULT bmi088GyroSetRange(BMI088GyroConfig *config, BMI088GyroRange range);
 
 /**
- * @brief Read BMI088 gyroscope data in radians per second
+ * @brief Read BMI088 gyroscope data
  *
  * @param config Configuration
- * @param data Data
+ * @param gyro Angular velocity in radians per second
  * @return Result code
  */
-FUNCRESULT bmi088GyroRead(BMI088GyroConfig *config, BMI088GyroData *data);
+FUNCRESULT bmi088GyroRead(BMI088GyroConfig *config, vec3 *gyro);
 
 /**
  * @brief Soft reset BMI088 gyroscope
