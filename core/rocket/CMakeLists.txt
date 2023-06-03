@@ -1,4 +1,4 @@
-set(EXE_NAME satellite)
+set(EXE_NAME rocket)
 
 add_executable(${EXE_NAME}
     main.c

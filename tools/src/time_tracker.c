@@ -8,7 +8,7 @@ TIME getMsSinceBoot()
 	return time_ms;
 }
 
-BOOL runEvery(TIME ms, TIME* timerOffset)
+BOOL runEvery(TIME ms, TIME *timerOffset)
 {
 	if (getMsSinceBoot() - *timerOffset >= ms)
 	{
@@ -18,4 +18,9 @@ BOOL runEvery(TIME ms, TIME* timerOffset)
 	}
 
 	return FALSE;
+}
+
+VOID sleepMiliseconds(TIME ms)
+{
+	sleep_ms(ms);
 }

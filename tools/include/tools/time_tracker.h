@@ -19,3 +19,10 @@ TIME getMsSinceBoot();
  * @return True if the time has passed, false otherwise
  */
 BOOL runEvery(TIME ms, TIME *timerOffset);
+
+/**
+ * @brief Sleeps for a given number of milliseconds
+ *
+ * @param ms Time in milliseconds
+ */
+VOID sleepMiliseconds(TIME ms);

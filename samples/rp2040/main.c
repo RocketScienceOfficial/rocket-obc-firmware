@@ -1,10 +1,10 @@
-#include "pico/stdlib.h"
+#include "tools/board_control.h"
+#include "tools/time_tracker.h"
 #include <stdio.h>
 
 int main()
 {
-    stdio_init_all();
-    sleep_ms(5000);
+    boardInit(5000);
 
     printf("Hello, World!");
 
@@ -14,7 +14,7 @@ int main()
 
         printf("2 + 3 = %d\n", a + b);
         
-        sleep_ms(1000);
+        sleepMiliseconds(1000);
     }
 
     return 0;

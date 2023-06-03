@@ -1,5 +1,6 @@
 #include "drivers/battery/battery_driver.h"
-#include "pico/stdlib.h"
+#include "tools/board_control.h"
+#include "tools/time_tracker.h"
 #include <stdio.h>
 
 #define BATTERY_ADC_CHANNEL 3
@@ -7,8 +8,7 @@
 
 int main()
 {
-    stdio_init_all();
-    sleep_ms(5000);
+    boardInit(5000);
 
     adcInitAll();
 
@@ -35,7 +35,7 @@ int main()
 
         printf("Battery: %f%\n", percent);
 
-        sleep_ms(500);
+        sleepMiliseconds(500);
     }
 
     return 0;

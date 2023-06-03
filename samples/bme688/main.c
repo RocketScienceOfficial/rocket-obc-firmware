@@ -1,5 +1,6 @@
 #include "drivers/barometer/bme688_driver.h"
-#include "pico/stdlib.h"
+#include "tools/board_control.h"
+#include "tools/time_tracker.h"
 #include <stdio.h>
 
 #define SPI 0
@@ -10,8 +11,7 @@
 
 int main()
 {
-    stdio_init_all();
-    sleep_ms(5000);
+    boardInit(5000);
 
     spiInitAll(SPI, 1 * 1000 * 1000);
 
@@ -30,7 +30,7 @@ int main()
     while (TRUE)
     {
         bme688SetMode(&bme688Config, BME688_MODE_FORCED);
-        sleep_ms(1000);
+        sleepMiliseconds(1000);
 
         BME688Data data = {0};
         bme688Read(&bme688Config, &data);

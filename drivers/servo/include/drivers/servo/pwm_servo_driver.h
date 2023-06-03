@@ -9,7 +9,7 @@
  * @param pin GPIO pin to use for servo
  * @return Result code
  */
-FUNCRESULT mg995Init(PinNumber pin);
+FUNCRESULT pwmServoInit(PinNumber pin);
 
 /**
  * @brief Check if servo is connected
@@ -18,7 +18,7 @@ FUNCRESULT mg995Init(PinNumber pin);
  * @param result Result of check
  * @return Result code
  */
-FUNCRESULT mg995Check(PinNumber pin, BOOL *result);
+FUNCRESULT pwmServoCheck(PinNumber pin, BOOL *result);
 
 /**
  * @brief Rotate servo to angle
@@ -27,4 +27,4 @@ FUNCRESULT mg995Check(PinNumber pin, BOOL *result);
  * @param angle Angle to rotate to (degrees)
  * @return Result code
  */
-FUNCRESULT mg995RotateAngle(PinNumber pin, FLOAT destAngleDegrees);
+FUNCRESULT pwmServoRotateAngle(PinNumber pin, FLOAT destAngleDegrees);

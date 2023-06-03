@@ -1,12 +1,11 @@
 #include "drivers/storage/flash_driver.h"
-#include "pico/stdlib.h"
+#include "tools/board_control.h"
 #include <stdio.h>
 #include <string.h>
 
 int main()
 {
-    stdio_init_all();
-    sleep_ms(10000);
+    boardInit(10000);
 
     flashEraseSectors(0, 1);
 
@@ -22,7 +21,7 @@ int main()
 
     while (TRUE)
     {
-        tight_loop_contents();
+        tightLoop();
     }
 
     return 0;

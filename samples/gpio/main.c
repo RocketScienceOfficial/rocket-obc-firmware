@@ -1,5 +1,5 @@
 #include "drivers/gpio/gpio_driver.h"
-#include "pico/stdlib.h"
+#include "tools/time_tracker.h"
 
 #define PIN 29
 #define DELAY 1000
@@ -11,10 +11,10 @@ int main()
     while (TRUE)
     {
         gpioSetPinState(PIN, GPIO_HIGH);
-        sleep_ms(DELAY);
+        sleepMiliseconds(DELAY);
         
         gpioSetPinState(PIN, GPIO_LOW);
-        sleep_ms(DELAY);
+        sleepMiliseconds(DELAY);
     }
 
     return 0;

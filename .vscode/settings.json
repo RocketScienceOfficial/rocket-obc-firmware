@@ -63,6 +63,13 @@
         "measurements_utils.h": "c",
         "test_nmea.h": "c",
         "*.tcc": "c",
-        "func_result.h": "c"
+        "func_result.h": "c",
+        "driver_calling.h": "c",
+        "string": "c",
+        "xor_encryption.h": "c",
+        "time.h": "c",
+        "board_control.h": "c",
+        "default_commands.h": "c",
+        "test_radio_protocol.h": "c"
     }
 }

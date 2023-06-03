@@ -1,6 +1,7 @@
 #include "drivers/gps/u_blox_neo_m9n_driver.h"
 #include "drivers/gps/nmea_parser.h"
-#include "pico/stdlib.h"
+#include "tools/board_control.h"
+#include "tools/time_tracker.h"
 #include <stdio.h>
 
 #define SPI 0
@@ -11,8 +12,7 @@
 
 int main()
 {
-    stdio_init_all();
-    sleep_ms(5000);
+    boardInit(5000);
 
     spiInitAll(SPI, 1 * 1000 * 1000);
 
@@ -64,7 +64,7 @@ int main()
             }
         }
 
-        sleep_ms(10);
+        sleepMiliseconds(10);
     }
 
     return 0;

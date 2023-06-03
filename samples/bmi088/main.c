@@ -1,7 +1,8 @@
 #include "drivers/accelerometer/bmi088_driver.h"
+#include "tools/board_control.h"
+#include "tools/time_tracker.h"
 #include "ahrs/madgwick_filter.h"
 #include "maths/constants.h"
-#include "pico/stdlib.h"
 #include <stdio.h>
 
 #define SPI 0
@@ -13,8 +14,7 @@
 
 int main()
 {
-    stdio_init_all();
-    sleep_ms(5000);
+    boardInit(5000);
 
     spiInitAll(SPI, 10 * 1000 * 1000);
 
@@ -54,7 +54,7 @@ int main()
         printf("MAD Gyro Y: %f\n", eulerData.y);
         printf("MAD Gyro Z: %f\n", eulerData.z);
 
-        sleep_ms(100);
+        sleepMiliseconds(100);
     }
 
     return 0;

@@ -1,5 +1,6 @@
 #include "drivers/magnetometer/mmc5983ma_driver.h"
-#include "pico/stdlib.h"
+#include "tools/time_tracker.h"
+#include "tools/board_control.h"
 #include <stdio.h>
 
 #define SPI 0
@@ -10,8 +11,7 @@
 
 int main()
 {
-    stdio_init_all();
-    sleep_ms(5000);
+    boardInit(5000);
 
     spiInitAll(SPI, 1 * 1000 * 1000);
 
@@ -26,7 +26,7 @@ int main()
         
         printf("X: %f, Y: %f, Z: %f\n", mag.x, mag.y, mag.z);
 
-        sleep_ms(50);
+        sleepMiliseconds(50);
     }
 
     return 0;

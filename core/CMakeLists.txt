@@ -6,4 +6,4 @@ link_libraries(core_common_lib)
 
 add_subdirectory(ground_station)
 add_subdirectory(prototyping)
-add_subdirectory(satellite)
+add_subdirectory(rocket)

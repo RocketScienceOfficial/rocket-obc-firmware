@@ -1,5 +1,5 @@
 #include "drivers/lora/sx127X_driver.h"
-#include "pico/stdlib.h"
+#include "tools/board_control.h"
 #include <stdio.h>
 
 #define SPI 0
@@ -11,8 +11,7 @@
 
 int main()
 {
-    stdio_init_all();
-    sleep_ms(5000);
+    boardInit(5000);
 
     spiInitAll(SPI, 12500);
 
@@ -27,12 +26,12 @@ int main()
     };
 
     FUNCRESULT code = sx127XInit(&data, &pinout, 433E6);
-    
+
     printf("Result code of init: %d\n", code);
 
     while (TRUE)
     {
-        sleep_ms(1000);
+        tightLoop();
     }
 
     return 0;

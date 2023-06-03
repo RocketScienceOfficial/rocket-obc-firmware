@@ -1,6 +1,5 @@
 #include "test_radio_protocol.h"
 #include "kernel/services/radio_protocol.h"
-#include <obc/api.h>
 #include <string.h>
 #include <stdlib.h>
 

@@ -1,4 +1,4 @@
-#include "pico/stdlib.h"
+#include "tools/board_control.h"
 #include "test_framework.h"
 #include "kernel/logging/logger.h"
 #include "drivers/console/console_output.h"
@@ -15,15 +15,14 @@ static VOID run();
 
 int main()
 {
-    stdio_init_all();
-    sleep_ms(10000);
+    boardInit(10000);
 
     intialize();
     run();
 
     while (TRUE)
     {
-        tight_loop_contents();
+        tightLoop();
     }
 
     return 0;

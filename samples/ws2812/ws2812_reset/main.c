@@ -1,5 +1,5 @@
 #include "drivers/led/w2812_driver.h"
-#include "pico/stdlib.h"
+#include "tools/board_control.h"
 
 #define PIN 15
 #define RGBW FALSE
@@ -21,7 +21,7 @@ int main()
 
     while (TRUE)
     {
-        sleep_ms(1000);
+        tightLoop();
     }
 
     return 0;

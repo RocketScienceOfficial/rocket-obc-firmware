@@ -1,17 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "pico/stdlib.h"
 #include "pinout.h"
 #include "core/common/measurements_utils.h"
 #include "core/common/radio_utils.h"
+#include "tools/board_control.h"
 
 static RadioUtilPacketData s_Packet;
 
 int main()
 {
-    stdio_init_all();
-    sleep_ms(5000);
+    boardInit(0);
 
     SX127XPinout loraPinout = (SX127XPinout){
         .spi = SX1278_SPI,

@@ -1,12 +1,11 @@
 #include "drivers/storage/sd_driver.h"
-#include "pico/stdlib.h"
+#include "tools/board_control.h"
 
 #define FILE_NAME "TEST_FILE.txt"
 
 int main()
 {
-    stdio_init_all();
-    sleep_ms(5000);
+    boardInit(5000);
 
     SDCard sdCard = {0};
 
@@ -20,7 +19,7 @@ int main()
 
     while (TRUE)
     {
-        sleep_ms(1000);
+        tightLoop();
     }
 
     return 0;
