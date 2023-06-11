@@ -30,7 +30,7 @@ if [ ! -d executables/samples ]; then
 fi
 
 cp build/core/ground_station/ground_station.uf2 executables/core/ground_station.uf2
-cp build/core/satellite/satellite.uf2 executables/core/satellite.uf2
+cp build/core/rocket/rocket.uf2 executables/core/rocket.uf2
 cp build/core/prototyping/prototyping.uf2 executables/core/prototyping.uf2
 
 cp build/tests/tests_runner/tests_runner.uf2 executables/tests/tests_runner.uf2

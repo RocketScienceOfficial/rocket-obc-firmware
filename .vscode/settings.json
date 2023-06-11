@@ -70,6 +70,7 @@
         "time.h": "c",
         "board_control.h": "c",
         "default_commands.h": "c",
-        "test_radio_protocol.h": "c"
+        "test_radio_protocol.h": "c",
+        "exp_filter.h": "c"
     }
 }

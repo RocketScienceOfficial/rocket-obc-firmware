@@ -1,5 +1,5 @@
 #include "drivers/magnetometer/mmc5983ma_driver.h"
-#include "pico/stdlib.h"
+#include "tools/time_tracker.h"
 
 #define X_OUT_0 0x00
 #define X_OUT_1 0x01
@@ -17,8 +17,15 @@
 #define PRODUCT_ID 0x2F
 
 #define PRODUCT_ID_VALID 0x0C
-#define RESOLUTION 0.00006103515625f
+#define RESOLUTION 0.0625f
 #define BASE_OFFSET 131072
+
+static float HARD_IRON_CALIB[3] = {-21.11f, 11.87f, -47.88f};
+static float SOFT_IRON_CALIB[3][3] = {
+    {1.022f, 0.007f, 0.007f},
+    {0.007f, 0.979f, -0.001f},
+    {0.007f, -0.001f, 0.999f},
+};
 
 FUNCRESULT mmc5983maInit(MMC5983MAConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
 {
@@ -28,6 +35,8 @@ FUNCRESULT mmc5983maInit(MMC5983MAConfig *config, SPIInstance spi, PinNumber mis
     spiInitPins(spi, miso, mosi, sck, cs);
 
     __mmc5983maWriteReg(config, INTERNAL_CONTROL_0, 0x20);
+
+    mmc5983maReset(config);
 
     return SUC_OK;
 }
@@ -46,7 +55,7 @@ FUNCRESULT mmc5983maSetBandwidth(MMC5983MAConfig *config, MMC5983MABandwidth ban
     return SUC_OK;
 }
 
-FUNCRESULT mmc5983maSetODR(MMC5983MAConfig *config, MMC5983ODR odr)
+FUNCRESULT mmc5983maSetContinuousModeODR(MMC5983MAConfig *config, MMC5983ODR odr)
 {
     __mmc5983maWriteReg(config, INTERNAL_CONTROL_2, odr == 0 ? 0 : (0x08 | odr));
 
@@ -57,7 +66,12 @@ FUNCRESULT mmc5983maReset(MMC5983MAConfig *config)
 {
     __mmc5983maWriteReg(config, INTERNAL_CONTROL_1, 0x80);
 
-    sleep_ms(10);
+    sleepMiliseconds(20);
+
+    __mmc5983maSET(config);
+    __mmc5983maRESET(config);
+
+    mmc5983maSetContinuousModeODR(config, 0);
 
     return SUC_OK;
 }
@@ -68,11 +82,11 @@ FUNCRESULT mmc5983maCalculateOffset(MMC5983MAConfig *config, vec3 *offset)
     UINT16 dataSet[3];
     UINT16 dataReset[3];
 
-    mmc5983maSetODR(config, 0);
+    mmc5983maSetContinuousModeODR(config, 0);
 
     __mmc5983maSET(config);
     __mmc5983maWriteReg(config, INTERNAL_CONTROL_0, 0x01);
-    sleep_ms(10);
+    sleepMiliseconds(10);
     __mmc5983maReadRegs(config, X_OUT_0, buffer, 6);
     dataSet[0] = (UINT16)((buffer[0] << 8) | buffer[1]);
     dataSet[1] = (UINT16)((buffer[2] << 8) | buffer[3]);
@@ -80,7 +94,7 @@ FUNCRESULT mmc5983maCalculateOffset(MMC5983MAConfig *config, vec3 *offset)
 
     __mmc5983maRESET(config);
     __mmc5983maWriteReg(config, INTERNAL_CONTROL_0, 0x01);
-    sleep_ms(10);
+    sleepMiliseconds(10);
     __mmc5983maReadRegs(config, X_OUT_0, buffer, 6);
     dataReset[0] = (UINT16)((buffer[0] << 8) | buffer[1]);
     dataReset[1] = (UINT16)((buffer[2] << 8) | buffer[3]);
@@ -103,9 +117,13 @@ FUNCRESULT mmc5983maRead(MMC5983MAConfig *config, vec3 *mag)
     INT32 y = (UINT32)((buffer[2] << 10) | (buffer[3] << 2) | ((buffer[7] & 0x30) >> 4)) - BASE_OFFSET;
     INT32 z = (UINT32)((buffer[4] << 10) | (buffer[5] << 2) | ((buffer[7] & 0x0C) >> 2)) - BASE_OFFSET;
 
-    mag->x = (FLOAT)x * RESOLUTION;
-    mag->y = (FLOAT)y * RESOLUTION;
-    mag->z = (FLOAT)z * RESOLUTION;
+    FLOAT rawX = (FLOAT)x * RESOLUTION - HARD_IRON_CALIB[0];
+    FLOAT rawY = (FLOAT)y * RESOLUTION - HARD_IRON_CALIB[1];
+    FLOAT rawZ = (FLOAT)z * RESOLUTION - HARD_IRON_CALIB[2];
+
+    mag->x = SOFT_IRON_CALIB[0][0] * rawX + SOFT_IRON_CALIB[0][1] * rawY + SOFT_IRON_CALIB[0][2] * rawZ;
+    mag->y = SOFT_IRON_CALIB[1][0] * rawX + SOFT_IRON_CALIB[1][1] * rawY + SOFT_IRON_CALIB[1][2] * rawZ;
+    mag->z = SOFT_IRON_CALIB[2][0] * rawX + SOFT_IRON_CALIB[2][1] * rawY + SOFT_IRON_CALIB[2][2] * rawZ;
 
     return SUC_OK;
 }
@@ -122,11 +140,15 @@ FUNCRESULT mmc5983maReadTemp(MMC5983MAConfig *config, FLOAT *temp)
 VOID __mmc5983maSET(MMC5983MAConfig *config)
 {
     __mmc5983maWriteReg(config, INTERNAL_CONTROL_0, 0x08);
+
+    sleepMiliseconds(1);
 }
 
 VOID __mmc5983maRESET(MMC5983MAConfig *config)
 {
     __mmc5983maWriteReg(config, INTERNAL_CONTROL_0, 0x10);
+
+    sleepMiliseconds(1);
 }
 
 BYTE __mmc5983maReadReg(MMC5983MAConfig *config, BYTE address)

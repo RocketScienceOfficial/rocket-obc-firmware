@@ -30,7 +30,7 @@ int main()
     while (TRUE)
     {
         bme688SetMode(&bme688Config, BME688_MODE_FORCED);
-        sleepMiliseconds(1000);
+        sleepMiliseconds(10);
 
         BME688Data data = {0};
         bme688Read(&bme688Config, &data);
@@ -39,8 +39,6 @@ int main()
         printf("Pressure: %f\n", data.pressure);
         printf("Humidity: %f\n", data.humidity);
         printf("Gas: %f\n", data.gas);
-
-        sleep_ms(100);
     }
 
     return 0;

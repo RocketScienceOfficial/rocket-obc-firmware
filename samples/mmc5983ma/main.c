@@ -17,16 +17,16 @@ int main()
 
     MMC5983MAConfig mmc5983maConfig = {0};
     mmc5983maInit(&mmc5983maConfig, SPI, MISO, MOSI, CS, SCK);
-    mmc5983maSetODR(&mmc5983maConfig, MMC5983MA_ODR_200HZ);
+    mmc5983maSetContinuousModeODR(&mmc5983maConfig, MMC5983MA_ODR_200HZ);
 
     while (TRUE)
     {
         vec3 mag = {0};
         mmc5983maRead(&mmc5983maConfig, &mag);
-        
-        printf("X: %f, Y: %f, Z: %f\n", mag.x, mag.y, mag.z);
 
-        sleepMiliseconds(50);
+        printf("Raw:0,0,0,0,0,0,%d,%d,%d\n", (INT32)mag.x, (INT32)mag.y, (INT32)mag.z);
+
+        sleepMiliseconds(10);
     }
 
     return 0;

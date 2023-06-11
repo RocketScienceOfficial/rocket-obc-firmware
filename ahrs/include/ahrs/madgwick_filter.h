@@ -9,8 +9,6 @@
 #include "maths/quaternion.h"
 #include "maths/vector.h"
 
-#define MADGWICK_BETA_CONSTANT 0.8660254f
-
 /**
  * @brief Madgwick filter data for IMU
  */

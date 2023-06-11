@@ -6,17 +6,9 @@
 /**
  * @brief Quaternion data structure
  */
-typedef union quat
+typedef struct quat
 {
-    struct
-    {
-        FLOAT q1, q2, q3, q4;
-    };
-
-    struct
-    {
-        FLOAT w, x, y, z;
-    };
+    FLOAT w, x, y, z;
 } quat;
 
 /**
@@ -72,14 +64,14 @@ VOID quatConjugate(quat *q);
  *
  * @param q Quaternion to inverse
  */
-VOID quatInverse(quat* q);
+VOID quatInverse(quat *q);
 
 /**
  * @brief Normalize a quaternion
  *
  * @param q Quaternion to normalize
  */
-VOID quatNormalize(quat* q);
+VOID quatNormalize(quat *q);
 
 /**
  * @brief Convert quaternion to Euler angles
@@ -87,4 +79,4 @@ VOID quatNormalize(quat* q);
  * @param res Euler angles (in degrees) vector
  * @param q Quaternion
  */
-VOID quatToEuler(vec3 *res, quat* q);
+VOID quatToEuler(vec3 *res, quat *q);

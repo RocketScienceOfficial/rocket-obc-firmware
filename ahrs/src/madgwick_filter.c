@@ -2,6 +2,8 @@
 #include "maths/constants.h"
 #include <math.h>
 
+#define MADGWICK_BETA_CONSTANT 0.8660254f
+
 static quat s_Q;
 static quat s_GyroDerivative;
 static vec3 s_FuncG;
@@ -50,10 +52,10 @@ VOID madgwickUpdateIMU(MadgiwckFilterData *data, vec3 gyroVec, vec3 accVec)
 
     vec3Normalize(&accVec);
 
-    s_2qw = 2 * s_Q.w;
-    s_2qx = 2 * s_Q.x;
-    s_2qy = 2 * s_Q.y;
-    s_2qz = 2 * s_Q.z;
+    s_2qw = 2.0f * s_Q.w;
+    s_2qx = 2.0f * s_Q.x;
+    s_2qy = 2.0f * s_Q.y;
+    s_2qz = 2.0f * s_Q.z;
 
     s_FuncG = (vec3){
         s_2qx * s_Q.z - s_2qw * s_Q.y - accVec.x,
@@ -63,22 +65,22 @@ VOID madgwickUpdateIMU(MadgiwckFilterData *data, vec3 gyroVec, vec3 accVec)
 
     s_Grad = (quat){
         -s_2qy * s_FuncG.x + s_2qx * s_FuncG.y,
-        s_2qz * s_FuncG.x + s_2qw * s_FuncG.y - 2 * s_2qx * s_FuncG.z,
-        -s_2qw * s_FuncG.x + s_2qz * s_FuncG.y - 2 * s_2qy * s_FuncG.z,
+        s_2qz * s_FuncG.x + s_2qw * s_FuncG.y - 2.0f * s_2qx * s_FuncG.z,
+        -s_2qw * s_FuncG.x + s_2qz * s_FuncG.y - 2.0f * s_2qy * s_FuncG.z,
         s_2qx * s_FuncG.x + s_2qy * s_FuncG.y,
     };
 
     quatNormalize(&s_Grad);
 
-    s_GyroDerivative.q1 -= data->beta * s_Grad.q1;
-    s_GyroDerivative.q2 -= data->beta * s_Grad.q2;
-    s_GyroDerivative.q3 -= data->beta * s_Grad.q3;
-    s_GyroDerivative.q4 -= data->beta * s_Grad.q4;
+    s_GyroDerivative.w -= data->beta * s_Grad.w;
+    s_GyroDerivative.x -= data->beta * s_Grad.x;
+    s_GyroDerivative.y -= data->beta * s_Grad.y;
+    s_GyroDerivative.z -= data->beta * s_Grad.z;
 
-    s_Q.q1 += s_GyroDerivative.q1 * data->samplePeriod;
-    s_Q.q2 += s_GyroDerivative.q2 * data->samplePeriod;
-    s_Q.q3 += s_GyroDerivative.q3 * data->samplePeriod;
-    s_Q.q4 += s_GyroDerivative.q4 * data->samplePeriod;
+    s_Q.w += s_GyroDerivative.w * data->samplePeriod;
+    s_Q.x += s_GyroDerivative.x * data->samplePeriod;
+    s_Q.y += s_GyroDerivative.y * data->samplePeriod;
+    s_Q.z += s_GyroDerivative.z * data->samplePeriod;
 
     quatNormalize(&s_Q);
 
@@ -145,15 +147,15 @@ VOID madgwickUpdateMARG(MadgiwckFilterData *data, vec3 gyroVec, vec3 accVec, vec
 
     quatNormalize(&s_Grad);
 
-    s_GyroDerivative.q1 -= data->beta * s_Grad.q1;
-    s_GyroDerivative.q2 -= data->beta * s_Grad.q2;
-    s_GyroDerivative.q3 -= data->beta * s_Grad.q3;
-    s_GyroDerivative.q4 -= data->beta * s_Grad.q4;
+    s_GyroDerivative.w -= data->beta * s_Grad.w;
+    s_GyroDerivative.x -= data->beta * s_Grad.x;
+    s_GyroDerivative.y -= data->beta * s_Grad.y;
+    s_GyroDerivative.z -= data->beta * s_Grad.z;
 
-    s_Q.q1 += s_GyroDerivative.q1 * data->samplePeriod;
-    s_Q.q2 += s_GyroDerivative.q2 * data->samplePeriod;
-    s_Q.q3 += s_GyroDerivative.q3 * data->samplePeriod;
-    s_Q.q4 += s_GyroDerivative.q4 * data->samplePeriod;
+    s_Q.w += s_GyroDerivative.w * data->samplePeriod;
+    s_Q.x += s_GyroDerivative.x * data->samplePeriod;
+    s_Q.y += s_GyroDerivative.y * data->samplePeriod;
+    s_Q.z += s_GyroDerivative.z * data->samplePeriod;
 
     quatNormalize(&s_Q);
 

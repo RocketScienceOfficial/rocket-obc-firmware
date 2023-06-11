@@ -27,6 +27,10 @@
 #define WHO_AM_I_VALUE 0x32
 #define RESOLUTION_DIVIDER 32768.0f
 
+#define X_OFFSET -95
+#define Y_OFFSET -45
+#define Z_OFFSET 420
+
 FUNCRESULT h3lis331dlInit(H3lis331dlConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
 {
     config->spi = spi;
@@ -92,9 +96,9 @@ FUNCRESULT h3lis331dlRead(H3lis331dlConfig *config, vec3 *accel)
 
     __h3lis331dlReadRegs(config, OUT_X_L, buffer, 6);
 
-    INT16 x = (INT16)((buffer[1] << 8) | buffer[0]);
-    INT16 y = (INT16)((buffer[3] << 8) | buffer[2]);
-    INT16 z = (INT16)((buffer[5] << 8) | buffer[4]);
+    INT16 x = (INT16)((buffer[1] << 8) | buffer[0]) - X_OFFSET;
+    INT16 y = (INT16)((buffer[3] << 8) | buffer[2]) - Y_OFFSET;
+    INT16 z = (INT16)((buffer[5] << 8) | buffer[4]) - Z_OFFSET;
 
     accel->x = (FLOAT)x * config->rangeFactor;
     accel->y = (FLOAT)y * config->rangeFactor;

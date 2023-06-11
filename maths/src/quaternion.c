@@ -5,72 +5,72 @@
 
 VOID quatAdd(quat *a, quat *b)
 {
-    a->q1 += b->q1;
-    a->q2 += b->q2;
-    a->q3 += b->q3;
-    a->q4 += b->q4;
+    a->w += b->w;
+    a->x += b->x;
+    a->y += b->y;
+    a->z += b->z;
 }
 
 VOID quatSub(quat *a, quat *b)
 {
-    a->q1 -= b->q1;
-    a->q2 -= b->q2;
-    a->q3 -= b->q3;
-    a->q4 -= b->q4;
+    a->w -= b->w;
+    a->x -= b->x;
+    a->y -= b->y;
+    a->z -= b->z;
 }
 
 VOID quatMulNum(FLOAT n, quat *q)
 {
-    q->q1 *= n;
-    q->q2 *= n;
-    q->q3 *= n;
-    q->q4 *= n;
+    q->w *= n;
+    q->x *= n;
+    q->y *= n;
+    q->z *= n;
 }
 
 VOID quatMul(quat *res, quat *a, quat *b)
 {
-    res->q1 = a->q1 * b->q1 - a->q2 * b->q2 - a->q3 * b->q3 - a->q4 * b->q4;
-    res->q2 = a->q1 * b->q2 + a->q2 * b->q1 + a->q3 * b->q4 - a->q4 * b->q3;
-    res->q3 = a->q1 * b->q3 - a->q2 * b->q4 + a->q3 * b->q1 + a->q4 * b->q2;
-    res->q4 = a->q1 * b->q4 + a->q2 * b->q3 - a->q3 * b->q2 + a->q4 * b->q1;
+    res->w = a->w * b->w - a->x * b->x - a->y * b->y - a->z * b->z;
+    res->x = a->w * b->x + a->x * b->w + a->y * b->z - a->z * b->y;
+    res->y = a->w * b->y - a->x * b->z + a->y * b->w + a->z * b->x;
+    res->z = a->w * b->z + a->x * b->y - a->y * b->x + a->z * b->w;
 }
 
 FLOAT quatNorm(quat *q)
 {
-    return sqrt(q->q1 * q->q1 + q->q2 * q->q2 + q->q3 * q->q3 + q->q4 * q->q4);
+    return sqrt(q->w * q->w + q->x * q->x + q->y * q->y + q->z * q->z);
 }
 
 VOID quatConjugate(quat *q)
 {
-    q->q2 = -q->q2;
-    q->q3 = -q->q3;
-    q->q4 = -q->q4;
+    q->x = -q->x;
+    q->y = -q->y;
+    q->z = -q->z;
 }
 
 VOID quatInverse(quat *q)
 {
-    FLOAT normInv = fastInverseSqrt(q->q1 * q->q1 + q->q2 * q->q2 + q->q3 * q->q3 + q->q4 * q->q4);
+    FLOAT normInv = fastInverseSqrt(q->w * q->w + q->x * q->x + q->y * q->y + q->z * q->z);
     FLOAT normInv2 = normInv * normInv;
 
-    q->q1 *= normInv2;
-    q->q2 *= -normInv2;
-    q->q3 *= -normInv2;
-    q->q4 *= -normInv2;
+    q->w *= normInv2;
+    q->x *= -normInv2;
+    q->y *= -normInv2;
+    q->z *= -normInv2;
 }
 
 VOID quatNormalize(quat *q)
 {
-    FLOAT normInv = fastInverseSqrt(q->q1 * q->q1 + q->q2 * q->q2 + q->q3 * q->q3 + q->q4 * q->q4);
+    FLOAT normInv = fastInverseSqrt(q->w * q->w + q->x * q->x + q->y * q->y + q->z * q->z);
 
-    q->q1 *= normInv;
-    q->q2 *= normInv;
-    q->q3 *= normInv;
-    q->q4 *= normInv;
+    q->w *= normInv;
+    q->x *= normInv;
+    q->y *= normInv;
+    q->z *= normInv;
 }
 
 VOID quatToEuler(vec3 *res, quat *q)
 {
-    res->x = RAD_2_DEG(atan2(2 * (q->q1 * q->q2 + q->q3 * q->q4), 1 - 2 * (q->q2 * q->q2 + q->q3 * q->q3)));
-    res->y = RAD_2_DEG(asin(clampValue(2 * (q->q1 * q->q3 - q->q2 * q->q4), -1, 1)));
-    res->z = RAD_2_DEG(atan2(2 * (q->q1 * q->q4 + q->q2 * q->q3), 1 - 2 * (q->q3 * q->q3 + q->q4 * q->q4)));
+    res->x = RAD_2_DEG(atan2(2 * (q->w * q->x + q->y * q->z), 1 - 2 * (q->x * q->x + q->y * q->y)));
+    res->y = RAD_2_DEG(asin(clampValue(2 * (q->w * q->y - q->x * q->z), -1, 1)));
+    res->z = RAD_2_DEG(atan2(2 * (q->w * q->z + q->x * q->y), 1 - 2 * (q->y * q->y + q->z * q->z)));
 }

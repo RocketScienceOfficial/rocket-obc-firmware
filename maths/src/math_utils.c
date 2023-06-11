@@ -11,6 +11,7 @@ FLOAT fastInverseSqrt(FLOAT x)
     i = 0x5f3759df - (i >> 1);
     x = *(FLOAT *)&i;
     x = x * (1.5f - xhalf * x * x);
+    x = x * (1.5f - xhalf * x * x);
 
     return x;
 }
@@ -18,11 +19,17 @@ FLOAT fastInverseSqrt(FLOAT x)
 FLOAT clampValue(FLOAT value, FLOAT min, FLOAT max)
 {
     if (value < min)
+    {
         return min;
+    }
     else if (value > max)
+    {
         return max;
+    }
     else
+    {
         return value;
+    }
 }
 
 FLOAT heightFromBarometricFormula(FLOAT pressure, FLOAT temperature)

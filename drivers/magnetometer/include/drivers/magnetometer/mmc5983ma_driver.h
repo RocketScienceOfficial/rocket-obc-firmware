@@ -81,7 +81,7 @@ FUNCRESULT mmc5983maSetBandwidth(MMC5983MAConfig *config, MMC5983MABandwidth ban
  * @param odr ODR
  * @return Result code
  */
-FUNCRESULT mmc5983maSetODR(MMC5983MAConfig *config, MMC5983ODR odr);
+FUNCRESULT mmc5983maSetContinuousModeODR(MMC5983MAConfig *config, MMC5983ODR odr);
 
 /**
  * @brief MMC5983MA Magnetometer reset
@@ -104,7 +104,7 @@ FUNCRESULT mmc5983maCalculateOffset(MMC5983MAConfig *config, vec3 *offset);
  * @brief Read data from magnetometer
  *
  * @param config MMC5983MA configuration
- * @param mag Magnetic field in Gauss
+ * @param mag Magnetic field in miliGauss
  * @return Result code
  */
 FUNCRESULT mmc5983maRead(MMC5983MAConfig *config, vec3 *mag);

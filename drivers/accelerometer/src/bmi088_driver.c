@@ -1,7 +1,7 @@
 #include "drivers/accelerometer/bmi088_driver.h"
+#include "tools/time_tracker.h"
 #include "maths/constants.h"
 #include <math.h>
-#include "pico/stdlib.h"
 
 #define ACC_CHIP_ID 0x00
 #define ACC_ERR_REG 0x02
@@ -77,7 +77,7 @@ FUNCRESULT bmi088AccelSetConf(BMI088AccelConfig *config, BMI088AccelODR odr, BMI
 
     __bmi088AccelWriteReg(config, ACC_CONF, cfg);
 
-    sleep_ms(5);
+    sleepMiliseconds(5);
 
     return SUC_OK;
 }
@@ -88,7 +88,7 @@ FUNCRESULT bmi088AccelSetRange(BMI088AccelConfig *config, BMI088AccelRange range
 
     __bmi088AccelWriteReg(config, ACC_RANGE, range);
 
-    sleep_ms(5);
+    sleepMiliseconds(5);
 
     return SUC_OK;
 }
@@ -114,7 +114,7 @@ VOID __bmi088AccelSoftReset(BMI088AccelConfig *config)
 {
     __bmi088AccelWriteReg(config, ACC_SOFTRESET, ACC_SOFTRESET_CMD);
 
-    sleep_ms(50);
+    sleepMiliseconds(50);
 
     gpioSetPinState(config->cs, GPIO_LOW);
     gpioSetPinState(config->cs, GPIO_HIGH);
@@ -126,7 +126,7 @@ VOID __bmi088AccelSetMode(BMI088AccelConfig *config, BOOL active)
 
     __bmi088AccelWriteReg(config, ACC_PWR_CONF, data);
 
-    sleep_ms(5);
+    sleepMiliseconds(5);
 }
 
 VOID __bmi088AccelSetPower(BMI088AccelConfig *config, BOOL on)
@@ -135,7 +135,7 @@ VOID __bmi088AccelSetPower(BMI088AccelConfig *config, BOOL on)
 
     __bmi088AccelWriteReg(config, ACC_PWR_CTRL, data);
 
-    sleep_ms(5);
+    sleepMiliseconds(5);
 }
 
 BYTE __bmi088AccelReadReg(BMI088AccelConfig *config, BYTE address)
@@ -192,7 +192,7 @@ FUNCRESULT bmi088GyroSetBandwidth(BMI088GyroConfig *config, BMI088GyroBandwidth 
 {
     __bmi088GyroWriteReg(config, GYRO_BANDWIDTH, bw | 0x80);
 
-    sleep_ms(5);
+    sleepMiliseconds(5);
 
     return SUC_OK;
 }
@@ -216,7 +216,7 @@ FUNCRESULT bmi088GyroSetRange(BMI088GyroConfig *config, BMI088GyroRange range)
 
     __bmi088GyroWriteReg(config, GYRO_RANGE, range);
 
-    sleep_ms(5);
+    sleepMiliseconds(5);
 
     return SUC_OK;
 }
@@ -242,7 +242,7 @@ VOID __bmi088GyroSoftReset(BMI088GyroConfig *config)
 {
     __bmi088GyroWriteReg(config, GYRO_SOFTRESET, GYRO_SOFTRESET_CMD);
 
-    sleep_ms(50);
+    sleepMiliseconds(50);
 
     gpioSetPinState(config->cs, GPIO_LOW);
     gpioSetPinState(config->cs, GPIO_HIGH);

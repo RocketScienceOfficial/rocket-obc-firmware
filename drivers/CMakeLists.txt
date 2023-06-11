@@ -1,4 +1,4 @@
-link_libraries(api_lib pico_stdlib)
+link_libraries(api_lib tools_lib pico_stdlib)
 
 add_subdirectory(gpio)
 add_subdirectory(accelerometer)
