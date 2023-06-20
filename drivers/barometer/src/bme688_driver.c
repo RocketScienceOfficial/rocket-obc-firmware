@@ -1,5 +1,5 @@
 #include "drivers/barometer/bme688_driver.h"
-#include "pico/stdlib.h"
+#include "tools/time_tracker.h"
 
 #define STATUS 0x73
 #define VARIANT_ID 0x70
@@ -51,6 +51,8 @@
 #define GAS_R_LSB_1 0x3E
 #define GAS_R_LSB_2 0x4F
 
+#define BME688_VARIANT_ID 0x01
+#define BME688_CHIP_ID 0x61
 #define SOFT_RESET_CMD 0xB6
 
 #define CALIB_T1_LSB 0xE9
@@ -169,6 +171,75 @@ FUNCRESULT bme688Init(BME688Config *config, SPIInstance spi, PinNumber miso, Pin
     return SUC_OK;
 }
 
+static FLOAT __calculateTemperature(BME688Config *config, UINT32 temp_adc, INT32 *t_fine)
+{
+    FLOAT var1 = ((((FLOAT)temp_adc / 16384.0f) - ((FLOAT)config->par_t1 / 1024.0f)) * ((FLOAT)config->par_t2));
+    FLOAT var2 = (((((FLOAT)temp_adc / 131072.0f) - ((FLOAT)config->par_t1 / 8192.0f)) * (((FLOAT)temp_adc / 131072.0f) - ((FLOAT)config->par_t1 / 8192.0f))) * ((FLOAT)config->par_t3 * 16.0f));
+    FLOAT t_fine_f = var1 + var2;
+
+    INT32 var1t = ((INT32)temp_adc >> 3) - ((INT32)config->par_t1 << 1);
+    INT32 var2t = (var1t * (INT32)config->par_t2) >> 11;
+    INT32 var3t = ((((var1t >> 1) * (var1t >> 1)) >> 12) * ((INT32)config->par_t3 << 4)) >> 14;
+
+    *t_fine = (FLOAT)(var2t + var3t);
+
+    return t_fine_f / 5120.0f;
+}
+
+static INT32 __calculatePressure(BME688Config *config, UINT32 press_adc, INT32 t_fine)
+{
+    INT32 var1p = (INT32)((INT32)t_fine >> 1) - 64000;
+    INT32 var2p = ((((var1p >> 2) * (var1p >> 2)) >> 11) * (INT32)config->par_p6) >> 2;
+    var2p = var2p + ((var1p * (INT32)config->par_p5) << 1);
+    var2p = (var2p >> 2) + ((INT32)config->par_p4 << 16);
+    var1p = (((((var1p >> 2) * (var1p >> 2)) >> 13) * ((INT32)config->par_p3 << 5)) >> 3) + (((INT32)config->par_p2 * var1p) >> 1);
+    var1p = var1p >> 18;
+    var1p = ((32768 + var1p) * (INT32)config->par_p1) >> 15;
+    INT32 press_comp_p = 1048576 - press_adc;
+    press_comp_p = (INT32)((press_comp_p - (var2p >> 12)) * (UINT32)3125);
+
+    if (press_comp_p >= (1 << 30))
+    {
+        press_comp_p = ((press_comp_p / (UINT32)var1p) << 1);
+    }
+    else
+    {
+        press_comp_p = ((press_comp_p << 1) / (UINT32)var1p);
+    }
+
+    var1p = ((INT32)config->par_p9 * (((press_comp_p >> 3) * (press_comp_p >> 3)) >> 13)) >> 12;
+    var2p = (((INT32)(press_comp_p >> 2)) * ((INT32)config->par_p8)) >> 13;
+    INT32 var3p = (((INT32)(press_comp_p >> 8)) * ((INT32)(press_comp_p >> 8)) * ((INT32)(press_comp_p >> 8)) * ((INT32)config->par_p10)) >> 17;
+    press_comp_p = (INT32)(press_comp_p) + ((var1p + var2p + var3p + ((INT32)((INT32)config->par_p7 << 7))) >> 4);
+
+    return press_comp_p;
+}
+
+static FLOAT __calculateHumidity(BME688Config *config, UINT16 hum_adc, FLOAT temp_comp)
+{
+    INT32 temp_scaled = (INT32)(temp_comp * 100.0f);
+    INT32 var1h = (INT32)hum_adc - (INT32)((INT32)config->par_h1 << 4) - (((temp_scaled * (INT32)config->par_h3) / ((INT32)100)) >> 1);
+    INT32 var2h = ((INT32)config->par_h2 * (((temp_scaled * (INT32)config->par_h4) / ((INT32)100)) + (((temp_scaled * ((temp_scaled * (INT32)config->par_h5) / ((INT32)100))) >> 6) / ((INT32)100)) + ((INT32)1 << 14))) >> 10;
+    INT32 var3h = var1h * var2h;
+    INT32 var4h = (((INT32)config->par_h6 << 7) + ((temp_scaled * (INT32)config->par_h7) / ((INT32)100))) >> 4;
+    INT32 var5h = ((var3h >> 14) * (var3h >> 14)) >> 10;
+    INT32 var6h = (var4h * var5h) >> 1;
+    INT32 hum_comph = (((var3h + var6h) >> 10) * ((INT32)1000)) >> 12;
+
+    return (FLOAT)((FLOAT)hum_comph / 1000.0f);
+}
+
+static INT32 __calculateGasRes(BME688Config *config, UINT16 gas_resistance_adc, UINT8 gas_range_adc)
+{
+    UINT32 var1g = (UINT32)262144 >> gas_range_adc;
+    INT32 var2g = (INT32)gas_resistance_adc - (INT32)512;
+
+    var2g *= (INT32)3;
+    var2g = (INT32)4096 + var2g;
+
+    return (INT32)(1000000.0f * (FLOAT)var1g / (FLOAT)var2g);
+}
+
 FUNCRESULT bme688Read(BME688Config *config, BME688Data *data)
 {
     BYTE press_msb = __bme688ReadReg(config, PRESS_MSB_0);
@@ -188,139 +259,59 @@ FUNCRESULT bme688Read(BME688Config *config, BME688Data *data)
     UINT16 gas_resistance_adc = (UINT16)((gas_r_msb << 2) | (gas_r_lsb >> 6));
     UINT8 gas_range_adc = (UINT8)(gas_r_lsb & 0x0F);
 
-    FLOAT var1, var2, var3, var4, t_fine, temp_comp, press_comp, hum_comp, gas_res;
+    INT32 t_fine = 0;
 
-    var1 = ((((FLOAT)temp_adc / 16384.0f) - ((FLOAT)config->par_t1 / 1024.0f)) * ((FLOAT)config->par_t2));
-    var2 = (((((FLOAT)temp_adc / 131072.0f) - ((FLOAT)config->par_t1 / 8192.0f)) * (((FLOAT)temp_adc / 131072.0f) - ((FLOAT)config->par_t1 / 8192.0f))) * ((FLOAT)config->par_t3 * 16.0f));
-    t_fine = var1 + var2;
-    temp_comp = t_fine / 5120.0f;
-
-    var1 = ((FLOAT)t_fine / 2.0f) - 64000.0f;
-    var2 = var1 * var1 * ((FLOAT)config->par_p6 / 131072.0f);
-    var2 = var2 + (var1 * (FLOAT)config->par_p5 * 2.0f);
-    var2 = (var2 / 4.0f) + ((FLOAT)config->par_p4 * 65536.0f);
-    var1 = ((((FLOAT)config->par_t3 * var1 * var1) / 16384.0f) + ((FLOAT)config->par_t2 * var1)) / 524288.0f;
-    var1 = (1.0f + (var1 / 32768.0f)) * (FLOAT)config->par_p1;
-    press_comp = 1048576.0f - (FLOAT)press_adc;
-    press_comp = ((press_comp - (var2 / 4096.0f)) * 6250.0f) / var1;
-    var1 = ((FLOAT)config->par_p9 * press_comp * press_comp) / 2147483648.0f;
-    var2 = press_comp * ((FLOAT)config->par_p8 / 32768.0f);
-    var3 = (press_comp / 256.0f) * (press_comp / 256.0f) * (press_comp / 256.0f) * (config->par_p10 / 131072.0f);
-    press_comp = press_comp + (var1 + var2 + var3 + ((FLOAT)config->par_p7 * 128.0f)) / 16.0f;
-
-    // var1 = (FLOAT)((FLOAT)hum_adc) - (((FLOAT)config->par_h1 * 16.0f) + (((FLOAT)config->par_h3 / 2.0f) * temp_comp));
-    // var2 = var1 * ((FLOAT)(((FLOAT)config->par_h2 / 262144.0f) * (1.0f + (((FLOAT)config->par_h4 / 16384.0f) * temp_comp) + (((FLOAT)config->par_h5 / 1048576.0f) * temp_comp * temp_comp))));
-    // var3 = (FLOAT)config->par_h6 / 16384.0f;
-    // var4 = (FLOAT)config->par_h7 / 2097152.0f;
-    // hum_comp = var2 + ((var3 + (var4 * temp_comp)) + var2 * var2);
-
-    INT32 temp_scaled = (INT32)(temp_comp * 100.0f);
-    INT32 var1h = (INT32)hum_adc - (INT32)((INT32)config->par_h1 << 4) - (((temp_scaled * (INT32)config->par_h3) / ((INT32)100)) >> 1);
-    INT32 var2h = ((INT32)config->par_h2 * (((temp_scaled * (INT32)config->par_h4) / ((INT32)100)) + (((temp_scaled * ((temp_scaled * (INT32)config->par_h5) / ((INT32)100))) >> 6) / ((INT32)100)) + ((INT32)1 << 14))) >> 10;
-    INT32 var3h = var1h * var2h;
-    INT32 var4h = (((INT32)config->par_h6 << 7) + ((temp_scaled * (INT32)config->par_h7) / ((INT32)100))) >> 4;
-    INT32 var5h = ((var3h >> 14) * (var3h >> 14)) >> 10;
-    INT32 var6h = (var4h * var5h) >> 1;
-    INT32 hum_comph = (((var3h + var6h) >> 10) * ((INT32)1000)) >> 12;
-    hum_comp = (FLOAT)((FLOAT)hum_comph / 1000.0f);
-
-    UINT32 var1g = (UINT32)262144 >> gas_range_adc;
-    INT32 var2g = (INT32)gas_resistance_adc - (INT32)512;
-    var2g *= (INT32)3;
-    var2g = (INT32)4096 + var2g;
-    gas_res = 1000000.0f * (FLOAT)var1g / (FLOAT)var2g;
-
-    data->temperature = temp_comp;
-    data->pressure = press_comp;
-    data->humidity = hum_comp;
-    data->gas = gas_res;
+    data->temperature = __calculateTemperature(config, temp_adc, &t_fine);
+    data->pressure = __calculatePressure(config, press_adc, (INT32)t_fine);
+    data->humidity = __calculateHumidity(config, hum_adc, data->temperature);
+    data->gas = __calculateGasRes(config, gas_resistance_adc, gas_range_adc);
 
     return SUC_OK;
 }
 
-FUNCRESULT bme688GetVariantId(BME688Config *config, BYTE *variantId)
+FUNCRESULT bme688ValidateId(BME688Config *config, BOOL *valid)
 {
-    *variantId = __bme688ReadReg(config, VARIANT_ID);
+    BYTE variantId = __bme688ReadReg(config, VARIANT_ID);
+    BYTE chipId = __bme688ReadReg(config, CHIP_ID);
 
-    return SUC_OK;
-}
-
-FUNCRESULT bme688GetChipId(BME688Config *config, BYTE *chipId)
-{
-    *chipId = __bme688ReadReg(config, CHIP_ID);
+    *valid = (variantId == BME688_VARIANT_ID) && (chipId == BME688_CHIP_ID);
 
     return SUC_OK;
 }
 
 FUNCRESULT bme688SetMode(BME688Config *config, BME688Mode mode)
 {
-    BYTE data = __bme688ReadReg(config, CTRL_MEAS);
-
-    data &= 0xFC;
-    data |= mode;
-
-    __bme688WriteReg(config, CTRL_MEAS, data);
+    FUNC_CHECK_BOOL(__bme688WriteRegField(config, CTRL_MEAS, 2, 0, mode));
 
     config->currentMode = mode;
 
     return SUC_OK;
 }
 
-FUNCRESULT bme688SetHumidityOSR(BME688Config *config, BME688SensorOSR osr)
+FUNCRESULT bme688SetConfig(BME688Config *config, BME688SensorOSR temperatureOSR, BME688SensorOSR pressureOSR, BME688SensorOSR humidityOSR, BME688IIRFilterCoefficient filterCoefficient)
 {
-    BYTE data = __bme688ReadReg(config, CTRL_HUM);
-
-    data &= 0xF8;
-    data |= osr;
-
-    __bme688WriteReg(config, CTRL_HUM, data);
+    FUNC_CHECK_BOOL(__bme688WriteRegField(config, CTRL_HUM, 3, 0, humidityOSR));
+    FUNC_CHECK_BOOL(__bme688WriteRegField(config, CTRL_MEAS, 6, 2, temperatureOSR << 3 | pressureOSR));
+    FUNC_CHECK_BOOL(__bme688WriteRegField(config, CONFIG, 3, 2, filterCoefficient));
 
     return SUC_OK;
 }
 
-FUNCRESULT bme688SetTemperatureOSR(BME688Config *config, BME688SensorOSR osr)
+FUNCRESULT bme688SetHeaterConfig(BME688Config *config, UINT8 index, FLOAT current, FLOAT targetTemp, BYTE sequences, UINT16 time)
 {
-    BYTE ctrl_meas = __bme688ReadReg(config, CTRL_MEAS);
+    if (index > 9)
+    {
+        return ERR_INVALIDARG;
+    }
 
-    ctrl_meas &= 0x1F;
-    ctrl_meas |= osr << 5;
+    FUNC_CHECK_BOOL(__bme688WriteRegField(config, CTRL_GAS_1, 1, 5, 1));
+    FUNC_CHECK_BOOL(__bme688WriteRegField(config, CTRL_GAS_1, 3, 0, index));
 
-    __bme688WriteReg(config, CTRL_MEAS, ctrl_meas);
+    if (current > 0)
+    {
+        __bme688WriteReg(config, IDAC_HEAT_X + index, (BYTE)(current * 8 - 1));
+    }
 
-    return SUC_OK;
-}
-
-FUNCRESULT bme688SetPressureOSR(BME688Config *config, BME688SensorOSR osr)
-{
-    BYTE ctrl_meas = __bme688ReadReg(config, CTRL_MEAS);
-
-    ctrl_meas &= 0xE3;
-    ctrl_meas |= osr << 2;
-
-    __bme688WriteReg(config, CTRL_MEAS, ctrl_meas);
-
-    return SUC_OK;
-}
-
-FUNCRESULT bme688SetIIRFilter(BME688Config *config, BME688IIRFilterCoefficient filter)
-{
-    BYTE cfg = __bme688ReadReg(config, CONFIG);
-
-    cfg &= 0xE3;
-    cfg |= filter << 2;
-
-    __bme688WriteReg(config, CONFIG, cfg);
-
-    return SUC_OK;
-}
-
-VOID __bme688SetHeaterCurrent(BME688Config *config, UINT8 index, FLOAT current)
-{
-    __bme688WriteReg(config, IDAC_HEAT_X + index, (BYTE)(current * 8 - 1));
-}
-
-VOID __bme688SetTargetHeaterTemp(BME688Config *config, UINT8 index, FLOAT targetTemp)
-{
     FLOAT ambTemp = 25.0f;
     FLOAT var1 = ((FLOAT)config->par_g1 / 16.0f) + 49.0;
     FLOAT var2 = (((FLOAT)config->par_g2 / 32768.0f) * 0.0005f) + 0.00235f;
@@ -330,20 +321,9 @@ VOID __bme688SetTargetHeaterTemp(BME688Config *config, UINT8 index, FLOAT target
     BYTE res_heat_x = (BYTE)(3.4f * ((var5 * (4.0f / (4.0f + (FLOAT)config->res_heat_range)) * (1.0f / (1.0f + ((FLOAT)config->res_heat_val * 0.002f)))) - 25));
 
     __bme688WriteReg(config, RES_HEAT_X + index, res_heat_x);
-}
 
-VOID __bme688SetParallelSequences(BME688Config *config, UINT8 index, BYTE sequences)
-{
-    if (config->currentMode == BME688_MODE_PARALLEL)
-    {
-        __bme688WriteReg(config, GAS_WAIT_X + index, sequences);
-    }
-}
-
-VOID __bme688SetGasSensorHeaterOnTime(BME688Config *config, UINT8 index, UINT16 time)
-{
     UINT8 factor = 0;
-    UINT8 durval;
+    UINT8 durval = 0;
 
     if (time >= 0xFC0)
     {
@@ -368,90 +348,95 @@ VOID __bme688SetGasSensorHeaterOnTime(BME688Config *config, UINT8 index, UINT16 
     }
     else if (config->currentMode == BME688_MODE_PARALLEL)
     {
+        __bme688WriteReg(config, GAS_WAIT_X + index, sequences);
+
         address = GAS_WAIT_SHARED;
     }
 
     __bme688WriteReg(config, address, durval);
+
+    return SUC_OK;
 }
 
-VOID __bme688HeaterOff(BME688Config *config)
+FUNCRESULT bme688HeaterOff(BME688Config *config)
 {
-    BYTE data = __bme688ReadReg(config, CTRL_GAS_0);
+    FUNC_CHECK_BOOL(__bme688WriteRegField(config, CTRL_GAS_0, 1, 3, 1));
 
-    data &= 0xF7;
-    data |= 1 << 3;
-
-    __bme688WriteReg(config, CTRL_GAS_0, data);
+    return SUC_OK;
 }
 
-VOID __bme688SetHeaterProfile(BME688Config *config, BYTE index)
-{
-    BYTE data = __bme688ReadReg(config, CTRL_GAS_1);
-
-    data &= 0xF0;
-    data |= index;
-
-    __bme688WriteReg(config, CTRL_GAS_1, data);
-}
-
-VOID __bme688RunGas(BME688Config *config)
-{
-    BYTE data = __bme688ReadReg(config, CTRL_GAS_1);
-
-    data &= 0xDF;
-    data |= 1 << 5;
-
-    __bme688WriteReg(config, CTRL_GAS_1, data);
-}
-
-BOOL __bme688IsDataReady(BME688Config *config, UINT8 index)
+BOOL bme688IsDataReady(BME688Config *config, UINT8 index)
 {
     return __bme688ReadReg(config, MEAS_STATUS_0 + index * 0x0B) & 0x80;
 }
 
-BOOL __bme688IsMeasuring(BME688Config *config, UINT8 index)
+BOOL bme688IsMeasuring(BME688Config *config, UINT8 index)
 {
     return __bme688ReadReg(config, MEAS_STATUS_0 + index * 0x0B) & 0x40;
 }
 
-BOOL __bme688IsConverting(BME688Config *config, UINT8 index)
+BOOL bme688IsConverting(BME688Config *config, UINT8 index)
 {
     return __bme688ReadReg(config, MEAS_STATUS_0 + index * 0x0B) & 0x20;
 }
 
-BYTE __bme688GetMeasurementIndex(BME688Config *config, UINT8 index)
+BYTE bme688GetMeasurementIndex(BME688Config *config, UINT8 index)
 {
     return __bme688ReadReg(config, MEAS_STATUS_0 + index * 0x0B) & 0x0F;
 }
 
-BOOL __bme688IsGasValid(BME688Config *config, UINT8 index)
+BOOL bme688IsGasValid(BME688Config *config, UINT8 index)
 {
     return __bme688ReadReg(config, GAS_R_LSB_0 + index * 0x0B) & 0x20;
 }
 
-BOOL __bme688IsHeaterStable(BME688Config *config, UINT8 index)
+BOOL bme688IsHeaterStable(BME688Config *config, UINT8 index)
 {
     return __bme688ReadReg(config, GAS_R_LSB_0 + index * 0x0B) & 0x10;
 }
 
-BYTE __bme688GetMeasurementSequenceNumber(BME688Config *config, UINT8 index)
+BYTE bme688GetMeasurementSequenceNumber(BME688Config *config, UINT8 index)
 {
     return __bme688ReadReg(config, SUB_MEAS_INDEX_0 + index * 0x0B);
 }
 
 VOID __bme688SetPage(BME688Config *config, UINT8 page)
 {
-    BYTE status = __bme688ReadReg(config, STATUS);
-
-    status &= 0xEF;
-    status |= page << 4;
-
-    __bme688WriteReg(config, STATUS, status);
+    __bme688WriteRegField(config, STATUS, 1, 4, page);
 }
 
 VOID __bme688SoftReset(BME688Config *config)
 {
     __bme688WriteReg(config, RESET, SOFT_RESET_CMD);
+
+    sleepMiliseconds(10);
+}
+
+BOOL __bme688WriteRegField(BME688Config *config, BYTE address, UINT8 length, UINT8 offset, BYTE value)
+{
+    BYTE data = __bme688ReadReg(config, address);
+
+    BYTE mask = 0xFF;
+    mask >>= offset;
+    mask <<= offset;
+    mask <<= 8 - offset - length;
+    mask >>= 8 - offset - length;
+
+    data &= ~mask;
+    data |= (value << offset);
+
+    __bme688WriteReg(config, address, data);
+
+#if OBC_DEBUG_MODE
+    BYTE read = __bme688ReadReg(config, address);
+
+    if (read != data)
+    {
+        return FALSE;
+    }
+#endif
+
+    return TRUE;
 }
 
 BYTE __bme688ReadReg(BME688Config *config, BYTE address)

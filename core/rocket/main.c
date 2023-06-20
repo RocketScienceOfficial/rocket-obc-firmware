@@ -76,7 +76,7 @@ int main()
 
             if (s_MeasurementIndex >= MEASUREMENTS_BUFFER_SIZE)
             {
-                DRIVER_CALL(flashWritePages(0, (const BYTE *)s_Measurements, sizeof(s_Measurements) / flashWriteBufferSize()));
+                DRIVER_CALL(flashWritePages(0, (BYTE *)s_Measurements, sizeof(s_Measurements) / flashWriteBufferSize()));
 
                 memset(s_Measurements, 0, sizeof(s_Measurements));
                 s_MeasurementIndex = 0;
@@ -117,14 +117,7 @@ VOID initSensors()
     DRIVER_CALL(bmi088GyroSetRange(&s_BMI088GyroConfig, BMI088_GYRO_RANGE_500DPS));
 
     DRIVER_CALL(bme688Init(&s_BME688Config, BME688_SPI, BME688_MISO, BME688_MOSI, BME688_SCK, BME688_CS));
-    DRIVER_CALL(bme688SetHumidityOSR(&s_BME688Config, BME688_SENSOR_OSR_16X));
-    DRIVER_CALL(bme688SetTemperatureOSR(&s_BME688Config, BME688_SENSOR_OSR_2X));
-    DRIVER_CALL(bme688SetPressureOSR(&s_BME688Config, BME688_SENSOR_OSR_1X));
-    DRIVER_CALL(bme688SetIIRFilter(&s_BME688Config, BME688_IIR_FILTER_COEFF_OFF));
-    __bme688SetGasSensorHeaterOnTime(&s_BME688Config, 0, 100);
-    __bme688SetTargetHeaterTemp(&s_BME688Config, 0, 300);
-    __bme688SetHeaterProfile(&s_BME688Config, 0);
-    __bme688RunGas(&s_BME688Config);
+    DRIVER_CALL(bme688SetConfig(&s_BME688Config, BME688_SENSOR_OSR_2X, BME688_SENSOR_OSR_1X, BME688_SENSOR_OSR_16X, BME688_IIR_FILTER_COEFF_OFF));
 
     DRIVER_CALL(h3lis331dlInit(&s_H3lis331dlConfig, H3LIS331DL_SPI, H3LIS331DL_MISO, H3LIS331DL_MOSI, H3LIS331DL_CS, H3LIS331DL_SCK));
     DRIVER_CALL(h3lis331dlSetPowerMode(&s_H3lis331dlConfig, H3LIS331DL_POWER_NORMAL));

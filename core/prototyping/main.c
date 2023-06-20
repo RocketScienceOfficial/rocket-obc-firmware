@@ -39,13 +39,13 @@ int main()
 
     MMC5983MAConfig mmc5983maConfig = {0};
     mmc5983maInit(&mmc5983maConfig, SPI, MISO, MOSI, MAG_CS, SCK);
-    mmc5983maSetContinuousModeODR(&mmc5983maConfig, MMC5983MA_ODR_200HZ);
+    mmc5983maSetContinuousModeODR(&mmc5983maConfig, MMC5983MA_ODR_1000HZ);
 
     H3lis331dlConfig h3lis331dlConfig = {0};
     h3lis331dlInit(&h3lis331dlConfig, SPI, MISO, MOSI, ACCEL2_CS, SCK);
     h3lis331dlSetPowerMode(&h3lis331dlConfig, H3LIS331DL_POWER_NORMAL);
     h3lis331dlSetRange(&h3lis331dlConfig, H3LIS331DL_RANGE_100G);
-    h3lis331dlSetODR(&h3lis331dlConfig, H3LIS331DL_ODR_400HZ);
+    h3lis331dlSetODR(&h3lis331dlConfig, H3LIS331DL_ODR_1000HZ);
 
     while (TRUE)
     {

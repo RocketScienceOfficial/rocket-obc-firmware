@@ -26,12 +26,12 @@ FUNCRESULT flashRead(SIZE offset, const BYTE **data)
     return SUC_OK;
 }
 
-FUNCRESULT flashWritePage(SIZE offsetPages, const BYTE *buffer)
+FUNCRESULT flashWritePage(SIZE offsetPages, BYTE *buffer)
 {
     return flashWritePages(offsetPages, buffer, 1);
 }
 
-FUNCRESULT flashWritePages(SIZE offsetPages, const BYTE *buffer, SIZE pagesCount)
+FUNCRESULT flashWritePages(SIZE offsetPages, BYTE *buffer, SIZE pagesCount)
 {
     if (!buffer || pagesCount == 0)
     {

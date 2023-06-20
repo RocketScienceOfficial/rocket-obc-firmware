@@ -32,7 +32,7 @@ FUNCRESULT flashRead(SIZE offset, const BYTE **data);
  * @param buffer Data to write.
  * @return Result code.
  */
-FUNCRESULT flashWritePage(SIZE offsetPages, const BYTE *buffer);
+FUNCRESULT flashWritePage(SIZE offsetPages, BYTE *buffer);
 
 /**
  * @brief Write pages to flash. Only 256-byte pages are allowed!
@@ -42,7 +42,7 @@ FUNCRESULT flashWritePage(SIZE offsetPages, const BYTE *buffer);
  * @param pagesCount Number of pages to write (256 byte each).
  * @return Result code.
  */
-FUNCRESULT flashWritePages(SIZE offsetPages, const BYTE *buffer, SIZE pagesCount);
+FUNCRESULT flashWritePages(SIZE offsetPages, BYTE *buffer, SIZE pagesCount);
 
 /**
  * @brief Erase data from flash sector.
