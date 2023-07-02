@@ -1,8 +1,8 @@
 #include "core/common/radio_utils.h"
+#include "core/common/driver_calling.h"
 #include "drivers/console/console_input.h"
 #include "kernel/logging/logger.h"
-#include "kernel/commands/commands.h"
-#include "kernel/services/driver_calling.h"
+#include "services/commands/commands.h"
 #include <stdlib.h>
 #include <string.h>
 

@@ -3,16 +3,16 @@
 #include <obc/api.h>
 
 /**
- * @brief Initialize CPU Temperature Sensor.
+ * @brief Initialize CPU Temperature Sensor
  * 
- * @return Result code.
+ * @return Result code
  */
 FUNCRESULT cpuTempInit();
 
 /**
- * @brief Read CPU temp.
+ * @brief Read CPU temp
  * 
- * @param temp Temperature of CPU.
- * @return Result code.
+ * @param temp Temperature of CPU
+ * @return Result code
  */
 FUNCRESULT cpuTempReadTemp(FLOAT *temp);

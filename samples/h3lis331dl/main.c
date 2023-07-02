@@ -1,7 +1,6 @@
 #include "drivers/accelerometer/h3lis331dl_driver.h"
-#include "kernel/services/driver_calling.h"
-#include "tools/time_tracker.h"
-#include "tools/board_control.h"
+#include "drivers/tools/time_tracker.h"
+#include "drivers/tools/board_control.h"
 #include <stdio.h>
 
 #define SPI 0

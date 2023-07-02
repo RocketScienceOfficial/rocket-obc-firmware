@@ -3,6 +3,7 @@
 /**
  * REF: https://ahrs.readthedocs.io/en/latest/filters/madgwick.html
  * REF: https://github.com/adafruit/Adafruit_AHRS/blob/master/src/Adafruit_AHRS_Madgwick.cpp
+ * REF: https://github.com/arduino-libraries/MadgwickAHRS
  */
 
 #include <obc/api.h>
@@ -14,9 +15,9 @@
  */
 typedef struct MadgiwckFilterData
 {
-    quat q;
-    FLOAT beta;
-    FLOAT samplePeriod;
+    quat q;             /** Current calculated quaternion as orientation */
+    FLOAT beta;         /** Filter coefficent */
+    FLOAT samplePeriod; /** Inverse of frequency */
 } MadgiwckFilterData;
 
 /**

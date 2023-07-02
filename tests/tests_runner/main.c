@@ -1,6 +1,6 @@
-#include "tools/board_control.h"
+#include "drivers/tools/board_control.h"
 #include "test_framework.h"
-#include "kernel/logging/logger.h"
+#include "services/logging/logger.h"
 #include "drivers/console/console_output.h"
 
 #include "test_cryptography.h"

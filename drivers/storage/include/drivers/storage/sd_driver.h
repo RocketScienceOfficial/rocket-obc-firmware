@@ -7,7 +7,6 @@
 #include "f_util.h"
 
 #define SD_FILES_MAX_COUNT 4
-#define SD_CALLBACKS_MAX_COUNT SD_FILES_MAX_COUNT
 
 /**
  * @brief SD card file structure

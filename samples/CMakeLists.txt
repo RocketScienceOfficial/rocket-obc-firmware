@@ -1,4 +1,4 @@
-link_libraries(api_lib drivers_lib kernel_lib maths_lib tools_lib)
+link_libraries(api_lib drivers_lib services_lib maths_lib)
 
 add_subdirectory(battery)
 add_subdirectory(bme688)

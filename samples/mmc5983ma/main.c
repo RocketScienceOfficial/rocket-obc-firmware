@@ -1,6 +1,6 @@
 #include "drivers/magnetometer/mmc5983ma_driver.h"
-#include "tools/time_tracker.h"
-#include "tools/board_control.h"
+#include "drivers/tools/time_tracker.h"
+#include "drivers/tools/board_control.h"
 #include <stdio.h>
 
 #define SPI 0
@@ -16,7 +16,7 @@ int main()
     spiInitAll(SPI, 1 * 1000 * 1000);
 
     MMC5983MAConfig mmc5983maConfig = {0};
-    mmc5983maInit(&mmc5983maConfig, SPI, MISO, MOSI, CS, SCK);
+    mmc5983maInitSPI(&mmc5983maConfig, SPI, MISO, MOSI, CS, SCK);
     mmc5983maSetContinuousModeODR(&mmc5983maConfig, MMC5983MA_ODR_200HZ);
 
     while (TRUE)

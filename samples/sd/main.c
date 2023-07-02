@@ -1,5 +1,5 @@
 #include "drivers/storage/sd_driver.h"
-#include "tools/board_control.h"
+#include "drivers/tools/board_control.h"
 
 #define FILE_NAME "TEST_FILE.txt"
 

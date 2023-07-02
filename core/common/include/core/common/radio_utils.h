@@ -2,7 +2,7 @@
 
 #include <obc/api.h>
 #include "drivers/lora/sx127X_driver.h"
-#include "kernel/services/radio_protocol.h"
+#include "drivers/lora/radio_protocol.h"
 
 #define RADIO_DBM 20
 #define RADIO_SPREADING_FACTOR 10

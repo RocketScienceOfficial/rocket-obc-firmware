@@ -1,5 +1,5 @@
 #include "drivers/storage/flash_driver.h"
-#include "tools/board_control.h"
+#include "drivers/tools/board_control.h"
 #include <stdio.h>
 #include <string.h>
 

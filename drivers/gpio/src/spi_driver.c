@@ -75,7 +75,7 @@ BOOL spiCheckSCK(SPIInstance spi, PinNumber sck)
     }
 }
 
-FUNCRESULT spiInitAll(SPIInstance spi, SPIBaudRate baudrate)
+FUNCRESULT spiInitAll(SPIInstance spi, BaudRate baudrate)
 {
     if (!spiCheckInstance(spi))
     {

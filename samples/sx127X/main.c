@@ -1,5 +1,5 @@
 #include "drivers/lora/sx127X_driver.h"
-#include "tools/board_control.h"
+#include "drivers/tools/board_control.h"
 #include <stdio.h>
 
 #define SPI 0

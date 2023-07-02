@@ -1,7 +1,7 @@
 #include "drivers/gps/u_blox_neo_m9n_driver.h"
 #include "drivers/gps/nmea_parser.h"
-#include "tools/board_control.h"
-#include "tools/time_tracker.h"
+#include "drivers/tools/board_control.h"
+#include "drivers/tools/time_tracker.h"
 #include <stdio.h>
 
 #define SPI 0

@@ -1,7 +1,7 @@
 #include "core/common/commands_utils.h"
 #include "drivers/console/console_input.h"
-#include "kernel/commands/commands.h"
-#include "kernel/commands/default_commands.h"
+#include "services/commands/commands.h"
+#include "services/commands/default_commands.h"
 
 static INT32 s_ConsoleChar;
 static ConsoleInput s_ConsoleInput;

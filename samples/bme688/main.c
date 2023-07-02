@@ -1,6 +1,6 @@
 #include "drivers/barometer/bme688_driver.h"
-#include "tools/board_control.h"
-#include "tools/time_tracker.h"
+#include "drivers/tools/board_control.h"
+#include "drivers/tools/time_tracker.h"
 #include "maths/math_utils.h"
 #include <stdio.h>
 

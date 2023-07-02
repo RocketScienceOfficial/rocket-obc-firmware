@@ -4,6 +4,7 @@
 
 typedef UINT32 PinNumber;   /** Type for GPIO pin number */
 typedef FLOAT VoltageLevel; /** Type for voltage level */
+typedef UINT32 BaudRate;    /** Type for baud rate */
 
 /**
  * @brief Type for GPIO pin mode
@@ -36,6 +37,17 @@ typedef enum GPIOFunction
     GPIO_FUNCTION_PIO0 = 5,
     GPIO_FUNCTION_PIO1 = 6,
 } GPIOFunction;
+
+/**
+ * @brief Type for GPIO pin protocol
+*/
+typedef enum GPIOProtocol
+{
+    GPIO_PROTOCOL_UNKWOWN = -1,
+    GPIO_PROTOCOL_UART = 0,
+    GPIO_PROTOCOL_SPI = 1,
+    GPIO_PROTOCOL_I2C = 2,
+} GPIOProtocol;
 
 /**
  * @brief Number for invalid pin

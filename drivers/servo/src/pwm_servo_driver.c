@@ -16,7 +16,7 @@ FUNCRESULT pwmServoInit(PinNumber pin)
 
     BOOL connected = FALSE;
 
-    if (FUNCFAILED(SERVOCheck(pin, &connected)))
+    if (FUNCFAILED(pwmServoCheck(pin, &connected)))
     {
         return ERR_UNEXPECTED;
     }

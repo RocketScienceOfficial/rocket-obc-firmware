@@ -1,5 +1,5 @@
 #include "drivers/magnetometer/mmc5983ma_driver.h"
-#include "tools/time_tracker.h"
+#include "drivers/tools/time_tracker.h"
 
 #define X_OUT_0 0x00
 #define X_OUT_1 0x01
@@ -27,7 +27,7 @@ static float SOFT_IRON_CALIB[3][3] = {
     {0.007f, -0.001f, 0.999f},
 };
 
-FUNCRESULT mmc5983maInit(MMC5983MAConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
+FUNCRESULT mmc5983maInitSPI(MMC5983MAConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
 {
     config->spi = spi;
     config->cs = cs;

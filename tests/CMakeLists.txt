@@ -6,6 +6,6 @@ link_libraries(test_framework)
 
 add_subdirectory(crypto_tests)
 add_subdirectory(drivers_tests)
-add_subdirectory(kernel_tests)
+add_subdirectory(services_tests)
 
 add_subdirectory(tests_runner)

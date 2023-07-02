@@ -18,5 +18,5 @@ add_library(${LIB_GENERAL_NAME} STATIC
 )
 
 target_link_libraries(${LIB_GENERAL_NAME} PRIVATE hardware_adc hardware_i2c hardware_pwm hardware_spi hardware_uart)
-target_link_libraries(${LIB_GENERAL_NAME} PUBLIC tools_lib)
+target_link_libraries(${LIB_GENERAL_NAME} PUBLIC drivers_tools_lib)
 target_include_directories(${LIB_GENERAL_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

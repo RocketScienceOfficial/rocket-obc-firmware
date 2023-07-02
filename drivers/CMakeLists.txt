@@ -1,5 +1,6 @@
-link_libraries(api_lib tools_lib pico_stdlib)
+link_libraries(api_lib pico_stdlib)
 
+add_subdirectory(tools)
 add_subdirectory(gpio)
 add_subdirectory(accelerometer)
 add_subdirectory(barometer)
@@ -16,6 +17,5 @@ add_subdirectory(magnetometer)
 add_subdirectory(potentiometer)
 add_subdirectory(servo)
 add_subdirectory(storage)
-add_subdirectory(uv)
 
 add_subdirectory(drivers_lib)

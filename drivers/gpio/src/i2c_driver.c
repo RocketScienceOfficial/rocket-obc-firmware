@@ -54,7 +54,7 @@ BOOL i2cCheckSCL(I2CInstance i2c, PinNumber scl)
     }
 }
 
-FUNCRESULT i2cInitAll(I2CInstance i2c, I2CBaudRate baudrate)
+FUNCRESULT i2cInitAll(I2CInstance i2c, BaudRate baudrate)
 {
     if (!i2cCheckInstance(i2c))
     {

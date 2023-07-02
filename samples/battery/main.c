@@ -1,6 +1,6 @@
 #include "drivers/battery/battery_driver.h"
-#include "tools/board_control.h"
-#include "tools/time_tracker.h"
+#include "drivers/tools/board_control.h"
+#include "drivers/tools/time_tracker.h"
 #include <stdio.h>
 
 #define BATTERY_ADC_CHANNEL 3

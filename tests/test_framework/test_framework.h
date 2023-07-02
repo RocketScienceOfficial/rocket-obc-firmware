@@ -1,8 +1,8 @@
 #pragma once
 
-#include "kernel/logging/logger.h"
 #include <obc/api.h>
-#include "tools/time_tracker.h"
+#include "services/logging/logger.h"
+#include "drivers/tools/time_tracker.h"
 
 typedef INT32 TestResult;
 

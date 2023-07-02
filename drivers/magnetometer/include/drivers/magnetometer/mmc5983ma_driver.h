@@ -2,11 +2,13 @@
 
 /**
  * REF: https://github.com/kriswiner/MMC5983MA/tree/master
+ * REF: https://www.vectornav.com/resources/inertial-navigation-primer/specifications--and--error-budgets/specs-hsicalibration
  */
 
 #include <obc/api.h>
-#include "drivers/gpio/spi_driver.h"
 #include "drivers/gpio/gpio_driver.h"
+#include "drivers/gpio/spi_driver.h"
+#include "drivers/gpio/i2c_driver.h"
 #include "maths/vector.h"
 
 /**
@@ -14,8 +16,10 @@
  */
 typedef struct MMC5983MAConfig
 {
-    SPIInstance spi; /** SPI */
-    PinNumber cs;    /** CS */
+    GPIOProtocol protocol; /** Protocol */
+    SPIInstance spi;       /** SPI */
+    PinNumber cs;          /** CS */
+    I2CInstance i2c;       /** I2C */
 } MMC5983MAConfig;
 
 /**
@@ -54,7 +58,7 @@ typedef enum MMC5983ODR
  * @param sck SCK pin
  * @return Result code
  */
-FUNCRESULT mmc5983maInit(MMC5983MAConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck);
+FUNCRESULT mmc5983maInitSPI(MMC5983MAConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck);
 
 /**
  * @brief Check if product id is valid

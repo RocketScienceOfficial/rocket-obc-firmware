@@ -7,6 +7,8 @@ add_library(${LIB_GENERAL_NAME} STATIC
     test_console.c
     test_nmea.h
     test_nmea.c
+    test_radio_protocol.h
+    test_radio_protocol.c
 )
 
 target_link_libraries(${LIB_GENERAL_NAME} PRIVATE drivers_lib)

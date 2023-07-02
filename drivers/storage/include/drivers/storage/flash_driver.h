@@ -3,52 +3,52 @@
 #include <obc/api.h>
 
 /**
- * @brief Get flash write buffer size.
+ * @brief Get flash write buffer size
  *
- * @return Size.
+ * @return Size
  */
 SIZE flashWriteBufferSize();
 
 /**
- * @brief Get flash sector size.
+ * @brief Get flash sector size
  *
- * @return Size.
+ * @return Size
  */
 SIZE flashSectorSize();
 
 /**
- * @brief Read data from flash.
+ * @brief Read data from flash
  *
- * @param offset Offset of data.
- * @param data pointer to data pointer.
- * @return Result code.
+ * @param offset Offset of data
+ * @param data pointer to data pointer
+ * @return Result code
  */
 FUNCRESULT flashRead(SIZE offset, const BYTE **data);
 
 /**
- * @brief Write a single 256-byte page to flash.
+ * @brief Write a single 256-byte page to flash
  *
- * @param offsetPages Offset of data.
- * @param buffer Data to write.
- * @return Result code.
+ * @param offsetPages Offset of data
+ * @param buffer Data to write
+ * @return Result code
  */
 FUNCRESULT flashWritePage(SIZE offsetPages, BYTE *buffer);
 
 /**
  * @brief Write pages to flash. Only 256-byte pages are allowed!
  *
- * @param offsetPages Offset of data.
- * @param buffer Data to write.
- * @param pagesCount Number of pages to write (256 byte each).
- * @return Result code.
+ * @param offsetPages Offset of data
+ * @param buffer Data to write
+ * @param pagesCount Number of pages to write (256 byte each)
+ * @return Result code
  */
 FUNCRESULT flashWritePages(SIZE offsetPages, BYTE *buffer, SIZE pagesCount);
 
 /**
- * @brief Erase data from flash sector.
+ * @brief Erase data from flash sector
  *
- * @param sectorsOffset Offset of data.
- * @param sectorsCount Number of sectors to erase (4096 byte each).
- * @return Result code.
+ * @param sectorsOffset Offset of data
+ * @param sectorsCount Number of sectors to erase (4096 byte each)
+ * @return Result code
  */
 FUNCRESULT flashEraseSectors(SIZE sectorsOffset, SIZE sectorsCount);

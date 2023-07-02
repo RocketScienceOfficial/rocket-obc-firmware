@@ -1,6 +1,6 @@
 #include "drivers/accelerometer/bmi088_driver.h"
-#include "tools/board_control.h"
-#include "tools/time_tracker.h"
+#include "drivers/tools/board_control.h"
+#include "drivers/tools/time_tracker.h"
 #include "ahrs/madgwick_filter.h"
 #include "maths/constants.h"
 #include <stdio.h>

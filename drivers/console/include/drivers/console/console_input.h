@@ -10,54 +10,54 @@
  */
 typedef struct ConsoleInput
 {
-    CHAR cmd[CONSOLE_INPUT_MAX_LENGTH]; /** Current characters. */
-    SIZE cmdSize;                       /** Current characters length. */
+    CHAR cmd[CONSOLE_INPUT_MAX_LENGTH]; /** Current characters */
+    SIZE cmdSize;                       /** Current characters length */
 } ConsoleInput;
 
 /**
- * @brief Console tokens structure.
+ * @brief Console tokens structure
  */
 typedef struct ConsoleTokens
 {
-    STRING *tokens; /** Two-dimensional array of tokens. */
-    SIZE size;      /** Number of tokens. */
+    STRING *tokens; /** Two-dimensional array of tokens */
+    SIZE size;      /** Number of tokens */
 } ConsoleTokens;
 
 /**
- * @brief Checks if the input is available.
+ * @brief Checks if the input is available
  *
- * @param chr Pointer to the character to store the result in.
+ * @param chr Pointer to the character to store the result in
  *
- * @return True if available.
+ * @return True if available
  */
 BOOL consoleCheckInput(INT32 *chr);
 
 /**
- * @brief Processess the character.
+ * @brief Processess the character
  *
- * @param c Character to process.
- * @param input Console input structure to setup.
- * @param input Console tokens structure to setup.
+ * @param c Character to process
+ * @param input Console input structure to setup
+ * @param input Console tokens structure to setup
  *
- * @return Result code.
+ * @return Result code
  */
 FUNCRESULT consoleInputProcessCharacter(INT32 c, ConsoleInput *input, ConsoleTokens *tokens);
 
 /**
- * @brief Tokenizes the input.
+ * @brief Tokenizes the input
  *
- * @param input Input to tokenize.
- * @param tokens Console tokens structure to setup.
+ * @param input Input to tokenize
+ * @param tokens Console tokens structure to setup
  *
- * @return Result code.
+ * @return Result code
  */
 FUNCRESULT consoleTokenizeInput(ConsoleInput *input, ConsoleTokens *tokens);
 
 /**
- * @brief Clears the input.
+ * @brief Clears the input
  *
- * @param input Console input structure to clear.
+ * @param input Console input structure to clear
  *
- * @return Result code.
+ * @return Result code
  */
 FUNCRESULT consoleInputClear(ConsoleInput *input, ConsoleTokens *tokens);

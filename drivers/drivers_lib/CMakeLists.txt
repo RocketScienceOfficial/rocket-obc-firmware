@@ -11,6 +11,7 @@ target_link_libraries(${LIB_GENERAL_NAME} INTERFACE
     drivers_cpu_lib
     drivers_detonator_lib
     drivers_display_lib
+    drivers_gpio_lib
     drivers_gps_lib
     drivers_led_lib
     drivers_lora_lib
@@ -18,5 +19,5 @@ target_link_libraries(${LIB_GENERAL_NAME} INTERFACE
     drivers_potentiometer_lib
     drivers_servo_lib
     drivers_storage_lib
-    drivers_uv_lib
+    drivers_tools_lib
 )

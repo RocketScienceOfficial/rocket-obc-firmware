@@ -1,5 +1,5 @@
 #include "drivers/led/w2812_driver.h"
-#include "tools/board_control.h"
+#include "drivers/tools/board_control.h"
 
 #define PIN 15
 #define RGBW FALSE

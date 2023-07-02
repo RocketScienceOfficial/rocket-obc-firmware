@@ -1,5 +1,5 @@
-#include "tools/board_control.h"
-#include "tools/time_tracker.h"
+#include "drivers/tools/board_control.h"
+#include "drivers/tools/time_tracker.h"
 #include <stdio.h>
 
 int main()

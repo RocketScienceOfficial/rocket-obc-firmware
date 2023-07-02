@@ -1,5 +1,5 @@
 #include "core/common/measurements_utils.h"
-#include "kernel/logging/logger.h"
+#include "services/logging/logger.h"
 
 static Logger s_Logger;
 

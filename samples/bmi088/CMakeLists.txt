@@ -8,4 +8,4 @@ add_executable(${EXE_NAME}
 
 target_link_libraries(${EXE_NAME} PRIVATE ahrs_lib maths_lib)
 
-add_pico_output(${EXE_NAME})
+add_platform_output(${EXE_NAME})
