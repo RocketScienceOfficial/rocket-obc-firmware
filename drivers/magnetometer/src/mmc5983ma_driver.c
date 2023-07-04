@@ -16,6 +16,8 @@
 #define INTERNAL_CONTROL_3 0x0C
 #define PRODUCT_ID 0x2F
 
+#define I2C_ADDRESS 0x30
+
 #define PRODUCT_ID_VALID 0x0C
 #define RESOLUTION 0.0625f
 #define BASE_OFFSET 131072
@@ -29,42 +31,62 @@ static float SOFT_IRON_CALIB[3][3] = {
 
 FUNCRESULT mmc5983maInitSPI(MMC5983MAConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
 {
-    config->spi = spi;
-    config->cs = cs;
+    config->gpioConfig = (GPIOCommunicationConfig){
+        .protocol = GPIO_PROTOCOL_SPI,
+        .spi = spi,
+        .cs = cs,
+        .readMask = 0x80,
+        .multipleReadMask = 0x80,
+        .writeMask = 0x7F,
+    };
 
     spiInitPins(spi, miso, mosi, sck, cs);
 
-    __mmc5983maWriteReg(config, INTERNAL_CONTROL_0, 0x20);
+    __mmc5983maInitBase(config);
 
-    mmc5983maReset(config);
+    return SUC_OK;
+}
+
+FUNCRESULT mmc5983maInitI2C(MMC5983MAConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl)
+{
+    config->gpioConfig = (GPIOCommunicationConfig){
+        .protocol = GPIO_PROTOCOL_I2C,
+        .i2c = i2c,
+        .i2cAddress = I2C_ADDRESS,
+        .readMask = 0x80,
+        .multipleReadMask = 0x80,
+        .writeMask = 0x7F,
+    };
+
+    i2cInitPins(i2c, sda, scl);
 
     return SUC_OK;
 }
 
 FUNCRESULT mmc5983ValidateId(MMC5983MAConfig *config, BOOL *valid)
 {
-    *valid = __mmc5983maReadReg(config, PRODUCT_ID) == PRODUCT_ID_VALID;
+    *valid = gpioReadReg(&config->gpioConfig, PRODUCT_ID) == PRODUCT_ID_VALID;
 
     return SUC_OK;
 }
 
 FUNCRESULT mmc5983maSetBandwidth(MMC5983MAConfig *config, MMC5983MABandwidth bandwidth)
 {
-    __mmc5983maWriteReg(config, INTERNAL_CONTROL_1, bandwidth);
+    gpioWriteReg(&config->gpioConfig, INTERNAL_CONTROL_1, (BYTE)bandwidth);
 
     return SUC_OK;
 }
 
 FUNCRESULT mmc5983maSetContinuousModeODR(MMC5983MAConfig *config, MMC5983ODR odr)
 {
-    __mmc5983maWriteReg(config, INTERNAL_CONTROL_2, odr == 0 ? 0 : (0x08 | odr));
+    gpioWriteReg(&config->gpioConfig, INTERNAL_CONTROL_2, odr == 0 ? 0 : (0x08 | odr));
 
     return SUC_OK;
 }
 
 FUNCRESULT mmc5983maReset(MMC5983MAConfig *config)
 {
-    __mmc5983maWriteReg(config, INTERNAL_CONTROL_1, 0x80);
+    gpioWriteReg(&config->gpioConfig, INTERNAL_CONTROL_1, 0x80);
 
     sleepMiliseconds(20);
 
@@ -85,17 +107,17 @@ FUNCRESULT mmc5983maCalculateOffset(MMC5983MAConfig *config, vec3 *offset)
     mmc5983maSetContinuousModeODR(config, 0);
 
     __mmc5983maSET(config);
-    __mmc5983maWriteReg(config, INTERNAL_CONTROL_0, 0x01);
+    gpioWriteReg(&config->gpioConfig, INTERNAL_CONTROL_0, 0x01);
     sleepMiliseconds(10);
-    __mmc5983maReadRegs(config, X_OUT_0, buffer, 6);
+    gpioReadRegs(&config->gpioConfig, X_OUT_0, buffer, 6);
     dataSet[0] = (UINT16)((buffer[0] << 8) | buffer[1]);
     dataSet[1] = (UINT16)((buffer[2] << 8) | buffer[3]);
     dataSet[2] = (UINT16)((buffer[4] << 8) | buffer[5]);
 
     __mmc5983maRESET(config);
-    __mmc5983maWriteReg(config, INTERNAL_CONTROL_0, 0x01);
+    gpioWriteReg(&config->gpioConfig, INTERNAL_CONTROL_0, 0x01);
     sleepMiliseconds(10);
-    __mmc5983maReadRegs(config, X_OUT_0, buffer, 6);
+    gpioReadRegs(&config->gpioConfig, X_OUT_0, buffer, 6);
     dataReset[0] = (UINT16)((buffer[0] << 8) | buffer[1]);
     dataReset[1] = (UINT16)((buffer[2] << 8) | buffer[3]);
     dataReset[2] = (UINT16)((buffer[4] << 8) | buffer[5]);
@@ -111,7 +133,7 @@ FUNCRESULT mmc5983maRead(MMC5983MAConfig *config, vec3 *mag)
 {
     BYTE buffer[7];
 
-    __mmc5983maReadRegs(config, X_OUT_0, buffer, 7);
+    gpioReadRegs(&config->gpioConfig, X_OUT_0, buffer, 7);
 
     INT32 x = (UINT32)((buffer[0] << 10) | (buffer[1] << 2) | ((buffer[7] & 0xC0) >> 6)) - BASE_OFFSET;
     INT32 y = (UINT32)((buffer[2] << 10) | (buffer[3] << 2) | ((buffer[7] & 0x30) >> 4)) - BASE_OFFSET;
@@ -130,7 +152,7 @@ FUNCRESULT mmc5983maRead(MMC5983MAConfig *config, vec3 *mag)
 
 FUNCRESULT mmc5983maReadTemp(MMC5983MAConfig *config, FLOAT *temp)
 {
-    BYTE rawTemp = __mmc5983maReadReg(config, T_OUT);
+    BYTE rawTemp = gpioReadReg(&config->gpioConfig, T_OUT);
 
     *temp = 0.8f * (FLOAT)rawTemp - 75.0f;
 
@@ -139,54 +161,21 @@ FUNCRESULT mmc5983maReadTemp(MMC5983MAConfig *config, FLOAT *temp)
 
 VOID __mmc5983maSET(MMC5983MAConfig *config)
 {
-    __mmc5983maWriteReg(config, INTERNAL_CONTROL_0, 0x08);
+    gpioWriteReg(&config->gpioConfig, INTERNAL_CONTROL_0, 0x08);
 
     sleepMiliseconds(1);
 }
 
 VOID __mmc5983maRESET(MMC5983MAConfig *config)
 {
-    __mmc5983maWriteReg(config, INTERNAL_CONTROL_0, 0x10);
+    gpioWriteReg(&config->gpioConfig, INTERNAL_CONTROL_0, 0x10);
 
     sleepMiliseconds(1);
 }
 
-BYTE __mmc5983maReadReg(MMC5983MAConfig *config, BYTE address)
+VOID __mmc5983maInitBase(MMC5983MAConfig *config)
 {
-    BYTE data;
+    gpioWriteReg(&config->gpioConfig, INTERNAL_CONTROL_0, 0x20);
 
-    address |= 0x80;
-
-    gpioSetPinState(config->cs, GPIO_LOW);
-
-    spiWriteBlocking(config->spi, &address, 1);
-    spiReadBlocking(config->spi, 0, &data, 1);
-
-    gpioSetPinState(config->cs, GPIO_HIGH);
-
-    return data;
-}
-
-VOID __mmc5983maReadRegs(MMC5983MAConfig *config, BYTE address, BYTE *buffer, SIZE count)
-{
-    address |= 0x80;
-
-    gpioSetPinState(config->cs, GPIO_LOW);
-
-    spiWriteBlocking(config->spi, &address, 1);
-    spiReadBlocking(config->spi, 0, buffer, count);
-
-    gpioSetPinState(config->cs, GPIO_HIGH);
-}
-
-VOID __mmc5983maWriteReg(MMC5983MAConfig *config, BYTE address, BYTE data)
-{
-    address &= 0x7F;
-
-    gpioSetPinState(config->cs, GPIO_LOW);
-
-    spiWriteBlocking(config->spi, &address, 1);
-    spiWriteBlocking(config->spi, &data, 1);
-
-    gpioSetPinState(config->cs, GPIO_HIGH);
+    mmc5983maReset(config);
 }

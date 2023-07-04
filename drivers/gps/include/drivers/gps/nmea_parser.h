@@ -6,6 +6,8 @@
 
 #include <obc/api.h>
 
+#define NMEA_SENTENCE_MAX_LENGTH 83
+
 /**
  * @brief NMEA sentence IDs
  */

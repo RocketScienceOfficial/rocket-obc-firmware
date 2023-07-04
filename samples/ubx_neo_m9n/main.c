@@ -18,7 +18,7 @@ int main()
 
     UBloxNeoM9NConfig config = {0};
     UBloxNeoM9NData data = {0};
-    uBloxNeoM9NInit(&config, SPI, MISO, MOSI, CS, SCK);
+    uBloxNeoM9NInitSPI(&config, SPI, MISO, MOSI, CS, SCK);
 
     while (TRUE)
     {

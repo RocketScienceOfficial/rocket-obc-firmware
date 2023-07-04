@@ -55,6 +55,7 @@ $ git clone https://github.com/Filipeak/project-rocket.git
 
 - Use provided types in api folder.
 - Backend functions (drivers, etc.) should return FUNCRESULT.
+- Always initialize local variables.
 
 ## Naming Conventions
 

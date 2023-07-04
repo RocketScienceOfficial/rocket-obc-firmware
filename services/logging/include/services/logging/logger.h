@@ -58,9 +58,8 @@ VOID myLogCreateConsoleSink(Logger *logger, const STRING pattern);
  * @param level Level of log
  * @param format Format of log
  * @param args Arguments of log
- * @return CHAR* Parsed log
  */
-STRING parseLog(const STRING loggerName, const STRING pattern, const STRING level, const STRING format, va_list args);
+VOID parseLog(const STRING loggerName, const STRING pattern, const STRING level, const STRING format, va_list args);
 
 /**
  * @brief Logs a message

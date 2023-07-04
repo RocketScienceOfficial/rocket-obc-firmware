@@ -30,7 +30,7 @@ copy build\samples\flash\samples_flash.uf2 executables\samples\flash.uf2
 copy build\samples\gpio\samples_gpio.uf2 executables\samples\gpio.uf2
 copy build\samples\h3lis331dl\samples_h3lis331dl.uf2 executables\samples\h3lis331dl.uf2
 copy build\samples\mmc5983ma\samples_mmc5983ma.uf2 executables\samples\mmc5983ma.uf2
-copy build\samples\rp2040\samples_rp2040.uf2 executables\samples\rp2040.uf2
+copy build\samples\cpu\samples_cpu.uf2 executables\samples\cpu.uf2
 copy build\samples\sd\samples_sd.uf2 executables\samples\sd.uf2
 copy build\samples\simple_buzzer\samples_simple_buzzer.uf2 executables\samples\simple_buzzer.uf2
 copy build\samples\sx127X\samples_sx127X.uf2 executables\samples\sx127X.uf2

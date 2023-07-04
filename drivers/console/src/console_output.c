@@ -2,7 +2,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-VOID consoleLog(const STRING format, ...)
+FUNCRESULT consoleLog(const STRING format, ...)
 {
     va_list ap;
 
@@ -11,9 +11,11 @@ VOID consoleLog(const STRING format, ...)
     va_end(ap);
 
     fflush(stdout);
+
+    return SUC_OK;
 }
 
-VOID consoleLogError(const STRING format, ...)
+FUNCRESULT consoleLogError(const STRING format, ...)
 {
     va_list ap;
 
@@ -22,4 +24,6 @@ VOID consoleLogError(const STRING format, ...)
     va_end(ap);
 
     fflush(stdout);
+
+    return SUC_OK;
 }

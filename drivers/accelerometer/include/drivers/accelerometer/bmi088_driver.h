@@ -6,8 +6,7 @@
  */
 
 #include <obc/api.h>
-#include "drivers/gpio/spi_driver.h"
-#include "drivers/gpio/gpio_driver.h"
+#include "drivers/gpio/gpio_utils.h"
 #include "maths/vector.h"
 
 /**
@@ -15,9 +14,8 @@
  */
 typedef struct BMI088AccelConfig
 {
-    SPIInstance spi;     /** SPI */
-    PinNumber cs;        /** CS */
-    FLOAT rangeConstant; /** Range Constant */
+    GPIOCommunicationConfig gpioConfig; /** GPIO communication configuration */
+    FLOAT rangeConstant;                /** Range Constant */
 } BMI088AccelConfig;
 
 /**
@@ -61,9 +59,8 @@ typedef enum BMI088AccelOSR
  */
 typedef struct BMI088GyroConfig
 {
-    SPIInstance spi;     /** SPI */
-    PinNumber cs;        /** CS */
-    FLOAT rangeConstant; /** Range constant */
+    GPIOCommunicationConfig gpioConfig; /** GPIO communication configuration */
+    FLOAT rangeConstant;                /** Range constant */
 } BMI088GyroConfig;
 
 /**
@@ -104,7 +101,19 @@ typedef enum BMI088GyroBandwidth
  * @param sck SCK
  * @return Result code
  */
-FUNCRESULT bmi088AccelInit(BMI088AccelConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck);
+FUNCRESULT bmi088AccelInitSPI(BMI088AccelConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck);
+
+/**
+ * @brief Initialize BMI088 accelerometer
+ *
+ * @param config Configuration
+ * @param i2c I2C
+ * @param sda SDA
+ * @param scl SCL
+ * @param address Address
+ * @return Result code
+ */
+FUNCRESULT bmi088AccelInitI2C(BMI088AccelConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl, BYTE address);
 
 /**
  * @brief Set BMI088 accelerometer configuration
@@ -158,6 +167,13 @@ VOID __bmi088AccelSetMode(BMI088AccelConfig *config, BOOL active);
 VOID __bmi088AccelSetPower(BMI088AccelConfig *config, BOOL on);
 
 /**
+ * @brief Initialize BMI088 accelerometer base
+ *
+ * @param config Configuration
+ */
+VOID __bmi088InitBase(BMI088AccelConfig *config);
+
+/**
  * @brief Read BMI088 accelerometer register
  *
  * @param config Configuration
@@ -196,7 +212,19 @@ VOID __bmi088AccelWriteReg(BMI088AccelConfig *config, BYTE address, BYTE data);
  * @param sck SCK
  * @return Result code
  */
-FUNCRESULT bmi088GyroInit(BMI088GyroConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck);
+FUNCRESULT bmi088GyroInitSPI(BMI088GyroConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck);
+
+/**
+ * @brief Initialize BMI088 gyroscope
+ *
+ * @param config Configuration
+ * @param i2c I2C
+ * @param sda SDA
+ * @param scl SCL
+ * @param address Address
+ * @return Result code
+ */
+FUNCRESULT bmi088GyroInitI2C(BMI088GyroConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl, BYTE address);
 
 /**
  * @brief Set BMI088 gyroscope bandwidth
@@ -231,31 +259,3 @@ FUNCRESULT bmi088GyroRead(BMI088GyroConfig *config, vec3 *gyro);
  * @param config Configuration
  */
 VOID __bmi088GyroSoftReset(BMI088GyroConfig *config);
-
-/**
- * @brief Read BMI088 gyroscope register
- *
- * @param config Configuration
- * @param address Address
- * @return Register value
- */
-BYTE __bmi088GyroReadReg(BMI088GyroConfig *config, BYTE address);
-
-/**
- * @brief Read BMI088 gyroscope registers
- *
- * @param config Configuration
- * @param address Address
- * @param buffer Buffer
- * @param count Count
- */
-VOID __bmi088GyroReadRegs(BMI088GyroConfig *config, BYTE address, BYTE *buffer, SIZE count);
-
-/**
- * @brief Write BMI088 gyroscope register
- *
- * @param config Configuration
- * @param address Address
- * @param data Data
- */
-VOID __bmi088GyroWriteReg(BMI088GyroConfig *config, BYTE address, BYTE data);

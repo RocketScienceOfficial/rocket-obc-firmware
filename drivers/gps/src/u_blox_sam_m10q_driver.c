@@ -6,9 +6,11 @@
 
 FUNCRESULT uBloxSamM10QInitSPI(UBloxSamM10QConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
 {
-    config->useI2C = FALSE;
-    config->spi = spi;
-    config->cs = cs;
+    config->gpioConfig = (GPIOCommunicationConfig){
+        .protocol = GPIO_PROTOCOL_SPI,
+        .spi = spi,
+        .cs = cs,
+    };
 
     spiInitPins(spi, miso, mosi, sck, cs);
 
@@ -17,8 +19,11 @@ FUNCRESULT uBloxSamM10QInitSPI(UBloxSamM10QConfig *config, SPIInstance spi, PinN
 
 FUNCRESULT uBloxSamM10QInitI2C(UBloxSamM10QConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl)
 {
-    config->useI2C = TRUE;
-    config->i2c = i2c;
+    config->gpioConfig = (GPIOCommunicationConfig){
+        .protocol = GPIO_PROTOCOL_I2C,
+        .i2c = i2c,
+        .i2cAddress = I2C_ADDRESS,
+    };
 
     i2cInitPins(i2c, sda, scl);
 
@@ -27,7 +32,7 @@ FUNCRESULT uBloxSamM10QInitI2C(UBloxSamM10QConfig *config, I2CInstance i2c, PinN
 
 FUNCRESULT uBloxSamM10QReadData(UBloxSamM10QConfig *config, UBloxSamM10QData *data)
 {
-    BYTE b = __uBloxSamM10QRead(config);
+    BYTE b = gpioSingleRead(&config->gpioConfig);
 
     if (b == 0xFF)
     {
@@ -57,36 +62,4 @@ FUNCRESULT uBloxSamM10QReadData(UBloxSamM10QConfig *config, UBloxSamM10QData *da
     }
 
     return SUC_OK;
-}
-
-BYTE __uBloxSamM10QRead(UBloxSamM10QConfig *config)
-{
-    BYTE data;
-
-    if (config->useI2C)
-    {
-        i2cReadBlocking(config->i2c, I2C_ADDRESS, &data, 1, FALSE);
-    }
-    else
-    {
-        gpioSetPinState(config->cs, GPIO_LOW);
-        spiReadBlocking(config->spi, 0, &data, 1);
-        gpioSetPinState(config->cs, GPIO_HIGH);
-    }
-
-    return data;
-}
-
-VOID __uBloxSamM10QWrite(UBloxSamM10QConfig *config, BYTE data)
-{
-    if (config->useI2C)
-    {
-        i2cWriteBlocking(config->i2c, I2C_ADDRESS, &data, 1, FALSE);
-    }
-    else
-    {
-        gpioSetPinState(config->cs, GPIO_LOW);
-        spiWriteBlocking(config->spi, &data, 1);
-        gpioSetPinState(config->cs, GPIO_HIGH);
-    }
 }

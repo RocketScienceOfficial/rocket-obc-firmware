@@ -7,6 +7,9 @@
 
 #define REPORT_ERROR(msg) consoleLogError(msg)
 
+static CHAR s_TempLog[MAX_LOG_SIZE];
+static CHAR s_TempMsg[MAX_LOG_SIZE];
+
 VOID myLogCreateLogger(Logger *logger, const STRING name)
 {
 	if (!logger || !name)
@@ -38,9 +41,8 @@ VOID myLogCreateConsoleSink(Logger *logger, const STRING pattern)
 	logger->sinks[logger->numSinks++] = sink;
 }
 
-STRING parseLog(const STRING loggerName, const STRING pattern, const STRING level, const STRING format, va_list args)
+VOID parseLog(const STRING loggerName, const STRING pattern, const STRING level, const STRING format, va_list args)
 {
-	STRING log = (STRING)malloc(sizeof(CHAR) * MAX_LOG_SIZE);
 	SIZE logIndex = 0;
 	TIME timeMs = getMsSinceBoot();
 	TIME minutes = floor(timeMs / 60000);
@@ -53,7 +55,7 @@ STRING parseLog(const STRING loggerName, const STRING pattern, const STRING leve
 		{
 			REPORT_ERROR("Log is too big");
 
-			return NULL;
+			return;
 		}
 
 		if (pattern[i] == '%')
@@ -68,7 +70,7 @@ STRING parseLog(const STRING loggerName, const STRING pattern, const STRING leve
 
 				for (SIZE j = 0; j < len; j++)
 				{
-					log[logIndex] = buff[j];
+					s_TempLog[logIndex] = buff[j];
 					logIndex++;
 				}
 			}
@@ -80,7 +82,7 @@ STRING parseLog(const STRING loggerName, const STRING pattern, const STRING leve
 
 				for (SIZE j = 0; j < len; j++)
 				{
-					log[logIndex] = buff[j];
+					s_TempLog[logIndex] = buff[j];
 					logIndex++;
 				}
 			}
@@ -92,7 +94,7 @@ STRING parseLog(const STRING loggerName, const STRING pattern, const STRING leve
 
 				for (SIZE j = 0; j < len; j++)
 				{
-					log[logIndex] = buff[j];
+					s_TempLog[logIndex] = buff[j];
 					logIndex++;
 				}
 			}
@@ -100,30 +102,27 @@ STRING parseLog(const STRING loggerName, const STRING pattern, const STRING leve
 			{
 				for (SIZE j = 0; level[j] != '\0'; j++)
 				{
-					log[logIndex] = level[j];
+					s_TempLog[logIndex] = level[j];
 					logIndex++;
 				}
 			}
 			else if (pattern[tmpI] == 'c')
 			{
 				SIZE len = vsnprintf(NULL, 0, format, args) + 1;
-				STRING msg = malloc(len);
 
-				vsnprintf(msg, len, format, args);
+				vsnprintf(s_TempMsg, len, format, args);
 
-				for (SIZE j = 0; msg[j] != '\0'; j++)
+				for (SIZE j = 0; s_TempMsg[j] != '\0'; j++)
 				{
-					log[logIndex] = msg[j];
+					s_TempLog[logIndex] = s_TempMsg[j];
 					logIndex++;
 				}
-
-				free(msg);
 			}
 			else if (pattern[tmpI] == 't')
 			{
 				for (SIZE j = 0; loggerName[j] != '\0'; j++)
 				{
-					log[logIndex] = loggerName[j];
+					s_TempLog[logIndex] = loggerName[j];
 					logIndex++;
 				}
 			}
@@ -132,35 +131,31 @@ STRING parseLog(const STRING loggerName, const STRING pattern, const STRING leve
 		}
 		else
 		{
-			log[logIndex] = pattern[i];
+			s_TempLog[logIndex] = pattern[i];
 			logIndex++;
 		}
 	}
 
-	log[logIndex] = '\0';
-
-	return log;
+	s_TempLog[logIndex] = '\0';
 }
 
 static VOID __log(Logger *logger, const STRING level, const STRING format, va_list args)
 {
 	for (SIZE i = 0; i < logger->numSinks; i++)
 	{
-		STRING log = parseLog(logger->name, logger->sinks[i].pattern, level, format, args);
+		parseLog(logger->name, logger->sinks[i].pattern, level, format, args);
 
-		if (log)
+		if (s_TempLog)
 		{
 			switch (logger->sinks[i].type)
 			{
 			case SINK_CONSOLE:
-				consoleLog(log);
+				consoleLog(s_TempLog);
 				break;
 			default:
 				REPORT_ERROR("Unknown sink type");
 				break;
 			}
-
-			free(log);
 		}
 	}
 }

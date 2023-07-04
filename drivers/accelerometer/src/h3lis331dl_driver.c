@@ -24,6 +24,7 @@
 #define INT_2_THS 0x36
 #define INT_2_DURATION 0x37
 
+#define I2C_ADDRESS 0x18
 #define WHO_AM_I_VALUE 0x32
 #define RESOLUTION_DIVIDER 32768.0f
 
@@ -31,46 +32,67 @@
 #define Y_OFFSET -45
 #define Z_OFFSET 420
 
-FUNCRESULT h3lis331dlInit(H3lis331dlConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
+FUNCRESULT h3lis331dlInitSPI(H3lis331dlConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
 {
-    config->spi = spi;
-    config->cs = cs;
+    config->gpioConfig = (GPIOCommunicationConfig){
+        .protocol = GPIO_PROTOCOL_SPI,
+        .spi = spi,
+        .cs = cs,
+        .readMask = 0x80,
+        .multipleReadMask = 0xC0,
+        .writeMask = 0x7F,
+    };
     config->rangeFactor = 0;
 
     return spiInitPins(spi, miso, mosi, sck, cs);
 }
 
+FUNCRESULT h3lis331dlInitI2C(H3lis331dlConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl)
+{
+    config->gpioConfig = (GPIOCommunicationConfig){
+        .protocol = GPIO_PROTOCOL_I2C,
+        .i2c = i2c,
+        .i2cAddress = I2C_ADDRESS,
+        .readMask = 0x80,
+        .multipleReadMask = 0xC0,
+        .writeMask = 0x7F,
+    };
+    config->rangeFactor = 0;
+
+    return i2cInitPins(i2c, sda, scl);
+}
+
 FUNCRESULT h3lis331dlValidateId(H3lis331dlConfig *config, BOOL *valid)
 {
-    *valid = __h3lis331dlReadReg(config, WHO_AM_I) == WHO_AM_I_VALUE;
+    *valid = gpioReadReg(&config->gpioConfig, WHO_AM_I) == WHO_AM_I_VALUE;
 
     return SUC_OK;
 }
 
 FUNCRESULT h3lis331dlSetPowerMode(H3lis331dlConfig *config, H3lis331dlPowerMode power)
 {
-    FUNC_CHECK_BOOL(__h3lis331dlWriteRegField(config, CTRL_REG1, 3, 5, (BYTE)power));
+    FUNC_CHECK_BOOL(gpioWriteRegField(&config->gpioConfig, CTRL_REG1, 3, 5, (BYTE)power));
 
     return SUC_OK;
 }
 
 FUNCRESULT h3lis331dlSetODR(H3lis331dlConfig *config, H3lis331dlODR odr)
 {
-    FUNC_CHECK_BOOL(__h3lis331dlWriteRegField(config, CTRL_REG1, 2, 3, (BYTE)odr));
+    FUNC_CHECK_BOOL(gpioWriteRegField(&config->gpioConfig, CTRL_REG1, 2, 3, (BYTE)odr));
 
     return SUC_OK;
 }
 
 FUNCRESULT h3lis331dlSetHPCF(H3lis331dlConfig *config, H3lis331dlHPFc hpcf)
 {
-    FUNC_CHECK_BOOL(__h3lis331dlWriteRegField(config, CTRL_REG2, 2, 0, (BYTE)hpcf));
+    FUNC_CHECK_BOOL(gpioWriteRegField(&config->gpioConfig, CTRL_REG2, 2, 0, (BYTE)hpcf));
 
     return SUC_OK;
 }
 
 FUNCRESULT h3lis331dlSetRange(H3lis331dlConfig *config, H3lis331dlRange range)
 {
-    FUNC_CHECK_BOOL(__h3lis331dlWriteRegField(config, CTRL_REG4, 2, 4, (BYTE)range));
+    FUNC_CHECK_BOOL(gpioWriteRegField(&config->gpioConfig, CTRL_REG4, 2, 4, (BYTE)range));
 
     switch (range)
     {
@@ -94,7 +116,7 @@ FUNCRESULT h3lis331dlRead(H3lis331dlConfig *config, vec3 *accel)
 {
     BYTE buffer[6];
 
-    __h3lis331dlReadRegs(config, OUT_X_L, buffer, 6);
+    gpioReadRegs(&config->gpioConfig, OUT_X_L, buffer, 6);
 
     INT16 x = (INT16)((buffer[1] << 8) | buffer[0]) - X_OFFSET;
     INT16 y = (INT16)((buffer[3] << 8) | buffer[2]) - Y_OFFSET;
@@ -105,71 +127,4 @@ FUNCRESULT h3lis331dlRead(H3lis331dlConfig *config, vec3 *accel)
     accel->z = (FLOAT)z * config->rangeFactor;
 
     return SUC_OK;
-}
-
-BOOL __h3lis331dlWriteRegField(H3lis331dlConfig *config, BYTE address, UINT8 length, UINT8 offset, BYTE value)
-{
-    BYTE data = __h3lis331dlReadReg(config, address);
-
-    BYTE mask = 0xFF;
-    mask >>= offset;
-    mask <<= offset;
-    mask <<= 8 - offset - length;
-    mask >>= 8 - offset - length;
-
-    data &= ~mask;
-    data |= (value << offset);
-
-    __h3lis331dlWriteReg(config, address, data);
-
-#if OBC_DEBUG_MODE
-    BYTE read = __h3lis331dlReadReg(config, address);
-
-    if (read != data)
-    {
-        return FALSE;
-    }
-#endif
-
-    return TRUE;
-}
-
-BYTE __h3lis331dlReadReg(H3lis331dlConfig *config, BYTE address)
-{
-    BYTE data;
-
-    address |= 0x80;
-
-    gpioSetPinState(config->cs, GPIO_LOW);
-
-    spiWriteBlocking(config->spi, &address, 1);
-    spiReadBlocking(config->spi, 0, &data, 1);
-
-    gpioSetPinState(config->cs, GPIO_HIGH);
-
-    return data;
-}
-
-VOID __h3lis331dlReadRegs(H3lis331dlConfig *config, BYTE address, BYTE *buffer, SIZE count)
-{
-    address |= 0xC0;
-
-    gpioSetPinState(config->cs, GPIO_LOW);
-
-    spiWriteBlocking(config->spi, &address, 1);
-    spiReadBlocking(config->spi, 0, buffer, count);
-
-    gpioSetPinState(config->cs, GPIO_HIGH);
-}
-
-VOID __h3lis331dlWriteReg(H3lis331dlConfig *config, BYTE address, BYTE data)
-{
-    address &= 0x7F;
-
-    gpioSetPinState(config->cs, GPIO_LOW);
-
-    spiWriteBlocking(config->spi, &address, 1);
-    spiWriteBlocking(config->spi, &data, 1);
-
-    gpioSetPinState(config->cs, GPIO_HIGH);
 }

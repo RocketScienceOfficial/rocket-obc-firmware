@@ -2,19 +2,37 @@
 #include <string.h>
 #include <stdlib.h>
 
-FUNCRESULT uBloxNeoM9NInit(UBloxNeoM9NConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
+#define I2C_ADDRESS 0x42
+
+FUNCRESULT uBloxNeoM9NInitSPI(UBloxNeoM9NConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
 {
-    config->spi = spi;
-    config->cs = cs;
+    config->gpioConfig = (GPIOCommunicationConfig){
+        .protocol = GPIO_PROTOCOL_SPI,
+        .spi = spi,
+        .cs = cs,
+    };
 
     spiInitPins(spi, miso, mosi, sck, cs);
 
     return SUC_OK;
 }
 
+FUNCRESULT uBloxNeoM9NInitI2C(UBloxNeoM9NConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl)
+{
+    config->gpioConfig = (GPIOCommunicationConfig){
+        .protocol = GPIO_PROTOCOL_I2C,
+        .i2c = i2c,
+        .i2cAddress = I2C_ADDRESS,
+    };
+
+    i2cInitPins(i2c, sda, scl);
+
+    return SUC_OK;
+}
+
 FUNCRESULT uBloxNeoM9NReadData(UBloxNeoM9NConfig *config, UBloxNeoM9NData *data)
 {
-    BYTE b = __uBloxNeoM9NRead(config);
+    BYTE b = gpioSingleRead(&config->gpioConfig);
 
     if (b == 0xFF)
     {
@@ -44,22 +62,4 @@ FUNCRESULT uBloxNeoM9NReadData(UBloxNeoM9NConfig *config, UBloxNeoM9NData *data)
     }
 
     return SUC_OK;
-}
-
-BYTE __uBloxNeoM9NRead(UBloxNeoM9NConfig *config)
-{
-    BYTE data;
-
-    gpioSetPinState(config->cs, GPIO_LOW);
-    spiReadBlocking(config->spi, 0, &data, 1);
-    gpioSetPinState(config->cs, GPIO_HIGH);
-
-    return data;
-}
-
-VOID __uBloxNeoM9NWrite(UBloxNeoM9NConfig *config, BYTE data)
-{
-    gpioSetPinState(config->cs, GPIO_LOW);
-    spiWriteBlocking(config->spi, &data, 1);
-    gpioSetPinState(config->cs, GPIO_HIGH);
 }

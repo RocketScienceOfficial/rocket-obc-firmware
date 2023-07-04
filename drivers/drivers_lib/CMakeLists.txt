@@ -8,7 +8,7 @@ target_link_libraries(${LIB_GENERAL_NAME} INTERFACE
     drivers_battery_lib
     drivers_buzzer_lib
     drivers_console_lib
-    drivers_cpu_lib
+    drivers_cpu_temp_lib
     drivers_detonator_lib
     drivers_display_lib
     drivers_gpio_lib

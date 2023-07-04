@@ -1,4 +1,4 @@
-#include "drivers/cpu/cpu_temp_driver.h"
+#include "drivers/cpu_temp/cpu_temp_driver.h"
 #include "drivers/gpio/gpio_driver.h"
 #include "drivers/gpio/adc_driver.h"
 

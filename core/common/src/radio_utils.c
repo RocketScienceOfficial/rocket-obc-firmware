@@ -1,8 +1,7 @@
 #include "core/common/radio_utils.h"
 #include "core/common/driver_calling.h"
 #include "drivers/console/console_input.h"
-#include "kernel/logging/logger.h"
-#include "services/commands/commands.h"
+#include "services/logging/logger.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -99,39 +98,4 @@ VOID sendRadioPacket(RadioBody *body)
     {
         MY_LOG_CORE_ERROR("Packet serialization failed!");
     }
-}
-
-VOID sendRadioRemoteCommand(STRING msg)
-{
-    RadioBody body = {
-        .command = COMMANDS_RADIO_COMMAND_ID,
-        .payloadSize = strlen(msg),
-        .payload = (BYTE *)msg,
-    };
-
-    sendRadioPacket(&body);
-}
-
-VOID radioRemoteCommandCallback(BYTE *msg, SIZE size)
-{
-    ConsoleInput input = {0};
-    ConsoleTokens tokens = {0};
-
-    for (SIZE i = 0; i < size; i++)
-    {
-        DRIVER_CALL(consoleInputProcessCharacter(msg[i], &input, &tokens));
-    }
-
-    DRIVER_CALL(consoleInputProcessCharacter('\r', &input, &tokens));
-
-    CommandArgs args = {0};
-    CommandData *command = parseCommand(tokens.tokens, tokens.size, &args);
-
-    if (command)
-    {
-        executeCommand(command, &args);
-        commandClearArgs(&args);
-    }
-
-    DRIVER_CALL(consoleInputClear(&input, &tokens));
 }

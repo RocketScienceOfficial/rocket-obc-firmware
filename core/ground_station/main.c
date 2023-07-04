@@ -4,7 +4,7 @@
 #include "pinout.h"
 #include "core/common/measurements_utils.h"
 #include "core/common/radio_utils.h"
-#include "tools/board_control.h"
+#include "drivers/tools/board_control.h"
 
 static RadioUtilPacketData s_Packet;
 

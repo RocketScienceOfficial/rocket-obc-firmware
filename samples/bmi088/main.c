@@ -24,11 +24,11 @@ int main()
 
     madgwickInit(&madgwickFilterData, 5, 0.1);
 
-    bmi088AccelInit(&accelConfig, SPI, MISO, MOSI, ACCEL_CS, SCK);
+    bmi088AccelInitSPI(&accelConfig, SPI, MISO, MOSI, ACCEL_CS, SCK);
     bmi088AccelSetConf(&accelConfig, BMI088_ACCEL_ODR_1600HZ, BMI088_ACCEL_OSR_NORMAL);
     bmi088AccelSetRange(&accelConfig, BMI088_ACCEL_RANGE_24G);
 
-    bmi088GyroInit(&gyroConfig, SPI, MISO, MOSI, GYRO_CS, SCK);
+    bmi088GyroInitSPI(&gyroConfig, SPI, MISO, MOSI, GYRO_CS, SCK);
     bmi088GyroSetBandwidth(&gyroConfig, BMI088_GYRO_ODR_2000_BW_523HZ);
     bmi088GyroSetRange(&gyroConfig, BMI088_GYRO_RANGE_500DPS);
 

@@ -16,7 +16,7 @@ int main()
     spiInitAll(0, 1 * 1000 * 1000);
 
     H3lis331dlConfig h3lis331dlConfig = {0};
-    h3lis331dlInit(&h3lis331dlConfig, SPI, MISO, MOSI, CS, SCK);
+    h3lis331dlInitSPI(&h3lis331dlConfig, SPI, MISO, MOSI, CS, SCK);
     h3lis331dlSetPowerMode(&h3lis331dlConfig, H3LIS331DL_POWER_NORMAL);
     h3lis331dlSetRange(&h3lis331dlConfig, H3LIS331DL_RANGE_100G);
     h3lis331dlSetODR(&h3lis331dlConfig, H3LIS331DL_ODR_50HZ);

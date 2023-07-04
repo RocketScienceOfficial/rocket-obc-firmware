@@ -13,7 +13,6 @@
 #define RADIO_MIN_RSSI -80
 
 #define MEASUREMENTS_RADIO_COMMAND_ID 'M'
-#define COMMANDS_RADIO_COMMAND_ID 'C'
 
 /**
  * @brief Radio packet wrapper structure
@@ -45,18 +44,3 @@ BOOL checkRadioPacket(RadioUtilPacketData *packet);
  * @param body Radio packet body
  */
 VOID sendRadioPacket(RadioBody *body);
-
-/**
- * @brief Send command to be executed on other device
- *
- * @param msg Command message
- */
-VOID sendRadioRemoteCommand(STRING msg);
-
-/**
- * @brief Call this function when you receive radio packet with commnd
- *
- * @param msg Command message
- * @param size Size of command message
- */
-VOID radioRemoteCommandCallback(BYTE *msg, SIZE size);

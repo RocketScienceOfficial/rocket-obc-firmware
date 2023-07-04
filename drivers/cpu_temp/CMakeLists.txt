@@ -1,5 +1,5 @@
 set(MODULE_NAME drivers)
-set(LIB_NAME cpu)
+set(LIB_NAME cpu_temp)
 set(LIB_GENERAL_NAME "${MODULE_NAME}_${LIB_NAME}_lib")
 
 add_library(${LIB_GENERAL_NAME} STATIC

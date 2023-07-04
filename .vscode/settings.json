@@ -73,6 +73,10 @@
         "test_radio_protocol.h": "c",
         "exp_filter.h": "c",
         "radio_protocol.h": "c",
-        "multicore.h": "c"
+        "multicore.h": "c",
+        "algorithm": "c",
+        "gpio_utils.h": "c",
+        "i2c_driver.h": "c",
+        "cmath": "c"
     }
 }

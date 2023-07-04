@@ -10,7 +10,7 @@
  * @param format Format
  * @param ... Arguments
  */
-VOID consoleLog(const STRING format, ...);
+FUNCRESULT consoleLog(const STRING format, ...);
 
 /**
  * @brief Logs error message to serial output
@@ -18,4 +18,4 @@ VOID consoleLog(const STRING format, ...);
  * @param format Format
  * @param ... Arguments
  */
-VOID consoleLogError(const STRING format, ...);
+FUNCRESULT consoleLogError(const STRING format, ...);

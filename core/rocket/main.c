@@ -4,8 +4,9 @@
 #include "pinout.h"
 #include "core/common/radio_utils.h"
 #include "core/common/measurements_utils.h"
-#include "tools/time_tracker.h"
-#include "tools/board_control.h"
+#include "core/common/driver_calling.h"
+#include "drivers/tools/time_tracker.h"
+#include "drivers/tools/board_control.h"
 #include "drivers/accelerometer/bmi088_driver.h"
 #include "drivers/barometer/bme688_driver.h"
 #include "drivers/accelerometer/h3lis331dl_driver.h"
@@ -13,7 +14,6 @@
 #include "drivers/gps/u_blox_neo_m9n_driver.h"
 #include "drivers/gps/nmea_parser.h"
 #include "drivers/storage/flash_driver.h"
-#include "kernel/services/driver_calling.h"
 #include "ahrs/madgwick_filter.h"
 #include "maths/constants.h"
 
@@ -31,6 +31,7 @@ typedef struct MeasurementData_FlashSave
 static RadioUtilPacketData s_Packet;
 static MeasurementData_FlashSave s_Measurements[MEASUREMENTS_BUFFER_SIZE];
 static SIZE s_MeasurementIndex;
+static SIZE s_PagesOffset;
 static MadgiwckFilterData s_MadgwickFilterData;
 static BMI088AccelConfig s_BMI088AccelConfig;
 static BMI088GyroConfig s_BMI088GyroConfig;
@@ -76,10 +77,11 @@ int main()
 
             if (s_MeasurementIndex >= MEASUREMENTS_BUFFER_SIZE)
             {
-                DRIVER_CALL(flashWritePages(0, (BYTE *)s_Measurements, sizeof(s_Measurements) / flashWriteBufferSize()));
+                DRIVER_CALL(flashWritePages(s_PagesOffset, (BYTE *)s_Measurements, sizeof(s_Measurements) / flashWriteBufferSize()));
 
                 memset(s_Measurements, 0, sizeof(s_Measurements));
                 s_MeasurementIndex = 0;
+                s_PagesOffset += sizeof(s_Measurements) / flashWriteBufferSize();
             }
 
             RadioBody body = {
@@ -108,26 +110,26 @@ VOID initSensors()
 
     madgwickInit(&s_MadgwickFilterData, 5, 0.1);
 
-    DRIVER_CALL(bmi088AccelInit(&s_BMI088AccelConfig, BMI088_SPI, BMI088_MISO, BMI088_MOSI, BMI088_ACCEL_CS, BMI088_SCK));
+    DRIVER_CALL(bmi088AccelInitSPI(&s_BMI088AccelConfig, BMI088_SPI, BMI088_MISO, BMI088_MOSI, BMI088_ACCEL_CS, BMI088_SCK));
     DRIVER_CALL(bmi088AccelSetConf(&s_BMI088AccelConfig, BMI088_ACCEL_ODR_1600HZ, BMI088_ACCEL_OSR_NORMAL));
     DRIVER_CALL(bmi088AccelSetRange(&s_BMI088AccelConfig, BMI088_ACCEL_RANGE_24G));
 
-    DRIVER_CALL(bmi088GyroInit(&s_BMI088GyroConfig, BMI088_SPI, BMI088_MISO, BMI088_MOSI, BMI088_GYRO_CS, BMI088_SCK));
+    DRIVER_CALL(bmi088GyroInitSPI(&s_BMI088GyroConfig, BMI088_SPI, BMI088_MISO, BMI088_MOSI, BMI088_GYRO_CS, BMI088_SCK));
     DRIVER_CALL(bmi088GyroSetBandwidth(&s_BMI088GyroConfig, BMI088_GYRO_ODR_2000_BW_523HZ));
     DRIVER_CALL(bmi088GyroSetRange(&s_BMI088GyroConfig, BMI088_GYRO_RANGE_500DPS));
 
     DRIVER_CALL(bme688Init(&s_BME688Config, BME688_SPI, BME688_MISO, BME688_MOSI, BME688_SCK, BME688_CS));
     DRIVER_CALL(bme688SetConfig(&s_BME688Config, BME688_SENSOR_OSR_2X, BME688_SENSOR_OSR_1X, BME688_SENSOR_OSR_16X, BME688_IIR_FILTER_COEFF_OFF));
 
-    DRIVER_CALL(h3lis331dlInit(&s_H3lis331dlConfig, H3LIS331DL_SPI, H3LIS331DL_MISO, H3LIS331DL_MOSI, H3LIS331DL_CS, H3LIS331DL_SCK));
+    DRIVER_CALL(h3lis331dlInitSPI(&s_H3lis331dlConfig, H3LIS331DL_SPI, H3LIS331DL_MISO, H3LIS331DL_MOSI, H3LIS331DL_CS, H3LIS331DL_SCK));
     DRIVER_CALL(h3lis331dlSetPowerMode(&s_H3lis331dlConfig, H3LIS331DL_POWER_NORMAL));
     DRIVER_CALL(h3lis331dlSetRange(&s_H3lis331dlConfig, H3LIS331DL_RANGE_100G));
     DRIVER_CALL(h3lis331dlSetODR(&s_H3lis331dlConfig, H3LIS331DL_ODR_50HZ));
 
-    DRIVER_CALL(mmc5983maInit(&s_MMC5983MAConfig, MMC5983MA_SPI, MMC5983MA_MISO, MMC5983MA_MOSI, MMC5983MA_CS, MMC5983MA_SCK));
+    DRIVER_CALL(mmc5983maInitSPI(&s_MMC5983MAConfig, MMC5983MA_SPI, MMC5983MA_MISO, MMC5983MA_MOSI, MMC5983MA_CS, MMC5983MA_SCK));
     DRIVER_CALL(mmc5983maSetContinuousModeODR(&s_MMC5983MAConfig, MMC5983MA_ODR_200HZ));
 
-    DRIVER_CALL(uBloxNeoM9NInit(&s_UBloxNeoM9NConfig, UBX_NEO_M9N_SPI, UBX_NEO_M9N_MISO, UBX_NEO_M9N_MOSI, UBX_NEO_M9N_CS, UBX_NEO_M9N_SCK));
+    DRIVER_CALL(uBloxNeoM9NInitSPI(&s_UBloxNeoM9NConfig, UBX_NEO_M9N_SPI, UBX_NEO_M9N_MISO, UBX_NEO_M9N_MOSI, UBX_NEO_M9N_CS, UBX_NEO_M9N_SCK));
 
     DRIVER_CALL(flashEraseSectors(0, (SIZE)FLASH_STORAGE_MAX_SIZE / flashSectorSize()));
 }

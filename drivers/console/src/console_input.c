@@ -3,18 +3,18 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
-#include <stdlib.h>
 
-BOOL consoleCheckInput(INT32 *chr)
+FUNCRESULT consoleCheckInput(BOOL *pAvailable, INT32 *chr)
 {
     *chr = getchar_timeout_us(0);
+    *pAvailable = *chr != PICO_ERROR_TIMEOUT;
 
-    return *chr != PICO_ERROR_TIMEOUT;
+    return SUC_OK;
 }
 
-FUNCRESULT consoleInputProcessCharacter(INT32 c, ConsoleInput *input, ConsoleTokens *tokens)
+FUNCRESULT consoleInputProcessCharacter(INT32 c, ConsoleInput *input, BOOL *pTokensReady)
 {
-    if (!input || !tokens)
+    if (!input)
     {
         return ERR_INVALIDARG;
     }
@@ -24,6 +24,8 @@ FUNCRESULT consoleInputProcessCharacter(INT32 c, ConsoleInput *input, ConsoleTok
         return SUC_OK;
     }
 
+    *pTokensReady = FALSE;
+
     if (c == '\r')
     {
         if (strnlen(input->cmd, sizeof(input->cmd)) == 0)
@@ -32,7 +34,19 @@ FUNCRESULT consoleInputProcessCharacter(INT32 c, ConsoleInput *input, ConsoleTok
         }
         else
         {
-            return consoleTokenizeInput(input, tokens);
+            if (__consoleTokenizeInput(input))
+            {
+                *pTokensReady = TRUE;
+
+                memset(input->cmd, 0, sizeof(input->cmd));
+                input->cmdSize = 0;
+
+                return SUC_OK;
+            }
+            else
+            {
+                return ERR_FAIL;
+            }
         }
     }
     else
@@ -50,54 +64,28 @@ FUNCRESULT consoleInputProcessCharacter(INT32 c, ConsoleInput *input, ConsoleTok
     }
 }
 
-FUNCRESULT consoleTokenizeInput(ConsoleInput *input, ConsoleTokens *tokens)
+BOOL __consoleTokenizeInput(ConsoleInput *input)
 {
-    if (!input || !tokens)
+    if (!input)
     {
-        return ERR_INVALIDARG;
+        return FALSE;
     }
 
-    tokens->tokens = (STRING *)malloc(CONSOLE_ARGS_MAX_COUNT * sizeof(STRING));
-    tokens->size = 0;
+    input->tokensSize = 0;
 
     STRING cmdn = strtok(input->cmd, " ");
 
     while (cmdn != NULL)
     {
-        STRING arg = (STRING)malloc((strlen(cmdn) + 1) * sizeof(CHAR));
-
-        strcpy(arg, cmdn);
-
-        tokens->tokens[tokens->size] = arg;
-
-        cmdn = strtok(NULL, " ");
-        tokens->size++;
-    }
-
-    return SUC_OK;
-}
-
-FUNCRESULT consoleInputClear(ConsoleInput *input, ConsoleTokens *tokens)
-{
-    if (!input || !tokens)
-    {
-        return ERR_INVALIDARG;
-    }
-
-    input->cmdSize = 0;
-    memset(input->cmd, 0, sizeof(input->cmd));
-
-    if (tokens->size > 0)
-    {
-        for (SIZE i = 0; i < tokens->size; i++)
+        if (input->tokensSize >= CONSOLE_TOKENS_MAX_COUNT)
         {
-            free(tokens->tokens[i]);
+            return FALSE;
         }
 
-        free(tokens->tokens);
+        strcpy(input->tokens[input->tokensSize++], cmdn);
 
-        tokens->size = 0;
+        cmdn = strtok(NULL, " ");
     }
 
-    return SUC_OK;
+    return TRUE;
 }

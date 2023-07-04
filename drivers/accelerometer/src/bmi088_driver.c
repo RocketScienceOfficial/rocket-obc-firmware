@@ -2,6 +2,7 @@
 #include "drivers/tools/time_tracker.h"
 #include "maths/constants.h"
 #include <math.h>
+#include <string.h>
 
 #define ACC_CHIP_ID 0x00
 #define ACC_ERR_REG 0x02
@@ -57,16 +58,40 @@
 #define GYRO_FIFO_CONFIG 0x3D
 #define GYRO_FIFO_DATA 0x3E
 
-FUNCRESULT bmi088AccelInit(BMI088AccelConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
+FUNCRESULT bmi088AccelInitSPI(BMI088AccelConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
 {
-    config->spi = spi;
-    config->cs = cs;
+    config->gpioConfig = (GPIOCommunicationConfig){
+        .protocol = GPIO_PROTOCOL_SPI,
+        .spi = spi,
+        .cs = cs,
+        .readMask = 0x80,
+        .multipleReadMask = 0x80,
+        .writeMask = 0x7F,
+    };
     config->rangeConstant = 0.0f;
 
     spiInitPins(spi, miso, mosi, sck, cs);
 
-    __bmi088AccelSetPower(config, TRUE);
-    __bmi088AccelSetMode(config, TRUE);
+    __bmi088InitBase(config);
+
+    return SUC_OK;
+}
+
+FUNCRESULT bmi088AccelInitI2C(BMI088AccelConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl, BYTE address)
+{
+    config->gpioConfig = (GPIOCommunicationConfig){
+        .protocol = GPIO_PROTOCOL_SPI,
+        .i2c = i2c,
+        .i2cAddress = address,
+        .readMask = 0x80,
+        .multipleReadMask = 0x80,
+        .writeMask = 0x7F,
+    };
+    config->rangeConstant = 0.0f;
+
+    i2cInitPins(i2c, sda, scl);
+
+    __bmi088InitBase(config);
 
     return SUC_OK;
 }
@@ -115,9 +140,6 @@ VOID __bmi088AccelSoftReset(BMI088AccelConfig *config)
     __bmi088AccelWriteReg(config, ACC_SOFTRESET, ACC_SOFTRESET_CMD);
 
     sleepMiliseconds(50);
-
-    gpioSetPinState(config->cs, GPIO_LOW);
-    gpioSetPinState(config->cs, GPIO_HIGH);
 }
 
 VOID __bmi088AccelSetMode(BMI088AccelConfig *config, BOOL active)
@@ -138,59 +160,68 @@ VOID __bmi088AccelSetPower(BMI088AccelConfig *config, BOOL on)
     sleepMiliseconds(5);
 }
 
+VOID __bmi088InitBase(BMI088AccelConfig *config)
+{
+    __bmi088AccelSetPower(config, TRUE);
+    __bmi088AccelSetMode(config, TRUE);
+}
+
 BYTE __bmi088AccelReadReg(BMI088AccelConfig *config, BYTE address)
 {
     BYTE data[2];
 
-    address |= 0x80;
-
-    gpioSetPinState(config->cs, GPIO_LOW);
-
-    spiWriteBlocking(config->spi, &address, 1);
-    spiReadBlocking(config->spi, 0, data, 2);
-
-    gpioSetPinState(config->cs, GPIO_HIGH);
+    gpioReadRegs(&config->gpioConfig, address, data, 2);
 
     return data[1];
 }
 
 VOID __bmi088AccelReadRegs(BMI088AccelConfig *config, BYTE address, BYTE *buffer, SIZE count)
 {
-    address |= 0x80;
+    BYTE tmp_buffer[16];
 
-    gpioSetPinState(config->cs, GPIO_LOW);
+    gpioReadRegs(&config->gpioConfig, address, tmp_buffer, count + 1);
 
-    spiWriteBlocking(config->spi, &address, 1);
-    spiReadBlocking(config->spi, 0, buffer, 1);
-    spiReadBlocking(config->spi, 0, buffer, count);
-
-    gpioSetPinState(config->cs, GPIO_HIGH);
+    memcpy(buffer, tmp_buffer + 1, count);
 }
 
 VOID __bmi088AccelWriteReg(BMI088AccelConfig *config, BYTE address, BYTE data)
 {
-    address &= 0x7F;
-
-    gpioSetPinState(config->cs, GPIO_LOW);
-
-    spiWriteBlocking(config->spi, &address, 1);
-    spiWriteBlocking(config->spi, &data, 1);
-
-    gpioSetPinState(config->cs, GPIO_HIGH);
+    gpioWriteReg(&config->gpioConfig, address, data);
 }
 
-FUNCRESULT bmi088GyroInit(BMI088GyroConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
+FUNCRESULT bmi088GyroInitSPI(BMI088GyroConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
 {
-    config->spi = spi;
-    config->cs = cs;
+    config->gpioConfig = (GPIOCommunicationConfig){
+        .protocol = GPIO_PROTOCOL_SPI,
+        .spi = spi,
+        .cs = cs,
+        .readMask = 0x80,
+        .multipleReadMask = 0x80,
+        .writeMask = 0x7F,
+    };
     config->rangeConstant = 0.0f;
 
-    spiInitPins(spi, miso, mosi, sck, cs);
+    return spiInitPins(spi, miso, mosi, sck, cs);
+}
+
+FUNCRESULT bmi088GyroInitI2C(BMI088GyroConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl, BYTE address)
+{
+    config->gpioConfig = (GPIOCommunicationConfig){
+        .protocol = GPIO_PROTOCOL_I2C,
+        .i2c = i2c,
+        .i2cAddress = address,
+        .readMask = 0x80,
+        .multipleReadMask = 0x80,
+        .writeMask = 0x7F,
+    };
+    config->rangeConstant = 0.0f;
+
+    return i2cInitPins(i2c, sda, scl);
 }
 
 FUNCRESULT bmi088GyroSetBandwidth(BMI088GyroConfig *config, BMI088GyroBandwidth bw)
 {
-    __bmi088GyroWriteReg(config, GYRO_BANDWIDTH, bw | 0x80);
+    gpioWriteReg(&config->gpioConfig, GYRO_BANDWIDTH, (BYTE)bw | 0x80);
 
     sleepMiliseconds(5);
 
@@ -214,7 +245,7 @@ FUNCRESULT bmi088GyroSetRange(BMI088GyroConfig *config, BMI088GyroRange range)
 
     config->rangeConstant = DEG_2_RAD(val);
 
-    __bmi088GyroWriteReg(config, GYRO_RANGE, range);
+    gpioWriteReg(&config->gpioConfig, GYRO_RANGE, range);
 
     sleepMiliseconds(5);
 
@@ -225,7 +256,7 @@ FUNCRESULT bmi088GyroRead(BMI088GyroConfig *config, vec3 *gyro)
 {
     BYTE buff[6];
 
-    __bmi088GyroReadRegs(config, GYRO_RATE, buff, 6);
+    gpioReadRegs(&config->gpioConfig, GYRO_RATE, buff, 6);
 
     INT16 gyroX = (INT16)((buff[1] << 8) | buff[0]);
     INT16 gyroY = (INT16)((buff[3] << 8) | buff[2]);
@@ -240,50 +271,7 @@ FUNCRESULT bmi088GyroRead(BMI088GyroConfig *config, vec3 *gyro)
 
 VOID __bmi088GyroSoftReset(BMI088GyroConfig *config)
 {
-    __bmi088GyroWriteReg(config, GYRO_SOFTRESET, GYRO_SOFTRESET_CMD);
+    gpioWriteReg(&config->gpioConfig, GYRO_SOFTRESET, GYRO_SOFTRESET_CMD);
 
     sleepMiliseconds(50);
-
-    gpioSetPinState(config->cs, GPIO_LOW);
-    gpioSetPinState(config->cs, GPIO_HIGH);
-}
-
-BYTE __bmi088GyroReadReg(BMI088GyroConfig *config, BYTE address)
-{
-    BYTE data;
-
-    address |= 0x80;
-
-    gpioSetPinState(config->cs, GPIO_LOW);
-
-    spiWriteBlocking(config->spi, &address, 1);
-    spiReadBlocking(config->spi, 0, &data, 1);
-
-    gpioSetPinState(config->cs, GPIO_HIGH);
-
-    return data;
-}
-
-VOID __bmi088GyroReadRegs(BMI088GyroConfig *config, BYTE address, BYTE *buffer, SIZE count)
-{
-    address |= 0x80;
-
-    gpioSetPinState(config->cs, GPIO_LOW);
-
-    spiWriteBlocking(config->spi, &address, 1);
-    spiReadBlocking(config->spi, 0, buffer, count);
-
-    gpioSetPinState(config->cs, GPIO_HIGH);
-}
-
-VOID __bmi088GyroWriteReg(BMI088GyroConfig *config, BYTE address, BYTE data)
-{
-    address &= 0x7F;
-
-    gpioSetPinState(config->cs, GPIO_LOW);
-
-    spiWriteBlocking(config->spi, &address, 1);
-    spiWriteBlocking(config->spi, &data, 1);
-
-    gpioSetPinState(config->cs, GPIO_HIGH);
 }

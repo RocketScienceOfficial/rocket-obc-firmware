@@ -6,9 +6,7 @@
  */
 
 #include <obc/api.h>
-#include "drivers/gpio/gpio_driver.h"
-#include "drivers/gpio/spi_driver.h"
-#include "drivers/gpio/i2c_driver.h"
+#include "drivers/gpio/gpio_utils.h"
 #include "maths/vector.h"
 
 /**
@@ -16,10 +14,7 @@
  */
 typedef struct MMC5983MAConfig
 {
-    GPIOProtocol protocol; /** Protocol */
-    SPIInstance spi;       /** SPI */
-    PinNumber cs;          /** CS */
-    I2CInstance i2c;       /** I2C */
+    GPIOCommunicationConfig gpioConfig; /** The GPIO communication configuration */
 } MMC5983MAConfig;
 
 /**
@@ -48,7 +43,7 @@ typedef enum MMC5983ODR
 } MMC5983ODR;
 
 /**
- * @brief MMC5983MA Magnetometer initialization
+ * @brief MMC5983MA Magnetometer initialization using SPI
  *
  * @param config MMC5983MA configuration
  * @param spi SPI instance
@@ -59,6 +54,17 @@ typedef enum MMC5983ODR
  * @return Result code
  */
 FUNCRESULT mmc5983maInitSPI(MMC5983MAConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck);
+
+/**
+ * @brief MMC5983MA Magnetometer initialization using I2C
+ *
+ * @param config MMC5983MA configuration
+ * @param i2c I2C instance
+ * @param sda SDA pin
+ * @param scl SCL pin
+ * @return Result code
+ */
+FUNCRESULT mmc5983maInitI2C(MMC5983MAConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl);
 
 /**
  * @brief Check if product id is valid
@@ -137,29 +143,8 @@ VOID __mmc5983maSET(MMC5983MAConfig *config);
 VOID __mmc5983maRESET(MMC5983MAConfig *config);
 
 /**
- * @brief Read register from magnetometer
+ * @brief Magnetometer initialization base
  *
  * @param config MMC5983MA configuration
- * @param address Register address
- * @return Register value
  */
-BYTE __mmc5983maReadReg(MMC5983MAConfig *config, BYTE address);
-
-/**
- * @brief Read registers from magnetometer
- *
- * @param config MMC5983MA configuration
- * @param address Register address
- * @param buffer Buffer
- * @param count Count
- */
-VOID __mmc5983maReadRegs(MMC5983MAConfig *config, BYTE address, BYTE *buffer, SIZE count);
-
-/**
- * @brief Write register to magnetometer
- *
- * @param config MMC5983MA configuration
- * @param address Register address
- * @param data Register value
- */
-VOID __mmc5983maWriteReg(MMC5983MAConfig *config, BYTE address, BYTE data);
+VOID __mmc5983maInitBase(MMC5983MAConfig *config);

@@ -1,8 +1,7 @@
 #pragma once
 
 #include <obc/api.h>
-#include "drivers/gpio/spi_driver.h"
-#include "drivers/gpio/gpio_driver.h"
+#include "drivers/gpio/gpio_utils.h"
 #include "maths/vector.h"
 
 #define H3LIS331DL_DEBUG TRUE
@@ -12,9 +11,8 @@
  */
 typedef struct H3lis331dlConfig
 {
-    SPIInstance spi;   /** SPI */
-    PinNumber cs;      /** CS */
-    FLOAT rangeFactor; /** Range factor */
+    GPIOCommunicationConfig gpioConfig; /** GPIO communication configuration */
+    FLOAT rangeFactor;                  /** Range factor */
 } H3lis331dlConfig;
 
 /**
@@ -64,7 +62,7 @@ typedef enum H3lis331dlRange
 } H3lis331dlRange;
 
 /**
- * @brief Initializes H3lis331dl
+ * @brief Initializes H3lis331dl with SPI
  *
  * @param config H3lis331dl configuration
  * @param spi SPI
@@ -74,7 +72,18 @@ typedef enum H3lis331dlRange
  * @param sck SCK
  * @return Result code
  */
-FUNCRESULT h3lis331dlInit(H3lis331dlConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck);
+FUNCRESULT h3lis331dlInitSPI(H3lis331dlConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck);
+
+/**
+ * @brief Initializes H3lis331dl with I2C
+ *
+ * @param config H3lis331dl configuration
+ * @param i2c I2C
+ * @param sda SDA
+ * @param scl SCL
+ * @return Result code
+ */
+FUNCRESULT h3lis331dlInitI2C(H3lis331dlConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl);
 
 /**
  * @brief Checks if H3lis331dl WHO_AM_I register is valid
@@ -129,43 +138,3 @@ FUNCRESULT h3lis331dlSetRange(H3lis331dlConfig *config, H3lis331dlRange range);
  * @return Result code
  */
 FUNCRESULT h3lis331dlRead(H3lis331dlConfig *config, vec3 *accel);
-
-/**
- * @brief Writes register field of H3lis331dl
- *
- * @param config H3lis331dl configuration
- * @param address Register address
- * @param length Field length
- * @param offset Field offset
- * @param value Field value
- * @return Success or fail
- */
-BOOL __h3lis331dlWriteRegField(H3lis331dlConfig *config, BYTE address, UINT8 length, UINT8 offset, BYTE value);
-
-/**
- * @brief Reads single register
- *
- * @param config H3lis331dl configuration
- * @param address Register address
- * @return Register value
- */
-BYTE __h3lis331dlReadReg(H3lis331dlConfig *config, BYTE address);
-
-/**
- * @brief Reads multiple registers
- *
- * @param config H3lis331dl configuration
- * @param address Starting register address
- * @param buffer Buffer to store data
- * @param count Count of registers to read
- */
-VOID __h3lis331dlReadRegs(H3lis331dlConfig *config, BYTE address, BYTE *buffer, SIZE count);
-
-/**
- * @brief Writes single register
- *
- * @param config H3lis331dl configuration
- * @param address Register address
- * @param data Data to write
- */
-VOID __h3lis331dlWriteReg(H3lis331dlConfig *config, BYTE address, BYTE data);
