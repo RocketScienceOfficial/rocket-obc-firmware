@@ -14,6 +14,7 @@
 #include "drivers/gps/u_blox_neo_m9n_driver.h"
 #include "drivers/gps/nmea_parser.h"
 #include "drivers/storage/flash_driver.h"
+#include "drivers/console/console_input.h"
 #include "ahrs/madgwick_filter.h"
 #include "maths/constants.h"
 
@@ -42,24 +43,14 @@ static UBloxNeoM9NConfig s_UBloxNeoM9NConfig;
 static UBloxNeoM9NData s_UBloxNeoM9NData;
 static TIME s_TimerOffset;
 
-VOID initSensors();
+VOID initSensors(VOID);
 VOID takeMeasurements(MeasurementData *measurements);
-VOID readFlashData();
+VOID readFlashData(VOID);
 
-int main()
+int main(VOID)
 {
     boardInit(0);
 
-    SX127XPinout loraPinout = (SX127XPinout){
-        .spi = SX1278_SPI,
-        .sck = SX1278_SCK_GPIO,
-        .miso = SX1278_MISO_GPIO,
-        .mosi = SX1278_MOSI_GPIO,
-        .cs = SX1278_CS_GPIO,
-        .reset = SX1278_RESET_GPIO,
-    };
-
-    initializeRadio(&loraPinout);
     initSensors();
 
     while (TRUE)
@@ -84,29 +75,34 @@ int main()
                 s_PagesOffset += sizeof(s_Measurements) / flashWriteBufferSize();
             }
 
-            RadioBody body = {
-                .command = MEASUREMENTS_RADIO_COMMAND_ID,
-                .payloadSize = sizeof(measurement),
-            };
+            RadioBody body = {0};
 
-            BYTE *buffer = (BYTE *)malloc(body.payloadSize);
+            body.command = MEASUREMENTS_RADIO_COMMAND_ID;
+            body.payloadSize = sizeof(measurement);
 
             memcpy(body.payload, &measurement, body.payloadSize);
 
-            body.payload = buffer;
-
             sendRadioPacket(&body);
-
-            free(buffer);
         }
     }
 
     return 0;
 }
 
-VOID initSensors()
+VOID initSensors(VOID)
 {
     spiInitAll(0, 1 * 1000 * 1000);
+
+    SX127XPinout loraPinout = (SX127XPinout){
+        .spi = SX1278_SPI,
+        .sck = SX1278_SCK_GPIO,
+        .miso = SX1278_MISO_GPIO,
+        .mosi = SX1278_MOSI_GPIO,
+        .cs = SX1278_CS_GPIO,
+        .reset = SX1278_RESET_GPIO,
+    };
+
+    initializeRadio(&loraPinout);
 
     madgwickInit(&s_MadgwickFilterData, 5, 0.1);
 
@@ -205,7 +201,7 @@ VOID takeMeasurements(MeasurementData *measurements)
     };
 }
 
-VOID readFlashData()
+VOID readFlashData(VOID)
 {
     const BYTE *newBuffer;
     flashRead(0, &newBuffer);
@@ -224,5 +220,37 @@ VOID readFlashData()
         logMeasurementData(&newData[i].data);
 
         i++;
+    }
+
+    printf("CMD:read-done\n");
+}
+
+VOID checkCMD()
+{
+    BOOL available = FALSE;
+    INT32 chr = 0;
+    ConsoleInput input = {0};
+    BOOL tokensReady = FALSE;
+
+    while (TRUE)
+    {
+        consoleCheckInput(&available, &chr);
+
+        if (available)
+        {
+            consoleInputProcessCharacter(chr, &input, &tokensReady);
+
+            if (tokensReady)
+            {
+                if (strcmp(input.tokens[0], "read-data") == 0)
+                {
+                    readFlashData();
+                }
+
+                tokensReady = FALSE;
+            }
+
+            available = FALSE;
+        }
     }
 }

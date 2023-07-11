@@ -2,7 +2,9 @@ set(LIB_NAME ahrs)
 set(LIB_GENERAL_NAME "${LIB_NAME}_lib")
 
 add_library(${LIB_GENERAL_NAME} STATIC
+    include/${LIB_NAME}/kalman_filter.h
     include/${LIB_NAME}/madgwick_filter.h
+    src/kalman_filter.c
     src/madgwick_filter.c
 )
 

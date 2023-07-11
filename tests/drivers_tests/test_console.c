@@ -42,7 +42,7 @@ MY_TEST_FUNC(CONSOLE_TEST_NAME, 2)
 MY_TEST_FUNC(CONSOLE_TEST_NAME, 3)
 {
     MY_ASSERT(FUNCSUCCESS(consoleInputProcessCharacter(0, NULL, NULL) == FALSE));
-    MY_ASSERT(FUNCSUCCESS(__consoleTokenizeInput(NULL) == FALSE));
+    MY_ASSERT(__consoleTokenizeInput(NULL) == FALSE);
 
     MY_TEST_END();
 }

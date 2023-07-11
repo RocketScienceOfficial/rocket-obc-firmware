@@ -262,9 +262,9 @@ FUNCRESULT bmi088GyroRead(BMI088GyroConfig *config, vec3 *gyro)
     INT16 gyroY = (INT16)((buff[3] << 8) | buff[2]);
     INT16 gyroZ = (INT16)((buff[5] << 8) | buff[4]);
 
-    gyro->x = (FLOAT)gyroX / 32767.0f * config->rangeConstant;
-    gyro->y = (FLOAT)gyroY / 32767.0f * config->rangeConstant;
-    gyro->z = (FLOAT)gyroZ / 32767.0f * config->rangeConstant;
+    gyro->x = gyroX / 32767.0f * config->rangeConstant;
+    gyro->y = gyroY / 32767.0f * config->rangeConstant;
+    gyro->z = gyroZ / 32767.0f * config->rangeConstant;
 
     return SUC_OK;
 }

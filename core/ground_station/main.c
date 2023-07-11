@@ -35,8 +35,6 @@ int main()
 
                 logMeasurementData(&measurement);
             }
-
-            radioClearPacket(&s_Packet.body);
         }
     }
 

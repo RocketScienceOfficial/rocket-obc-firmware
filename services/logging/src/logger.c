@@ -1,7 +1,6 @@
 #include "services/logging/logger.h"
 #include "drivers/console/console_output.h"
 #include "drivers/tools/time_tracker.h"
-#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 

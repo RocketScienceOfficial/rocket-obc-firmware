@@ -21,7 +21,7 @@ typedef struct MadgiwckFilterData
 } MadgiwckFilterData;
 
 /**
- * @brief Initialize Madgwick filter
+ * @brief Initialize Madgwick filter. Remember that the device should be aligned with the earth frame (or device frame if you want to use it)
  *
  * @param data Madgwick filter data
  * @param omegaError Gyroscope error in degrees per second

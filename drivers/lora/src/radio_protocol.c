@@ -1,5 +1,4 @@
 #include "drivers/lora/radio_protocol.h"
-#include "crypto/parity_check.h"
 #include "crypto/xor_encryption.h"
 #include <string.h>
 #include <stdlib.h>
@@ -90,47 +89,19 @@ static const BYTE RADIO_PACKET_SIGNATURE[RADIO_PACKET_SIGNATURE_LENGTH] = {
     0x39,
 };
 
-BOOL serializeRadioPacket(RadioBody *body, BYTE **buffer_out_ptr, SIZE *size_out)
+BOOL serializeRadioPacket(RadioBody *body, BYTE *pBuffer)
 {
-    SIZE bodySize = sizeof(BYTE) + sizeof(BYTE[3]) + sizeof(SIZE) + sizeof(BYTE) * body->payloadSize;
-    BYTE bodyBuffer[bodySize];
+    RadioHeader header = {0};
+    memcpy(header.signature, RADIO_PACKET_SIGNATURE, sizeof(RADIO_PACKET_SIGNATURE));
 
-    memcpy(bodyBuffer, &body->command, sizeof(BYTE) + sizeof(BYTE[3]) + sizeof(SIZE));
-    memcpy(bodyBuffer + sizeof(BYTE) + sizeof(BYTE[3]) + sizeof(SIZE), body->payload, sizeof(BYTE) * body->payloadSize);
-
-    ParityData parity = {0};
-
-    if (!calculateParity(bodyBuffer, bodySize, &parity))
-    {
-        return FALSE;
-    }
-
-    RadioHeader header = {
-        .paritySize = parity.size,
-        .parity = parity.buffer,
+    RadioPacket packet = {
+        .header = header,
+        .body = *body,
     };
 
-    SIZE headerSize = sizeof(SIZE) + sizeof(BYTE) * header.paritySize + sizeof(BYTE) * RADIO_PACKET_SIGNATURE_LENGTH;
-    BYTE headerBuffer[headerSize];
+    memcpy(pBuffer, &packet, sizeof(packet));
 
-    memcpy(headerBuffer, &header.paritySize, sizeof(SIZE));
-    memcpy(headerBuffer + sizeof(SIZE), header.parity, sizeof(BYTE) * header.paritySize);
-    memcpy(headerBuffer + sizeof(SIZE) + sizeof(BYTE) * header.paritySize, RADIO_PACKET_SIGNATURE, sizeof(BYTE) * RADIO_PACKET_SIGNATURE_LENGTH);
-
-    if (!clearParity(&parity))
-    {
-        return FALSE;
-    }
-
-    SIZE bufferSize = headerSize + bodySize;
-
-    *buffer_out_ptr = (BYTE *)malloc(bufferSize);
-    *size_out = bufferSize;
-
-    memcpy(*buffer_out_ptr, headerBuffer, headerSize);
-    memcpy(*buffer_out_ptr + headerSize, bodyBuffer, bodySize);
-
-    if (!encryptDecryptXOR(*buffer_out_ptr, bufferSize, RADIO_PACKET_KEY, sizeof(RADIO_PACKET_KEY) / sizeof(BYTE)))
+    if (!encryptDecryptXOR(pBuffer, sizeof(RadioPacket), RADIO_PACKET_KEY, sizeof(RADIO_PACKET_KEY)))
     {
         return FALSE;
     }
@@ -138,112 +109,23 @@ BOOL serializeRadioPacket(RadioBody *body, BYTE **buffer_out_ptr, SIZE *size_out
     return TRUE;
 }
 
-BOOL deserializeRadioPacket(BYTE *buffer, SIZE size, RadioBody *body_out)
+BOOL deserializeRadioPacket(BYTE *buffer, RadioBody *pBody)
 {
-    RadioPacket packet = {0};
-
-    if (!encryptDecryptXOR(buffer, size, RADIO_PACKET_KEY, sizeof(RADIO_PACKET_KEY) / sizeof(BYTE)))
+    if (!encryptDecryptXOR(buffer, sizeof(RadioPacket), RADIO_PACKET_KEY, sizeof(RADIO_PACKET_KEY)))
     {
         return FALSE;
     }
 
-    SIZE currentBufferOffset = 0;
+    RadioHeader header = {0};
+    BYTE *bodyBuffer = buffer + sizeof(RadioHeader);
 
-    if (currentBufferOffset + sizeof(SIZE) > size)
+    memcpy(&header, buffer, sizeof(RadioHeader));
+    memcpy(pBody, bodyBuffer, sizeof(RadioBody));
+
+    if (memcmp(header.signature, RADIO_PACKET_SIGNATURE, sizeof(RADIO_PACKET_SIGNATURE)) != 0)
     {
         return FALSE;
     }
-
-    memcpy(&packet.header.paritySize, buffer + currentBufferOffset, sizeof(SIZE));
-
-    currentBufferOffset += sizeof(SIZE);
-
-    if (currentBufferOffset + sizeof(BYTE) * packet.header.paritySize > size)
-    {
-        return FALSE;
-    }
-
-    packet.header.parity = (BYTE *)malloc(sizeof(BYTE) * packet.header.paritySize);
-
-    memcpy(packet.header.parity, buffer + currentBufferOffset, sizeof(BYTE) * packet.header.paritySize);
-
-    currentBufferOffset += sizeof(BYTE) * packet.header.paritySize;
-
-    if (currentBufferOffset + sizeof(BYTE) * RADIO_PACKET_SIGNATURE_LENGTH > size)
-    {
-        free(packet.header.parity);
-
-        return FALSE;
-    }
-
-    memcpy(packet.header.signature, buffer + currentBufferOffset, sizeof(BYTE) * RADIO_PACKET_SIGNATURE_LENGTH);
-
-    BOOL compSig = memcmp(packet.header.signature, RADIO_PACKET_SIGNATURE, sizeof(BYTE) * RADIO_PACKET_SIGNATURE_LENGTH) == 0;
-
-    if (!compSig)
-    {
-        free(packet.header.parity);
-
-        return FALSE;
-    }
-
-    SIZE bodyOffset = currentBufferOffset + sizeof(BYTE) * RADIO_PACKET_SIGNATURE_LENGTH;
-    SIZE parityBufferSize = size - bodyOffset;
-    ParityData parity = {0};
-
-    if (!calculateParity(buffer + bodyOffset, parityBufferSize, &parity))
-    {
-        return FALSE;
-    }
-
-    BOOL compParity = memcmp(packet.header.parity, parity.buffer, sizeof(BYTE) * packet.header.paritySize) == 0;
-
-    free(packet.header.parity);
-
-    if (!clearParity(&parity))
-    {
-        return FALSE;
-    }
-
-    if (!compParity)
-    {
-        return FALSE;
-    }
-
-    currentBufferOffset += sizeof(BYTE) * RADIO_PACKET_SIGNATURE_LENGTH;
-
-    if (currentBufferOffset + sizeof(BYTE) + sizeof(BYTE[3]) + sizeof(SIZE) > size)
-    {
-        return FALSE;
-    }
-
-    memcpy(&packet.body, buffer + currentBufferOffset, sizeof(BYTE) + sizeof(BYTE[3]) + sizeof(SIZE));
-
-    currentBufferOffset += sizeof(BYTE) + sizeof(BYTE[3]) + sizeof(SIZE);
-
-    if (currentBufferOffset + sizeof(BYTE) * packet.body.payloadSize > size)
-    {
-        return FALSE;
-    }
-
-    packet.body.payload = (BYTE *)malloc(sizeof(BYTE) * packet.body.payloadSize);
-
-    memcpy(packet.body.payload, buffer + currentBufferOffset, sizeof(BYTE) * packet.body.payloadSize);
-
-    *body_out = packet.body;
 
     return TRUE;
-}
-
-VOID radioClearPacket(RadioBody *body)
-{
-    if (!body)
-    {
-        return;
-    }
-
-    if (body->payload)
-    {
-        free(body->payload);
-    }
 }

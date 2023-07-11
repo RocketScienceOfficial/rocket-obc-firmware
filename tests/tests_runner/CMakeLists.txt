@@ -4,6 +4,6 @@ add_executable(${EXE_NAME}
     main.c
 )
 
-target_link_libraries(${EXE_NAME} PRIVATE drivers_lib tests_crypto tests_drivers tests_services)
+target_link_libraries(${EXE_NAME} PRIVATE drivers_lib tests_drivers tests_services)
 
 add_platform_output(${EXE_NAME})

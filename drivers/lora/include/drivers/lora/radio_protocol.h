@@ -2,15 +2,15 @@
 
 #include <obc/api.h>
 
+#define RADIO_PACKET_PARITY_SIZE 32
 #define RADIO_PACKET_SIGNATURE_LENGTH 16
+#define RADIO_PACKET_PAYLOAD_SIZE 128
 
 /**
  * @brief Header of radio packet (INTERNAL USE)
  */
 typedef struct RadioHeader
 {
-    SIZE paritySize;                               /** Parity Size */
-    BYTE *parity;                                  /** Parity */
     BYTE signature[RADIO_PACKET_SIGNATURE_LENGTH]; /** Radio packet signature */
 } RadioHeader;
 
@@ -19,10 +19,10 @@ typedef struct RadioHeader
  */
 typedef struct RadioBody
 {
-    BYTE command;     /** Packet command */
-    BYTE _padding[3]; /** Padding to align struct. Don't use it. */
-    SIZE payloadSize; /** Payload size */
-    BYTE *payload;    /** Packet payload */
+    BYTE command;                            /** Packet command */
+    BYTE _padding[3];                        /** Padding to align struct. Don't use it. */
+    BYTE payload[RADIO_PACKET_PAYLOAD_SIZE]; /** Packet payload */
+    SIZE payloadSize;                        /** Payload size */
 } RadioBody;
 
 /**
@@ -37,28 +37,19 @@ typedef struct RadioPacket
 /**
  * @brief Serialize and encrypt radio packet
  *
- * @param body_in Body of radio packet
- * @param buffer_out_ptr Pointer to buffer
- * @param size_out Size of buffer
+ * @param body Body of radio packet
+ * @param pBuffer Pointer to buffer
  *
  * @return True if success
  */
-BOOL serializeRadioPacket(RadioBody *body, BYTE **buffer_out_ptr, SIZE *size_out);
+BOOL serializeRadioPacket(RadioBody *body, BYTE *pBuffer);
 
 /**
- * @brief Deserialize and decrypt radio packet. Remeber to call radioClearPacket() on packet body after processing.
+ * @brief Deserialize and decrypt radio packet
  *
- * @param buffer_in Buffer
- * @param size_in Size of buffer
- * @param body_out Body of radio packet
+ * @param buffer Buffer
+ * @param pBody Body of radio packet
  *
  * @return True if success
  */
-BOOL deserializeRadioPacket(BYTE *buffer, SIZE size, RadioBody *body_out);
-
-/**
- * @brief Clears radio body (i.e payload)
- *
- * @param body Radio body to clear
- */
-VOID radioClearPacket(RadioBody *body);
+BOOL deserializeRadioPacket(BYTE *buffer, RadioBody *pBody);

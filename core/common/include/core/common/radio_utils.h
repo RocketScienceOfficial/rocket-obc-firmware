@@ -4,14 +4,6 @@
 #include "drivers/lora/sx127X_driver.h"
 #include "drivers/lora/radio_protocol.h"
 
-#define RADIO_DBM 20
-#define RADIO_SPREADING_FACTOR 10
-#define RADIO_SIGNAL_BANDWIDTH 125E3
-#define RADIO_ERROR_SPREADING_FACTOR 10
-#define RADIO_ERROR_SIGNAL_BANDWIDTH 125E3
-#define RADIO_FREQUENCY_HZ 433E6
-#define RADIO_MIN_RSSI -80
-
 #define MEASUREMENTS_RADIO_COMMAND_ID 'M'
 
 /**

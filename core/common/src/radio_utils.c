@@ -5,6 +5,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define RADIO_DBM 20
+#define RADIO_SPREADING_FACTOR 10
+#define RADIO_SIGNAL_BANDWIDTH 125E3
+#define RADIO_ERROR_SPREADING_FACTOR 10
+#define RADIO_ERROR_SIGNAL_BANDWIDTH 125E3
+#define RADIO_FREQUENCY_HZ 433E6
+#define RADIO_MIN_RSSI -80
+
 static SX127XData s_LoraData;
 
 VOID initializeRadio(SX127XPinout *pinout)
@@ -23,11 +31,18 @@ BOOL checkRadioPacket(RadioUtilPacketData *packet)
 
     DRIVER_CALL(sx127XParsePacket(&s_LoraData, 0, &packetSize));
 
-    if (packetSize)
+    if (packetSize > 0)
     {
         MY_LOG_CORE_INFO("Packet is available!");
 
-        BYTE buffer[packetSize];
+        if (packetSize != sizeof(RadioPacket))
+        {
+            MY_LOG_CORE_ERROR("Packet size is too big!");
+
+            return FALSE;
+        }
+
+        BYTE buffer[sizeof(RadioPacket)];
         SIZE i = 0;
         BOOL available = FALSE;
 
@@ -41,10 +56,7 @@ BOOL checkRadioPacket(RadioUtilPacketData *packet)
             i++;
         }
 
-        packet->body = (RadioBody){0};
-
         INT32 rssi = 0;
-
         DRIVER_CALL(sx127XRssi(&s_LoraData, &rssi));
 
         if (rssi < RADIO_MIN_RSSI)
@@ -58,9 +70,10 @@ BOOL checkRadioPacket(RadioUtilPacketData *packet)
             DRIVER_CALL(sx127XSetSignalBandwidth(&s_LoraData, RADIO_SIGNAL_BANDWIDTH));
         }
 
+        packet->body = (RadioBody){0};
         packet->signalStrength = rssi;
 
-        BOOL packetValidation = deserializeRadioPacket(buffer, packetSize, &packet->body);
+        BOOL packetValidation = deserializeRadioPacket(buffer, &packet->body);
 
         if (packetValidation)
         {
@@ -81,16 +94,12 @@ BOOL checkRadioPacket(RadioUtilPacketData *packet)
 
 VOID sendRadioPacket(RadioBody *body)
 {
-    BYTE *packetBuffer;
-    SIZE packetBufferSize = 0;
-
-    BOOL serializationResult = serializeRadioPacket(body, &packetBuffer, &packetBufferSize);
+    BYTE packetBuffer[sizeof(RadioPacket)];
+    BOOL serializationResult = serializeRadioPacket(body, &packetBuffer);
 
     if (serializationResult)
     {
-        DRIVER_CALL(sx127XWriteBuffer(&s_LoraData, packetBuffer, packetBufferSize));
-
-        free(packetBuffer);
+        DRIVER_CALL(sx127XWriteBuffer(&s_LoraData, packetBuffer, sizeof(RadioPacket)));
 
         MY_LOG_CORE_INFO("Packet sent!");
     }

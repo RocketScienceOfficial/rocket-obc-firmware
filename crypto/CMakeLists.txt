@@ -2,9 +2,7 @@ set(LIB_NAME crypto)
 set(LIB_GENERAL_NAME "${LIB_NAME}_lib")
 
 add_library(${LIB_GENERAL_NAME} STATIC
-    include/${LIB_NAME}/parity_check.h
     include/${LIB_NAME}/xor_encryption.h
-    src/parity_check.c
     src/xor_encryption.c
 )
 
