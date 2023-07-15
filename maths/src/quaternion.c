@@ -74,3 +74,12 @@ VOID quatToEuler(vec3 *res, quat *q)
     res->y = RAD_2_DEG(asin(clampValue(2 * (q->w * q->y - q->x * q->z), -1, 1)));
     res->z = RAD_2_DEG(atan2(2 * (q->w * q->z + q->x * q->y), 1 - 2 * (q->y * q->y + q->z * q->z)));
 }
+
+VOID rotateVectorThroughQuaternion(vec3 *v, quat *q)
+{
+    *v = (vec3){
+        .x = v->x * (1 - 2 * (q->y * q->y + q->z * q->z)) + v->y * 2 * (q->x * q->y - q->z * q->w) + v->z * 2 * (q->x * q->z + q->y * q->w),
+        .y = v->x * 2 * (q->x * q->y + q->z * q->w) + v->y * (1 - 2 * (q->x * q->x + q->z * q->z)) + v->z * 2 * (q->y * q->z - q->x * q->w),
+        .z = v->x * 2 * (q->x * q->z - q->y * q->w) + v->y * 2 * (q->y * q->z + q->x * q->w) + v->z * (1 - 2 * (q->x * q->x + q->y * q->y)),
+    };
+}

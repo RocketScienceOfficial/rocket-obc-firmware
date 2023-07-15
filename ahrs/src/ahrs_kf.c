@@ -1,16 +1,7 @@
-#include "ahrs/kalman_filter.h"
+#include "ahrs/ahrs_kf.h"
 #include <string.h>
 
-static vec3 rotateVectorThroughQuaternion(vec3 v, quat q)
-{
-    return (vec3){
-        .x = v.x * (1 - 2 * (q.y * q.y + q.z * q.z)) + v.y * 2 * (q.x * q.y - q.z * q.w) + v.z * 2 * (q.x * q.z + q.y * q.w),
-        .y = v.x * 2 * (q.x * q.y + q.z * q.w) + v.y * (1 - 2 * (q.x * q.x + q.z * q.z)) + v.z * 2 * (q.y * q.z - q.x * q.w),
-        .z = v.x * 2 * (q.x * q.z - q.y * q.w) + v.y * 2 * (q.y * q.z + q.x * q.w) + v.z * (1 - 2 * (q.x * q.x + q.y * q.y)),
-    };
-}
-
-VOID kalmanFilterInit(KalmanFilterState *state, KalmanFilterConfig *config)
+VOID ahrsKalmanFilterInit(AHRSKalmanFilterState *state, AHRSKalmanFilterConfig *config)
 {
     state->config = *config;
 
@@ -34,27 +25,29 @@ VOID kalmanFilterInit(KalmanFilterState *state, KalmanFilterConfig *config)
     state->dt4 = state->dt3 * state->config.dt;
     state->dt5 = state->dt4 * state->config.dt;
 
-    KalmanFilterInputData tempData = {0};
+    AHRSKalmanFilterInputData tempData = {0};
 
-    __kalmanFilterPredictState(state, &tempData);
-    __kalmanFilterPredictCovariance(state);
+    __ahrsKalmanFilterPredictState(state, &tempData);
+    __ahrsKalmanFilterPredictCovariance(state);
 }
 
-VOID kalmanFilterUpdate(KalmanFilterState *state, KalmanFilterInputData *inputData, KalmanFilterOutputData *pOutputData)
+VOID ahrsKalmanFilterUpdate(AHRSKalmanFilterState *state, AHRSKalmanFilterInputData *inputData, AHRSKalmanFilterOutputData *pOutputData)
 {
-    __kalmanFilterUpdateGain(state, inputData);
-    __kalmanFilterUpdateState(state, inputData);
-    __kalmanFilterUpdateCovariance(state);
+    __ahrsKalmanFilterUpdateGain(state, inputData);
+    __ahrsKalmanFilterUpdateState(state, inputData);
+    __ahrsKalmanFilterUpdateCovariance(state);
 
     *pOutputData = state->stateVector;
 
-    __kalmanFilterPredictState(state, inputData);
-    __kalmanFilterPredictCovariance(state);
+    __ahrsKalmanFilterPredictState(state, inputData);
+    __ahrsKalmanFilterPredictCovariance(state);
 }
 
-VOID __kalmanFilterPredictState(KalmanFilterState *state, KalmanFilterInputData *inputData)
+VOID __ahrsKalmanFilterPredictState(AHRSKalmanFilterState *state, AHRSKalmanFilterInputData *inputData)
 {
-    vec3 rotatedAcc = rotateVectorThroughQuaternion(inputData->acc, state->stateVector.q);
+    vec3 rotatedAcc = inputData->acc;
+
+    rotateVectorThroughQuaternion(&rotatedAcc, &state->stateVector.q);
 
     state->stateVector.pos.x = state->stateVector.pos.x + state->stateVector.vel.x * state->config.dt + rotatedAcc.x * state->dt2 / 2.0f;
     state->stateVector.pos.y = state->stateVector.pos.y + state->stateVector.vel.y * state->config.dt + rotatedAcc.y * state->dt2 / 2.0f;
@@ -127,18 +120,18 @@ VOID __kalmanFilterPredictState(KalmanFilterState *state, KalmanFilterInputData 
     state->stateTransitionMatrix[9][9] = 1.0f;
 }
 
-VOID __kalmanFilterPredictCovariance(KalmanFilterState *state)
+VOID __ahrsKalmanFilterPredictCovariance(AHRSKalmanFilterState *state)
 {
 }
 
-VOID __kalmanFilterUpdateState(KalmanFilterState *state, KalmanFilterInputData *inputData)
+VOID __ahrsKalmanFilterUpdateState(AHRSKalmanFilterState *state, AHRSKalmanFilterInputData *inputData)
 {
 }
 
-VOID __kalmanFilterUpdateCovariance(KalmanFilterState *state)
+VOID __ahrsKalmanFilterUpdateCovariance(AHRSKalmanFilterState *state)
 {
 }
 
-VOID __kalmanFilterUpdateGain(KalmanFilterState *state, KalmanFilterInputData *inputData)
+VOID __ahrsKalmanFilterUpdateGain(AHRSKalmanFilterState *state, AHRSKalmanFilterInputData *inputData)
 {
 }

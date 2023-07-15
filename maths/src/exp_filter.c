@@ -1,4 +1,4 @@
-#include "filters/exp_filter.h"
+#include "maths/exp_filter.h"
 
 VOID filterExpInit(ExpFilterData *data, FLOAT a)
 {

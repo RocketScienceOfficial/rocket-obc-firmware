@@ -77,6 +77,9 @@
         "algorithm": "c",
         "gpio_utils.h": "c",
         "i2c_driver.h": "c",
-        "cmath": "c"
+        "cmath": "c",
+        "pid_controller.h": "c",
+        "math_utils.h": "c",
+        "ins_kf.h": "c"
     }
 }

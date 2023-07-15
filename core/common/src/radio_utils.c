@@ -95,7 +95,7 @@ BOOL checkRadioPacket(RadioUtilPacketData *packet)
 VOID sendRadioPacket(RadioBody *body)
 {
     BYTE packetBuffer[sizeof(RadioPacket)];
-    BOOL serializationResult = serializeRadioPacket(body, &packetBuffer);
+    BOOL serializationResult = serializeRadioPacket(body, packetBuffer);
 
     if (serializationResult)
     {

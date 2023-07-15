@@ -4,7 +4,7 @@
 #include "maths/vector.h"
 #include "maths/quaternion.h"
 
-typedef struct KalmanFilterConfig
+typedef struct AHRSKalmanFilterConfig
 {
     FLOAT dt;
     FLOAT accelXVariance;
@@ -33,9 +33,9 @@ typedef struct KalmanFilterConfig
     FLOAT gpsPosYZCovariance;
     FLOAT pressureVariance;
     FLOAT temperatureVariance;
-} KalmanFilterConfig;
+} AHRSKalmanFilterConfig;
 
-typedef struct KalmanFilterInputData
+typedef struct AHRSKalmanFilterInputData
 {
     vec3 acc;
     vec3 gyro;
@@ -43,36 +43,36 @@ typedef struct KalmanFilterInputData
     vec3 gpsPos;
     FLOAT pressure;
     FLOAT temperature;
-} KalmanFilterInputData;
+} AHRSKalmanFilterInputData;
 
-typedef struct KalmanFilterOutputData
+typedef struct AHRSKalmanFilterOutputData
 {
     vec3 pos;
     vec3 vel;
     quat q;
-} KalmanFilterOutputData;
+} AHRSKalmanFilterOutputData;
 
-typedef struct KalmanFilterState
+typedef struct AHRSKalmanFilterState
 {
-    KalmanFilterConfig config;
+    AHRSKalmanFilterConfig config;
     FLOAT dt2;
     FLOAT dt3;
     FLOAT dt4;
     FLOAT dt5;
-    KalmanFilterOutputData stateVector;
+    AHRSKalmanFilterOutputData stateVector;
     FLOAT stateCovariance[10][10];
     FLOAT measurementVector[11];
     FLOAT stateTransitionMatrix[10][10];
     FLOAT processNoiseCovariance[10][10];
     FLOAT measurementNoiseCovariance[11][11];
     FLOAT kalmanGain[10][11];
-} KalmanFilterState;
+} AHRSKalmanFilterState;
 
-VOID kalmanFilterInit(KalmanFilterState *state, KalmanFilterConfig *config);
-VOID kalmanFilterUpdate(KalmanFilterState *state, KalmanFilterInputData *inputData, KalmanFilterOutputData *pOutputData);
+VOID ahrsKalmanFilterInit(AHRSKalmanFilterState *state, AHRSKalmanFilterConfig *config);
+VOID ahrsKalmanFilterUpdate(AHRSKalmanFilterState *state, AHRSKalmanFilterInputData *inputData, AHRSKalmanFilterOutputData *pOutputData);
 
-VOID __kalmanFilterPredictState(KalmanFilterState *state, KalmanFilterInputData *inputData);
-VOID __kalmanFilterPredictCovariance(KalmanFilterState *state);
-VOID __kalmanFilterUpdateState(KalmanFilterState *state, KalmanFilterInputData *inputData);
-VOID __kalmanFilterUpdateCovariance(KalmanFilterState *state);
-VOID __kalmanFilterUpdateGain(KalmanFilterState *state, KalmanFilterInputData *inputData);
+VOID __ahrsKalmanFilterPredictState(AHRSKalmanFilterState *state, AHRSKalmanFilterInputData *inputData);
+VOID __ahrsKalmanFilterPredictCovariance(AHRSKalmanFilterState *state);
+VOID __ahrsKalmanFilterUpdateState(AHRSKalmanFilterState *state, AHRSKalmanFilterInputData *inputData);
+VOID __ahrsKalmanFilterUpdateCovariance(AHRSKalmanFilterState *state);
+VOID __ahrsKalmanFilterUpdateGain(AHRSKalmanFilterState *state, AHRSKalmanFilterInputData *inputData);

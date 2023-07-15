@@ -80,3 +80,11 @@ VOID quatNormalize(quat *q);
  * @param q Quaternion
  */
 VOID quatToEuler(vec3 *res, quat *q);
+
+/**
+ * @brief Rotate vector through quaternion
+ *
+ * @param v Vector to rotate
+ * @param q Quaternion
+ */
+VOID rotateVectorThroughQuaternion(vec3 *v, quat *q);
