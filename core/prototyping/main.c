@@ -4,10 +4,12 @@
 #include "drivers/tools/board_control.h"
 #include "drivers/tools/time_tracker.h"
 #include "ahrs/madgwick_filter.h"
+#include "ahrs/mahony_filter.h"
 #include "ins/ins_kf.h"
 #include "maths/constants.h"
 #include "maths/math_utils.h"
 #include <stdio.h>
+#include <math.h>
 
 #define DT 0.01f
 #define SPI 0
@@ -26,6 +28,7 @@ int main()
     spiInitAll(SPI, 10 * 1000 * 1000);
 
     MadgiwckFilterData madgwickFilterData;
+    MahonyFilterData mahonyFilterData = {0};
     INSKalmanFilterState kalmanFilterState = {0};
     INSKalmanFilterConfig kalmanFilterConfig = {
         .dt = DT,
@@ -42,6 +45,7 @@ int main()
     MMC5983MAConfig mmc5983maConfig = {0};
 
     madgwickInit(&madgwickFilterData, 5.0f, DT);
+    mahonyInit(&mahonyFilterData, 3.0f, 0.0f, DT);
     insKalmanFilterInit(&kalmanFilterState, &kalmanFilterConfig);
 
     bmi088AccelInitSPI(&accelConfig, SPI, MISO, MOSI, ACCEL_CS, SCK);
@@ -49,7 +53,7 @@ int main()
     bmi088AccelSetRange(&accelConfig, BMI088_ACCEL_RANGE_6G);
 
     bmi088GyroInitSPI(&gyroConfig, SPI, MISO, MOSI, GYRO_CS, SCK);
-    bmi088GyroSetBandwidth(&gyroConfig, BMI088_GYRO_ODR_2000_BW_523HZ);
+    bmi088GyroSetBandwidth(&gyroConfig, BMI088_GYRO_ODR_400_BW_47HZ);
     bmi088GyroSetRange(&gyroConfig, BMI088_GYRO_RANGE_250DPS);
 
     mmc5983maInitSPI(&mmc5983maConfig, SPI, MISO, MOSI, MMC_CS, SCK);
@@ -75,6 +79,7 @@ int main()
         mmc5983maRead(&mmc5983maConfig, &mag);
         bme688Read(&bme688Config, &data);
 
+        mahonyUpdateIMU(&mahonyFilterData, gyro, accel);
         madgwickUpdateMARG(&madgwickFilterData, gyro, accel, mag);
         quatToEuler(&eulerData, &madgwickFilterData.q);
 

@@ -109,7 +109,7 @@ FUNCRESULT bmi088AccelSetConf(BMI088AccelConfig *config, BMI088AccelODR odr, BMI
 
 FUNCRESULT bmi088AccelSetRange(BMI088AccelConfig *config, BMI088AccelRange range)
 {
-    config->rangeConstant = (FLOAT)pow(2, range + 1) * 1.5f * EARTH_GRAVITY;
+    config->rangeConstant = powf(2, range + 1) * 1.5f * EARTH_GRAVITY;
 
     __bmi088AccelWriteReg(config, ACC_RANGE, range);
 

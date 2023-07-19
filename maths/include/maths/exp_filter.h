@@ -7,9 +7,9 @@
  */
 typedef struct ExpFilterData
 {
-    FLOAT a;    /** Alpha value */
-    FLOAT v;    /** Last value */
-    BOOL vInit; /** Is last value initialized */
+    FLOAT a;
+    FLOAT v;
+    BOOL vInit;
 } ExpFilterData;
 
 /**
