@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "pinout.h"
-#include "core/common/radio_utils.h"
-#include "core/common/measurements_utils.h"
-#include "core/common/driver_calling.h"
+#include "radio_utils.h"
+#include "measurements_utils.h"
+#include "driver_calling.h"
 #include "drivers/tools/time_tracker.h"
 #include "drivers/tools/board_control.h"
 #include "drivers/accelerometer/bmi088_driver.h"
@@ -55,7 +55,7 @@ int main(VOID)
 
     while (TRUE)
     {
-        if (runEvery(MEASUREMENTS_UPDATE_RATE_MS, &s_TimerOffset))
+        if (runEveryMs(MEASUREMENTS_UPDATE_RATE_MS, &s_TimerOffset))
         {
             MeasurementData measurement = {0};
 
@@ -149,8 +149,6 @@ VOID takeMeasurements(MeasurementData *measurements)
     if (s_UBloxNeoM9NData.isFinishedSentence)
     {
         BOOL valid = nmeaCheckSentence(s_UBloxNeoM9NData.sentence);
-
-        printf("Valid: %d\n", valid);
 
         if (valid)
         {

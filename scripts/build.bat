@@ -16,7 +16,6 @@ if not exist executables\core mkdir executables\core
 if not exist executables\tests mkdir executables\tests
 if not exist executables\samples mkdir executables\samples
 
-copy build\core\ground_station\ground_station.uf2 executables\core\ground_station.uf2
 copy build\core\rocket\rocket.uf2 executables\core\rocket.uf2
 copy build\core\prototyping\prototyping.uf2 executables\core\prototyping.uf2
 

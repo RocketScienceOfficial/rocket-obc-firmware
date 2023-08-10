@@ -4,6 +4,7 @@ add_library(${LIB_GENERAL_NAME} main.c)
 
 target_link_libraries(${LIB_GENERAL_NAME} INTERFACE
     drivers_accelerometer_lib
+    drivers_adc_lib
     drivers_barometer_lib
     drivers_battery_lib
     drivers_buzzer_lib

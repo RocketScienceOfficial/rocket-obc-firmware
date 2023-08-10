@@ -29,7 +29,6 @@ if [ ! -d executables/samples ]; then
    mkdir executables/samples
 fi
 
-cp build/core/ground_station/ground_station.uf2 executables/core/ground_station.uf2
 cp build/core/rocket/rocket.uf2 executables/core/rocket.uf2
 cp build/core/prototyping/prototyping.uf2 executables/core/prototyping.uf2
 

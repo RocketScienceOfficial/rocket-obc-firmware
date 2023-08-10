@@ -1,5 +1,5 @@
-#include "core/common/radio_utils.h"
-#include "core/common/driver_calling.h"
+#include "radio_utils.h"
+#include "driver_calling.h"
 #include "drivers/console/console_input.h"
 #include "services/logging/logger.h"
 #include <stdlib.h>

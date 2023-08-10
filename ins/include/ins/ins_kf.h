@@ -4,56 +4,162 @@
 #include "maths/vector.h"
 #include "maths/quaternion.h"
 
-typedef struct INSKalmanFilterConfig
+#define INS_KALMAN_FILTER_STATE_DIMENSION 6
+#define INS_KALMAN_FILTER_INPUT_DIMENSION 3
+#define INS_KALMAN_FILTER_MEASURE_DIMENSION 5
+
+/**
+ * @brief Kalman filter variances structure
+ */
+typedef struct INSKalmanFilterVariances
 {
-    FLOAT dt;
     FLOAT accelVariance;
     FLOAT gpsPosVariance;
     FLOAT pressureVariance;
     FLOAT temperatureVariance;
-} INSKalmanFilterConfig;
+} INSKalmanFilterVariances;
 
+/**
+ * @brief Kalman filter input data
+ */
 typedef struct INSKalmanFilterInputData
 {
     vec3 acc;
     vec3 gpsPos;
     FLOAT pressure;
     FLOAT temperature;
-    quat orientation;
 } INSKalmanFilterInputData;
 
+/**
+ * @brief Kalman filter output data
+ */
 typedef struct INSKalmanFilterOutputData
 {
     vec3 pos;
     vec3 vel;
 } INSKalmanFilterOutputData;
 
+/**
+ * @brief Kalman filter state
+ */
 typedef struct INSKalmanFilterState
 {
-    INSKalmanFilterConfig config;
+    FLOAT dt;
     FLOAT dt2;
     FLOAT dt3;
     FLOAT dt4;
     FLOAT dt5;
-    INSKalmanFilterOutputData stateVector;
-    FLOAT P[6][6];
-    FLOAT R[5][5];
-    FLOAT K[6][5];
-    FLOAT H[5][6];
-    FLOAT I_KH[6][6];
-    FLOAT I_KHP[6][6];
-    FLOAT I_KHP_I_HK_[6][6];
-    FLOAT KR[6][5];
-    FLOAT PH_[6][5];
-    FLOAT HPH_R[5][5];
-    FLOAT HPH_R_INV[5][5];
+    union
+    {
+        INSKalmanFilterOutputData stateVector;
+        FLOAT x[INS_KALMAN_FILTER_STATE_DIMENSION];
+    };
+    FLOAT F[INS_KALMAN_FILTER_STATE_DIMENSION][INS_KALMAN_FILTER_STATE_DIMENSION];
+    FLOAT P[INS_KALMAN_FILTER_STATE_DIMENSION][INS_KALMAN_FILTER_STATE_DIMENSION];
+    FLOAT Q[INS_KALMAN_FILTER_STATE_DIMENSION][INS_KALMAN_FILTER_STATE_DIMENSION];
+    FLOAT R[INS_KALMAN_FILTER_MEASURE_DIMENSION][INS_KALMAN_FILTER_MEASURE_DIMENSION];
+    FLOAT K[INS_KALMAN_FILTER_STATE_DIMENSION][INS_KALMAN_FILTER_MEASURE_DIMENSION];
+    FLOAT H[INS_KALMAN_FILTER_MEASURE_DIMENSION][INS_KALMAN_FILTER_STATE_DIMENSION];
+    FLOAT FP[INS_KALMAN_FILTER_STATE_DIMENSION][INS_KALMAN_FILTER_STATE_DIMENSION];
+    FLOAT h[INS_KALMAN_FILTER_MEASURE_DIMENSION];
+    FLOAT v[INS_KALMAN_FILTER_MEASURE_DIMENSION];
+    FLOAT I_KH[INS_KALMAN_FILTER_STATE_DIMENSION][INS_KALMAN_FILTER_STATE_DIMENSION];
+    FLOAT I_KHP[INS_KALMAN_FILTER_STATE_DIMENSION][INS_KALMAN_FILTER_STATE_DIMENSION];
+    FLOAT I_KHP_I_KH_[INS_KALMAN_FILTER_STATE_DIMENSION][INS_KALMAN_FILTER_STATE_DIMENSION];
+    FLOAT KR[INS_KALMAN_FILTER_STATE_DIMENSION][INS_KALMAN_FILTER_MEASURE_DIMENSION];
+    FLOAT PH_[INS_KALMAN_FILTER_STATE_DIMENSION][INS_KALMAN_FILTER_MEASURE_DIMENSION];
+    FLOAT HPH_R[INS_KALMAN_FILTER_MEASURE_DIMENSION][INS_KALMAN_FILTER_MEASURE_DIMENSION];
+    FLOAT HPH_R_INV[INS_KALMAN_FILTER_MEASURE_DIMENSION][INS_KALMAN_FILTER_MEASURE_DIMENSION];
 } INSKalmanFilterState;
 
-VOID insKalmanFilterInit(INSKalmanFilterState *state, INSKalmanFilterConfig *config);
+/**
+ * @brief Initializes the Kalman filter
+ *
+ * @param state Kalman filter state
+ * @param dt Delta time
+ * @param baseState Kalman filter base state
+ * @param variances Kalman filter variances
+ */
+VOID insKalmanFilterInit(INSKalmanFilterState *state, FLOAT dt, INSKalmanFilterOutputData *baseState, INSKalmanFilterVariances *variances);
+
+/**
+ * @brief Updates the Kalman filter
+ *
+ * @param state Kalman filter state
+ * @param inputData Kalman filter input data
+ * @param pOutputData Kalman filter output data
+ */
 VOID insKalmanFilterUpdate(INSKalmanFilterState *state, INSKalmanFilterInputData *inputData, INSKalmanFilterOutputData *pOutputData);
 
+/**
+ * @brief Updates the Kalman filter variances
+ *
+ * @param state Kalman filter state
+ * @param variances Kalman filter variances
+ */
+VOID insKalmanFilterUpdateVariances(INSKalmanFilterState *state, INSKalmanFilterVariances *variances);
+
+/**
+ * @brief Predicts the Kalman state
+ *
+ * @param state Kalman filter state
+ * @param inputData Kalman filter input data
+ */
 VOID __insKalmanFilterPredictState(INSKalmanFilterState *state, INSKalmanFilterInputData *inputData);
+
+/**
+ * @brief Predicts the Kalman covariance
+ *
+ * @param state Kalman filter state
+ */
 VOID __insKalmanFilterPredictCovariance(INSKalmanFilterState *state);
+
+/**
+ * @brief Updates the Kalman state
+ *
+ * @param state Kalman filter state
+ * @param inputData Kalman filter input data
+ */
 VOID __insKalmanFilterUpdateState(INSKalmanFilterState *state, INSKalmanFilterInputData *inputData);
+
+/**
+ * @brief Updates the Kalman covariance
+ *
+ * @param state Kalman filter state
+ */
 VOID __insKalmanFilterUpdateCovariance(INSKalmanFilterState *state);
-VOID __insKalmanFilterUpdateGain(INSKalmanFilterState *state, INSKalmanFilterInputData *inputData);
+
+/**
+ * @brief Updates the Kalman gain
+ *
+ * @param state Kalman filter state
+ */
+VOID __insKalmanFilterUpdateGain(INSKalmanFilterState *state);
+
+/**
+ * @brief Calculates the Kalman gain temp (HPH_ + R) inverse. See: https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/matrix-inverse/matrix-inverse.html
+ *
+ * @param state Kalman filter state
+ */
+VOID __insKalmanFilterCalculateGainTempInverse(INSKalmanFilterState *state);
+
+/**
+ * @brief Update state vector with revolution
+ *
+ * @param state Kalman filter state
+ */
+VOID __insKalmanFilterUpdateStateRevolution(INSKalmanFilterState *state);
+
+/**
+ * @brief Recalculates the F Jacobian
+ *
+ * @param state Kalman filter state
+ */
+VOID __insKalmanFilterRecalculateFJacobian(INSKalmanFilterState *state);
+
+/**
+ * @brief Recalculates the H Jacobian
+ *
+ * @param state Kalman filter state
+ */
+VOID __insKalmanFilterRecalculateHJacobian(INSKalmanFilterState *state);

@@ -98,9 +98,7 @@ FUNCRESULT bmi088AccelInitI2C(BMI088AccelConfig *config, I2CInstance i2c, PinNum
 
 FUNCRESULT bmi088AccelSetConf(BMI088AccelConfig *config, BMI088AccelODR odr, BMI088AccelOSR osr)
 {
-    BYTE cfg = odr | (osr << 4);
-
-    __bmi088AccelWriteReg(config, ACC_CONF, cfg);
+    __bmi088AccelWriteReg(config, ACC_CONF, odr | (osr << 4));
 
     sleepMiliseconds(5);
 
@@ -245,7 +243,7 @@ FUNCRESULT bmi088GyroSetRange(BMI088GyroConfig *config, BMI088GyroRange range)
 
     config->rangeConstant = DEG_2_RAD(val);
 
-    gpioWriteReg(&config->gpioConfig, GYRO_RANGE, range);
+    gpioWriteReg(&config->gpioConfig, GYRO_RANGE, (BYTE)range);
 
     sleepMiliseconds(5);
 

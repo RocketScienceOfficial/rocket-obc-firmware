@@ -8,7 +8,14 @@ TIME getMsSinceBoot()
 	return time_ms;
 }
 
-BOOL runEvery(TIME ms, TIME *timerOffset)
+TIME getUsSinceBoot()
+{
+	TIME time_us = to_us_since_boot(get_absolute_time());
+
+	return time_us;
+}
+
+BOOL runEveryMs(TIME ms, TIME *timerOffset)
 {
 	if (getMsSinceBoot() - *timerOffset >= ms)
 	{
@@ -20,7 +27,24 @@ BOOL runEvery(TIME ms, TIME *timerOffset)
 	return FALSE;
 }
 
+BOOL runEveryUs(TIME us, TIME *timerOffset)
+{
+	if (getUsSinceBoot() - *timerOffset >= us)
+	{
+		*timerOffset = getUsSinceBoot();
+
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 VOID sleepMiliseconds(TIME ms)
 {
 	sleep_ms(ms);
+}
+
+VOID sleepMicroseconds(TIME us)
+{
+	sleep_us(us);
 }

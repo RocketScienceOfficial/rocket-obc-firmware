@@ -3,7 +3,7 @@
 #include <obc/api.h>
 
 /**
- * @brief Vector 2D
+ * @brief 2D Vector
  */
 typedef struct vec2
 {
@@ -11,7 +11,7 @@ typedef struct vec2
 } vec2;
 
 /**
- * @brief Vector 3D
+ * @brief 3D Vector
  */
 typedef struct vec3
 {

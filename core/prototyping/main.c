@@ -11,7 +11,8 @@
 #include <stdio.h>
 #include <math.h>
 
-#define DT 0.01f
+#define FREQ 200.0f
+#define DT (1.0f / FREQ)
 #define SPI 0
 #define SCK 18
 #define MOSI 19
@@ -30,12 +31,15 @@ int main()
     MadgiwckFilterData madgwickFilterData;
     MahonyFilterData mahonyFilterData = {0};
     INSKalmanFilterState kalmanFilterState = {0};
-    INSKalmanFilterConfig kalmanFilterConfig = {
-        .dt = DT,
-        .accelVariance = 0.2f,
-        .gpsPosVariance = 10000.0f,
-        .pressureVariance = 0.2f,
-        .temperatureVariance = 0.2f,
+    INSKalmanFilterVariances kalmanFilterVariances = {
+        .accelVariance = 1.0f,
+        .gpsPosVariance = 10.0f,
+        .pressureVariance = 1.0f,
+        .temperatureVariance = 1.0f,
+    };
+    INSKalmanFilterOutputData kalmanFilterBaseState = {
+        .pos = (vec3){.x = 0, .y = 0, .z = 128},
+        .vel = (vec3){.x = 0, .y = 0, .z = 0},
     };
     INSKalmanFilterInputData kalmanFilterInputData = {0};
     INSKalmanFilterOutputData kalmanFilterOutputData = {0};
@@ -44,12 +48,12 @@ int main()
     BME688Config bme688Config = {0};
     MMC5983MAConfig mmc5983maConfig = {0};
 
-    madgwickInit(&madgwickFilterData, 5.0f, DT);
+    madgwickInit(&madgwickFilterData, 45.0f, DT);
     mahonyInit(&mahonyFilterData, 3.0f, 0.0f, DT);
-    insKalmanFilterInit(&kalmanFilterState, &kalmanFilterConfig);
+    insKalmanFilterInit(&kalmanFilterState, DT, &kalmanFilterBaseState, &kalmanFilterVariances);
 
     bmi088AccelInitSPI(&accelConfig, SPI, MISO, MOSI, ACCEL_CS, SCK);
-    bmi088AccelSetConf(&accelConfig, BMI088_ACCEL_ODR_800HZ, BMI088_ACCEL_OSR_NORMAL);
+    bmi088AccelSetConf(&accelConfig, BMI088_ACCEL_ODR_400HZ, BMI088_ACCEL_OSR_NORMAL);
     bmi088AccelSetRange(&accelConfig, BMI088_ACCEL_RANGE_6G);
 
     bmi088GyroInitSPI(&gyroConfig, SPI, MISO, MOSI, GYRO_CS, SCK);
@@ -66,37 +70,47 @@ int main()
 
     sleepMiliseconds(100);
 
+    TIME offset = 0;
+
     while (TRUE)
     {
-        vec3 accel;
-        vec3 gyro;
-        vec3 mag = {0};
-        vec3 eulerData;
-        BME688Data data = {0};
+        if (runEveryUs(DT * 1000000, &offset))
+        {
+            vec3 accel;
+            vec3 gyro;
+            vec3 mag = {0};
+            vec3 eulerData;
+            BME688Data data = {0};
 
-        bmi088AccelRead(&accelConfig, &accel);
-        bmi088GyroRead(&gyroConfig, &gyro);
-        mmc5983maRead(&mmc5983maConfig, &mag);
-        bme688Read(&bme688Config, &data);
+            bmi088AccelRead(&accelConfig, &accel);
+            bmi088GyroRead(&gyroConfig, &gyro);
+            mmc5983maRead(&mmc5983maConfig, &mag);
+            bme688Read(&bme688Config, &data);
 
-        mahonyUpdateIMU(&mahonyFilterData, gyro, accel);
-        madgwickUpdateMARG(&madgwickFilterData, gyro, accel, mag);
-        quatToEuler(&eulerData, &madgwickFilterData.q);
+            mahonyUpdateIMU(&mahonyFilterData, gyro, accel);
+            madgwickUpdateMARG(&madgwickFilterData, gyro, accel, mag);
+            quatToEuler(&eulerData, &mahonyFilterData.q);
 
-        kalmanFilterInputData.acc = accel;
-        kalmanFilterInputData.gpsPos = (vec3){0};
-        kalmanFilterInputData.orientation = madgwickFilterData.q;
-        kalmanFilterInputData.pressure = data.pressure;
-        kalmanFilterInputData.temperature = data.temperature;
+            //if (getMsSinceBoot() >= 20000)
+            {
+                rotateVectorThroughQuaternion(&accel, &mahonyFilterData.q);
 
-        insKalmanFilterUpdate(&kalmanFilterState, &kalmanFilterInputData, &kalmanFilterOutputData);
+                accel.z -= EARTH_GRAVITY;
 
-        printf("X: %f, Y: %f, Z: %f\n", eulerData.x, eulerData.y, eulerData.z);
-        // printf("X: %f, Y: %f, Z: %f\n", kalmanFilterOutputData.pos.x, kalmanFilterOutputData.pos.y, kalmanFilterOutputData.pos.z);
+                accel = (vec3){0};
 
-        bme688SetMode(&bme688Config, BME688_MODE_FORCED);
+                kalmanFilterInputData.acc = accel;
+                kalmanFilterInputData.gpsPos = (vec3){.x = 0, .y = 0, .z = 128};
+                kalmanFilterInputData.pressure = data.pressure;
+                kalmanFilterInputData.temperature = CELSIUS_2_KELVIN(data.temperature);
 
-        sleepMiliseconds(DT * 1000.0f);
+                insKalmanFilterUpdate(&kalmanFilterState, &kalmanFilterInputData, &kalmanFilterOutputData);
+
+                // printf("X: %f, Y: %f, Z: %f\n", kalmanFilterOutputData.pos.x, kalmanFilterOutputData.pos.y, kalmanFilterOutputData.pos.z);
+            }
+
+            bme688SetMode(&bme688Config, BME688_MODE_FORCED);
+        }
     }
 
     return 0;
