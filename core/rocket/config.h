@@ -1,0 +1,4 @@
+#pragma once
+
+#define RADIO_SEND_RATE_MS 500
+#define MEASUREMENTS_UPDATE_RATE_MS 2.5

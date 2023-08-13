@@ -1,8 +1,6 @@
 #include "radio_utils.h"
+#include "pinout.h"
 #include "driver_calling.h"
-#include "drivers/console/console_input.h"
-#include "services/logging/logger.h"
-#include <stdlib.h>
 #include <string.h>
 
 #define RADIO_DBM 20
@@ -15,14 +13,21 @@
 
 static SX127XData s_LoraData;
 
-VOID initializeRadio(SX127XPinout *pinout)
+VOID initRadio(VOID)
 {
-    DRIVER_CALL(sx127XInit(&s_LoraData, pinout, RADIO_FREQUENCY_HZ));
+    SX127XPinout loraPinout = (SX127XPinout){
+        .spi = SX1278_SPI,
+        .sck = SX1278_SCK_GPIO,
+        .miso = SX1278_MISO_GPIO,
+        .mosi = SX1278_MOSI_GPIO,
+        .cs = SX1278_CS_GPIO,
+        .reset = SX1278_RESET_GPIO,
+    };
+
+    DRIVER_CALL(sx127XInit(&s_LoraData, &loraPinout, RADIO_FREQUENCY_HZ));
     DRIVER_CALL(sx127XSetTxPower(&s_LoraData, RADIO_DBM));
     DRIVER_CALL(sx127XSetSpreadingFactor(&s_LoraData, RADIO_SPREADING_FACTOR));
     DRIVER_CALL(sx127XSetSignalBandwidth(&s_LoraData, RADIO_SIGNAL_BANDWIDTH));
-
-    MY_LOG_CORE_INFO("Radio initialized!");
 }
 
 BOOL checkRadioPacket(RadioUtilPacketData *packet)
@@ -33,12 +38,8 @@ BOOL checkRadioPacket(RadioUtilPacketData *packet)
 
     if (packetSize > 0)
     {
-        MY_LOG_CORE_INFO("Packet is available!");
-
         if (packetSize != sizeof(RadioPacket))
         {
-            MY_LOG_CORE_ERROR("Packet size is too big!");
-
             return FALSE;
         }
 
@@ -73,20 +74,7 @@ BOOL checkRadioPacket(RadioUtilPacketData *packet)
         packet->body = (RadioBody){0};
         packet->signalStrength = rssi;
 
-        BOOL packetValidation = deserializeRadioPacket(buffer, &packet->body);
-
-        if (packetValidation)
-        {
-            MY_LOG_CORE_INFO("Packet is valid!");
-        }
-        else
-        {
-            MY_LOG_CORE_ERROR("Validation failed!");
-        }
-
-        MY_LOG_CORE_INFO("Packet processed!");
-
-        return packetValidation;
+        return deserializeRadioPacket(buffer, &packet->body);
     }
 
     return FALSE;
@@ -100,11 +88,17 @@ VOID sendRadioPacket(RadioBody *body)
     if (serializationResult)
     {
         DRIVER_CALL(sx127XWriteBuffer(&s_LoraData, packetBuffer, sizeof(RadioPacket)));
+    }
+}
 
-        MY_LOG_CORE_INFO("Packet sent!");
-    }
-    else
-    {
-        MY_LOG_CORE_ERROR("Packet serialization failed!");
-    }
+VOID sendMeasurementData(MeasurementData *data)
+{
+    RadioBody body = {0};
+
+    body.command = MEASUREMENTS_RADIO_COMMAND_ID;
+    body.payloadSize = sizeof(*data);
+
+    memcpy(body.payload, data, body.payloadSize);
+
+    sendRadioPacket(&body);
 }

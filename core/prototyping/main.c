@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define FREQ 200.0f
+#define FREQ 1.0f
 #define DT (1.0f / FREQ)
 #define SPI 0
 #define SCK 18
@@ -80,12 +80,12 @@ int main()
             vec3 gyro;
             vec3 mag = {0};
             vec3 eulerData;
-            BME688Data data = {0};
+            BME688Data baro = {0};
 
             bmi088AccelRead(&accelConfig, &accel);
             bmi088GyroRead(&gyroConfig, &gyro);
             mmc5983maRead(&mmc5983maConfig, &mag);
-            bme688Read(&bme688Config, &data);
+            bme688Read(&bme688Config, &baro);
 
             mahonyUpdateIMU(&mahonyFilterData, gyro, accel);
             madgwickUpdateMARG(&madgwickFilterData, gyro, accel, mag);
@@ -101,9 +101,9 @@ int main()
 
                 kalmanFilterInputData.acc = accel;
                 kalmanFilterInputData.gpsPos = (vec3){.x = 0, .y = 0, .z = 128};
-                kalmanFilterInputData.pressure = data.pressure;
-                kalmanFilterInputData.temperature = CELSIUS_2_KELVIN(data.temperature);
-
+                kalmanFilterInputData.pressure = 99796.74f;
+                kalmanFilterInputData.temperature = 288.15f;
+                
                 insKalmanFilterUpdate(&kalmanFilterState, &kalmanFilterInputData, &kalmanFilterOutputData);
 
                 // printf("X: %f, Y: %f, Z: %f\n", kalmanFilterOutputData.pos.x, kalmanFilterOutputData.pos.y, kalmanFilterOutputData.pos.z);

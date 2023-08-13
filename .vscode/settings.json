@@ -81,6 +81,7 @@
         "pid_controller.h": "c",
         "math_utils.h": "c",
         "ins_kf.h": "c",
-        "max1161x_driver.h": "c"
+        "max1161x_driver.h": "c",
+        "saver.h": "c"
     }
 }

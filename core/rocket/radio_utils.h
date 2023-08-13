@@ -3,6 +3,7 @@
 #include <obc/api.h>
 #include "drivers/lora/sx127X_driver.h"
 #include "drivers/lora/radio_protocol.h"
+#include "measurements_utils.h"
 
 #define MEASUREMENTS_RADIO_COMMAND_ID 'M'
 
@@ -17,10 +18,8 @@ typedef struct RadioUtilPacketData
 
 /**
  * @brief Initialize radio module
- *
- * @param pinout Radio pinout
  */
-VOID initializeRadio(SX127XPinout *pinout);
+VOID initRadio(VOID);
 
 /**
  * @brief Check if radio packet is available
@@ -36,3 +35,10 @@ BOOL checkRadioPacket(RadioUtilPacketData *packet);
  * @param body Radio packet body
  */
 VOID sendRadioPacket(RadioBody *body);
+
+/**
+ * @brief Send measurement data
+ *
+ * @param data Measurement data
+ */
+VOID sendMeasurementData(MeasurementData *data);

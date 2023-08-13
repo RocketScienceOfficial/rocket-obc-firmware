@@ -6,6 +6,103 @@
 
 #define INIT_STATE_COVARIANCE 100.0f
 
+static VOID __printMatrix_State_State(STRING name, FLOAT matrix[INS_KALMAN_FILTER_STATE_DIMENSION][INS_KALMAN_FILTER_STATE_DIMENSION])
+{
+    printf("=========== %s: ===========\n", name);
+
+    for (SIZE i = 0; i < INS_KALMAN_FILTER_STATE_DIMENSION; i++)
+    {
+        for (SIZE j = 0; j < INS_KALMAN_FILTER_STATE_DIMENSION; j++)
+        {
+            printf("%f ", matrix[i][j]);
+        }
+
+        printf("\n");
+    }
+
+    printf("\n");
+}
+
+static VOID __printMatrix_State_Measure(STRING name, FLOAT matrix[INS_KALMAN_FILTER_STATE_DIMENSION][INS_KALMAN_FILTER_MEASURE_DIMENSION])
+{
+    printf("=========== %s: ===========\n", name);
+
+    for (SIZE i = 0; i < INS_KALMAN_FILTER_STATE_DIMENSION; i++)
+    {
+        for (SIZE j = 0; j < INS_KALMAN_FILTER_MEASURE_DIMENSION; j++)
+        {
+            printf("%f ", matrix[i][j]);
+        }
+
+        printf("\n");
+    }
+
+    printf("\n");
+}
+
+static VOID __printMatrix_Measure_Measure(STRING name, FLOAT matrix[INS_KALMAN_FILTER_MEASURE_DIMENSION][INS_KALMAN_FILTER_MEASURE_DIMENSION])
+{
+    printf("=========== %s: ===========\n", name);
+
+    for (SIZE i = 0; i < INS_KALMAN_FILTER_MEASURE_DIMENSION; i++)
+    {
+        for (SIZE j = 0; j < INS_KALMAN_FILTER_MEASURE_DIMENSION; j++)
+        {
+            printf("%f ", matrix[i][j]);
+        }
+
+        printf("\n");
+    }
+
+    printf("\n");
+}
+
+static VOID __printMatrix_Measure_State(STRING name, FLOAT matrix[INS_KALMAN_FILTER_MEASURE_DIMENSION][INS_KALMAN_FILTER_STATE_DIMENSION])
+{
+    printf("=========== %s: ===========\n", name);
+
+    for (SIZE i = 0; i < INS_KALMAN_FILTER_MEASURE_DIMENSION; i++)
+    {
+        for (SIZE j = 0; j < INS_KALMAN_FILTER_STATE_DIMENSION; j++)
+        {
+            printf("%f ", matrix[i][j]);
+        }
+
+        printf("\n");
+    }
+
+    printf("\n");
+}
+
+static VOID __printVector_Measure(STRING name, FLOAT vector[INS_KALMAN_FILTER_MEASURE_DIMENSION])
+{
+    printf("=========== %s: ===========\n", name);
+
+    for (SIZE i = 0; i < INS_KALMAN_FILTER_MEASURE_DIMENSION; i++)
+    {
+        printf("%f\n", vector[i]);
+    }
+
+    printf("\n\n");
+}
+
+static VOID __printVector_State(STRING name, FLOAT vector[INS_KALMAN_FILTER_STATE_DIMENSION])
+{
+    printf("=========== %s: ===========\n", name);
+
+    for (SIZE i = 0; i < INS_KALMAN_FILTER_STATE_DIMENSION; i++)
+    {
+        printf("%f\n", vector[i]);
+    }
+
+    printf("\n\n");
+}
+
+static VOID __printMatrixEnd()
+{
+    printf("\n\n\n");
+}
+
 VOID insKalmanFilterInit(INSKalmanFilterState *state, FLOAT dt, INSKalmanFilterOutputData *baseState, INSKalmanFilterVariances *variances)
 {
     memset(state, 0, sizeof(*state));
@@ -43,7 +140,7 @@ VOID insKalmanFilterUpdate(INSKalmanFilterState *state, INSKalmanFilterInputData
     *pOutputData = state->stateVector;
 
     __insKalmanFilterPredictState(state, inputData);
-    //__insKalmanFilterRecalculateFJacobian(state);
+    __insKalmanFilterRecalculateFJacobian(state);
     __insKalmanFilterPredictCovariance(state);
 }
 
