@@ -58,6 +58,11 @@
 #define GYRO_FIFO_CONFIG 0x3D
 #define GYRO_FIFO_DATA 0x3E
 
+#define ACC_GND_I2C_ADDRESS 0x18
+#define ACC_VDD_I2C_ADDRESS 0x19
+#define GYRO_GND_I2C_ADDRESS 0x68
+#define GYRO_VDD_I2C_ADDRESS 0x69
+
 FUNCRESULT bmi088AccelInitSPI(BMI088AccelConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
 {
     config->gpioConfig = (GPIOCommunicationConfig){
@@ -77,12 +82,12 @@ FUNCRESULT bmi088AccelInitSPI(BMI088AccelConfig *config, SPIInstance spi, PinNum
     return SUC_OK;
 }
 
-FUNCRESULT bmi088AccelInitI2C(BMI088AccelConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl, BYTE address)
+FUNCRESULT bmi088AccelInitI2C(BMI088AccelConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl, BOOL sdo1Grounded)
 {
     config->gpioConfig = (GPIOCommunicationConfig){
         .protocol = GPIO_PROTOCOL_SPI,
         .i2c = i2c,
-        .i2cAddress = address,
+        .i2cAddress = sdo1Grounded ? ACC_GND_I2C_ADDRESS : ACC_VDD_I2C_ADDRESS,
         .readMask = 0x80,
         .multipleReadMask = 0x80,
         .writeMask = 0x7F,
@@ -202,12 +207,12 @@ FUNCRESULT bmi088GyroInitSPI(BMI088GyroConfig *config, SPIInstance spi, PinNumbe
     return spiInitPins(spi, miso, mosi, sck, cs);
 }
 
-FUNCRESULT bmi088GyroInitI2C(BMI088GyroConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl, BYTE address)
+FUNCRESULT bmi088GyroInitI2C(BMI088GyroConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl, BOOL sdo1Grounded)
 {
     config->gpioConfig = (GPIOCommunicationConfig){
         .protocol = GPIO_PROTOCOL_I2C,
         .i2c = i2c,
-        .i2cAddress = address,
+        .i2cAddress = sdo1Grounded ? GYRO_GND_I2C_ADDRESS : GYRO_VDD_I2C_ADDRESS,
         .readMask = 0x80,
         .multipleReadMask = 0x80,
         .writeMask = 0x7F,

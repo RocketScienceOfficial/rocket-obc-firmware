@@ -116,7 +116,11 @@ FUNCRESULT lsm6dso32Read(LSM6DSO32Config *config, vec3 *pAcceleration, vec3 *pGy
     INT16 rawAccelerationY = (INT16)(buffer[11] << 8) | buffer[10];
     INT16 rawAccelerationZ = (INT16)(buffer[13] << 8) | buffer[12];
 
-    *pTemperature = rawTemperature / 32768.0f;
+    if (pTemperature != NULL)
+    {
+        *pTemperature = rawTemperature / 32768.0f;
+    }
+    
     pGyro->x = rawAngularRateX / 32768.0f * config->gyroRangeConstant;
     pGyro->y = rawAngularRateY / 32768.0f * config->gyroRangeConstant;
     pGyro->z = rawAngularRateZ / 32768.0f * config->gyroRangeConstant;

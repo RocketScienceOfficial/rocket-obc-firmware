@@ -3,10 +3,9 @@
 #include "drivers/tools/time_tracker.h"
 #include <stdio.h>
 
-#define I2C 0
-#define SDA 0
-#define SCL 1
-#define ADDRESS 0x00
+#define I2C 1
+#define SDA 14
+#define SCL 13
 
 int main()
 {
@@ -28,7 +27,7 @@ int main()
         printf("Temperature: %f C\n", data.temperature);
         printf("Pressure: %f Pa\n", data.pressure);
 
-        sleepMiliseconds(4);
+        sleepMiliseconds(5);
     }
 
     return 0;

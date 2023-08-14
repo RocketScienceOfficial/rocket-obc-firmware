@@ -5,18 +5,15 @@
 #include "maths/constants.h"
 #include <stdio.h>
 
-#define SPI 0
-#define SCK 18
-#define MOSI 19
-#define MISO 16
-#define ACCEL_CS 11
-#define GYRO_CS 10
+#define I2C 1
+#define SDA 14
+#define SCL 13
 
 int main()
 {
     boardInit(5000);
 
-    spiInitAll(SPI, 10 * 1000 * 1000);
+    i2cInitAll(I2C, 400000);
 
     MadgiwckFilterData madgwickFilterData;
     BMI088AccelConfig accelConfig;
@@ -24,11 +21,11 @@ int main()
 
     madgwickInit(&madgwickFilterData, 0.2f, 0.01f);
 
-    bmi088AccelInitSPI(&accelConfig, SPI, MISO, MOSI, ACCEL_CS, SCK);
+    bmi088AccelInitI2C(&accelConfig, I2C, SDA, SCL, TRUE);
     bmi088AccelSetConf(&accelConfig, BMI088_ACCEL_ODR_800HZ, BMI088_ACCEL_OSR_NORMAL);
     bmi088AccelSetRange(&accelConfig, BMI088_ACCEL_RANGE_6G);
 
-    bmi088GyroInitSPI(&gyroConfig, SPI, MISO, MOSI, GYRO_CS, SCK);
+    bmi088GyroInitI2C(&gyroConfig, I2C, SDA, SCL, TRUE);
     bmi088GyroSetBandwidth(&gyroConfig, BMI088_GYRO_ODR_2000_BW_523HZ);
     bmi088GyroSetRange(&gyroConfig, BMI088_GYRO_RANGE_250DPS);
 
@@ -44,12 +41,12 @@ int main()
         madgwickUpdateIMU(&madgwickFilterData, gyro, accel);
         quatToEuler(&eulerData, &madgwickFilterData.q);
 
-        // printf("Accel X: %f\n", accel.x);
-        // printf("Accel Y: %f\n", accel.y);
-        // printf("Accel Z: %f\n", accel.z);
-        // printf("Gyro X: %f\n", RAD_2_DEG(gyro.x));
-        // printf("Gyro Y: %f\n", RAD_2_DEG(gyro.y));
-        // printf("Gyro Z: %f\n", RAD_2_DEG(gyro.z));
+        printf("Accel X: %f\n", accel.x);
+        printf("Accel Y: %f\n", accel.y);
+        printf("Accel Z: %f\n", accel.z);
+        printf("Gyro X: %f\n", RAD_2_DEG(gyro.x));
+        printf("Gyro Y: %f\n", RAD_2_DEG(gyro.y));
+        printf("Gyro Z: %f\n", RAD_2_DEG(gyro.z));
         printf("MAD Gyro X: %f\n", eulerData.x);
         printf("MAD Gyro Y: %f\n", eulerData.y);
         printf("MAD Gyro Z: %f\n", eulerData.z);

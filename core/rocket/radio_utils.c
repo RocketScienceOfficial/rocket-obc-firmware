@@ -1,27 +1,19 @@
 #include "radio_utils.h"
-#include "pinout.h"
+#include "config.h"
 #include "driver_calling.h"
 #include <string.h>
-
-#define RADIO_DBM 20
-#define RADIO_SPREADING_FACTOR 10
-#define RADIO_SIGNAL_BANDWIDTH 125E3
-#define RADIO_ERROR_SPREADING_FACTOR 10
-#define RADIO_ERROR_SIGNAL_BANDWIDTH 125E3
-#define RADIO_FREQUENCY_HZ 433E6
-#define RADIO_MIN_RSSI -80
 
 static SX127XData s_LoraData;
 
 VOID initRadio(VOID)
 {
     SX127XPinout loraPinout = (SX127XPinout){
-        .spi = SX1278_SPI,
-        .sck = SX1278_SCK_GPIO,
-        .miso = SX1278_MISO_GPIO,
-        .mosi = SX1278_MOSI_GPIO,
-        .cs = SX1278_CS_GPIO,
-        .reset = SX1278_RESET_GPIO,
+        .spi = SPI,
+        .sck = SCK,
+        .miso = MISO,
+        .mosi = MOSI,
+        .cs = EXTERNAL_CS_PIN,
+        .reset = LORA_RESET_PIN,
     };
 
     DRIVER_CALL(sx127XInit(&s_LoraData, &loraPinout, RADIO_FREQUENCY_HZ));

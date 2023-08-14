@@ -37,10 +37,20 @@ typedef struct BatteryConfig
 FUNCRESULT batteryInit(BatteryConfig *config, ADCInput input, BatteryInterval *intervals, SIZE8 intervalsCount);
 
 /**
- * @brief Read battery percentage.
+ * @brief Read battery percentage
  *
- * @param config Battery data pointer.
- * @param percentage Percentage of battery.
- * @return Result code.
+ * @param config Battery data pointer
+ * @param percentage Percentage of battery
+ * @return Result code
  */
 FUNCRESULT batteryReadPercent(BatteryConfig *config, FLOAT *percentage);
+
+/**
+ * @brief Convert voltage to percent
+ *
+ * @param intervals Intervals
+ * @param intervalsCount Count of intervals
+ * @param voltage Voltage
+ * @return Percent
+ */
+FLOAT batteryConvertVoltageToPercent(BatteryInterval *intervals, SIZE8 intervalsCount, VoltageLevel voltage);

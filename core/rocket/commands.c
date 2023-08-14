@@ -6,6 +6,11 @@
 #include <string.h>
 #include <stdio.h>
 
+static BOOL s_Available;
+static INT32 s_Chr;
+static ConsoleInput s_Input;
+static BOOL s_TokensReady;
+
 VOID readFlashData(VOID)
 {
     const BYTE *newBuffer;
@@ -34,30 +39,22 @@ VOID readFlashData(VOID)
 
 VOID checkCMD(VOID)
 {
-    BOOL available = FALSE;
-    INT32 chr = 0;
-    ConsoleInput input = {0};
-    BOOL tokensReady = FALSE;
+    consoleCheckInput(&s_Available, &s_Chr);
 
-    while (TRUE)
+    if (s_Available)
     {
-        consoleCheckInput(&available, &chr);
+        consoleInputProcessCharacter(s_Chr, &s_Input, &s_TokensReady);
 
-        if (available)
+        if (s_TokensReady)
         {
-            consoleInputProcessCharacter(chr, &input, &tokensReady);
-
-            if (tokensReady)
+            if (strcmp(s_Input.tokens[0], "read-data") == 0)
             {
-                if (strcmp(input.tokens[0], "read-data") == 0)
-                {
-                    readFlashData();
-                }
-
-                tokensReady = FALSE;
+                readFlashData();
             }
 
-            available = FALSE;
+            s_TokensReady = FALSE;
         }
+
+        s_Available = FALSE;
     }
 }

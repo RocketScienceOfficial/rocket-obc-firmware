@@ -33,15 +33,20 @@ FUNCRESULT batteryReadPercent(BatteryConfig *config, FLOAT *percentage)
         return ERR_FAIL;
     }
 
-    for (SIZE8 i = 0; i < config->intervalsCount; i++)
-    {
-        if (voltage >= config->intervals[i].minVolts && voltage <= config->intervals[i].maxVolts)
-        {
-            *percentage = (config->intervals[i].maxPercent - config->intervals[i].minPercent) / (config->intervals[i].maxVolts - config->intervals[i].minVolts) * (voltage - config->intervals[i].minVolts) + config->intervals[i].minPercent;
+    *percentage = batteryConvertVoltageToPercent(config->intervals, config->intervalsCount, voltage);
 
-            return SUC_OK;
+    return ERR_UNEXPECTED;
+}
+
+FLOAT batteryConvertVoltageToPercent(BatteryInterval *intervals, SIZE8 intervalsCount, VoltageLevel voltage)
+{
+    for (SIZE8 i = 0; i < intervalsCount; i++)
+    {
+        if (voltage >= intervals[i].minVolts && voltage <= intervals[i].maxVolts)
+        {
+            return (intervals[i].maxPercent - intervals[i].minPercent) / (intervals[i].maxVolts - intervals[i].minVolts) * (voltage - intervals[i].minVolts) + intervals[i].minPercent;
         }
     }
 
-    return ERR_UNEXPECTED;
+    return 0;
 }

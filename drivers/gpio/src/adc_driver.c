@@ -73,13 +73,13 @@ FUNCRESULT adcInitPin(ADCInput input)
         return ERR_INVALIDARG;
     }
 
-    if (input != ADC_TEMP_INPUT)
+    if (input != ADC_TEMP_SENSOR_INPUT)
     {
         adc_gpio_init(adcConvertInputToPin(input));
     }
     else
     {
-        adc_set_temp_sensor_enabled(true);
+        adc_set_temp_sensor_enabled(TRUE);
     }
 
     return SUC_OK;

@@ -7,6 +7,8 @@ add_executable(${EXE_NAME}
     commands.c
     saver.c
     algorithms.c
+    status.c
+    mission_control.c
 )
 
 add_platform_output(${EXE_NAME})

@@ -42,6 +42,8 @@ typedef struct RawMeasurementData
     FLOAT lat;
     FLOAT lon;
     FLOAT alt;
+    FLOAT pressure;
+    FLOAT temperature;
 } RawMeasurementData;
 
 /**

@@ -11,7 +11,7 @@ typedef UINT8 ADCInput;
 /**
  * @brief ADC input for temp sensor
  */
-#define ADC_TEMP_INPUT 4
+#define ADC_TEMP_SENSOR_INPUT 4
 
 /**
  * @brief ADC invalid input

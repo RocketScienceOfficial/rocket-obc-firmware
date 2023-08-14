@@ -2,7 +2,7 @@
 #include "drivers/tools/time_tracker.h"
 #include <stdio.h>
 
-#define PIN 14
+#define PIN 24
 
 int main()
 {

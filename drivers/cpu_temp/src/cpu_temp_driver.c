@@ -4,7 +4,7 @@
 
 FUNCRESULT cpuTempInit()
 {
-    if (FUNCFAILED(adcInitPin(ADC_TEMP_INPUT)))
+    if (FUNCFAILED(adcInitPin(ADC_TEMP_SENSOR_INPUT)))
     {
         return ERR_FAIL;
     }
@@ -23,12 +23,12 @@ FUNCRESULT cpuTempReadTemp(FLOAT *temp)
 
     VoltageLevel voltage = 0;
 
-    if (FUNCFAILED(adcRead(ADC_TEMP_INPUT, &voltage)))
+    if (FUNCFAILED(adcRead(ADC_TEMP_SENSOR_INPUT, &voltage)))
     {
         return ERR_FAIL;
     }
 
-    *temp = 27 - (voltage - 0.706) / 0.001721;
+    *temp = 27 - (voltage - 0.706f) / 0.001721f;
 
     return SUC_OK;
 }

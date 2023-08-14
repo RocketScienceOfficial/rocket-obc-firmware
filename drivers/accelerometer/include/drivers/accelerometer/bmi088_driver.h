@@ -110,10 +110,10 @@ FUNCRESULT bmi088AccelInitSPI(BMI088AccelConfig *config, SPIInstance spi, PinNum
  * @param i2c I2C
  * @param sda SDA
  * @param scl SCL
- * @param address Address
+ * @param sdo1Grounded Is SDO1 pulled to GND
  * @return Result code
  */
-FUNCRESULT bmi088AccelInitI2C(BMI088AccelConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl, BYTE address);
+FUNCRESULT bmi088AccelInitI2C(BMI088AccelConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl, BOOL sdo1Grounded);
 
 /**
  * @brief Set BMI088 accelerometer configuration
@@ -221,10 +221,10 @@ FUNCRESULT bmi088GyroInitSPI(BMI088GyroConfig *config, SPIInstance spi, PinNumbe
  * @param i2c I2C
  * @param sda SDA
  * @param scl SCL
- * @param address Address
+ * @param sdo1Grounded Is SDO1 pulled to GND
  * @return Result code
  */
-FUNCRESULT bmi088GyroInitI2C(BMI088GyroConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl, BYTE address);
+FUNCRESULT bmi088GyroInitI2C(BMI088GyroConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl, BOOL sdo1Grounded);
 
 /**
  * @brief Set BMI088 gyroscope bandwidth

@@ -3,20 +3,18 @@
 #include "drivers/tools/board_control.h"
 #include <stdio.h>
 
-#define SPI 0
-#define SCK 18
-#define MOSI 19
-#define MISO 16
-#define CS 12
+#define I2C 1
+#define SDA 14
+#define SCL 13
 
 int main()
 {
     boardInit(5000);
 
-    spiInitAll(SPI, 1 * 1000 * 1000);
+    i2cInitAll(I2C, 400000);
 
     MMC5983MAConfig mmc5983maConfig = {0};
-    mmc5983maInitSPI(&mmc5983maConfig, SPI, MISO, MOSI, CS, SCK);
+    mmc5983maInitI2C(&mmc5983maConfig, I2C, SDA, SCL);
     mmc5983maSetContinuousModeODR(&mmc5983maConfig, MMC5983MA_ODR_200HZ);
 
     while (TRUE)
