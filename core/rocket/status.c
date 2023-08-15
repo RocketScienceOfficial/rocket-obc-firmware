@@ -7,7 +7,7 @@
 #include "drivers/battery/battery_driver.h"
 
 #define LEDS_COUNT 7
-#define LORA_TX_TIME_MS 100
+#define LORA_TX_TIME_MS 50
 #define BATTERY_INTERVALS_COUNT 10
 
 static WS2812COLOR s_Colors[LEDS_COUNT];

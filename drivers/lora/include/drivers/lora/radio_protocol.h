@@ -2,7 +2,6 @@
 
 #include <obc/api.h>
 
-#define RADIO_PACKET_PARITY_SIZE 32
 #define RADIO_PACKET_SIGNATURE_LENGTH 16
 #define RADIO_PACKET_PAYLOAD_SIZE 128
 
