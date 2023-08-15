@@ -18,6 +18,7 @@ static TIME s_LoRaTXStartTime;
 static BOOL s_LoRaTXState;
 
 static VOID __refreshColors(VOID);
+static BOOL __voltagetApproxEqual(FLOAT a, FLOAT b);
 static WS2812COLOR __getDetonatorConColor(VoltageLevel voltage);
 static WS2812COLOR __getARMColor(BOOL state);
 static WS2812COLOR __getBatteryColor(FLOAT percent);
@@ -104,9 +105,35 @@ static VOID __refreshColors(VOID)
     ws2812SetColors(s_Colors, LEDS_COUNT);
 }
 
+static BOOL __voltagetApproxEqual(FLOAT a, FLOAT b)
+{
+    const FLOAT VOLTAGE_APPROXIMATION = 0.075f;
+
+    return a >= b - VOLTAGE_APPROXIMATION && a <= b + VOLTAGE_APPROXIMATION;
+}
+
 static WS2812COLOR __getDetonatorConColor(VoltageLevel voltage)
 {
-    return voltage > 0.5 ? ws2812GetColor(0, 255, 0) : ws2812GetColor(255, 0, 0);
+    const VoltageLevel VBAT = 3.3f;
+
+    if (__voltagetApproxEqual(voltage, 0.0f))
+    {
+        return ws2812GetColor(0, 255, 0);
+    }
+    else if (__voltagetApproxEqual(voltage, VBAT * 0.0189607f))
+    {
+        return ws2812GetColor(255, 255, 0);
+    }
+    else if (__voltagetApproxEqual(voltage, VBAT * 0.0297897))
+    {
+        return ws2812GetColor(255, 0, 0);
+    }
+    else if (__voltagetApproxEqual(voltage, VBAT * 0.0383104f))
+    {
+        return ws2812GetColor(0, 0, 255);
+    }
+
+    return ws2812GetColor(0, 0, 0);
 }
 
 static WS2812COLOR __getARMColor(BOOL state)
