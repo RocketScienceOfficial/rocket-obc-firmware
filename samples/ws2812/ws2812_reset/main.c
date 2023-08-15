@@ -1,9 +1,9 @@
 #include "drivers/led/w2812_driver.h"
 #include "drivers/tools/board_control.h"
 
-#define PIN 15
+#define PIN 8
 #define RGBW FALSE
-#define PIXELS_COUNT 5
+#define PIXELS_COUNT 7
 
 int main()
 {

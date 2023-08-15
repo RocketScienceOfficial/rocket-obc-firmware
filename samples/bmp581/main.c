@@ -11,7 +11,7 @@ int main()
 {
     boardInit(5000);
 
-    i2cInitAll(I2C, 400 * 1000);
+    i2cInitAll(I2C, 400000);
 
     BMP581Config bmp581Config;
 
