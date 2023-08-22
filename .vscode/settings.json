@@ -85,5 +85,6 @@
         "saver.h": "c",
         "multithreading.h": "c",
         "diodes.h": "c"
-    }
+    },
+    "cmake.configureOnOpen": false,
 }
