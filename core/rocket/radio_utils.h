@@ -1,7 +1,6 @@
 #pragma once
 
 #include <obc/api.h>
-#include "drivers/lora/sx127X_driver.h"
 #include "drivers/lora/radio_protocol.h"
 #include "measurements_utils.h"
 
@@ -20,14 +19,6 @@ typedef struct RadioUtilPacketData
  * @brief Initialize radio module
  */
 VOID initRadio(VOID);
-
-/**
- * @brief Check if radio packet is available
- *
- * @param packet Radio packet is available. Remeber to call radioClearPacket() on packet body after processing.
- * @return TRUE if radio packet is available, FALSE otherwise
- */
-BOOL checkRadioPacket(RadioUtilPacketData *packet);
 
 /**
  * @brief Send radio packet

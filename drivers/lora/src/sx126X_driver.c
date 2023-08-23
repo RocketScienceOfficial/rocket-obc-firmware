@@ -1,4 +1,5 @@
 #include "drivers/lora/sx126X_driver.h"
+#include "drivers/tools/time_tracker.h"
 #include <string.h>
 
 #define CMD_SET_SLEEP 0x84
@@ -90,6 +91,11 @@ FUNCRESULT sx126XInit(SX126XConfig *data, SX126XPinout *pinout, UINT32 frequency
         return ERR_INVALIDARG;
     }
 
+    gpioInitPin(pinout->busy, GPIO_INPUT);
+    gpioInitPin(pinout->reset, GPIO_OUTPUT);
+
+    spiInitPins(data->pinout.spi, data->pinout.miso, data->pinout.mosi, data->pinout.sck, data->pinout.cs);
+
     return SUC_OK;
 }
 
@@ -102,11 +108,11 @@ FUNCRESULT sx126XSetSleep(SX126XConfig *data, BOOL coldStart)
     return __sx126XCMD(data, CMD_SET_SLEEP, buff, 1, NULL, 0);
 }
 
-FUNCRESULT sx126XSetStandby(SX126XConfig *data, BOOL rc)
+FUNCRESULT sx126XSetStandby(SX126XConfig *data, SX126XStandbyMode mode)
 {
     BYTE buff[1];
 
-    buff[0] = (BYTE)rc;
+    buff[0] = (BYTE)mode;
 
     return __sx126XCMD(data, CMD_SET_STANDBY, buff, 1, NULL, 0);
 }
@@ -183,11 +189,11 @@ FUNCRESULT sx126XSetTXInfinitePreamble(SX126XConfig *data)
     return __sx126XCMD(data, CMD_SET_TX_INFINITE_PREAMBLE, NULL, 0, NULL, 0);
 }
 
-FUNCRESULT sx126XSetRegulatorMode(SX126XConfig *data, BOOL useDCDC)
+FUNCRESULT sx126XSetRegulatorMode(SX126XConfig *data, SX126XRegulatorMode mode)
 {
     BYTE buff[1];
 
-    buff[0] = (BYTE)(useDCDC ? 0 : 1);
+    buff[0] = (BYTE)mode;
 
     return __sx126XCMD(data, CMD_SET_REGULATOR_MODE, buff, 1, NULL, 0);
 }
@@ -401,10 +407,14 @@ FUNCRESULT sx126XSetGFSKModulationParams(SX126XConfig *data, UINT32 bitrate, SX1
     buff[6] = (BYTE)(freq_dev >> 8);
     buff[7] = (BYTE)(freq_dev);
 
-    return __sx126XCMD(data, CMD_SET_MODULATION_PARAMS, buff, 8, NULL, 0);
+    __sx126XCMD(data, CMD_SET_MODULATION_PARAMS, buff, 8, NULL, 0);
+
+    __sx126XTXModulationWorkaround(data, SX126X_PACKET_TYPE_LORA, 0);
+
+    return SUC_OK;
 }
 
-FUNCRESULT sx126XSetLoRaParams(SX126XConfig *data, SX126XLoRaSF sf, SX126XLoRaBW bw, SX126XLoRaCR cr, BOOL lowDataRateOptimize)
+FUNCRESULT sx126XSetLoRaModulationParams(SX126XConfig *data, SX126XLoRaSF sf, SX126XLoRaBW bw, SX126XLoRaCR cr, BOOL lowDataRateOptimize)
 {
     BYTE buff[4];
 
@@ -413,7 +423,11 @@ FUNCRESULT sx126XSetLoRaParams(SX126XConfig *data, SX126XLoRaSF sf, SX126XLoRaBW
     buff[2] = (BYTE)cr;
     buff[3] = (BYTE)lowDataRateOptimize;
 
-    return __sx126XCMD(data, CMD_SET_PACKET_PARAMS, buff, 4, NULL, 0);
+    __sx126XCMD(data, CMD_SET_PACKET_PARAMS, buff, 4, NULL, 0);
+
+    __sx126XTXModulationWorkaround(data, SX126X_PACKET_TYPE_LORA, bw);
+
+    return SUC_OK;
 }
 
 FUNCRESULT sx126XSetPacketGFSKParams(SX126XConfig *data, UINT16 preambleLength, SX126XGFSKPreambleDetectorLength detectorLength, UINT8 syncWordLength, SX126XGFSKAddressFiltering addressFiltering, SX126XGFSKPacketType packetType, UINT8 payloadLength, SX126XGFSKCRCType crcType, BOOL whitening)
@@ -444,7 +458,23 @@ FUNCRESULT sx126XSetPacketLoRaParams(SX126XConfig *data, UINT16 preambleLength, 
     buff[4] = (BYTE)crc;
     buff[5] = (BYTE)invertIQ;
 
-    return __sx126XCMD(data, CMD_SET_PACKET_PARAMS, buff, 6, NULL, 0);
+    __sx126XCMD(data, CMD_SET_PACKET_PARAMS, buff, 6, NULL, 0);
+
+    BYTE reg;
+    __sx126XReadRegister(data, REG_IQ_POLARITY_SETUP, &reg, 1);
+
+    if (invertIQ)
+    {
+        reg &= ~(1 << 2);
+    }
+    else
+    {
+        reg |= (1 << 2);
+    }
+
+    __sx126XWriteRegister(data, REG_IQ_POLARITY_SETUP, &reg, 1);
+
+    return SUC_OK;
 }
 
 FUNCRESULT sx126XSetCADParams(SX126XConfig *data, SX126XCADSymbol cadSymbolNum, UINT8 cadDetPeak, UINT8 cadDetMin, SX126XLoRaCADExitMode cadExitMode, UINT32 timeout_ms)
@@ -525,8 +555,8 @@ FUNCRESULT sx126XGetGFSKPacketStatus(SX126XConfig *data, SX126XGFSKPacketRXStatu
     {
         memcpy(pRXStatus, &buff[1], 1);
 
-        *pRssiSync = (INT8)buff[2];
-        *pRssiAvg = (INT8)buff[3];
+        *pRssiSync = (INT8)(-buff[2] >> 1);
+        *pRssiAvg = (INT8)(-buff[3] >> 1);
     }
 
     return res;
@@ -540,9 +570,9 @@ FUNCRESULT sx126XGetLoRaPacketStatus(SX126XConfig *data, INT8 *pRssiPacket, INT8
 
     if (res == SUC_OK)
     {
-        *pRssiPacket = (INT8)buff[1];
-        *pSnrPkt = (INT8)buff[2];
-        *pSignalRssiPkt = (INT8)buff[3];
+        *pRssiPacket = (INT8)(-buff[1] >> 1);
+        *pSnrPkt = (INT8)(buff[2] >> 2);
+        *pSignalRssiPkt = (INT8)(-buff[3] >> 1);
     }
 
     return res;
@@ -556,7 +586,7 @@ FUNCRESULT sx126XGetRssiInst(SX126XConfig *data, INT8 *pRssiInst)
 
     if (res == SUC_OK)
     {
-        *pRssiInst = (INT8)buff[1];
+        *pRssiInst = (INT8)(-buff[1] >> 1);
     }
 
     return res;
@@ -624,6 +654,78 @@ FUNCRESULT sx126XClearDeviceErrors(SX126XConfig *data)
     return __sx126XCMD(data, CMD_CLEAR_DEVICE_ERRORS, buff, 2, NULL, 0);
 }
 
+FUNCRESULT sx126XIsBusy(SX126XConfig *data, BOOL *pStatus)
+{
+    GPIOState state;
+    gpioGetPinState(data->pinout.busy, &state);
+
+    *pStatus = state == GPIO_HIGH;
+
+    return SUC_OK;
+}
+
+FUNCRESULT sx126XCheckBusy(SX126XConfig *data)
+{
+    BOOL busy;
+    sx126XIsBusy(data, &busy);
+
+    while (busy)
+    {
+        sx126XIsBusy(data, &busy);
+        sleepMicroseconds(1);
+    }
+
+    return SUC_OK;
+}
+
+FUNCRESULT sx126XReset(SX126XConfig *data)
+{
+    sleepMiliseconds(20);
+    gpioSetPinState(data->pinout.reset, GPIO_LOW);
+    sleepMiliseconds(50);
+    gpioSetPinState(data->pinout.reset, GPIO_HIGH);
+    sleepMiliseconds(20);
+
+    return SUC_OK;
+}
+
+FUNCRESULT sx126XWakeup(SX126XConfig *data)
+{
+    gpioSetPinState(data->pinout.cs, GPIO_LOW);
+    sleepMiliseconds(2);
+    gpioSetPinState(data->pinout.cs, GPIO_HIGH);
+    sleepMiliseconds(2);
+
+    return SUC_OK;
+}
+
+FUNCRESULT sx126XClampTX(SX126XConfig *data)
+{
+    BYTE reg;
+
+    __sx126XReadRegister(data, REG_TX_CLAMP_CONFIG, &reg, 1);
+
+    reg |= 0x1E;
+
+    __sx126XWriteRegister(data, REG_TX_CLAMP_CONFIG, &reg, 1);
+
+    return SUC_OK;
+}
+
+FUNCRESULT sx126XStopRTC(SX126XConfig *data)
+{
+    BYTE reg = 0;
+
+    __sx126XWriteRegister(data, REG_RTC_CONTROL, &reg, 1);
+    __sx126XReadRegister(data, REG_RTC_CONTROL, &reg, 1);
+
+    reg |= 0x02;
+
+    __sx126XWriteRegister(data, REG_RTC_CONTROL, &reg, 1);
+
+    return SUC_OK;
+}
+
 UINT32 __sx126XConvertTimeoutToRTCStep(UINT32 timeout_ms)
 {
     return timeout_ms * RTC_FREQ / 1000;
@@ -632,6 +734,31 @@ UINT32 __sx126XConvertTimeoutToRTCStep(UINT32 timeout_ms)
 UINT32 __sx126XConvertFrequencyToRegisterValue(UINT32 frequency)
 {
     return (UINT32)((frequency / (double)XTAL_FREQ) * (double)(1 << 25));
+}
+
+VOID __sx126XTXModulationWorkaround(SX126XConfig *data, SX126XPacketType packetType, SX126XLoRaBW bw)
+{
+    BYTE reg;
+
+    __sx126XReadRegister(data, REG_TX_MODULATION, &reg, 1);
+
+    if (packetType == SX126X_PACKET_TYPE_GFSK)
+    {
+        reg |= (1 << 2);
+    }
+    else
+    {
+        if (bw == SX126X_LORA_BW_500)
+        {
+            reg &= ~(1 << 2);
+        }
+        else
+        {
+            reg |= (1 << 2);
+        }
+    }
+
+    __sx126XWriteRegister(data, REG_TX_MODULATION, &reg, 1);
 }
 
 VOID __sx126XWriteRegister(SX126XConfig *data, UINT16 address, BYTE *buffer, SIZE szBuffer)

@@ -15,6 +15,7 @@ typedef struct SX126XPinout
     PinNumber mosi;  /** MOSI */
     PinNumber cs;    /** CS */
     PinNumber reset; /** RESET */
+    PinNumber busy;  /** BUSY */
 } SX126XPinout;
 
 /**
@@ -22,11 +23,7 @@ typedef struct SX126XPinout
  */
 typedef struct SX126XConfig
 {
-    SX126XPinout pinout;     /** Pinout pointer */
-    INT32 txPower;           /** Power */
-    UINT64 frequency;        /** Frequency to work with */
-    INT32 packetIndex;       /** Index of packet */
-    BOOL implicitHeaderMode; /** Implicit header mode */
+    SX126XPinout pinout; /** Pinout */
 } SX126XConfig;
 
 typedef struct SX126XGFSKPacketRXStatus
@@ -41,12 +38,51 @@ typedef struct SX126XGFSKPacketRXStatus
     BOOL packetSent;
 } SX126XGFSKPacketRXStatus;
 
+typedef enum SX126XStandbyMode
+{
+    SX126X_STANDBY_RC = 0x00,
+    SX126X_STANDBY_XOSC = 0x01,
+} SX126XStandbyMode;
+
+typedef enum SX126XRegulatorMode
+{
+    SX126X_REGULATOR_LDO = 0x00,
+    SX126X_REGULATOR_DC_DC = 0x01,
+} SX126XRegulatorMode;
+
 typedef enum SX126XFallbackMode
 {
     SX126X_FALLBACK_MODE_STDBY_RC = 0x20,
     SX126X_FALLBACK_MODE_STDBY_XOSC = 0x30,
     SX126X_FALLBACK_MODE_FS = 0x40,
 } SX126XFallbackMode;
+
+typedef enum SX126XIRQMask
+{
+    SX126X_IRQ_TX_DONE_MASK = (1 << 0),
+    SX126X_IRQ_RX_DONE_MASK = (1 << 1),
+    SX126X_IRQ_PREAMBLE_DETECTED_MASK = (1 << 2),
+    SX126X_IRQ_SYNC_WORD_VALID_MASK = (1 << 3),
+    SX126X_IRQ_HEADER_VALID_MASK = (1 << 4),
+    SX126X_IRQ_HEADER_ERR_MASK = (1 << 5),
+    SX126X_IRQ_CRC_ERR_MASK = (1 << 6),
+    SX126X_IRQ_CAD_DONE_MASK = (1 << 7),
+    SX126X_IRQ_CAD_ACTIVITY_DETECTED_MASK = (1 << 8),
+    SX126X_IRQ_RX_TX_TIMEOUT_MASK = (1 << 9),
+    SX126X_IRQ_RADIO_ALL_MASK = SX126X_IRQ_TX_DONE_MASK | SX126X_IRQ_RX_DONE_MASK | SX126X_IRQ_PREAMBLE_DETECTED_MASK | SX126X_IRQ_SYNC_WORD_VALID_MASK | SX126X_IRQ_HEADER_VALID_MASK | SX126X_IRQ_HEADER_ERR_MASK | SX126X_IRQ_CRC_ERR_MASK | SX126X_IRQ_CAD_DONE_MASK | SX126X_IRQ_CAD_ACTIVITY_DETECTED_MASK | SX126X_IRQ_RX_TX_TIMEOUT_MASK,
+} SX126XIRQMask;
+
+typedef enum SX126XCalibrateMask
+{
+    SX126X_CALIBRATE_RC64K_MASK = (1 << 0),
+    SX126X_CALIBRATE_RC13M_MASK = (1 << 1),
+    SX126X_CALIBRATE_PLL_MASK = (1 << 2),
+    SX126X_CALIBRATE_ADC_PULSE_MASK = (1 << 3),
+    SX126X_CALIBRATE_ADC_BULK_N_MASK = (1 << 4),
+    SX126X_CALIBRATE_ADC_BULK_P_MASK = (1 << 5),
+    SX126X_CALIBRATE_IMAGE_MASK = (1 << 6),
+    SX126X_CALIBRATE_ALL_MASK = SX126X_CALIBRATE_RC64K_MASK | SX126X_CALIBRATE_RC13M_MASK | SX126X_CALIBRATE_PLL_MASK | SX126X_CALIBRATE_ADC_PULSE_MASK | SX126X_CALIBRATE_ADC_BULK_N_MASK | SX126X_CALIBRATE_ADC_BULK_P_MASK | SX126X_CALIBRATE_IMAGE_MASK,
+} SX126XCalibrateMask;
 
 typedef enum SX126XTCXOVoltage
 {
@@ -222,7 +258,7 @@ typedef enum SX126XCommandStatus
 
 FUNCRESULT sx126XInit(SX126XConfig *data, SX126XPinout *pinout, UINT32 frequency);
 FUNCRESULT sx126XSetSleep(SX126XConfig *data, BOOL coldStart);
-FUNCRESULT sx126XSetStandby(SX126XConfig *data, BOOL rc);
+FUNCRESULT sx126XSetStandby(SX126XConfig *data, SX126XStandbyMode mode);
 FUNCRESULT sx126XSetFS(SX126XConfig *data);
 FUNCRESULT sx126XSetTX(SX126XConfig *data, UINT32 timeout_ms);
 FUNCRESULT sx126XSetRX(SX126XConfig *data, UINT32 timeout_ms);
@@ -231,7 +267,7 @@ FUNCRESULT sx126XSetRXDutyCycle(SX126XConfig *data, UINT32 rxPeriod_ms, UINT32 s
 FUNCRESULT sx126XSetCAD(SX126XConfig *data);
 FUNCRESULT sx126XSetTXContinuousWave(SX126XConfig *data);
 FUNCRESULT sx126XSetTXInfinitePreamble(SX126XConfig *data);
-FUNCRESULT sx126XSetRegulatorMode(SX126XConfig *data, BOOL useDCDC);
+FUNCRESULT sx126XSetRegulatorMode(SX126XConfig *data, SX126XRegulatorMode mode);
 FUNCRESULT sx126XCalibrate(SX126XConfig *data, UINT8 calibParam);
 FUNCRESULT sx126XCalibrateImage(SX126XConfig *data, UINT32 freq_hz);
 FUNCRESULT sx126XSetPAConfig(SX126XConfig *data, UINT8 paDutyCycle, UINT8 hpMax);
@@ -248,7 +284,7 @@ FUNCRESULT sx126XSetPacketType(SX126XConfig *data, SX126XPacketType packetType);
 FUNCRESULT sx126XGetPacketType(SX126XConfig *data, SX126XPacketType *packetType);
 FUNCRESULT sx126XSetTXParams(SX126XConfig *data, INT8 power, SX126XRampTime rampTime);
 FUNCRESULT sx126XSetGFSKModulationParams(SX126XConfig *data, UINT32 bitrate, SX126XGFSKPulseShape pulseShape, SX126XGFSKBandwidth bandwidth, UINT32 freq_dev_hz);
-FUNCRESULT sx126XSetLoRaParams(SX126XConfig *data, SX126XLoRaSF sf, SX126XLoRaBW bw, SX126XLoRaCR cr, BOOL lowDataRateOptimize);
+FUNCRESULT sx126XSetLoRaModulationParams(SX126XConfig *data, SX126XLoRaSF sf, SX126XLoRaBW bw, SX126XLoRaCR cr, BOOL lowDataRateOptimize);
 FUNCRESULT sx126XSetPacketGFSKParams(SX126XConfig *data, UINT16 preambleLength, SX126XGFSKPreambleDetectorLength detectorLength, UINT8 syncWordLength, SX126XGFSKAddressFiltering addressFiltering, SX126XGFSKPacketType packetType, UINT8 payloadLength, SX126XGFSKCRCType crcType, BOOL whitening);
 FUNCRESULT sx126XSetPacketLoRaParams(SX126XConfig *data, UINT16 preambleLength, SX126XLoRaHeaderType headerType, UINT8 payloadLength, BOOL crc, BOOL invertIQ);
 FUNCRESULT sx126XSetCADParams(SX126XConfig *data, SX126XCADSymbol cadSymbolNum, UINT8 cadDetPeak, UINT8 cadDetMin, SX126XLoRaCADExitMode cadExitMode, UINT32 timeout_ms);
@@ -264,8 +300,15 @@ FUNCRESULT sx126XGetLoRaStats(SX126XConfig *data, UINT16 *pNbPktReceived, UINT16
 FUNCRESULT sx126XResetStats(SX126XConfig *data);
 FUNCRESULT sx126XGetDeviceErrors(SX126XConfig *data, UINT16 *pErrors);
 FUNCRESULT sx126XClearDeviceErrors(SX126XConfig *data);
+FUNCRESULT sx126XIsBusy(SX126XConfig *data, BOOL *pStatus);
+FUNCRESULT sx126XCheckBusy(SX126XConfig *data);
+FUNCRESULT sx126XReset(SX126XConfig *data);
+FUNCRESULT sx126XWakeup(SX126XConfig *data);
+FUNCRESULT sx126XClampTX(SX126XConfig *data);
+FUNCRESULT sx126XStopRTC(SX126XConfig *data);
 UINT32 __sx126XConvertTimeoutToRTCStep(UINT32 timeout_ms);
 UINT32 __sx126XConvertFrequencyToRegisterValue(UINT32 frequency);
+VOID __sx126XTXModulationWorkaround(SX126XConfig *data, SX126XPacketType packetType, SX126XLoRaBW bw);
 VOID __sx126XWriteRegister(SX126XConfig *data, UINT16 address, BYTE *buffer, SIZE szBuffer);
 VOID __sx126XReadRegister(SX126XConfig *data, UINT16 address, BYTE *buffer, SIZE szBuffer);
 FUNCRESULT __sx126XCMD(SX126XConfig *data, BYTE command, BYTE *params, SIZE szParams, BYTE *resultBuffer, SIZE szBuffer);
