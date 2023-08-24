@@ -39,7 +39,7 @@ cp build/samples/bme688/samples_bme688.uf2 executables/samples/bme688.uf2
 cp build/samples/bmi088/samples_bmi088.uf2 executables/samples/bmi088.uf2
 cp build/samples/bmp581/samples_bmp581.uf2 executables/samples/bmp581.uf2
 cp build/samples/cpu/samples_cpu.uf2 executables/samples/cpu.uf2
-cp build/samples/detonator/samples_detonator.uf2 executables/samples/detonator.uf2
+cp build/samples/igniter/samples_igniter.uf2 executables/samples/igniter.uf2
 cp build/samples/flash/samples_flash.uf2 executables/samples/flash.uf2
 cp build/samples/gpio/samples_gpio.uf2 executables/samples/gpio.uf2
 cp build/samples/h3lis331dl/samples_h3lis331dl.uf2 executables/samples/h3lis331dl.uf2

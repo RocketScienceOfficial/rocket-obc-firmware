@@ -1,12 +1,21 @@
 #include "gps.h"
 #include "config.h"
 #include <Arduino.h>
+#include <SparkFun_u-blox_GNSS_Arduino_Library.h>
+#include <MicroNMEA.h>
 
-void MyGPS::Init()
+static SFE_UBLOX_GNSS s_GNSS;
+static char s_NMEABuffer[100];
+static MicroNMEA s_NMEA(s_NMEABuffer, sizeof(s_NMEABuffer));
+static float s_Latitude;
+static float s_Longitude;
+static float s_Altitude;
+
+void GPSInit()
 {
-    Serial1.begin(9600, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN);
+    Serial1.begin(9600, SERIAL_8N1, GPS_TX_PIN, GPS_RX_PIN);
 
-    if (!m_GNSS.begin(Serial1))
+    if (!s_GNSS.begin(Serial1))
     {
         Serial.println("GPS failed to start!");
 
@@ -14,37 +23,50 @@ void MyGPS::Init()
             ;
     }
 
-    m_GNSS.setUART1Output(COM_TYPE_UBX);
-    m_GNSS.saveConfiguration();
+    s_GNSS.setUART1Output(COM_TYPE_NMEA);
+    s_GNSS.saveConfiguration();
 
     Serial.println("GPS started!");
 }
 
-void MyGPS::Check()
+void GPSCheck()
 {
-    unsigned long now = millis();
-
-    if (now - m_LastUpdate >= GPS_UPDATE_RATE_MS)
+    if (s_GNSS.checkUblox())
     {
-        m_LastUpdate=now;
+        if (s_NMEA.isValid())
+        {
+            long lat = s_NMEA.getLatitude();
+            long lon = s_NMEA.getLongitude();
+            long alt = 0;
 
-        m_Latitude = m_GNSS.getLatitude() / 1000000.0f;
-        m_Longitude = m_GNSS.getLongitude() / 1000000.0f;
-        m_Altitude = m_GNSS.getAltitude() / 1000.0f;
+            s_Latitude = lat / 1000000.0f;
+            s_Longitude = lon / 1000000.0f;
+
+            s_NMEA.getAltitude(alt);
+
+            s_Altitude = alt / 1000.0f;
+
+            Serial.println("Updated GPS!");
+        }
     }
 }
 
-float MyGPS::GetLatitude()
+float GPSGetLatitude()
 {
-    return m_Latitude;
+    return s_Latitude;
 }
 
-float MyGPS::GetLongitude()
+float GPSGetLongitude()
 {
-    return m_Latitude;
+    return s_Longitude;
 }
 
-float MyGPS::GetAltitude()
+float GPSGetAltitude()
 {
-    return m_Altitude;
+    return s_Altitude;
+}
+
+void SFE_UBLOX_GNSS::processNMEA(char incoming)
+{
+    s_NMEA.process(incoming);
 }

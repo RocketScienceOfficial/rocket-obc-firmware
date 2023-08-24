@@ -1,6 +1,6 @@
 #pragma once
 
-#include <LoRa.h>
+#include <Arduino.h>
 
 #define RADIO_PACKET_SIGNATURE_LENGTH 16
 #define RADIO_PACKET_PAYLOAD_SIZE 128
@@ -125,18 +125,8 @@ static const uint8_t RADIO_PACKET_KEY[] = {
     0xa0,
 };
 
-class MyLoRa
-{
-public:
-    void Init();
-    void Check();
-    int GetRssi();
-
-private:
-    float m_Rssi;
-    uint8_t m_Buffer[256];
-    MeasurementData m_CurrentMeasurement;
-
-    void HandlePacket();
-    void BufferEncryptDecrypt(uint8_t *buffer, size_t bufferSize);
-};
+void LoRaInit();
+void LoRaCheck();
+int LoRaGetRssi();
+void __LoRaHandlePacket();
+void __LoRaBufferEncryptDecrypt(uint8_t *buffer, size_t bufferSize);
