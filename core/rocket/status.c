@@ -1,10 +1,12 @@
 #include "status.h"
 #include "config.h"
+#include "mission_control.h"
 #include "drivers/led/w2812_driver.h"
 #include "drivers/adc/max1161X_driver.h"
 #include "drivers/gpio/adc_driver.h"
 #include "drivers/tools/time_tracker.h"
 #include "drivers/battery/battery_driver.h"
+#include "drivers/buzzer/simple_buzzer_driver.h"
 
 #define LEDS_COUNT 7
 #define LORA_TX_TIME_MS 50
@@ -19,7 +21,7 @@ static BOOL s_LoRaTXState;
 
 static VOID __refreshColors(VOID);
 static BOOL __voltagetApproxEqual(FLOAT a, FLOAT b);
-static WS2812COLOR __getDetonatorConColor(VoltageLevel voltage);
+static WS2812COLOR __getIgniterConColor(VoltageLevel voltage);
 static WS2812COLOR __getARMColor(BOOL state);
 static WS2812COLOR __getBatteryColor(FLOAT percent);
 static WS2812COLOR __getLoRaTXColor(BOOL state);
@@ -29,6 +31,7 @@ VOID initStatus(VOID)
     ws2812Init(RGB_LED_PIN, FALSE);
     max1161XInit(&s_ADCConfig, MAX1161X_TYPE_3, I2C, SDA, SCL);
     gpioInitPin(ARM_PIN, GPIO_OUTPUT);
+    simpleBuzzerInit(BUZZER_PIN);
 
     adcInitPin(0);
     adcInitPin(1);
@@ -51,13 +54,13 @@ VOID updateStatus(VOID)
 {
     if (runEveryUs(DIODES_UPDATE_RATE_MS * 1000, &s_DiodesTimerOffset))
     {
-        VoltageLevel det1, det2, det3, det4, currentConsumption, batteryVoltage, usbConnection;
+        VoltageLevel ign1, ign2, ign3, ign4, currentConsumption, batteryVoltage, usbConnection;
         GPIOState armState;
 
-        adcRead(0, &det1);
-        adcRead(1, &det2);
-        adcRead(2, &det3);
-        adcRead(3, &det4);
+        adcRead(0, &ign1);
+        adcRead(1, &ign2);
+        adcRead(2, &ign3);
+        adcRead(3, &ign4);
 
         gpioGetPinState(ARM_PIN, &armState);
 
@@ -67,10 +70,10 @@ VOID updateStatus(VOID)
 
         FLOAT batteryPercentage = batteryConvertVoltageToPercent(s_BatteryIntervals, BATTERY_INTERVALS_COUNT, batteryVoltage);
 
-        s_Colors[0] = __getDetonatorConColor(det1);
-        s_Colors[1] = __getDetonatorConColor(det2);
-        s_Colors[2] = __getDetonatorConColor(det3);
-        s_Colors[3] = __getDetonatorConColor(det4);
+        s_Colors[0] = __getIgniterConColor(ign1);
+        s_Colors[1] = __getIgniterConColor(ign2);
+        s_Colors[2] = __getIgniterConColor(ign3);
+        s_Colors[3] = __getIgniterConColor(ign4);
         s_Colors[4] = __getARMColor(armState == GPIO_HIGH);
         s_Colors[5] = __getBatteryColor(batteryPercentage);
 
@@ -83,6 +86,11 @@ VOID updateStatus(VOID)
         {
             setLoRaTXDiode(FALSE);
         }
+    }
+
+    if (isMissionDone())
+    {
+        simpleBuzzerSetActive(BUZZER_PIN, TRUE);
     }
 }
 
@@ -112,7 +120,7 @@ static BOOL __voltagetApproxEqual(FLOAT a, FLOAT b)
     return a >= b - VOLTAGE_APPROXIMATION && a <= b + VOLTAGE_APPROXIMATION;
 }
 
-static WS2812COLOR __getDetonatorConColor(VoltageLevel voltage)
+static WS2812COLOR __getIgniterConColor(VoltageLevel voltage)
 {
     const VoltageLevel VBAT = 3.3f;
 

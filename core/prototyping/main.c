@@ -24,6 +24,20 @@
 
 int main()
 {
+    // ========================
+    boardInit(5000);
+
+    gpioInitPin(9, GPIO_OUTPUT);
+
+    while (1)
+    {
+        gpioSetPinState(9, GPIO_HIGH);
+        sleepMiliseconds(1000);
+        gpioSetPinState(9, GPIO_LOW);
+        sleepMiliseconds(1000);
+    }
+    return 0;
+    // ========================
     boardInit(5000);
 
     spiInitAll(SPI, 10 * 1000 * 1000);
@@ -91,7 +105,7 @@ int main()
             madgwickUpdateMARG(&madgwickFilterData, gyro, accel, mag);
             quatToEuler(&eulerData, &mahonyFilterData.q);
 
-            //if (getMsSinceBoot() >= 20000)
+            // if (getMsSinceBoot() >= 20000)
             {
                 rotateVectorThroughQuaternion(&accel, &mahonyFilterData.q);
 
@@ -103,7 +117,7 @@ int main()
                 kalmanFilterInputData.gpsPos = (vec3){.x = 0, .y = 0, .z = 128};
                 kalmanFilterInputData.pressure = 99796.74f;
                 kalmanFilterInputData.temperature = 288.15f;
-                
+
                 insKalmanFilterUpdate(&kalmanFilterState, &kalmanFilterInputData, &kalmanFilterOutputData);
 
                 // printf("X: %f, Y: %f, Z: %f\n", kalmanFilterOutputData.pos.x, kalmanFilterOutputData.pos.y, kalmanFilterOutputData.pos.z);

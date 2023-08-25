@@ -1,7 +1,9 @@
 #pragma once
 
 #include <obc/api.h>
-#include "measurements_utils.h"
+#include "measurements.h"
+
+#define FLASH_DATA_FRAME_START_SEQUENCE 0xEEEEEEEE
 
 /**
  * @brief Single measurement data structure for saving

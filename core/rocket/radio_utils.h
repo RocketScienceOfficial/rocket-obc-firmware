@@ -2,7 +2,7 @@
 
 #include <obc/api.h>
 #include "drivers/lora/radio_protocol.h"
-#include "measurements_utils.h"
+#include "measurements.h"
 
 #define MEASUREMENTS_RADIO_COMMAND_ID 'M'
 

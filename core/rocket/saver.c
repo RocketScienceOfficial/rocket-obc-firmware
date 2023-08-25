@@ -5,7 +5,6 @@
 
 #define MEASUREMENTS_BUFFER_SIZE 128
 #define FLASH_STORAGE_MAX_SIZE (1 << 19)
-#define FLASH_DATA_FRAME_START_SEQUENCE 0xEEEEEEEE
 
 static MeasurementData_FlashSave s_Measurements[MEASUREMENTS_BUFFER_SIZE];
 static MeasurementData s_LastNormalMeasurement;

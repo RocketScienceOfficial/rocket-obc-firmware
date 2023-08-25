@@ -1,12 +1,13 @@
 #include "config.h"
 #include "radio_utils.h"
-#include "measurements_utils.h"
+#include "measurements.h"
 #include "saver.h"
 #include "status.h"
 #include "commands.h"
 #include "algorithms.h"
 #include "driver_calling.h"
 #include "mission_control.h"
+#include "ign.h"
 
 #include "drivers/gpio/spi_driver.h"
 #include "drivers/gpio/i2c_driver.h"
@@ -24,6 +25,8 @@ int main(VOID)
 {
     boardInit(0);
 
+    checkCMD();
+
     DRIVER_CALL(spiInitAll(SPI, 1000000));
     DRIVER_CALL(i2cInitAll(I2C, 400000));
     DRIVER_CALL(adcInitAll());
@@ -33,11 +36,11 @@ int main(VOID)
     initRadio();
     initAlgorithms();
     initStatus();
+    initIgn();
 
     while (TRUE)
     {
         updateStatus();
-        checkCMD();
 
         if (isMissionReady())
         {
@@ -54,6 +57,8 @@ int main(VOID)
 
                 setLoRaTXDiode(TRUE);
             }
+
+            // checkIgn();
         }
     }
 

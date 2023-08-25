@@ -1,7 +1,7 @@
 #pragma once
 
 #include <obc/api.h>
-#include "measurements_utils.h"
+#include "measurements.h"
 
 /**
  * @brief Initializes all algorithms.

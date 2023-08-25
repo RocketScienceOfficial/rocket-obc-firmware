@@ -1,8 +1,10 @@
 #include "commands.h"
-#include "measurements_utils.h"
+#include "measurements.h"
 #include "saver.h"
+#include "config.h"
 #include "drivers/console/console_input.h"
 #include "drivers/storage/flash_driver.h"
+#include "drivers/tools/time_tracker.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -24,7 +26,7 @@ VOID readFlashData(VOID)
     {
         memcpy(&seq, &newBuffer[i * sizeof(MeasurementData_FlashSave)], sizeof(SIZE));
 
-        if (seq != 0xEEEEEEEE)
+        if (seq != FLASH_DATA_FRAME_START_SEQUENCE)
         {
             break;
         }
@@ -39,22 +41,27 @@ VOID readFlashData(VOID)
 
 VOID checkCMD(VOID)
 {
-    consoleCheckInput(&s_Available, &s_Chr);
+    TIME offset = getMsSinceBoot();
 
-    if (s_Available)
+    while (getMsSinceBoot() - offset < COMMANDS_START_TIME_MS)
     {
-        consoleInputProcessCharacter(s_Chr, &s_Input, &s_TokensReady);
+        consoleCheckInput(&s_Available, &s_Chr);
 
-        if (s_TokensReady)
+        if (s_Available)
         {
-            if (strcmp(s_Input.tokens[0], "read-data") == 0)
+            consoleInputProcessCharacter(s_Chr, &s_Input, &s_TokensReady);
+
+            if (s_TokensReady)
             {
-                readFlashData();
+                if (strcmp(s_Input.tokens[0], "read-data") == 0)
+                {
+                    readFlashData();
+                }
+
+                s_TokensReady = FALSE;
             }
 
-            s_TokensReady = FALSE;
+            s_Available = FALSE;
         }
-
-        s_Available = FALSE;
     }
 }

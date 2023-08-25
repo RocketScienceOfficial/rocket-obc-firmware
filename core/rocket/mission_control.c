@@ -1,5 +1,5 @@
 #include "mission_control.h"
-#include "measurements_utils.h"
+#include "measurements.h"
 
 static BOOL s_GPSInitialized;
 
@@ -16,4 +16,9 @@ BOOL isMissionReady(VOID)
     }
 
     return TRUE;
+}
+
+BOOL isMissionDone(VOID)
+{
+    return FALSE;
 }

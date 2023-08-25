@@ -84,7 +84,9 @@
         "max1161x_driver.h": "c",
         "saver.h": "c",
         "multithreading.h": "c",
-        "diodes.h": "c"
+        "diodes.h": "c",
+        "measurements.h": "c",
+        "algorithms.h": "c"
     },
     "cmake.configureOnOpen": false,
 }

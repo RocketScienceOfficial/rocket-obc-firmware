@@ -84,12 +84,14 @@
 #define RTC_FREQ 64000
 #define XTAL_FREQ 32000000
 
-FUNCRESULT sx126XInit(SX126XConfig *data, SX126XPinout *pinout, UINT32 frequency)
+FUNCRESULT sx126XInit(SX126XConfig *data, SX126XPinout *pinout)
 {
     if (!data || !pinout)
     {
         return ERR_INVALIDARG;
     }
+
+    data->pinout = *pinout;
 
     gpioInitPin(pinout->busy, GPIO_INPUT);
     gpioInitPin(pinout->reset, GPIO_OUTPUT);
@@ -780,6 +782,8 @@ VOID __sx126XReadRegister(SX126XConfig *data, UINT16 address, BYTE *buffer, SIZE
 
 FUNCRESULT __sx126XCMD(SX126XConfig *data, BYTE command, BYTE *params, SIZE szParams, BYTE *resultBuffer, SIZE szBuffer)
 {
+    sx126XCheckBusy(data);
+
     BYTE buff[16];
 
     buff[0] = command;
