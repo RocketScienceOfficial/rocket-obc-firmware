@@ -27,12 +27,12 @@ FUNCRESULT ws2812SetColors(WS2812COLOR *colors, SIZE count)
     return SUC_OK;
 }
 
-VOID __ws2812SendColor(UINT32 color)
-{
-    pio_sm_put_blocking(WS2812_PIO, WS2812_SM, color << 8u);
-}
-
 WS2812COLOR ws2812GetColor(UINT8 r, UINT8 g, UINT8 b)
 {
     return ((UINT32)r << 8) | ((UINT32)g << 16) | (UINT32)b;
+}
+
+VOID __ws2812SendColor(UINT32 color)
+{
+    pio_sm_put_blocking(WS2812_PIO, WS2812_SM, color << 8u);
 }

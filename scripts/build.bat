@@ -25,6 +25,8 @@ copy build\samples\battery\samples_battery.uf2 executables\samples\battery.uf2
 copy build\samples\bme688\samples_bme688.uf2 executables\samples\bme688.uf2
 copy build\samples\bmi088\samples_bmi088.uf2 executables\samples\bmi088.uf2
 copy build\samples\bmp581\samples_bmp581.uf2 executables\samples\bmp581.uf2
+copy build\samples\buzzer_active\samples_buzzer_active.uf2 executables\samples\buzzer_active.uf2
+copy build\samples\buzzer_passive\samples_buzzer_passive.uf2 executables\samples\buzzer_passive.uf2
 copy build\samples\cpu\samples_cpu.uf2 executables\samples\cpu.uf2
 copy build\samples\igniter\samples_igniter.uf2 executables\samples\igniter.uf2
 copy build\samples\flash\samples_flash.uf2 executables\samples\flash.uf2
@@ -33,7 +35,6 @@ copy build\samples\h3lis331dl\samples_h3lis331dl.uf2 executables\samples\h3lis33
 copy build\samples\lsm6dso32\samples_lsm6dso32.uf2 executables\samples\lsm6dso32.uf2
 copy build\samples\mmc5983ma\samples_mmc5983ma.uf2 executables\samples\mmc5983ma.uf2
 copy build\samples\sd\samples_sd.uf2 executables\samples\sd.uf2
-copy build\samples\simple_buzzer\samples_simple_buzzer.uf2 executables\samples\simple_buzzer.uf2
 copy build\samples\sx126X\samples_sx126X.uf2 executables\samples\sx126X.uf2
 copy build\samples\sx127X\samples_sx127X.uf2 executables\samples\sx127X.uf2
 copy build\samples\ubx_neo_m9n\samples_ubx_neo_m9n.uf2 executables\samples\ubx_neo_m9n.uf2

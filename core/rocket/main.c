@@ -2,12 +2,10 @@
 #include "radio_utils.h"
 #include "measurements.h"
 #include "saver.h"
-#include "status.h"
 #include "commands.h"
 #include "algorithms.h"
 #include "driver_calling.h"
 #include "mission_control.h"
-#include "ign.h"
 
 #include "drivers/gpio/spi_driver.h"
 #include "drivers/gpio/i2c_driver.h"
@@ -33,15 +31,11 @@ int main(VOID)
 
     initStorage();
     initSensors();
-    initRadio();
+    // initRadio();
     initAlgorithms();
-    initStatus();
-    initIgn();
 
     while (TRUE)
     {
-        updateStatus();
-
         if (isMissionReady())
         {
             if (runEveryUs(MEASUREMENTS_UPDATE_RATE_MS * 1000, &s_MeasurementTimerOffset))
@@ -53,12 +47,8 @@ int main(VOID)
 
             if (runEveryUs(RADIO_SEND_RATE_MS * 1000, &s_RadioTimerOffset))
             {
-                sendMeasurementData(&s_LastNormalMeasurement);
-
-                setLoRaTXDiode(TRUE);
+                // sendMeasurementData(&s_LastNormalMeasurement);
             }
-
-            // checkIgn();
         }
     }
 

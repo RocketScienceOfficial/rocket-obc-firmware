@@ -18,7 +18,7 @@ int main()
     bmp581InitI2C(&bmp581Config, I2C, SDA, SCL);
     bmp581SetMode(&bmp581Config, BMP581_MODE_CONTINUOUS);
     bmp581SetODR_OSR(&bmp581Config, BMP581_OSR_1, BMP581_OSR_1, BMP581_ODR_240);
-
+    
     while (TRUE)
     {
         BMP581Data data;

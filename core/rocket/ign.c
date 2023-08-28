@@ -1,16 +1,20 @@
 #include "ign.h"
 #include "config.h"
 #include "mission_control.h"
-#include "drivers/gpio/gpio_driver.h"
+#include "drivers/igniter/igniter_driver.h"
 
+static IgniterData s_IgniterData;
 static BOOL s_IgnitersFired;
 
 VOID initIgn(VOID)
 {
-    gpioInitPin(IGNITER_1_PIN, GPIO_OUTPUT);
-    gpioInitPin(IGNITER_2_PIN, GPIO_OUTPUT);
-    gpioInitPin(IGNITER_3_PIN, GPIO_OUTPUT);
-    gpioInitPin(IGNITER_4_PIN, GPIO_OUTPUT);
+    s_IgniterData = (IgniterData){
+        .pins = {IGNITER_1_PIN, IGNITER_2_PIN, IGNITER_3_PIN, IGNITER_4_PIN},
+        .count = 4,
+        .delay = IGNITER_DELAY_MS,
+    };
+
+    ignInit(&s_IgniterData);
 }
 
 VOID checkIgn(VOID)
@@ -19,12 +23,11 @@ VOID checkIgn(VOID)
     {
         if (s_IgnitersFired)
         {
-            gpioSetPinState(IGNITER_1_PIN, GPIO_HIGH);
-            gpioSetPinState(IGNITER_2_PIN, GPIO_HIGH);
-            gpioSetPinState(IGNITER_3_PIN, GPIO_HIGH);
-            gpioSetPinState(IGNITER_4_PIN, GPIO_HIGH);
+            ignFire(&s_IgniterData);
 
             s_IgnitersFired = TRUE;
         }
     }
+
+    ignUpdate(&s_IgniterData);
 }

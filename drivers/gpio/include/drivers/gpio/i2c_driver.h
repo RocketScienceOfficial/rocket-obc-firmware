@@ -1,7 +1,7 @@
 #pragma once
 
-#include "gpio_driver.h"
 #include <obc/api.h>
+#include "gpio_driver.h"
 #include "drivers/tools/time_tracker.h"
 
 typedef UINT8 I2CInstance; /** I2C instance */

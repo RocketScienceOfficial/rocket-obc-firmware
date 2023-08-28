@@ -6,7 +6,7 @@
 #include "drivers/gpio/adc_driver.h"
 #include "drivers/tools/time_tracker.h"
 #include "drivers/battery/battery_driver.h"
-#include "drivers/buzzer/simple_buzzer_driver.h"
+#include "drivers/buzzer/active_buzzer_driver.h"
 
 #define LEDS_COUNT 7
 #define LORA_TX_TIME_MS 50
@@ -31,7 +31,7 @@ VOID initStatus(VOID)
     ws2812Init(RGB_LED_PIN, FALSE);
     max1161XInit(&s_ADCConfig, MAX1161X_TYPE_3, I2C, SDA, SCL);
     gpioInitPin(ARM_PIN, GPIO_OUTPUT);
-    simpleBuzzerInit(BUZZER_PIN);
+    activeBuzzerInit(BUZZER_PIN);
 
     adcInitPin(0);
     adcInitPin(1);
@@ -90,7 +90,7 @@ VOID updateStatus(VOID)
 
     if (isMissionDone())
     {
-        simpleBuzzerSetActive(BUZZER_PIN, TRUE);
+        activeBuzzerSetActive(BUZZER_PIN, TRUE);
     }
 }
 

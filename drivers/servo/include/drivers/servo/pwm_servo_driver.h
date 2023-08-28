@@ -2,29 +2,31 @@
 
 #include <obc/api.h>
 #include "drivers/gpio/gpio_driver.h"
+#include "drivers/gpio/pwm_driver.h"
 
 /**
  * @brief Initialize servo
  *
+ * @param config PWM configuration
  * @param pin GPIO pin to use for servo
  * @return Result code
  */
-FUNCRESULT pwmServoInit(PinNumber pin);
+FUNCRESULT pwmServoInit(PWMConfig *config, PinNumber pin);
 
 /**
  * @brief Check if servo is connected
  *
- * @param pin GPIO pin to use for servo
+ * @param config PWM configuration
  * @param result Result of check
  * @return Result code
  */
-FUNCRESULT pwmServoCheck(PinNumber pin, BOOL *result);
+FUNCRESULT pwmServoCheck(PWMConfig *config, BOOL *result);
 
 /**
  * @brief Rotate servo to angle
  *
- * @param pin GPIO pin to use for servo
+ * @param config PWM configuration
  * @param angle Angle to rotate to (degrees)
  * @return Result code
  */
-FUNCRESULT pwmServoRotateAngle(PinNumber pin, FLOAT destAngleDegrees);
+FUNCRESULT pwmServoRotateAngle(PWMConfig *config, FLOAT destAngleDegrees);

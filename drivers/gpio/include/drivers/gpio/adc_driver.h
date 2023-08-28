@@ -1,7 +1,7 @@
 #pragma once
 
-#include "gpio_driver.h"
 #include <obc/api.h>
+#include "gpio_driver.h"
 
 /**
  * @brief ADC input modes

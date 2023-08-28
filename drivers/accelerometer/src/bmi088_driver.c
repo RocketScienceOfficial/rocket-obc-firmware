@@ -85,7 +85,7 @@ FUNCRESULT bmi088AccelInitSPI(BMI088AccelConfig *config, SPIInstance spi, PinNum
 FUNCRESULT bmi088AccelInitI2C(BMI088AccelConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl, BOOL sdo1Grounded)
 {
     config->gpioConfig = (GPIOCommunicationConfig){
-        .protocol = GPIO_PROTOCOL_SPI,
+        .protocol = GPIO_PROTOCOL_I2C,
         .i2c = i2c,
         .i2cAddress = sdo1Grounded ? ACC_GND_I2C_ADDRESS : ACC_VDD_I2C_ADDRESS,
         .readMask = 0x80,

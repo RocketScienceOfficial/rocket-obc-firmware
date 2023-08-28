@@ -5,9 +5,14 @@
 static const UINT32 PWM_FREQ_HZ = 125E6;
 static const UINT32 PWM_DEFAULT_WRAP = 65535;
 
-static UINT32 pwmGetClockDiv(UINT32 frequency)
+static UINT32 __pwmGetClockDiv(UINT32 frequency)
 {
-    return ceil((float)PWM_FREQ_HZ / (float)(PWM_DEFAULT_WRAP * frequency));
+    return ceil((FLOAT)PWM_FREQ_HZ / (FLOAT)(PWM_DEFAULT_WRAP * frequency));
+}
+
+static UINT32 __pwmGetWrap(UINT32 frequency, UINT32 clockDiv)
+{
+    return PWM_FREQ_HZ / (clockDiv * frequency);
 }
 
 BOOL pwmCheckPin(PinNumber pin)
@@ -15,9 +20,9 @@ BOOL pwmCheckPin(PinNumber pin)
     return pin >= 0 && pin <= 28;
 }
 
-FUNCRESULT pwmInit(PinNumber pin, UINT32 frequency)
+FUNCRESULT pwmInit(PWMConfig *config, PinNumber pin, UINT32 frequency)
 {
-    if (!pwmCheckPin(pin))
+    if (!config || !pwmCheckPin(pin))
     {
         return ERR_INVALIDARG;
     }
@@ -27,28 +32,47 @@ FUNCRESULT pwmInit(PinNumber pin, UINT32 frequency)
         return ERR_FAIL;
     }
 
-    INT32 slice_num = pwm_gpio_to_slice_num(pin);
-    UINT32 clockDiv = pwmGetClockDiv(frequency);
-    UINT32 wrap = PWM_FREQ_HZ / (clockDiv * frequency);
+    config->pin = pin;
 
-    pwm_set_clkdiv(slice_num, clockDiv);
-    pwm_set_wrap(slice_num, wrap);
+    pwmSetFrequency(config, frequency);
+
+    UINT32 slice_num = pwm_gpio_to_slice_num(pin);
+    
     pwm_set_enabled(slice_num, TRUE);
 
     return SUC_OK;
 }
 
-FUNCRESULT pwmSetDuty(PinNumber pin, UINT32 frequency, FLOAT dutyCyclePercent)
+FUNCRESULT pwmSetFrequency(PWMConfig *config, UINT32 frequency)
 {
-    if (!pwmCheckPin(pin))
+    if (!config)
     {
         return ERR_INVALIDARG;
     }
 
-    UINT32 clockDiv = pwmGetClockDiv(frequency);
-    UINT32 wrap = PWM_FREQ_HZ / (clockDiv * frequency);
+    config->frequency = frequency;
 
-    pwm_set_gpio_level(pin, dutyCyclePercent * wrap);
+    UINT32 slice_num = pwm_gpio_to_slice_num(config->pin);
+    UINT32 clockDiv = __pwmGetClockDiv(frequency);
+    UINT32 wrap = __pwmGetWrap(frequency, clockDiv);
+
+    pwm_set_clkdiv(slice_num, clockDiv);
+    pwm_set_wrap(slice_num, wrap);
+
+    return SUC_OK;
+}
+
+FUNCRESULT pwmSetDuty(PWMConfig *config, FLOAT dutyCyclePercent)
+{
+    if (!config)
+    {
+        return ERR_INVALIDARG;
+    }
+
+    UINT32 clockDiv = __pwmGetClockDiv(config->frequency);
+    UINT32 wrap = __pwmGetWrap(config->frequency, clockDiv);
+
+    pwm_set_gpio_level(config->pin, dutyCyclePercent * wrap);
 
     return SUC_OK;
 }

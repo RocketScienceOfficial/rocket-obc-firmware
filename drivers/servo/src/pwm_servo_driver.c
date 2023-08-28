@@ -7,16 +7,16 @@ static const FLOAT SERVO_DUTY_CYCLE_MS_90 = 1.5f;
 static const FLOAT SERVO_DUTY_CYCLE_MS_180 = 2.5f;
 static const FLOAT SERVO_MAX_ANGLE_DEG = 180.0f;
 
-FUNCRESULT pwmServoInit(PinNumber pin)
+FUNCRESULT pwmServoInit(PWMConfig *config, PinNumber pin)
 {
-    if (FUNCFAILED(pwmInit(pin, SERVO_FREQ_HZ)))
+    if (!config || FUNCFAILED(pwmInit(config, pin, SERVO_FREQ_HZ)))
     {
         return ERR_FAIL;
     }
 
     BOOL connected = FALSE;
 
-    if (FUNCFAILED(pwmServoCheck(pin, &connected)))
+    if (FUNCFAILED(pwmServoCheck(config, &connected)))
     {
         return ERR_UNEXPECTED;
     }
@@ -29,11 +29,11 @@ FUNCRESULT pwmServoInit(PinNumber pin)
     return SUC_OK;
 }
 
-FUNCRESULT pwmServoCheck(PinNumber pin, BOOL *result)
+FUNCRESULT pwmServoCheck(PWMConfig *config, BOOL *result)
 {
     GPIOState state = GPIO_LOW;
 
-    if (FUNCFAILED(gpioGetPinState(pin, &state)))
+    if (FUNCFAILED(gpioGetPinState(config->pin, &state)))
     {
         return ERR_UNEXPECTED;
     }
@@ -43,9 +43,9 @@ FUNCRESULT pwmServoCheck(PinNumber pin, BOOL *result)
     return SUC_OK;
 }
 
-FUNCRESULT pwmServoRotateAngle(PinNumber pin, FLOAT destAngleDegrees)
+FUNCRESULT pwmServoRotateAngle(PWMConfig *config, FLOAT destAngleDegrees)
 {
     FLOAT duty = ((SERVO_DUTY_CYCLE_MS_180 - SERVO_DUTY_CYCLE_MS_0) / SERVO_MAX_ANGLE_DEG * destAngleDegrees + SERVO_DUTY_CYCLE_MS_0) * SERVO_FREQ_HZ / 1000.0f;
 
-    return pwmSetDuty(pin, SERVO_FREQ_HZ, duty);
+    return pwmSetDuty(config, duty);
 }

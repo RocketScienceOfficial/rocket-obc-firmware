@@ -86,7 +86,12 @@
         "multithreading.h": "c",
         "diodes.h": "c",
         "measurements.h": "c",
-        "algorithms.h": "c"
+        "algorithms.h": "c",
+        "ign.h": "c",
+        "status.h": "c",
+        "u_blox_sam_m10q_driver.h": "c",
+        "active_buzzer_driver.h": "c",
+        "pwm_driver.h": "c"
     },
     "cmake.configureOnOpen": false,
 }

@@ -5,7 +5,7 @@
 
 #define I2C 1
 #define SDA 14
-#define SCL 13
+#define SCL 15
 
 int main()
 {

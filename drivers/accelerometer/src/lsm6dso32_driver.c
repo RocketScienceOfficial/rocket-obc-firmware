@@ -21,6 +21,7 @@
 FUNCRESULT lsm6dso32InitSPI(LSM6DSO32Config *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
 {
     config->gpioConfig = (GPIOCommunicationConfig){
+        .protocol = GPIO_PROTOCOL_SPI,
         .spi = spi,
         .cs = cs,
         .readMask = 0x80,
@@ -34,6 +35,7 @@ FUNCRESULT lsm6dso32InitSPI(LSM6DSO32Config *config, SPIInstance spi, PinNumber 
 FUNCRESULT lsm6dso32InitI2C(LSM6DSO32Config *config, I2CInstance i2c, PinNumber sda, PinNumber scl)
 {
     config->gpioConfig = (GPIOCommunicationConfig){
+        .protocol = GPIO_PROTOCOL_I2C,
         .i2c = i2c,
         .i2cAddress = I2C_ADDRESS,
         .readMask = 0x80,
@@ -120,7 +122,7 @@ FUNCRESULT lsm6dso32Read(LSM6DSO32Config *config, vec3 *pAcceleration, vec3 *pGy
     {
         *pTemperature = rawTemperature / 32768.0f;
     }
-    
+
     pGyro->x = rawAngularRateX / 32768.0f * config->gyroRangeConstant;
     pGyro->y = rawAngularRateY / 32768.0f * config->gyroRangeConstant;
     pGyro->z = rawAngularRateZ / 32768.0f * config->gyroRangeConstant;
