@@ -1,12 +1,12 @@
 #include "radio.h"
 #include "config.h"
+#include "measurements.h"
 #include <Arduino.h>
 #include <SPI.h>
 #include <LoRa.h>
 
 static float s_Rssi;
 static uint8_t s_Buffer[256];
-static MeasurementData s_CurrentMeasurement;
 
 void LoRaInit()
 {
@@ -90,20 +90,10 @@ void __LoRaHandlePacket()
         return;
     }
 
-    memcpy(&s_CurrentMeasurement, packet.body.payload, packet.body.payloadSize);
+    MeasurementData measurement;
+    memcpy(&measurement, packet.body.payload, packet.body.payloadSize);
 
-    Serial.print("/*");
-    Serial.print(s_CurrentMeasurement.pos_x);
-    Serial.print(s_CurrentMeasurement.pos_y);
-    Serial.print(s_CurrentMeasurement.pos_z);
-    Serial.print(s_CurrentMeasurement.roll);
-    Serial.print(s_CurrentMeasurement.pitch);
-    Serial.print(s_CurrentMeasurement.yaw);
-    Serial.print(s_CurrentMeasurement.latitude);
-    Serial.print(s_CurrentMeasurement.longitude);
-    Serial.print(s_CurrentMeasurement.altitude);
-    Serial.print(s_CurrentMeasurement.velocity);
-    Serial.println("*/");
+    SetMeasurementData(&measurement);
 }
 
 void __LoRaBufferEncryptDecrypt(uint8_t *buffer, size_t bufferSize)

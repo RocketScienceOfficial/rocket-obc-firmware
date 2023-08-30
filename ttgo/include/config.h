@@ -14,3 +14,5 @@
 #define LORA_CS_PIN 18
 #define LORA_DIO0_PIN 26
 #define LORA_RST_PIN 23
+
+#define BUTTON_PIN 38

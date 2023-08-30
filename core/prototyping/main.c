@@ -24,20 +24,6 @@
 
 int main()
 {
-    // ========================
-    boardInit(5000);
-
-    gpioInitPin(9, GPIO_OUTPUT);
-
-    while (1)
-    {
-        gpioSetPinState(9, GPIO_HIGH);
-        sleepMiliseconds(1000);
-        gpioSetPinState(9, GPIO_LOW);
-        sleepMiliseconds(1000);
-    }
-    return 0;
-    // ========================
     boardInit(5000);
 
     spiInitAll(SPI, 10 * 1000 * 1000);

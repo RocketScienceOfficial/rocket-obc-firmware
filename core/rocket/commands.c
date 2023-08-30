@@ -20,6 +20,7 @@ VOID readFlashData(VOID)
     flashRead(0, &newBuffer);
 
     MeasurementData_FlashSave *newData = (MeasurementData_FlashSave *)newBuffer;
+
     SIZE seq = 0, i = 0;
 
     while (TRUE)

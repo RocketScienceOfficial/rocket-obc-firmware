@@ -244,7 +244,7 @@ static UBloxNeoM9NData s_UBloxNeoM9NData;
 
 static vec3 s_LastGPSPos;
 
-VOID initializeMeasurementLogger()
+VOID initMeasurementLogger()
 {
     myLogCreateLogger(&s_Logger, MY_LOG_RECEIVER_DATA_NAME);
     myLogCreateConsoleSink(&s_Logger, MY_LOG_RECEIVER_DATA_PATTERN);

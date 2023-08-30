@@ -25,38 +25,24 @@ static const uint8_t RADIO_PACKET_SIGNATURE[RADIO_PACKET_SIGNATURE_LENGTH] = {
     0x39,
 };
 
-typedef struct MeasurementData
-{
-    float pos_x;
-    float pos_y;
-    float pos_z;
-    float roll;
-    float pitch;
-    float yaw;
-    float latitude;
-    float longitude;
-    float altitude;
-    float velocity;
-} MeasurementData;
-
-typedef struct RadioHeader
+struct RadioHeader
 {
     uint8_t signature[RADIO_PACKET_SIGNATURE_LENGTH];
-} RadioHeader;
+};
 
-typedef struct RadioBody
+struct RadioBody
 {
     uint8_t command;
     uint8_t _padding[3];
     uint8_t payload[RADIO_PACKET_PAYLOAD_SIZE];
     size_t payloadSize;
-} RadioBody;
+};
 
-typedef struct RadioPacket
+struct RadioPacket
 {
     RadioHeader header;
     RadioBody body;
-} RadioPacket;
+};
 
 static const uint8_t RADIO_PACKET_KEY[] = {
     0x18,

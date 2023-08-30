@@ -15,9 +15,9 @@ typedef struct MeasurementData_FlashSave
 } MeasurementData_FlashSave;
 
 /**
- * @brief Initializes the storage.
+ * @brief Flushes the storage.
  */
-VOID initStorage(VOID);
+VOID flushStorage(VOID);
 
 /**
  * @brief Saves the data to the Flash

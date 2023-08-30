@@ -6,6 +6,7 @@
 #include "algorithms.h"
 #include "driver_calling.h"
 #include "mission_control.h"
+#include "status.h"
 
 #include "drivers/gpio/spi_driver.h"
 #include "drivers/gpio/i2c_driver.h"
@@ -21,21 +22,26 @@ static TIME s_RadioTimerOffset;
 
 int main(VOID)
 {
-    boardInit(0);
-
-    checkCMD();
+    boardInit(BOARD_SLEEP_TIME);
 
     DRIVER_CALL(spiInitAll(SPI, 1000000));
-    DRIVER_CALL(i2cInitAll(I2C, 400000));
+    // DRIVER_CALL(i2cInitAll(I2C, 400000));
     DRIVER_CALL(adcInitAll());
 
-    initStorage();
+    initMeasurementLogger();
     initSensors();
     // initRadio();
     initAlgorithms();
+    initStatus();
+
+    checkCMD();
+
+    flushStorage();
 
     while (TRUE)
     {
+        updateStatus();
+
         if (isMissionReady())
         {
             if (runEveryUs(MEASUREMENTS_UPDATE_RATE_MS * 1000, &s_MeasurementTimerOffset))

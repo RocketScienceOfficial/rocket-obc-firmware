@@ -49,7 +49,7 @@ typedef struct RawMeasurementData
 /**
  * @brief Initializes the measurements logger.
  */
-VOID initializeMeasurementLogger();
+VOID initMeasurementLogger();
 
 /**
  * @brief Logs the normal measurement data.

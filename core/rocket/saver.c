@@ -7,11 +7,10 @@
 #define FLASH_STORAGE_MAX_SIZE (1 << 19)
 
 static MeasurementData_FlashSave s_Measurements[MEASUREMENTS_BUFFER_SIZE];
-static MeasurementData s_LastNormalMeasurement;
 static SIZE s_MeasurementIndex;
 static SIZE s_PagesOffset;
 
-VOID initStorage(VOID)
+VOID flushStorage(VOID)
 {
     DRIVER_CALL(flashEraseSectors(0, (SIZE)FLASH_STORAGE_MAX_SIZE / flashSectorSize()));
 }
