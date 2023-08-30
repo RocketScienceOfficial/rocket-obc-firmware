@@ -22,7 +22,7 @@ static TIME s_RadioTimerOffset;
 
 int main(VOID)
 {
-    boardInit(BOARD_SLEEP_TIME);
+    boardInit(BOARD_START_SLEEP_TIME_MS);
 
     DRIVER_CALL(spiInitAll(SPI, 1000000));
     // DRIVER_CALL(i2cInitAll(I2C, 400000));
@@ -40,6 +40,7 @@ int main(VOID)
 
     while (TRUE)
     {
+        updateMission();
         updateStatus();
 
         if (isMissionReady())
@@ -48,7 +49,11 @@ int main(VOID)
             {
                 takeMeasurements(&s_CurrentRawMeasurement);
                 convertRawData(&s_CurrentRawMeasurement, &s_LastNormalMeasurement);
-                saveData(&s_CurrentRawMeasurement);
+
+                if (!isMissionDone())
+                {
+                    saveData(&s_CurrentRawMeasurement);
+                }
             }
 
             if (runEveryUs(RADIO_SEND_RATE_MS * 1000, &s_RadioTimerOffset))

@@ -1,26 +1,26 @@
 #include "mission_control.h"
 #include "measurements.h"
+#include "config.h"
+#include "drivers/tools/time_tracker.h"
 
 static BOOL s_GPSInitialized;
+static TIME s_MissionStartTime;
 
-BOOL isMissionReady(VOID)
+VOID updateMission(VOID)
 {
-    return TRUE;
-    
     if (checkGPS() && !s_GPSInitialized)
     {
         s_GPSInitialized = TRUE;
+        s_MissionStartTime = getMsSinceBoot();
     }
+}
 
-    if (!s_GPSInitialized)
-    {
-        return FALSE;
-    }
-
-    return TRUE;
+BOOL isMissionReady(VOID)
+{
+    return s_GPSInitialized;
 }
 
 BOOL isMissionDone(VOID)
 {
-    return FALSE;
+    return getMsSinceBoot() - s_MissionStartTime < MISSION_TIME_MS;
 }

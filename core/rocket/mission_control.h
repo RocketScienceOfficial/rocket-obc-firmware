@@ -3,6 +3,11 @@
 #include <obc/api.h>
 
 /**
+ * @brief Updates the mission state.
+ */
+VOID updateMission(VOID);
+
+/**
  * @brief Checks if the mission is ready to start.
  *
  * @return TRUE if the mission is ready to start, FALSE otherwise.

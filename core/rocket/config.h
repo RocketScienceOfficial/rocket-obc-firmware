@@ -46,11 +46,12 @@
 
 #pragma once
 
-#define BOARD_SLEEP_TIME 0
+#define BOARD_START_SLEEP_TIME_MS 0
 #define RADIO_SEND_RATE_MS 500
 #define MEASUREMENTS_UPDATE_RATE_MS 2.5
 #define DIODES_UPDATE_RATE_MS 1000
 #define COMMANDS_START_TIME_MS 30000
+#define MISSION_TIME_MS 120000
 #define IGNITER_DELAY_MS 1000
 
 #define TX_PIN 0
@@ -74,6 +75,7 @@
 #define SERVO_3_PIN 5
 #define SERVO_4_PIN 6
 
+#define BUZZER_PIN 14
 #define RGB_LED_PIN 15
 
 #define SPI 0
