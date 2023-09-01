@@ -114,5 +114,7 @@ static const uint8_t RADIO_PACKET_KEY[] = {
 void LoRaInit();
 void LoRaCheck();
 int LoRaGetRssi();
+int LoRaGetRX();
+int LoRaGetTX();
 void __LoRaHandlePacket();
 void __LoRaBufferEncryptDecrypt(uint8_t *buffer, size_t bufferSize);

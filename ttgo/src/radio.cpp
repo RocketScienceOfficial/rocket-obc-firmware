@@ -5,7 +5,9 @@
 #include <SPI.h>
 #include <LoRa.h>
 
-static float s_Rssi;
+static int s_Rssi;
+static int s_RX;
+static int s_TX;
 static uint8_t s_Buffer[256];
 
 void LoRaInit()
@@ -25,6 +27,8 @@ void LoRaInit()
         while (1)
             ;
     }
+
+    LoRa.setSignalBandwidth(LORA_BANDWIDTH);
 
     LoRa.receive();
 
@@ -51,6 +55,7 @@ void LoRaCheck()
         }
 
         s_Rssi = LoRa.packetRssi();
+        s_RX++;
 
         __LoRaHandlePacket();
     }
@@ -59,6 +64,16 @@ void LoRaCheck()
 int LoRaGetRssi()
 {
     return s_Rssi;
+}
+
+int LoRaGetRX()
+{
+    return s_RX;
+}
+
+int LoRaGetTX()
+{
+    return s_TX;
 }
 
 void __LoRaHandlePacket()

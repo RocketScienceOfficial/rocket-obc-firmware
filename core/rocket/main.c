@@ -30,7 +30,7 @@ int main(VOID)
 
     initMeasurementLogger();
     initSensors();
-    // initRadio();
+    initRadio();
     initAlgorithms();
     initStatus();
 
@@ -58,7 +58,7 @@ int main(VOID)
 
             if (runEveryUs(RADIO_SEND_RATE_MS * 1000, &s_RadioTimerOffset))
             {
-                // sendMeasurementData(&s_LastNormalMeasurement);
+                sendMeasurementData(&s_LastNormalMeasurement);
             }
         }
     }

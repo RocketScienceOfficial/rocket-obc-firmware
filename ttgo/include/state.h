@@ -1,13 +1,11 @@
 #pragma once
 
-#define SYSTEM_STATES_COUNT 4
+#define SYSTEM_STATES_COUNT 2
 
 enum class SystemState
 {
     DASHBOARD,
-    LOCATION,
     NAVIGATION,
-    RADIO,
 };
 
 void StateInit();

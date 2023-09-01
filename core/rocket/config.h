@@ -75,7 +75,6 @@
 #define SERVO_3_PIN 5
 #define SERVO_4_PIN 6
 
-#define BUZZER_PIN 14
 #define RGB_LED_PIN 15
 
 #define SPI 0
@@ -87,11 +86,9 @@
 #define BMI088_GYRO_CS_PIN 10
 #define BME688_CS_PIN 4
 #define H3LIS331DL_CS_PIN 1
-#define LSM6DSO32_CS_PIN 000
+#define LSM6DSO32_CS_PIN 14
 #define MMC5983MA_CS_PIN 12
 #define UBLOX_NEO_M9N_CS_PIN 13
 
-#define LORA_CS_PIN 17
-#define LORA_RESET_PIN 18
-#define LORA_BUSY_PIN 19
-#define LORA_DIO1_PIN 20
+#define LORA_CS_PIN 21
+#define LORA_RESET_PIN 22

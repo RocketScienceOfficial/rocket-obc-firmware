@@ -3,18 +3,20 @@
 #include "drivers/tools/board_control.h"
 #include <stdio.h>
 
-#define I2C 1
-#define SDA 14
-#define SCL 15
+#define SPI 0
+#define SCK 18
+#define MISO 16
+#define MOSI 19
+#define CS 14
 
 int main()
 {
     boardInit(5000);
 
-    i2cInitAll(I2C, 400000);
+    spiInitAll(SPI, 1000000);
 
     LSM6DSO32Config config = {0};
-    lsm6dso32InitI2C(&config, I2C, SDA, SCL);
+    lsm6dso32InitSPI(&config, SPI, MISO, MOSI, CS, SCK);
     lsm6dso32SetODR(&config, LSM6DSO32_ODR_416HZ, LSM6DSO32_ODR_416HZ);
     lsm6dso32SetRange(&config, LSM6DSO32_RANGE_4G, LSM6DSO32_RANGE_125DPS);
 

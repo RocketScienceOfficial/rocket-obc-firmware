@@ -6,6 +6,7 @@ static int s_CurrentStateIndex = 0;
 static int s_LastStateIndex = 0;
 static int s_ButtonState = LOW;
 static bool s_ButtonPressed = false;
+static bool s_Initialized = false;
 
 void StateInit()
 {
@@ -20,6 +21,11 @@ void StateCheck()
 
     if (s_ButtonState == HIGH)
     {
+        if (!s_Initialized)
+        {
+            return;
+        }
+
         if (!s_ButtonPressed)
         {
             s_CurrentStateIndex++;
@@ -35,6 +41,7 @@ void StateCheck()
     else
     {
         s_ButtonPressed = false;
+        s_Initialized = true;
     }
 }
 

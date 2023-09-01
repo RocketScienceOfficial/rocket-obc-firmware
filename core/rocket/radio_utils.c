@@ -68,9 +68,6 @@
 #include "drivers/lora/sx127X_driver.h"
 #include <string.h>
 
-#define RADIO_FREQ 433E6
-#define RADIO_POWER 20
-
 static SX127XData s_LoraData;
 
 VOID initRadio(VOID)
@@ -80,12 +77,12 @@ VOID initRadio(VOID)
         .sck = SCK,
         .miso = MISO,
         .mosi = MOSI,
-        .cs = EXTERNAL_CS_PIN,
+        .cs = LORA_CS_PIN,
         .reset = LORA_RESET_PIN,
     };
 
-    DRIVER_CALL(sx127XInit(&s_LoraData, &loraPinout, RADIO_FREQ));
-    DRIVER_CALL(sx127XSetTxPower(&s_LoraData, RADIO_POWER));
+    DRIVER_CALL(sx127XInit(&s_LoraData, &loraPinout, 433E6));
+    DRIVER_CALL(sx127XSetTxPower(&s_LoraData, 10));
     DRIVER_CALL(sx127XSetSpreadingFactor(&s_LoraData, 8));
     DRIVER_CALL(sx127XSetSignalBandwidth(&s_LoraData, 125000));
 }

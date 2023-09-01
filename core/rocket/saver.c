@@ -27,6 +27,7 @@ VOID saveData(RawMeasurementData *data)
         DRIVER_CALL(flashWritePages(s_PagesOffset, (BYTE *)s_Measurements, sizeof(s_Measurements) / flashWriteBufferSize()));
 
         memset(s_Measurements, 0, sizeof(s_Measurements));
+        
         s_MeasurementIndex = 0;
         s_PagesOffset += sizeof(s_Measurements) / flashWriteBufferSize();
     }

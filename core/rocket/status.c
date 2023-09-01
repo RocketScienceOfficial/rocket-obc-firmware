@@ -138,9 +138,7 @@
 
 #include "status.h"
 #include "config.h"
-#include "mission_control.h"
 #include "drivers/led/w2812_driver.h"
-#include "drivers/buzzer/active_buzzer_driver.h"
 #include "drivers/tools/time_tracker.h"
 
 #define LEDS_COUNT 1
@@ -154,8 +152,6 @@ VOID initStatus(VOID)
     s_Colors[0] = ws2812GetColor(0, 0, 0);
 
     ws2812SetColors(s_Colors, LEDS_COUNT);
-
-    activeBuzzerInit(BUZZER_PIN);
 }
 
 VOID updateStatus(VOID)
@@ -169,10 +165,5 @@ VOID updateStatus(VOID)
         ws2812SetColors(s_Colors, LEDS_COUNT);
 
         test = true;
-    }
-
-    if (isMissionDone())
-    {
-        activeBuzzerSetActive(BUZZER_PIN, TRUE);
     }
 }

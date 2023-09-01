@@ -2,12 +2,12 @@
 #include "drivers/tools/board_control.h"
 #include <stdio.h>
 
-#define SPI 1
-#define SCK 10
-#define MISO 11
-#define MOSI 12
-#define CS 16
-#define RESET 18
+#define SPI 0
+#define SCK 18
+#define MISO 16
+#define MOSI 19
+#define CS 20
+#define RESET 22
 
 int main()
 {

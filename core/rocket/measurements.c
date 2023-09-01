@@ -309,11 +309,11 @@ VOID initSensors(VOID)
     DRIVER_CALL(bmi088GyroSetBandwidth(&s_BMI088GyroConfig, BMI088_GYRO_ODR_2000_BW_523HZ));
     DRIVER_CALL(bmi088GyroSetRange(&s_BMI088GyroConfig, BMI088_GYRO_RANGE_500DPS));
 
-    // DRIVER_CALL(lsm6dso32InitSPI(&s_LSM6DSO32Config, SPI, MISO, MOSI, LSM6DSO32_CS_PIN, SCK));
-    // DRIVER_CALL(lsm6dso32SetODR(&s_LSM6DSO32Config, LSM6DSO32_ODR_416HZ, LSM6DSO32_ODR_416HZ));
-    // DRIVER_CALL(lsm6dso32SetRange(&s_LSM6DSO32Config, LSM6DSO32_RANGE_32G, LSM6DSO32_RANGE_2000DPS));
+    DRIVER_CALL(lsm6dso32InitSPI(&s_LSM6DSO32Config, SPI, MISO, MOSI, LSM6DSO32_CS_PIN, SCK));
+    DRIVER_CALL(lsm6dso32SetODR(&s_LSM6DSO32Config, LSM6DSO32_ODR_416HZ, LSM6DSO32_ODR_416HZ));
+    DRIVER_CALL(lsm6dso32SetRange(&s_LSM6DSO32Config, LSM6DSO32_RANGE_32G, LSM6DSO32_RANGE_2000DPS));
 
-    DRIVER_CALL(bme688Init(&s_BME688Config, SPI, MISO, MOSI, BME688_CS_PIN, SCK));
+    DRIVER_CALL(bme688Init(&s_BME688Config, SPI, MISO, MOSI, SCK, BME688_CS_PIN));
     DRIVER_CALL(bme688SetConfig(&s_BME688Config, BME688_SENSOR_OSR_8X, BME688_SENSOR_OSR_8X, BME688_SENSOR_OSR_16X, BME688_IIR_FILTER_COEFF_OFF));
     DRIVER_CALL(bme688SetHeaterConfig(&s_BME688Config, 0, 0, 300, 0, 100));
 
@@ -342,7 +342,7 @@ VOID takeMeasurements(RawMeasurementData *rawMeasurements)
 
     DRIVER_CALL(bmi088AccelRead(&s_BMI088AccelConfig, &accel_1));
     DRIVER_CALL(bmi088GyroRead(&s_BMI088GyroConfig, &gyro_1));
-    // DRIVER_CALL(lsm6dso32Read(&s_LSM6DSO32Config, &accel_2, &gyro_2, NULL));
+    DRIVER_CALL(lsm6dso32Read(&s_LSM6DSO32Config, &accel_2, &gyro_2, NULL));
     DRIVER_CALL(h3lis331dlRead(&s_H3lis331dlConfig, &accel_3));
     DRIVER_CALL(mmc5983maRead(&s_MMC5983MAConfig, &mag));
     DRIVER_CALL(bme688Read(&s_BME688Config, &baroData));
