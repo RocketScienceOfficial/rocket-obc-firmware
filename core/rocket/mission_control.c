@@ -22,5 +22,5 @@ BOOL isMissionReady(VOID)
 
 BOOL isMissionDone(VOID)
 {
-    return getMsSinceBoot() - s_MissionStartTime < MISSION_TIME_MS;
+    return getMsSinceBoot() - s_MissionStartTime > MISSION_TIME_MS;
 }

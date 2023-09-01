@@ -41,10 +41,11 @@ int main(VOID)
     while (TRUE)
     {
         updateMission();
-        updateStatus();
 
         if (isMissionReady())
         {
+            updateStatus();
+
             if (runEveryUs(MEASUREMENTS_UPDATE_RATE_MS * 1000, &s_MeasurementTimerOffset))
             {
                 takeMeasurements(&s_CurrentRawMeasurement);

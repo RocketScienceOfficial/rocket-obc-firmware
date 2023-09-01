@@ -316,6 +316,7 @@ VOID initSensors(VOID)
     DRIVER_CALL(bme688Init(&s_BME688Config, SPI, MISO, MOSI, SCK, BME688_CS_PIN));
     DRIVER_CALL(bme688SetConfig(&s_BME688Config, BME688_SENSOR_OSR_8X, BME688_SENSOR_OSR_8X, BME688_SENSOR_OSR_16X, BME688_IIR_FILTER_COEFF_OFF));
     DRIVER_CALL(bme688SetHeaterConfig(&s_BME688Config, 0, 0, 300, 0, 100));
+    DRIVER_CALL(bme688SetMode(&s_BME688Config, BME688_MODE_FORCED));
 
     DRIVER_CALL(h3lis331dlInitSPI(&s_H3lis331dlConfig, SPI, MISO, MOSI, H3LIS331DL_CS_PIN, SCK));
     DRIVER_CALL(h3lis331dlSetPowerMode(&s_H3lis331dlConfig, H3LIS331DL_POWER_NORMAL));
@@ -337,8 +338,6 @@ VOID takeMeasurements(RawMeasurementData *rawMeasurements)
     vec3 gyro_2 = {0};
     vec3 mag = {0};
     BME688Data baroData = {0};
-
-    DRIVER_CALL(bme688SetMode(&s_BME688Config, BME688_MODE_FORCED));
 
     DRIVER_CALL(bmi088AccelRead(&s_BMI088AccelConfig, &accel_1));
     DRIVER_CALL(bmi088GyroRead(&s_BMI088GyroConfig, &gyro_1));
@@ -372,6 +371,8 @@ VOID takeMeasurements(RawMeasurementData *rawMeasurements)
         .pressure = baroData.pressure,
         .temperature = baroData.temperature,
     };
+
+    DRIVER_CALL(bme688SetMode(&s_BME688Config, BME688_MODE_FORCED));
 }
 
 BOOL checkGPS(VOID)

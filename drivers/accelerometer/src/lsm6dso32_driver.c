@@ -29,7 +29,7 @@ FUNCRESULT lsm6dso32InitSPI(LSM6DSO32Config *config, SPIInstance spi, PinNumber 
         .writeMask = 0x7F,
     };
 
-    return spiInitPins(spi, miso, mosi, cs, sck);
+    return spiInitPins(spi, miso, mosi, sck, cs);
 }
 
 FUNCRESULT lsm6dso32InitI2C(LSM6DSO32Config *config, I2CInstance i2c, PinNumber sda, PinNumber scl)

@@ -3,6 +3,8 @@
 
 VOID boardInit(TIME sleepTimeMS)
 {
+    sleep_ms(1000);
+    
     stdio_init_all();
 
     if (sleepTimeMS > 0)
