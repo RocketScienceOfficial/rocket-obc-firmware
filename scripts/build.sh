@@ -46,6 +46,7 @@ cp build/samples/flash/samples_flash.uf2 executables/samples/flash.uf2
 cp build/samples/gpio/samples_gpio.uf2 executables/samples/gpio.uf2
 cp build/samples/h3lis331dl/samples_h3lis331dl.uf2 executables/samples/h3lis331dl.uf2
 cp build/samples/lsm6dso32/samples_lsm6dso32.uf2 executables/samples/lsm6dso32.uf2
+cp build/samples/max1161X/samples_max1161X.uf2 executables/samples/max1161X.uf2
 cp build/samples/mmc5983ma/samples_mmc5983ma.uf2 executables/samples/mmc5983ma.uf2
 cp build/samples/sd/samples_sd.uf2 executables/samples/sd.uf2
 cp build/samples/sx126X/samples_sx126X.uf2 executables/samples/sx126X.uf2
