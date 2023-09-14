@@ -3,8 +3,6 @@ cmake_minimum_required(VERSION 3.12)
 include(vendor/pico-sdk/pico_sdk_init.cmake)
 include(cmake/utils.cmake)
 
-set(PICO_BOARD pico)
-
 project(obc C CXX ASM)
 
 set(CMAKE_C_STANDARD 11)
