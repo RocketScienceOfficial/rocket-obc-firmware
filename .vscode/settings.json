@@ -93,7 +93,8 @@
         "active_buzzer_driver.h": "c",
         "pwm_driver.h": "c",
         "bmp280_driver.h": "c",
-        "queue.h": "c"
+        "queue.h": "c",
+        "config_autogen.h": "c"
     },
     "cmake.configureOnOpen": false,
 }

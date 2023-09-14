@@ -13,12 +13,35 @@
 #include "drivers/gpio/adc_driver.h"
 #include "drivers/tools/time_tracker.h"
 #include "drivers/tools/board_control.h"
+#include "drivers/tools/multithreading.h"
 
 static RawMeasurementData s_CurrentRawMeasurement;
 static MeasurementData s_LastNormalMeasurement;
 
 static TIME s_MeasurementTimerOffset;
 static TIME s_RadioTimerOffset;
+
+static VOID core1Main(VOID)
+{
+    setAsVictimCore();
+
+    MeasurementData measurement = {0};
+    BOOL isMeasurementReady = FALSE;
+
+    while (TRUE)
+    {
+        receiveFromOtherCore(&measurement);
+
+        isMeasurementReady = TRUE;
+
+        if (runEveryUs(RADIO_SEND_RATE_MS * 1000, &s_RadioTimerOffset))
+        {
+            sendMeasurementData(&measurement);
+
+            isMeasurementReady = FALSE;
+        }
+    }
+}
 
 int main(VOID)
 {
@@ -36,7 +59,9 @@ int main(VOID)
 
     checkCMD();
 
-    flushStorage();
+    //flushStorage();
+
+    startOtherCore(core1Main, sizeof(MeasurementData), 1);
 
     while (TRUE)
     {
@@ -55,11 +80,8 @@ int main(VOID)
                 {
                     saveData(&s_CurrentRawMeasurement);
                 }
-            }
 
-            if (runEveryUs(RADIO_SEND_RATE_MS * 1000, &s_RadioTimerOffset))
-            {
-                sendMeasurementData(&s_LastNormalMeasurement);
+                sendToOtherCore(&s_LastNormalMeasurement);
             }
         }
     }

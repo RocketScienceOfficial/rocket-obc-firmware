@@ -1,10 +1,11 @@
 #include "saver.h"
 #include "driver_calling.h"
 #include "drivers/storage/flash_driver.h"
+#include "drivers/tools/multithreading.h"
 #include <string.h>
 
 #define MEASUREMENTS_BUFFER_SIZE 128
-#define FLASH_STORAGE_MAX_SIZE (1 << 19)
+#define FLASH_STORAGE_MAX_SIZE (1 << 23)
 
 static MeasurementData_FlashSave s_Measurements[MEASUREMENTS_BUFFER_SIZE];
 static SIZE s_MeasurementIndex;
@@ -24,7 +25,9 @@ VOID saveData(RawMeasurementData *data)
 
     if (s_MeasurementIndex >= MEASUREMENTS_BUFFER_SIZE)
     {
+        coreStartLockout();
         DRIVER_CALL(flashWritePages(s_PagesOffset, (BYTE *)s_Measurements, sizeof(s_Measurements) / flashWriteBufferSize()));
+        coreEndLockout();
 
         memset(s_Measurements, 0, sizeof(s_Measurements));
         

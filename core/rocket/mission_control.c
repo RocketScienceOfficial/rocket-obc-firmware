@@ -8,7 +8,7 @@ static TIME s_MissionStartTime;
 
 VOID updateMission(VOID)
 {
-    if (checkGPS() && !s_GPSInitialized)
+    //if (checkGPS() && !s_GPSInitialized)
     {
         s_GPSInitialized = TRUE;
         s_MissionStartTime = getMsSinceBoot();
