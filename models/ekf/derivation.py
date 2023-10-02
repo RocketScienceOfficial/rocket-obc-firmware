@@ -1,6 +1,6 @@
 from sympy import *
 from utils import *
-
+from scenarios import *
 
 # ==================== Utils ====================
 
@@ -21,8 +21,6 @@ def nav_to_body_frame(q):
 
 
 # ==================== Init ====================
-
-
 q_w, q_x, q_y, q_z, vel_n, vel_e, vel_d, pos_n, pos_e, pos_d, gyro_x_bias, gyro_y_bias, gyro_z_bias, accel_x_bias, accel_y_bias, accel_z_bias, mag_n, mag_e, mag_d, mag_x_bias, mag_y_bias, mag_z_bias, gyro_x, gyro_y, gyro_z, accel_x, accel_y, accel_z, gps_x, gps_y, gps_z, gps_vel_x, gps_vel_y, baro_height, mag_x, mag_y, mag_z, g, dt = symbols(
     'q_w, q_x, q_y, q_z, vel_n, vel_e, vel_d, pos_n, pos_e, pos_d, gyro_x_bias, gyro_y_bias, gyro_z_bias, accel_x_bias, accel_y_bias, accel_z_bias, mag_n, mag_e, mag_d, mag_x_bias, mag_y_bias, mag_z_bias, gyro_x, gyro_y, gyro_z, accel_x, accel_y, accel_z,gps_x, gps_y, gps_z, gps_vel_x, gps_vel_y, baro_height, mag_x, mag_y, mag_z, g, dt ')
 
@@ -152,42 +150,66 @@ h = Matrix([
 
 # ==================== Equations ====================
 
-
 F = f.jacobian(state_vector)
 G = f.jacobian(control_vector)
 H = h.jacobian(state_vector)
+W = Matrix([
+
+])
+Q = integrate(G * transpose(G), (dt, 0, dt))
+
+X_est, P_est, X_pred, P_pred, K = EKF(generate_scenario_free_fall_parachute(
+    config), config, get_R, get_Q, get_F, get_H)
+
+print(X_est[2])
 
 
 '''
 TODO:
-    - Accel & Gyro in state
-    - GPS to local
-    - Coordinates
-    - Seperate measurements vectors, jacobians, ...
-    - Different sampling rates
-    - Same sensors fusion
+    - Accel & Gyro in state; may be updated normally in correction
+    - Position prediction without accel
+    - Biases
+    - Accel angular acceleration
+    - Different sampling rates. Ideas:
+        - Seperate measurements vectors and jacobians; For each measurement update equations are run
+        - Seperate measurements vectors and jacobians; Only at the end of the loop the update equations are run
+        - Normal measurement vector and jacobian; Missing measurements are set to 0
+        - Normal measurement vector and jacobian; Missing measurements are set to previous value
+        - FIFO Buffer (PX4)
+    - Same sensors fusion. Ideas:
+        - Combinning measurements using special formula (variance, covariance, etc.)
+        - Combinning measurements using mulitple updates
+        - Seperate Kalman filters for group of sensors
+    - C code generation
+        - PX4: https://github.com/PX4/PX4-Autopilot/blob/main/src/modules/ekf2/EKF/python/ekf_derivation/derivation_utils.py
+        - AP: https://github.com/ArduPilot/ardupilot/blob/master/libraries/AP_NavEKF3/derivation/code_gen.py
+    - Scenarios (Replay; PX4)
+        - Generic
+        - Downloaded Data
+        - PX4: https://github.com/PX4/PX4-ECL/tree/master/test/replay_data
+    - Analyze:
+        - Normal distribution
+        - Plots: True vs Estimated vs Measured
+        - Plots: Covariance Ellipse
+        - Plots: Confidence
+        - Position in 3D & Map
+        - PX4: https://github.com/PX4/PX4-Autopilot/tree/main/Tools/ecl_ekf
+    - Include Earth Magnetic Data (Dip, Declination, Strength):
+        - Fusing Mag Dip: https://ahrs.readthedocs.io/en/latest/filters/ekf.html#correction-step
  
 
 SOURCES:
     - Docs:
-        + https://docs.px4.io/main/en/advanced_config/tuning_the_ecl_ekf.html
-        + https://ahrs.readthedocs.io/en/latest/filters/ekf.html
-        + https://github.com/PX4/PX4-ECL/blob/master/EKF/documentation/Process%20and%20Observation%20Models.pdf
-    - Geometry:
-        + https://en.wikipedia.org/wiki/Axes_conventions
-        + https://en.wikipedia.org/wiki/Local_tangent_plane_coordinates
-        + https://en.wikipedia.org/wiki/Geographic_coordinate_conversion
-        + https://www.mathworks.com/help/map/choose-a-3-d-coordinate-system.html
-        + https://stackoverflow.com/questions/4679876/how-do-i-translate-of-lon-lat-coordinate-by-some-n-e-meters-distance-on-earth-su
-        + http://www.movable-type.co.uk/scripts/latlong-vincenty.html#direct
-        + https://www.mathworks.com/help/map/ref/geodetic2ned.html
-        + https://www.mathworks.com/help/nav/ref/lla2ned.html
-        + https://en.wikipedia.org/wiki/Equirectangular_projection        
+        - PX4 Docs: https://docs.px4.io/main/en/advanced_config/tuning_the_ecl_ekf.html
+        - PX4 Models PDF: https://github.com/PX4/PX4-ECL/blob/master/EKF/documentation/Process%20and%20Observation%20Models.pdf
+        - AHRS: https://ahrs.readthedocs.io/en/latest/filters/ekf.html
     - Fusion:
-        + https://www.youtube.com/watch?v=0rlvvYgmTvI&list=PLn8PRpmsu08ryYoBpEKzoMOveSTyS-h4a&index=3
-        + https://www.youtube.com/watch?v=hN8dL55rP5I&list=PLn8PRpmsu08ryYoBpEKzoMOveSTyS-h4a&index=4
-        + https://dsp.stackexchange.com/questions/60511/kalman-filter-how-to-combine-data-from-sensors-with-different-measurement-rate/60513#60513
+        - Matlab Video 1: https://www.youtube.com/watch?v=0rlvvYgmTvI&list=PLn8PRpmsu08ryYoBpEKzoMOveSTyS-h4a&index=3
+        - Matlab Video 2: https://www.youtube.com/watch?v=hN8dL55rP5I&list=PLn8PRpmsu08ryYoBpEKzoMOveSTyS-h4a&index=4
+        - Stack Exchange Idea: https://dsp.stackexchange.com/questions/60511/kalman-filter-how-to-combine-data-from-sensors-with-different-measurement-rate/60513#60513
+        - Matlab functions: https://www.mathworks.com/help/fusion/referencelist.html?type=function&category=inertial-sensor-fusion&s_tid=CRUX_topnav
     - Code:
-        + https://github.com/PX4/PX4-Autopilot/blob/main/src/modules/ekf2/EKF/python/ekf_derivation/derivation.py
-        + https://github.com/PX4/PX4-Autopilot/blob/main/src/modules/ekf2/EKF/gps_control.cpp
+        - PX4 Derivation 1: https://github.com/PX4/PX4-Autopilot/blob/main/src/modules/ekf2/EKF/python/ekf_derivation
+        - PX4 Derivation 2: https://github.com/PX4/PX4-ECL/tree/master/EKF/python/ekf_derivation
+        - AP Derivation: https://github.com/ArduPilot/ardupilot/tree/master/libraries/AP_NavEKF3/derivation
 '''
