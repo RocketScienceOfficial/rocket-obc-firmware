@@ -6,9 +6,6 @@ Resources:
     - https://www.mathworks.com/help/nav/ref/ned2lla.html
     - https://en.wikipedia.org/wiki/Geographic_coordinate_conversion
     - https://en.wikipedia.org/wiki/Local_tangent_plane_coordinates
-    
-    
-    TODO: Check algorithm for 'ecef_to_geo' function (https://www.mathworks.com/help/aeroblks/ecefpositiontolla.html)
 '''
 
 from math import pi, sin, cos, sqrt, atan, atan2, asin, radians, degrees

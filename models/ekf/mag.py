@@ -1,11 +1,7 @@
 '''
 Resources:
- - https://github.com/PX4/PX4-ECL/blob/master/geo_lookup/fetch_noaa_table.py
- - https://www.ngdc.noaa.gov/geomag/CalcSurveyFin.shtml
-
-
- TODO: Generate Tables for C++
- TODO: Constrain indexes
+    - https://github.com/PX4/PX4-ECL/blob/master/geo_lookup/fetch_noaa_table.py
+    - https://www.ngdc.noaa.gov/geomag/CalcSurveyFin.shtml
 '''
 
 import math

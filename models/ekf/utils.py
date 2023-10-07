@@ -11,8 +11,19 @@ def print_matrix(m: Matrix):
         print("")
 
 
-def convert_sympy_matrix_to_numpy(m: Matrix):
-    return np.array(m.tolist()).astype(np.float64)
+def body_to_nav_frame(q):
+    return Matrix([
+        [q[0] ** 2 + q[1] ** 2 - q[2] ** 2 - q[3] ** 2, 2 *
+            (q[1] * q[2] - q[0] * q[3]), 2 * (q[1] * q[3] + q[0] * q[2])],
+        [2 * (q[1] * q[2] + q[0] * q[3]), q[0] ** 2 - q[1] ** 2 +
+         q[2] ** 2 - q[3] ** 2, 2 * (q[2] * q[3] - q[0] * q[1])],
+        [2 * (q[1] * q[3] - q[0] * q[2]), 2 * (q[0] * q[1] + q[2] * q[3]),
+         q[0] ** 2 - q[1] ** 2 - q[2] ** 2 + q[3] ** 2],
+    ])
+
+
+def nav_to_body_frame(q):
+    return body_to_nav_frame(q).transpose()
 
 
 def add_noise(X, sigma, seed):
