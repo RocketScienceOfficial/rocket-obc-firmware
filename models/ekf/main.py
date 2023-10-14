@@ -3,21 +3,12 @@ Resources:
     - Docs:
         - PX4 Docs: https://docs.px4.io/main/en/advanced_config/tuning_the_ecl_ekf.html
         - PX4 Models PDF: https://github.com/PX4/PX4-ECL/blob/master/EKF/documentation/Process%20and%20Observation%20Models.pdf
-        - AHRS: https://ahrs.readthedocs.io/en/latest/filters/ekf.html
-    - Fusion:
-        - Matlab Video 1: https://www.youtube.com/watch?v=0rlvvYgmTvI&list=PLn8PRpmsu08ryYoBpEKzoMOveSTyS-h4a&index=3
-        - Matlab Video 2: https://www.youtube.com/watch?v=hN8dL55rP5I&list=PLn8PRpmsu08ryYoBpEKzoMOveSTyS-h4a&index=4
-        - Stack Exchange Idea: https://dsp.stackexchange.com/questions/60511/kalman-filter-how-to-combine-data-from-sensors-with-different-measurement-rate/60513#60513
-        - Matlab functions: https://www.mathworks.com/help/fusion/referencelist.html?type=function&category=inertial-sensor-fusion&s_tid=CRUX_topnav
-    - Code:
-        - PX4 Derivation 1: https://github.com/PX4/PX4-Autopilot/blob/main/src/modules/ekf2/EKF/python/ekf_derivation
-        - PX4 Derivation 2: https://github.com/PX4/PX4-ECL/tree/master/EKF/python/ekf_derivation
-        - AP Derivation: https://github.com/ArduPilot/ardupilot/tree/master/libraries/AP_NavEKF3/derivation
+       - AHRS: https://ahrs.readthedocs.io/en/latest/filters/ekf.html
 '''
 
 import numpy as np
 from ekf import *
-from scenarios import *
+from data_provider import *
 from derivation import *
 from analysis import *
 
@@ -31,8 +22,6 @@ variances = {
     'gps_pos_x': 1,
     'gps_pos_y': 1,
     'gps_pos_z': 1,
-    'gps_vel_x': 0.5,
-    'gps_vel_y': 0.5,
     'baro': 0.5,
     'mag_x': 0.3,
     'mag_y': 0.3,
@@ -40,7 +29,7 @@ variances = {
 }
 
 init_paramas = {
-    'x0': np.array([[1, 0, 0, 0, 0, 0, 0, 0, 0, 1000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]).T,
+    'x0': np.array([[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]).T,
     'P0': np.eye(22) * 1000,
 }
 
@@ -61,47 +50,83 @@ f_hndl = lambdify([q_w, q_x, q_y, q_z, vel_n, vel_e, vel_d, pos_n, pos_e, pos_d,
 F_hndl = lambdify([q_w, q_x, q_y, q_z, vel_n, vel_e, vel_d, pos_n, pos_e, pos_d, gyro_x_bias, gyro_y_bias, gyro_z_bias, accel_x_bias, accel_y_bias,
                   accel_z_bias, mag_n, mag_e, mag_d, mag_x_bias, mag_y_bias, mag_z_bias, accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, g, dt], F)
 
-h_hndl = lambdify([q_w, q_x, q_y, q_z, vel_n, vel_e, vel_d, pos_n, pos_e, pos_d, gyro_x_bias, gyro_y_bias, gyro_z_bias,
-                  accel_x_bias, accel_y_bias, accel_z_bias, mag_n, mag_e, mag_d, mag_x_bias, mag_y_bias, mag_z_bias], h)
-
-H_hndl = lambdify([q_w, q_x, q_y, q_z, vel_n, vel_e, vel_d, pos_n, pos_e, pos_d, gyro_x_bias, gyro_y_bias, gyro_z_bias,
-                  accel_x_bias, accel_y_bias, accel_z_bias, mag_n, mag_e, mag_d, mag_x_bias, mag_y_bias, mag_z_bias], H)
+h_gps_hndl = lambdify([q_w, q_x, q_y, q_z, vel_n, vel_e, vel_d, pos_n, pos_e, pos_d, gyro_x_bias, gyro_y_bias, gyro_z_bias,
+                      accel_x_bias, accel_y_bias, accel_z_bias, mag_n, mag_e, mag_d, mag_x_bias, mag_y_bias, mag_z_bias], h_gps)
+h_baro_hndl = lambdify([q_w, q_x, q_y, q_z, vel_n, vel_e, vel_d, pos_n, pos_e, pos_d, gyro_x_bias, gyro_y_bias, gyro_z_bias,
+                       accel_x_bias, accel_y_bias, accel_z_bias, mag_n, mag_e, mag_d, mag_x_bias, mag_y_bias, mag_z_bias], h_baro)
+h_mag_hndl = lambdify([q_w, q_x, q_y, q_z, vel_n, vel_e, vel_d, pos_n, pos_e, pos_d, gyro_x_bias, gyro_y_bias, gyro_z_bias,
+                      accel_x_bias, accel_y_bias, accel_z_bias, mag_n, mag_e, mag_d, mag_x_bias, mag_y_bias, mag_z_bias], h_mag)
+H_gps_hndl = lambdify([q_w, q_x, q_y, q_z, vel_n, vel_e, vel_d, pos_n, pos_e, pos_d, gyro_x_bias, gyro_y_bias, gyro_z_bias,
+                      accel_x_bias, accel_y_bias, accel_z_bias, mag_n, mag_e, mag_d, mag_x_bias, mag_y_bias, mag_z_bias], H_gps)
+H_baro_hndl = lambdify([q_w, q_x, q_y, q_z, vel_n, vel_e, vel_d, pos_n, pos_e, pos_d, gyro_x_bias, gyro_y_bias, gyro_z_bias,
+                       accel_x_bias, accel_y_bias, accel_z_bias, mag_n, mag_e, mag_d, mag_x_bias, mag_y_bias, mag_z_bias], H_baro)
+H_mag_hndl = lambdify([q_w, q_x, q_y, q_z, vel_n, vel_e, vel_d, pos_n, pos_e, pos_d, gyro_x_bias, gyro_y_bias, gyro_z_bias,
+                      accel_x_bias, accel_y_bias, accel_z_bias, mag_n, mag_e, mag_d, mag_x_bias, mag_y_bias, mag_z_bias], H_mag)
 
 Q_hndl = lambdify([q_w, q_x, q_y, q_z, vel_n, vel_e, vel_d, pos_n, pos_e, pos_d, gyro_x_bias, gyro_y_bias, gyro_z_bias, accel_x_bias, accel_y_bias,
                   accel_z_bias, mag_n, mag_e, mag_d, mag_x_bias, mag_y_bias, mag_z_bias, sigma_a_x, sigma_a_y, sigma_a_z, sigma_w_x, sigma_w_y, sigma_w_z, dt], Q)
 
-R_hndl = lambdify([sigma_gps_pos_x, sigma_gps_pos_y, sigma_gps_pos_z, sigma_gps_vel_x,
-                  sigma_gps_vel_y, sigma_baro, sigma_mag_x, sigma_mag_y, sigma_mag_z], R)
+R_gps_hndl = lambdify([sigma_gps_pos_x, sigma_gps_pos_y, sigma_gps_pos_z,
+                      sigma_baro, sigma_mag_x, sigma_mag_y, sigma_mag_z], R_gps)
+R_baro_hndl = lambdify([sigma_gps_pos_x, sigma_gps_pos_y, sigma_gps_pos_z,
+                       sigma_baro, sigma_mag_x, sigma_mag_y, sigma_mag_z], R_baro)
+R_mag_hndl = lambdify([sigma_gps_pos_x, sigma_gps_pos_y, sigma_gps_pos_z,
+                      sigma_baro, sigma_mag_x, sigma_mag_y, sigma_mag_z], R_mag)
 
 
 def get_F(state, control):
-    state = state[:, 0]
+    new_state = state[:, 0]
 
-    return np.array(f_hndl(*state, *control, scenario_config['g'], scenario_config['dt'])), np.array(F_hndl(*state, *control, scenario_config['g'], scenario_config['dt']))
+    return np.array(f_hndl(*new_state, *control, scenario_config['g'], scenario_config['dt'])), np.array(F_hndl(*new_state, *control, scenario_config['g'], scenario_config['dt']))
 
 
-def get_H(state):
-    state = state[:, 0]
+def get_H(state, meas, flags):
+    new_state = state[:, 0]
 
-    return np.array(h_hndl(*state)), np.array(H_hndl(*state))
+    arr = []
+
+    if flags[0] == 1:
+        arr.append((np.array(h_gps_hndl(*new_state)),
+                   np.array(H_gps_hndl(*new_state)), meas[0:3]))
+
+    if flags[3] == 1:
+        arr.append((np.array(h_baro_hndl(*new_state)),
+                   np.array(H_baro_hndl(*new_state)), meas[3]))
+
+    if flags[4] == 1:
+        arr.append((np.array(h_mag_hndl(*new_state)),
+                   np.array(H_mag_hndl(*new_state)), meas[4:7]))
+
+    return arr
 
 
 def get_Q(state):
-    state = state[:, 0]
+    new_state = state[:, 0]
 
-    return np.array(Q_hndl(*state, variances['a_x'], variances['a_y'], variances['a_z'], variances['w_x'], variances['w_y'], variances['w_z'], scenario_config['dt']))
-
-
-def get_R(state):
-    state = state[:, 0]
-
-    return np.array(R_hndl(variances['gps_pos_x'], variances['gps_pos_y'], variances['gps_pos_z'], variances['gps_vel_x'], variances['gps_vel_y'], variances['baro'], variances['mag_x'], variances['mag_y'], variances['mag_z']))
+    return np.array(Q_hndl(*new_state, variances['a_x'], variances['a_y'], variances['a_z'], variances['w_x'], variances['w_y'], variances['w_z'], scenario_config['dt']))
 
 
-true_measurements, noisy_measurements, true_controls, noisy_controls = generate_scenario_free_fall_parachute(
-    scenario_config)
+def get_R(flags):
+    arr = []
 
-X_est, P_est, X_pred, P_pred, K = EKF(
-    noisy_measurements, noisy_controls, init_paramas, get_F, get_H, get_Q, get_R)
+    if flags[0] == 1:
+        arr.append(np.array(R_gps_hndl(variances['gps_pos_x'], variances['gps_pos_y'], variances['gps_pos_z'],
+                   variances['baro'], variances['mag_x'], variances['mag_y'], variances['mag_z'])))
 
-draw_plots(X_est, P_est, true_measurements, scenario_config['dt'])
+    if flags[3] == 1:
+        arr.append(np.array(R_baro_hndl(variances['gps_pos_x'], variances['gps_pos_y'], variances['gps_pos_z'],
+                   variances['baro'], variances['mag_x'], variances['mag_y'], variances['mag_z'])))
+
+    if flags[4] == 1:
+        arr.append(np.array(R_mag_hndl(variances['gps_pos_x'], variances['gps_pos_y'], variances['gps_pos_z'],
+                   variances['baro'], variances['mag_x'], variances['mag_y'], variances['mag_z'])))
+
+    return arr
+
+
+measurements, flags, controls = get_SAC_data()
+
+X_est, P_est, X_pred, P_pred = EKF(
+    measurements, flags, controls, init_paramas, get_F, get_H, get_Q, get_R)
+
+draw_plots(X_est, scenario_config['dt'])

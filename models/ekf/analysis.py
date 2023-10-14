@@ -49,19 +49,14 @@ def __draw_3_axis_data(t, title, est_data, true_data):
     fig.suptitle(title)
 
 
-def __draw_position(t, est_pos, true_pos):
-    __draw_3_axis_data(t, 'Position', est_pos, true_pos)
+def __draw_position(t, est_pos):
+    __draw_3_axis_data(t, 'Position', est_pos, None)
 
     ax = plt.figure().add_subplot(projection='3d')
     ax.set_xlim([-5, 5])
     ax.set_ylim([-5, 5])
     ax.set_zlim([700, 1000])
     ax.plot(est_pos[0, :], est_pos[1, :], est_pos[2, :])
-    ax.plot(true_pos[0], true_pos[1], true_pos[2])
-
-    pos_err = true_pos - est_pos
-
-    __draw_3_axis_data(t, 'Position Error', pos_err, None)
 
 
 def __draw_velocity(t, est_vel):
@@ -79,10 +74,10 @@ def __draw_velocity(t, est_vel):
     plt.legend(fontsize='x-large')
 
 
-def draw_plots(X_est, P_est, Z_true, dt):
-    t = np.arange(0, X_est.shape[1] * dt, dt)
+def draw_plots(X, dt):
+    t = np.arange(0, X.shape[1] * dt, dt)
 
-    __draw_position(t, X_est[7:10, :], Z_true[0:3])
-    __draw_velocity(t, X_est[4:7, :])
+    __draw_position(t, X[7:10, :])
+    __draw_velocity(t, X[4:7, :])
 
     plt.show()

@@ -44,7 +44,7 @@ def __wrap_to_2pi(x):
     return __wrap_to_pi(x) + pi
 
 
-def geo_to_ecef(lat, lon, alt):
+def __geo_to_ecef(lat, lon, alt):
     n = a / sqrt(1 - e2 * sin(lat) ** 2)
 
     x = (n + alt) * cos(lat) * cos(lon)
@@ -54,7 +54,7 @@ def geo_to_ecef(lat, lon, alt):
     return [x, y, z]
 
 
-def ecef_to_geo(x, y, z):
+def __ecef_to_geo(x, y, z):
     # lon = atan2(y, x)
 
     # p = sqrt(x ** 2 + y ** 2)
@@ -95,8 +95,8 @@ def ecef_to_geo(x, y, z):
     return [miu, lon, h]
 
 
-def ecef_to_ned(x, y, z, lat0, lon0, alt0):
-    [x0, y0, z0] = geo_to_ecef(lat0, lon0, alt0)
+def __ecef_to_ned(x, y, z, lat0, lon0, alt0):
+    [x0, y0, z0] = __geo_to_ecef(lat0, lon0, alt0)
 
     dx = x - x0
     dy = y - y0
@@ -111,8 +111,8 @@ def ecef_to_ned(x, y, z, lat0, lon0, alt0):
     return [x_ned, y_ned, z_ned]
 
 
-def ned_to_ecef(x, y, z, lat0, lon0, alt0):
-    [x0, y0, z0] = geo_to_ecef(lat0, lon0, alt0)
+def __ned_to_ecef(x, y, z, lat0, lon0, alt0):
+    [x0, y0, z0] = __geo_to_ecef(lat0, lon0, alt0)
 
     x_ecef = x * (-sin(lat0) * cos(lon0)) + y * \
         (-sin(lon0)) + z * (-cos(lat0) * cos(lon0))
@@ -131,8 +131,8 @@ def geo_to_ned(lat0, lon0, alt0, lat1, lon1, alt1):
     [lat0, lon0, lat1, lon1] = __convert_coords_to_rad(
         [lat0, lon0, lat1, lon1])
 
-    [x1, y1, z1] = geo_to_ecef(lat1, lon1, alt1)
-    [x, y, z] = ecef_to_ned(x1, y1, z1, lat0, lon0, alt0)
+    [x1, y1, z1] = __geo_to_ecef(lat1, lon1, alt1)
+    [x, y, z] = __ecef_to_ned(x1, y1, z1, lat0, lon0, alt0)
 
     return [x, y, z]
 
@@ -140,15 +140,11 @@ def geo_to_ned(lat0, lon0, alt0, lat1, lon1, alt1):
 def ned_to_geo(lat0, lon0, alt0, x, y, z):
     [lat0, lon0] = __convert_coords_to_rad([lat0, lon0])
 
-    [x_ecef, y_ecef, z_ecef] = ned_to_ecef(x, y, z, lat0, lon0, alt0)
-    [lat, lon, alt] = ecef_to_geo(x_ecef, y_ecef, z_ecef)
+    [x_ecef, y_ecef, z_ecef] = __ned_to_ecef(x, y, z, lat0, lon0, alt0)
+    [lat, lon, alt] = __ecef_to_geo(x_ecef, y_ecef, z_ecef)
     [lat, lon] = __convert_coords_to_deg([lat, lon])
 
     return [lat, lon, alt]
-
-
-#print(ecef_to_geo(4201000, 172460, 4780100))
-print(ned_to_geo(44.532, -72.782, 1699, 1334.3, -2543.6, 359.65))
 
 
 def geo_distance(lat0, lon0, lat1, lon1):
