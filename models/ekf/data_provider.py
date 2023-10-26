@@ -2,22 +2,13 @@ import numpy as np
 import csv
 import os
 from geo import *
-from scipy.special import erfinv
 
 
-def __add_noise(X, sigma, seed):
-    S = np.tile(sigma, X.shape)
+def __add_noise(X, sigma):
+    np.random.seed(1)
+    noise = np.random.normal(0, sigma ** 0.5, X.shape[0])
 
-    np.random.seed(seed)
-
-    randUniform = np.random.rand(*X.shape)
-    randNormal = np.sqrt(2) * erfinv(2 * randUniform - 1)
-
-    noise = randNormal * S
-
-    Z = X + noise
-
-    return Z
+    return X + noise
 
 
 def __parse_csv(filename, delim=';'):
@@ -76,9 +67,9 @@ def get_SAC_data():
             [gps_x[i], gps_y[i], gps_z[i]] = geo_to_ned(
                 32.951805, -106.915802, 137.073196, gps_x[i], gps_y[i], gps_z[i])
 
-        gps_flag[i] = 0
+        gps_flag[i] = False
 
-    true_flag = np.tile(1, data_len)
+    true_flag = np.tile(True, data_len)
 
     measurements = np.vstack(
         (gps_x, gps_y, gps_z, baro_height, mag_x, mag_y, mag_z))
@@ -91,14 +82,10 @@ def get_SAC_data():
     return measurements, measurements_flags, controls
 
 
-def generate_scenario_free_fall_parachute(config):
-    N = config['N']
-    dt = config['dt']
-    g = config['g']
-    start_height = config['start_height']
-    seed = config['seed']
-    parachute_factor = config['parachute_factor']
-    mag_strength = config['mag_strength']
+def generate_scenario_free_fall_parachute(n, dt, g, start_height, variances):
+    N = n
+    parachute_factor = 0.5
+    mag_strength = 0.5
 
     t = np.arange(0, dt * N, dt)
 
@@ -116,20 +103,21 @@ def generate_scenario_free_fall_parachute(config):
     mag_y = np.tile(0, N) * mag_strength
     mag_z = np.tile(0, N) * mag_strength
 
-    noisy_a_x = __add_noise(a_x, config['variances']['a_x'], seed)
-    noisy_a_y = __add_noise(a_y, config['variances']['a_y'], seed)
-    noisy_a_z = __add_noise(a_z, config['variances']['a_z'], seed)
-    noisy_w_x = __add_noise(w_x, config['variances']['w_x'], seed)
-    noisy_w_y = __add_noise(w_y, config['variances']['w_y'], seed)
-    noisy_w_z = __add_noise(w_z, config['variances']['w_z'], seed)
-    noisy_gps_x = __add_noise(gps_x, config['variances']['gps_pos_x'], seed)
-    noisy_gps_y = __add_noise(gps_y, config['variances']['gps_pos_y'], seed)
-    noisy_gps_z = __add_noise(gps_z, config['variances']['gps_pos_z'], seed)
-    noisy_baro_height = __add_noise(
-        baro_height, config['variances']['baro'], seed)
-    noisy_mag_x = __add_noise(mag_x, config['variances']['mag_x'], seed)
-    noisy_mag_y = __add_noise(mag_y, config['variances']['mag_y'], seed)
-    noisy_mag_z = __add_noise(mag_z, config['variances']['mag_z'], seed)
+    a_z *= -1
+
+    noisy_a_x = __add_noise(a_x, variances['a_x'])
+    noisy_a_y = __add_noise(a_y, variances['a_y'])
+    noisy_a_z = __add_noise(a_z, variances['a_z'])
+    noisy_w_x = __add_noise(w_x, variances['w_x'])
+    noisy_w_y = __add_noise(w_y, variances['w_y'])
+    noisy_w_z = __add_noise(w_z, variances['w_z'])
+    noisy_gps_x = __add_noise(gps_x, variances['gps'])
+    noisy_gps_y = __add_noise(gps_y, variances['gps'])
+    noisy_gps_z = __add_noise(gps_z, variances['gps'])
+    noisy_baro_height = __add_noise(baro_height, variances['baro'])
+    noisy_mag_x = __add_noise(mag_x, variances['mag'])
+    noisy_mag_y = __add_noise(mag_y, variances['mag'])
+    noisy_mag_z = __add_noise(mag_z, variances['mag'])
 
     true_measurements = np.vstack(
         (gps_x, gps_y, gps_z, baro_height, mag_x, mag_y, mag_z))
@@ -143,4 +131,10 @@ def generate_scenario_free_fall_parachute(config):
     noisy_controls = np.vstack(
         (noisy_a_x, noisy_a_y, noisy_a_z, noisy_w_x, noisy_w_y, noisy_w_z))
 
-    return noisy_measurements, noisy_controls
+    false_flag = np.tile(False, N)
+    true_flag = np.tile(True, N)
+
+    measurements_flags = np.vstack(
+        (true_flag, true_flag, true_flag, true_flag, true_flag, true_flag, true_flag))
+
+    return noisy_measurements, measurements_flags, noisy_controls

@@ -1,47 +1,51 @@
 import numpy as np
 
 
-def EKF(Z_Meas, Z_Meas_Flags, Z_Ctrl, init_params, F_handle, H_handle, Q_handle, R_handle):
-    x = init_params['x0']
-    P = init_params['P0']
+class ExtendedKalmanFilter:
+    def __init__(self, x0, P0, n_m, g, dt, ctrl_vars):
+        self.x = x0
+        self.P = P0
 
-    n_x = x.shape[0]
-    n_m = Z_Meas.shape[1]
+        self.g = g
+        self.dt = dt
+        self.ctrl_vars = ctrl_vars
 
-    X_est = np.zeros((n_x, n_m))
-    X_pred = np.zeros((n_x, n_m + 1))
-    P_est = np.zeros((n_x, n_x, n_m))
-    P_pred = np.zeros((n_x, n_x, n_m + 1))
+        n_x = self.x.shape[0]
 
-    for i in range(n_m):
-        x_p, F = F_handle(x, Z_Ctrl[:, i])
-        P_p = F @ P @ F.T + Q_handle(x_p)
+        self.i = -1
+        self.X_est = np.zeros((n_x, n_m))
+        self.X_pred = np.zeros((n_x, n_m + 1))
+        self.P_est = np.zeros((n_x, n_x, n_m))
+        self.P_pred = np.zeros((n_x, n_x, n_m + 1))
 
-        flags = Z_Meas_Flags[:, i:i + 1]
-        meas = Z_Meas[:, i:i + 1]
+    def predict(self, z, f, F, Q):
+        calc_f = f(*self.x[:, 0], *z, self.g, self.dt)
+        calc_F = F(*self.x[:, 0], *z, self.g, self.dt)
+        calc_Q = Q(*self.x[:, 0], *self.ctrl_vars, self.g, self.dt)
 
-        h_data = H_handle(x_p, meas, flags)
-        r_data = R_handle(flags)
+        self.x = calc_f
+        self.P = calc_F @ self.P @ calc_F.T + calc_Q
 
-        for i in range(len(h_data)):
-            h_p, H, m = h_data[i]
-            R = r_data[i]
-
-            PH_ = P_p @ H.T
-            k = PH_ @ np.linalg.inv(H @ PH_ + R)
-            x = x_p + k @ (m - h_p)
-            I_kH = np.eye(n_x) - k @ H
-            P = I_kH @ P_p @ I_kH.T + k @ R @ k.T
+        self.i += 1
         
-        X_est[:, i:i + 1] = x
-        P_est[:, :, i:i + 1] = P[..., np.newaxis]
-        X_pred[:, i:i + 1] = x_p
-        P_pred[:, :, i:i + 1] = P_p[..., np.newaxis]
-        
-    x_p, F = F_handle(x, Z_Ctrl[:, i])
-    P_p = F @ P @ F.T + Q_handle(x_p)
+        i = self.i
 
-    X_pred[:, i + 1:i + 2] = x_p
-    P_pred[:, :, i + 1:i + 2] = P_p[..., np.newaxis]
+        self.X_pred[:, i:i + 1] = self.x
+        self.P_pred[:, :, i:i + 1] = self.P[..., np.newaxis]
 
-    return X_est, P_est, X_pred, P_pred
+    def correct(self, z, h, H, R):
+        z = np.array([z]).T
+
+        calc_h = h(*self.x[:, 0])
+        calc_H = H(*self.x[:, 0])
+
+        PH_ = self.P @ calc_H.T
+        K = PH_ @ np.linalg.inv(calc_H @ PH_ + R)
+        self.x = self.x + K @ (z - calc_h)
+        I_KH = np.eye(calc_H.shape[1]) - K @ calc_H
+        self.P = I_KH @ self.P @ I_KH.T + K @ R @ K.T
+
+        i = self.i
+
+        self.X_est[:, i:i + 1] = self.x
+        self.P_est[:, :, i:i + 1] = self.P[..., np.newaxis]
