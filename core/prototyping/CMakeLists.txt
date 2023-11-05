@@ -1,9 +1,5 @@
-set(EXE_NAME prototyping)
-
-add_executable(${EXE_NAME}
+add_executable(prototyping
     main.c
 )
 
-target_link_libraries(${EXE_NAME} PRIVATE pico_stdlib hardware_i2c hardware_uart hardware_spi hardware_pwm hardware_adc hardware_pio)
-
-add_platform_output(${EXE_NAME})
+obc_add_platform_output(prototyping)

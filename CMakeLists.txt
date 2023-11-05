@@ -1,28 +1,15 @@
 cmake_minimum_required(VERSION 3.12)
 
-include(vendor/pico-sdk/pico_sdk_init.cmake)
-include(cmake/utils.cmake)
+include(cmake/obc_import_sdk.cmake)
+include(cmake/obc_add_module.cmake)
+include(cmake/obc_add_platform_output.cmake)
 
-project(obc C CXX ASM)
+obc_include_sdk()
 
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
+project(rocket_obc)
 
-pico_sdk_init()
+obc_init_sdk()
 
-set(PLATFORM PICO)
-
-add_compile_definitions(OBC_DEBUG_MODE=1)
-
-add_subdirectory(lib)
-add_subdirectory(api)
-add_subdirectory(maths)
-add_subdirectory(ahrs)
-add_subdirectory(ins)
-add_subdirectory(acs)
-add_subdirectory(crypto)
-add_subdirectory(drivers)
-add_subdirectory(services)
-add_subdirectory(core)
-add_subdirectory(tests)
-add_subdirectory(samples)
+#add_subdirectory(lib)
+#add_subdirectory(modules)
+#add_subdirectory(core)

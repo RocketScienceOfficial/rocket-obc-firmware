@@ -7,11 +7,9 @@ Project for the rocket on board computer.
 ## Required Software
 
 1. CMake
-2. Ninja Build
-3. ARM Toolchain
-4. A compiler (GCC, Clang, MinGW, etc.)
-5. Python 3
-6. Docker
+2. ARM Toolchain
+3. A build system (Ninja, etc...)
+4. A compiler (GCC, Clang, MinGW, etc...)
 
 ## Install
 
