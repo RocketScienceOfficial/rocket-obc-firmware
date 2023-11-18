@@ -1,11 +1,11 @@
-#include "drivers/led/simple_led_driver.h"
+#include "modules/drivers/led/simple_led_driver.h"
 
-FUNCRESULT ledInit(PinNumber pin)
+void led_init(pin_number_t pin)
 {
-    return gpioInitPin(pin, GPIO_OUTPUT);
+    return gpio_init_pin(pin, GPIO_OUTPUT);
 }
 
-FUNCRESULT ledSetState(PinNumber pin, BOOL state)
+void led_set_state(pin_number_t pin, bool state)
 {
-    return gpioSetPinState(pin, state ? GPIO_HIGH : GPIO_LOW);
+    return gpio_set_pin_state(pin, state ? GPIO_HIGH : GPIO_LOW);
 }

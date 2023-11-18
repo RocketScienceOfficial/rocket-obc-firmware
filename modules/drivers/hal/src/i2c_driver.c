@@ -1,22 +1,22 @@
-#include "drivers/gpio/i2c_driver.h"
+#include "modules/drivers/hal/i2c_driver.h"
 #include "hardware/i2c.h"
 #include "pico/stdlib.h"
 
-static i2c_inst_t *getI2C(I2CInstance i2c)
+static i2c_inst_t *__get_i2c(i2c_instance_t i2c)
 {
     return (i2c == 0 ? i2c0 : i2c1);
 }
 
-BOOL i2cCheckInstance(I2CInstance i2c)
+bool i2c_check_instance(i2c_instance_t i2c)
 {
     return i2c >= 0 && i2c <= 1;
 }
 
-BOOL i2cCheckSDA(I2CInstance i2c, PinNumber sda)
+bool i2c_check_sda(i2c_instance_t i2c, pin_number_t sda)
 {
-    if (!i2cCheckInstance(i2c))
+    if (!i2c_check_instance(i2c))
     {
-        return FALSE;
+        return false;
     }
 
     if (i2c == 0)
@@ -29,15 +29,15 @@ BOOL i2cCheckSDA(I2CInstance i2c, PinNumber sda)
     }
     else
     {
-        return FALSE;
+        return false;
     }
 }
 
-BOOL i2cCheckSCL(I2CInstance i2c, PinNumber scl)
+bool i2c_check_scl(i2c_instance_t i2c, pin_number_t scl)
 {
-    if (!i2cCheckInstance(i2c))
+    if (!i2c_check_instance(i2c))
     {
-        return FALSE;
+        return false;
     }
 
     if (i2c == 0)
@@ -50,100 +50,59 @@ BOOL i2cCheckSCL(I2CInstance i2c, PinNumber scl)
     }
     else
     {
-        return FALSE;
+        return false;
     }
 }
 
-FUNCRESULT i2cInitAll(I2CInstance i2c, BaudRate baudrate)
+void i2c_init_all(i2c_instance_t i2c, unsigned long baudrate)
 {
-    if (!i2cCheckInstance(i2c))
+    if (!i2c_check_instance(i2c))
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
-    i2c_init(getI2C(i2c), baudrate);
-
-    return SUC_OK;
+    i2c_init(__get_i2c(i2c), baudrate);
 }
 
-FUNCRESULT i2cInitPins(I2CInstance i2c, PinNumber sda, PinNumber scl)
+void i2c_init_pins(i2c_instance_t i2c, pin_number_t sda, pin_number_t scl)
 {
-    if (!i2cCheckInstance(i2c) || !i2cCheckSDA(i2c, sda) || !i2cCheckSCL(i2c, scl))
+    if (!i2c_check_instance(i2c) || !i2c_check_sda(i2c, sda) || !i2c_check_scl(i2c, scl))
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
-    gpioSetPinFunction(sda, GPIO_FUNCTION_I2C);
-    gpioSetPinFunction(scl, GPIO_FUNCTION_I2C);
-    gpioPullUpPin(sda);
-    gpioPullUpPin(scl);
-
-    return SUC_OK;
+    gpio_set_pin_function(sda, GPIO_FUNCTION_I2C);
+    gpio_set_pin_function(scl, GPIO_FUNCTION_I2C);
+    gpio_pull_up_pin(sda);
+    gpio_pull_up_pin(scl);
 }
 
-FUNCRESULT i2cWriteTimeout(I2CInstance i2c, BYTE address, BYTE *data, SIZE size, TIME timeout, BOOL nostop)
+bool i2c_write(i2c_instance_t i2c, uint8_t address, const uint8_t *data, size_t size, bool nostop)
 {
-    if (!i2cCheckInstance(i2c) || !data)
+    if (!i2c_check_instance(i2c) || !data)
     {
-        return ERR_INVALIDARG;
+        return false;
     }
 
-    if (i2c_write_timeout_us(getI2C(i2c), address, data, size, nostop, timeout) < 0)
+    if (i2c_write_blocking(__get_i2c(i2c), address, data, size, nostop) < 0)
     {
-        return ERR_FAIL;
+        return false;
     }
 
-    return SUC_OK;
+    return true;
 }
 
-FUNCRESULT i2cReadTimeout(I2CInstance i2c, BYTE address, BYTE *destination, SIZE size, TIME timeout, BOOL nostop)
+bool i2c_read(i2c_instance_t i2c, uint8_t address, uint8_t *destination, size_t size, bool nostop)
 {
-    if (!i2cCheckInstance(i2c) || !destination)
+    if (!i2c_check_instance(i2c) || !destination)
     {
-        return ERR_INVALIDARG;
+        return false;
     }
 
-    if (i2c_read_timeout_us(getI2C(i2c), address, destination, size, nostop, timeout) < 0)
+    if (i2c_read_blocking(__get_i2c(i2c), address, destination, size, nostop) < 0)
     {
-        return ERR_FAIL;
+        return false;
     }
 
-    return SUC_OK;
-}
-
-FUNCRESULT i2cWriteBlocking(I2CInstance i2c, BYTE address, const BYTE *data, SIZE size, BOOL nostop)
-{
-    if (!i2cCheckInstance(i2c) || !data)
-    {
-        return ERR_INVALIDARG;
-    }
-
-    if (i2c_write_blocking(getI2C(i2c), address, data, size, nostop) < 0)
-    {
-        return ERR_FAIL;
-    }
-
-    return SUC_OK;
-}
-
-FUNCRESULT i2cReadBlocking(I2CInstance i2c, BYTE address, BYTE *destination, SIZE size, BOOL nostop)
-{
-    if (!i2cCheckInstance(i2c) || !destination)
-    {
-        return ERR_INVALIDARG;
-    }
-
-    if (i2c_read_blocking(getI2C(i2c), address, destination, size, nostop) < 0)
-    {
-        return ERR_FAIL;
-    }
-
-    return SUC_OK;
-}
-
-BOOL i2cCheckDevice(I2CInstance i2c, BYTE address)
-{
-    BYTE data = 0;
-
-    return FUNCSUCCESS(i2cReadTimeout(i2c, address, &data, 1, 1E6, FALSE));
+    return true;
 }

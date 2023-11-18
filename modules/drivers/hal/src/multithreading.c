@@ -1,56 +1,54 @@
-#include "drivers/tools/multithreading.h"
+#include "modules/drivers/hal/multithreading.h"
 #include "pico/multicore.h"
 #include "pico/util/queue.h"
 
 static queue_t s_FIFO;
 
-BOOL startOtherCore(PicoCoreFunction function, SIZE fifoElementSize, SIZE fifoElementsCount)
+bool core_start_next(core_func_t function, size_t fifoElementSize, size_t fifoElementsCount)
 {
     if (function)
     {
         queue_init(&s_FIFO, fifoElementSize, fifoElementsCount);
         multicore_launch_core1(function);
 
-        return TRUE;
+        return true;
     }
     else
     {
-        return FALSE;
+        return false;
     }
 }
 
-VOID setAsVictimCore(VOID)
+void core_set_as_victim(void)
 {
     multicore_lockout_victim_init();
 }
 
-VOID coreStartLockout(VOID)
+void core_start_lock(void)
 {
     multicore_lockout_start_blocking();
 }
 
-VOID coreEndLockout(VOID)
+void core_end_lock(void)
 {
     multicore_lockout_end_blocking();
 }
 
-BOOL sendToOtherCore(VOID *data)
+void core_send_data(void *data)
 {
     queue_add_blocking(&s_FIFO, data);
-
-    return TRUE;
 }
 
-BOOL receiveFromOtherCore(VOID *data)
+bool core_receive_data(void *data)
 {
     if (data)
     {
         queue_remove_blocking(&s_FIFO, data);
 
-        return TRUE;
+        return true;
     }
     else
     {
-        return FALSE;
+        return false;
     }
 }

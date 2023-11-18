@@ -1,5 +1,5 @@
-#include "maths/vector.h"
-#include "maths/math_utils.h"
+#include "modules/maths/vector.h"
+#include "modules/maths/math_utils.h"
 #include <math.h>
 
 void vec3_add(vec3_t *a, vec3_t *b)

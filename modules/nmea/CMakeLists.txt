@@ -1,0 +1,1 @@
+obc_add_module(nmea nmea_parser.c)

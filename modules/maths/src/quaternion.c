@@ -1,6 +1,6 @@
-#include "maths/quaternion.h"
-#include "maths/math_constants.h"
-#include "maths/math_utils.h"
+#include "modules/maths/quaternion.h"
+#include "modules/maths/math_constants.h"
+#include "modules/maths/math_utils.h"
 #include <math.h>
 
 void quat_add(quat_t *a, quat_t *b)
@@ -71,7 +71,7 @@ void quat_normalize(quat_t *q)
 void quat_to_euler(vec3_t *res, quat_t *q)
 {
     res->x = RAD_2_DEG(atan2f(2.0f * (q->w * q->x + q->y * q->z), 1.0f - 2.0f * (q->x * q->x + q->y * q->y)));
-    res->y = RAD_2_DEG(asinf(clampValue(2.0f * (q->w * q->y - q->x * q->z), -1.0f, 1.0f)));
+    res->y = RAD_2_DEG(asinf(clamp_value(2.0f * (q->w * q->y - q->x * q->z), -1.0f, 1.0f)));
     res->z = RAD_2_DEG(atan2f(2.0f * (q->w * q->z + q->x * q->y), 1.0f - 2.0f * (q->y * q->y + q->z * q->z)));
 }
 

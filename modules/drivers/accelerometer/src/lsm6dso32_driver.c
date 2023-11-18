@@ -1,5 +1,6 @@
-#include "drivers/accelerometer/lsm6dso32_driver.h"
-#include "maths/constants.h"
+#include "modules/drivers/accelerometer/lsm6dso32_driver.h"
+#include "modules/maths/math_constants.h"
+#include <stdint.h>
 
 #define WHO_AM_I 0x0F
 #define CTRL1_XL 0x10
@@ -18,9 +19,9 @@
 #define WHO_AM_I_VALUE 0x6C
 #define I2C_ADDRESS 0x6A
 
-FUNCRESULT lsm6dso32InitSPI(LSM6DSO32Config *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
+void lsm6dso32_init_spi(lsm6dso32_config_t *config, spi_instance_t spi, pin_number_t miso, pin_number_t mosi, pin_number_t cs, pin_number_t sck)
 {
-    config->gpioConfig = (GPIOCommunicationConfig){
+    config->gpioConfig = (gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_SPI,
         .spi = spi,
         .cs = cs,
@@ -29,12 +30,12 @@ FUNCRESULT lsm6dso32InitSPI(LSM6DSO32Config *config, SPIInstance spi, PinNumber 
         .writeMask = 0x7F,
     };
 
-    return spiInitPins(spi, miso, mosi, sck, cs);
+    spi_init_pins(spi, miso, mosi, sck, cs);
 }
 
-FUNCRESULT lsm6dso32InitI2C(LSM6DSO32Config *config, I2CInstance i2c, PinNumber sda, PinNumber scl)
+void lsm6dso32_init_i2c(lsm6dso32_config_t *config, i2c_instance_t i2c, pin_number_t sda, pin_number_t scl)
 {
-    config->gpioConfig = (GPIOCommunicationConfig){
+    config->gpioConfig = (gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_I2C,
         .i2c = i2c,
         .i2cAddress = I2C_ADDRESS,
@@ -43,28 +44,24 @@ FUNCRESULT lsm6dso32InitI2C(LSM6DSO32Config *config, I2CInstance i2c, PinNumber 
         .writeMask = 0x7F,
     };
 
-    return i2cInitPins(i2c, sda, scl);
+    i2c_init_pins(i2c, sda, scl);
 }
 
-FUNCRESULT lsm6dso32ValidateId(LSM6DSO32Config *config, BOOL *valid)
+void lsm6dso32_validate_id(lsm6dso32_config_t *config, bool *valid)
 {
-    *valid = gpioReadReg(&config->gpioConfig, WHO_AM_I) == WHO_AM_I_VALUE;
-
-    return SUC_OK;
+    *valid = gpio_read_reg(&config->gpioConfig, WHO_AM_I) == WHO_AM_I_VALUE;
 }
 
-FUNCRESULT lsm6dso32SetODR(LSM6DSO32Config *config, LSM6DSO32ODR accelODR, LSM6DSO32ODR gyroODR)
+void lsm6dso32_set_odr(lsm6dso32_config_t *config, lsm6dso32_odr_t accelODR, lsm6dso32_odr_t gyroODR)
 {
-    gpioWriteRegField(&config->gpioConfig, CTRL1_XL, 4, 4, (BYTE)accelODR);
-    gpioWriteRegField(&config->gpioConfig, CTRL2_G, 4, 4, (BYTE)gyroODR);
-
-    return SUC_OK;
+    gpio_write_reg_field(&config->gpioConfig, CTRL1_XL, 4, 4, (uint8_t)accelODR);
+    gpio_write_reg_field(&config->gpioConfig, CTRL2_G, 4, 4, (uint8_t)gyroODR);
 }
 
-FUNCRESULT lsm6dso32SetRange(LSM6DSO32Config *config, LSM6DSO32AccelRange accelRange, LSM6DSO32GyroRange gyroRange)
+void lsm6dso32_set_range(lsm6dso32_config_t *config, lsm6dso32_accel_range_t accelRange, lsm6dso32_gyro_range_t gyroRange)
 {
-    FLOAT acc = 0.0f;
-    FLOAT gyr = 0.0f;
+    float acc = 0.0f;
+    float gyr = 0.0f;
 
     if (accelRange == LSM6DSO32_RANGE_4G)
         acc = 4.0f;
@@ -89,34 +86,32 @@ FUNCRESULT lsm6dso32SetRange(LSM6DSO32Config *config, LSM6DSO32AccelRange accelR
     config->accelRangeConstant = acc * EARTH_GRAVITY;
     config->gyroRangeConstant = DEG_2_RAD(gyr);
 
-    gpioWriteRegField(&config->gpioConfig, CTRL1_XL, 2, 2, (BYTE)accelRange);
+    gpio_write_reg_field(&config->gpioConfig, CTRL1_XL, 2, 2, (uint8_t)accelRange);
 
     if (gyroRange != LSM6DSO32_RANGE_125DPS)
     {
-        gpioWriteRegField(&config->gpioConfig, CTRL7_G, 1, 1, 0x00);
-        gpioWriteRegField(&config->gpioConfig, CTRL2_G, 2, 2, (BYTE)gyroRange);
+        gpio_write_reg_field(&config->gpioConfig, CTRL7_G, 1, 1, 0x00);
+        gpio_write_reg_field(&config->gpioConfig, CTRL2_G, 2, 2, (uint8_t)gyroRange);
     }
     else
     {
-        gpioWriteRegField(&config->gpioConfig, CTRL7_G, 1, 1, 0x01);
+        gpio_write_reg_field(&config->gpioConfig, CTRL7_G, 1, 1, 0x01);
     }
-
-    return SUC_OK;
 }
 
-FUNCRESULT lsm6dso32Read(LSM6DSO32Config *config, vec3 *pAcceleration, vec3 *pGyro, FLOAT *pTemperature)
+void lsm6dso32_read(lsm6dso32_config_t *config, vec3_t *pAcceleration, vec3_t *pGyro, float *pTemperature)
 {
-    BYTE buffer[14];
+    uint8_t buffer[14];
 
-    gpioReadRegs(&config->gpioConfig, OUT_TEMP_L, buffer, 14);
+    gpio_read_regs(&config->gpioConfig, OUT_TEMP_L, buffer, 14);
 
-    INT16 rawTemperature = (INT16)(buffer[1] << 8) | buffer[0];
-    INT16 rawAngularRateX = (INT16)(buffer[3] << 8) | buffer[2];
-    INT16 rawAngularRateY = (INT16)(buffer[5] << 8) | buffer[4];
-    INT16 rawAngularRateZ = (INT16)(buffer[7] << 8) | buffer[6];
-    INT16 rawAccelerationX = (INT16)(buffer[9] << 8) | buffer[8];
-    INT16 rawAccelerationY = (INT16)(buffer[11] << 8) | buffer[10];
-    INT16 rawAccelerationZ = (INT16)(buffer[13] << 8) | buffer[12];
+    int16_t rawTemperature = (int16_t)(buffer[1] << 8) | buffer[0];
+    int16_t rawAngularRateX = (int16_t)(buffer[3] << 8) | buffer[2];
+    int16_t rawAngularRateY = (int16_t)(buffer[5] << 8) | buffer[4];
+    int16_t rawAngularRateZ = (int16_t)(buffer[7] << 8) | buffer[6];
+    int16_t rawAccelerationX = (int16_t)(buffer[9] << 8) | buffer[8];
+    int16_t rawAccelerationY = (int16_t)(buffer[11] << 8) | buffer[10];
+    int16_t rawAccelerationZ = (int16_t)(buffer[13] << 8) | buffer[12];
 
     if (pTemperature != NULL)
     {

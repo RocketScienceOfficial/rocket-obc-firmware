@@ -1,4 +1,5 @@
-#include "drivers/accelerometer/h3lis331dl_driver.h"
+#include "modules/drivers/accelerometer/h3lis331dl_driver.h"
+#include <stdint.h>
 
 #define WHO_AM_I 0x0F
 #define CTRL_REG1 0x20
@@ -32,9 +33,9 @@
 #define Y_OFFSET -45
 #define Z_OFFSET 420
 
-FUNCRESULT h3lis331dlInitSPI(H3lis331dlConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
+void h3lis331dl_init_spi(h3lis331dl_config_t *config, spi_instance_t spi, pin_number_t miso, pin_number_t mosi, pin_number_t cs, pin_number_t sck)
 {
-    config->gpioConfig = (GPIOCommunicationConfig){
+    config->gpioConfig = (gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_SPI,
         .spi = spi,
         .cs = cs,
@@ -44,12 +45,12 @@ FUNCRESULT h3lis331dlInitSPI(H3lis331dlConfig *config, SPIInstance spi, PinNumbe
     };
     config->rangeFactor = 0;
 
-    return spiInitPins(spi, miso, mosi, sck, cs);
+    spi_init_pins(spi, miso, mosi, sck, cs);
 }
 
-FUNCRESULT h3lis331dlInitI2C(H3lis331dlConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl)
+void h3lis331dl_init_i2c(h3lis331dl_config_t *config, i2c_instance_t i2c, pin_number_t sda, pin_number_t scl)
 {
-    config->gpioConfig = (GPIOCommunicationConfig){
+    config->gpioConfig = (gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_I2C,
         .i2c = i2c,
         .i2cAddress = I2C_ADDRESS,
@@ -59,40 +60,32 @@ FUNCRESULT h3lis331dlInitI2C(H3lis331dlConfig *config, I2CInstance i2c, PinNumbe
     };
     config->rangeFactor = 0;
 
-    return i2cInitPins(i2c, sda, scl);
+    i2c_init_pins(i2c, sda, scl);
 }
 
-FUNCRESULT h3lis331dlValidateId(H3lis331dlConfig *config, BOOL *valid)
+void h3lis331dl_validate_id(h3lis331dl_config_t *config, bool *valid)
 {
-    *valid = gpioReadReg(&config->gpioConfig, WHO_AM_I) == WHO_AM_I_VALUE;
-
-    return SUC_OK;
+    *valid = gpio_read_reg(&config->gpioConfig, WHO_AM_I) == WHO_AM_I_VALUE;
 }
 
-FUNCRESULT h3lis331dlSetPowerMode(H3lis331dlConfig *config, H3lis331dlPowerMode power)
+void h3lis331dl_set_power_mode(h3lis331dl_config_t *config, h3lis331dl_power_mode_t power)
 {
-    FUNC_CHECK_BOOL(gpioWriteRegField(&config->gpioConfig, CTRL_REG1, 3, 5, (BYTE)power));
-
-    return SUC_OK;
+    gpio_write_reg_field(&config->gpioConfig, CTRL_REG1, 3, 5, (uint8_t)power);
 }
 
-FUNCRESULT h3lis331dlSetODR(H3lis331dlConfig *config, H3lis331dlODR odr)
+void h3lis331dl_set_odr(h3lis331dl_config_t *config, h3lis331dl_odr_t odr)
 {
-    FUNC_CHECK_BOOL(gpioWriteRegField(&config->gpioConfig, CTRL_REG1, 2, 3, (BYTE)odr));
-
-    return SUC_OK;
+    gpio_write_reg_field(&config->gpioConfig, CTRL_REG1, 2, 3, (uint8_t)odr);
 }
 
-FUNCRESULT h3lis331dlSetHPCF(H3lis331dlConfig *config, H3lis331dlHPFc hpcf)
+void h3lis331dl_set_hpfc(h3lis331dl_config_t *config, h3lis331dl_hpfc_t hpcf)
 {
-    FUNC_CHECK_BOOL(gpioWriteRegField(&config->gpioConfig, CTRL_REG2, 2, 0, (BYTE)hpcf));
-
-    return SUC_OK;
+    gpio_write_reg_field(&config->gpioConfig, CTRL_REG2, 2, 0, (uint8_t)hpcf);
 }
 
-FUNCRESULT h3lis331dlSetRange(H3lis331dlConfig *config, H3lis331dlRange range)
+void h3lis331dl_set_range(h3lis331dl_config_t *config, h3lis331dl_range_t range)
 {
-    FUNC_CHECK_BOOL(gpioWriteRegField(&config->gpioConfig, CTRL_REG4, 2, 4, (BYTE)range));
+    gpio_write_reg_field(&config->gpioConfig, CTRL_REG4, 2, 4, (uint8_t)range);
 
     switch (range)
     {
@@ -106,25 +99,21 @@ FUNCRESULT h3lis331dlSetRange(H3lis331dlConfig *config, H3lis331dlRange range)
         config->rangeFactor = 400.0f / RESOLUTION_DIVIDER;
         break;
     default:
-        return ERR_INVALIDARG;
+        return;
     }
-
-    return SUC_OK;
 }
 
-FUNCRESULT h3lis331dlRead(H3lis331dlConfig *config, vec3 *accel)
+void h3lis331dl_read(h3lis331dl_config_t *config, vec3_t *accel)
 {
-    BYTE buffer[6];
+    uint8_t buffer[6];
 
-    gpioReadRegs(&config->gpioConfig, OUT_X_L, buffer, 6);
+    gpio_read_regs(&config->gpioConfig, OUT_X_L, buffer, 6);
 
-    INT16 x = (INT16)((buffer[1] << 8) | buffer[0]) - X_OFFSET;
-    INT16 y = (INT16)((buffer[3] << 8) | buffer[2]) - Y_OFFSET;
-    INT16 z = (INT16)((buffer[5] << 8) | buffer[4]) - Z_OFFSET;
+    int16_t x = (int16_t)((buffer[1] << 8) | buffer[0]) - X_OFFSET;
+    int16_t y = (int16_t)((buffer[3] << 8) | buffer[2]) - Y_OFFSET;
+    int16_t z = (int16_t)((buffer[5] << 8) | buffer[4]) - Z_OFFSET;
 
-    accel->x = (FLOAT)x * config->rangeFactor;
-    accel->y = (FLOAT)y * config->rangeFactor;
-    accel->z = (FLOAT)z * config->rangeFactor;
-
-    return SUC_OK;
+    accel->x = (float)x * config->rangeFactor;
+    accel->y = (float)y * config->rangeFactor;
+    accel->z = (float)z * config->rangeFactor;
 }

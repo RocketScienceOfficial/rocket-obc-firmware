@@ -1,51 +1,41 @@
-#include "drivers/servo/pwm_servo_driver.h"
-#include "drivers/gpio/pwm_driver.h"
+#include "modules/drivers/servo/pwm_servo_driver.h"
+#include "modules/drivers/hal/pwm_driver.h"
 
-static const UINT32 SERVO_FREQ_HZ = 50;
-static const FLOAT SERVO_DUTY_CYCLE_MS_0 = 0.5f;
-static const FLOAT SERVO_DUTY_CYCLE_MS_90 = 1.5f;
-static const FLOAT SERVO_DUTY_CYCLE_MS_180 = 2.5f;
-static const FLOAT SERVO_MAX_ANGLE_DEG = 180.0f;
+static const unsigned int SERVO_FREQ_HZ = 50;
+static const float SERVO_DUTY_CYCLE_MS_0 = 0.5f;
+static const float SERVO_DUTY_CYCLE_MS_90 = 1.5f;
+static const float SERVO_DUTY_CYCLE_MS_180 = 2.5f;
+static const float SERVO_MAX_ANGLE_DEG = 180.0f;
 
-FUNCRESULT pwmServoInit(PWMConfig *config, PinNumber pin)
+void pwm_servo_init(pwm_config_t *config, pin_number_t pin)
 {
-    if (!config || FUNCFAILED(pwmInit(config, pin, SERVO_FREQ_HZ)))
+    if (!config)
     {
-        return ERR_FAIL;
+        return;
     }
 
-    BOOL connected = FALSE;
+    pwm_init_pin(config, pin, SERVO_FREQ_HZ);
 
-    if (FUNCFAILED(pwmServoCheck(config, &connected)))
-    {
-        return ERR_UNEXPECTED;
-    }
+    bool connected = false;
+    pwm_servo_check(config, &connected);
 
     if (!connected)
     {
-        return ERR_ACCESSDENIED;
+        return;
     }
-
-    return SUC_OK;
 }
 
-FUNCRESULT pwmServoCheck(PWMConfig *config, BOOL *result)
+void pwm_servo_check(pwm_config_t *config, bool *result)
 {
-    GPIOState state = GPIO_LOW;
-
-    if (FUNCFAILED(gpioGetPinState(config->pin, &state)))
-    {
-        return ERR_UNEXPECTED;
-    }
+    gpio_state_t state;
+    gpio_get_pin_state(config->pin, &state);
 
     *result = state == GPIO_HIGH;
-
-    return SUC_OK;
 }
 
-FUNCRESULT pwmServoRotateAngle(PWMConfig *config, FLOAT destAngleDegrees)
+void pwm_servo_rotate_angle(pwm_config_t *config, float destAngleDegrees)
 {
-    FLOAT duty = ((SERVO_DUTY_CYCLE_MS_180 - SERVO_DUTY_CYCLE_MS_0) / SERVO_MAX_ANGLE_DEG * destAngleDegrees + SERVO_DUTY_CYCLE_MS_0) * SERVO_FREQ_HZ / 1000.0f;
+    float duty = ((SERVO_DUTY_CYCLE_MS_180 - SERVO_DUTY_CYCLE_MS_0) / SERVO_MAX_ANGLE_DEG * destAngleDegrees + SERVO_DUTY_CYCLE_MS_0) * SERVO_FREQ_HZ / 1000.0f;
 
-    return pwmSetDuty(config, duty);
+    pwm_set_duty(config, duty);
 }

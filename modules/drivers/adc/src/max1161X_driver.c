@@ -1,6 +1,6 @@
-#include "drivers/adc/max1161X_driver.h"
+#include "modules/drivers/adc/max1161X_driver.h"
 
-FUNCRESULT max1161XInit(MAX1161XConfig *config, MAX1161XType type, I2CInstance i2c, PinNumber sda, PinNumber scl)
+void max1161_x_init(max1161x_config_t *config, max1161x_type_t type, i2c_instance_t i2c, pin_number_t sda, pin_number_t scl)
 {
     if (type == MAX1161X_TYPE_2 || type == MAX1161X_TYPE_3)
     {
@@ -16,17 +16,17 @@ FUNCRESULT max1161XInit(MAX1161XConfig *config, MAX1161XType type, I2CInstance i
     }
     else
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
     config->i2c = i2c;
     config->sda = sda;
     config->scl = scl;
 
-    i2cInitPins(i2c, sda, scl);
+    i2c_init_pins(i2c, sda, scl);
 
-    __max1161XSetup(config, (0x05 << 4) | (0x01 << 1));
-    __max1161XConfig(config, (0x03 << 5) | 0x01);
+    _max1161_x_setup(config, (0x05 << 4) | (0x01 << 1));
+    _max1161_x_config(config, (0x03 << 5) | 0x01);
 
     if (type == MAX1161X_TYPE_2 || type == MAX1161X_TYPE_4 || type == MAX1161X_TYPE_6)
     {
@@ -38,36 +38,32 @@ FUNCRESULT max1161XInit(MAX1161XConfig *config, MAX1161XType type, I2CInstance i
     }
     else
     {
-        return ERR_INVALIDARG;
+        return;
     }
-
-    return SUC_OK;
 }
 
-FUNCRESULT max1161XRead(MAX1161XConfig *config, MAX1161XChannel channel, VoltageLevel *voltage)
+void max1161_x_read(max1161x_config_t *config, max1161x_channel_t channel, voltage_level_t *voltage)
 {
-    __max1161XConfig(config, (0x03 << 5) | ((BYTE)channel << 1) | 0x01);
+    _max1161_x_config(config, (0x03 << 5) | ((uint8_t)channel << 1) | 0x01);
 
-    BYTE data[2];
-    i2cReadBlocking(config->i2c, config->address, data, 2, FALSE);
+    uint8_t data[2];
+    i2c_read(config->i2c, config->address, data, 2, false);
 
-    UINT16 value = ((data[0] & 0x0F) << 8) | data[1];
+    uint16_t value = ((data[0] & 0x0F) << 8) | data[1];
 
-    *voltage = (FLOAT)value / (FLOAT)(1 << 12) * config->vRef;
-
-    return SUC_OK;
+    *voltage = (float)value / (float)(1 << 12) * config->vRef;
 }
 
-VOID __max1161XSetup(MAX1161XConfig *config, BYTE data)
+void _max1161_x_setup(max1161x_config_t *config, uint8_t data)
 {
     data |= 0x80;
 
-    i2cWriteBlocking(config->i2c, config->address, &data, 1, FALSE);
+    i2c_write(config->i2c, config->address, &data, 1, false);
 }
 
-VOID __max1161XConfig(MAX1161XConfig *config, BYTE data)
+void _max1161_x_config(max1161x_config_t *config, uint8_t data)
 {
     data &= 0x7F;
 
-    i2cWriteBlocking(config->i2c, config->address, &data, 1, FALSE);
+    i2c_write(config->i2c, config->address, &data, 1, false);
 }

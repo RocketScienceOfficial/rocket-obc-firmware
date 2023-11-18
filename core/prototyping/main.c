@@ -1,126 +1,16 @@
-// #include "drivers/accelerometer/bmi088_driver.h"
-// #include "drivers/barometer/bme688_driver.h"
-// #include "drivers/magnetometer/mmc5983ma_driver.h"
-// #include "drivers/tools/board_control.h"
-// #include "drivers/tools/time_tracker.h"
-// #include "ahrs/madgwick_filter.h"
-// #include "ahrs/mahony_filter.h"
-// #include "maths/constants.h"
-// #include "maths/math_utils.h"
-// #include <stdio.h>
-// #include <math.h>
-
-// #define FREQ 1.0f
-// #define DT (1.0f / FREQ)
-// #define SPI 0
-// #define SCK 18
-// #define MOSI 19
-// #define MISO 16
-// #define ACCEL_CS 11
-// #define GYRO_CS 10
-// #define BME_CS 4
-// #define MMC_CS 12
-
-// int main()
-// {
-//     boardInit(5000);
-
-//     spiInitAll(SPI, 10 * 1000 * 1000);
-
-//     // MadgiwckFilterData madgwickFilterData;
-//     // MahonyFilterData mahonyFilterData = {0};
-//     // INSKalmanFilterState kalmanFilterState = {0};
-//     // INSKalmanFilterVariances kalmanFilterVariances = {
-//     //     .accelVariance = 1.0f,
-//     //     .gpsPosVariance = 10.0f,
-//     //     .pressureVariance = 1.0f,
-//     //     .temperatureVariance = 1.0f,
-//     // };
-//     // INSKalmanFilterOutputData kalmanFilterBaseState = {
-//     //     .pos = (vec3){.x = 0, .y = 0, .z = 128},
-//     //     .vel = (vec3){.x = 0, .y = 0, .z = 0},
-//     // };
-//     // INSKalmanFilterInputData kalmanFilterInputData = {0};
-//     // INSKalmanFilterOutputData kalmanFilterOutputData = {0};
-//     // BMI088AccelConfig accelConfig;
-//     // BMI088GyroConfig gyroConfig;
-//     // BME688Config bme688Config = {0};
-//     // MMC5983MAConfig mmc5983maConfig = {0};
-
-//     // madgwickInit(&madgwickFilterData, 45.0f, DT);
-//     // mahonyInit(&mahonyFilterData, 3.0f, 0.0f, DT);
-//     // insKalmanFilterInit(&kalmanFilterState, DT, &kalmanFilterBaseState, &kalmanFilterVariances);
-
-//     // bmi088AccelInitSPI(&accelConfig, SPI, MISO, MOSI, ACCEL_CS, SCK);
-//     // bmi088AccelSetConf(&accelConfig, BMI088_ACCEL_ODR_400HZ, BMI088_ACCEL_OSR_NORMAL);
-//     // bmi088AccelSetRange(&accelConfig, BMI088_ACCEL_RANGE_6G);
-
-//     // bmi088GyroInitSPI(&gyroConfig, SPI, MISO, MOSI, GYRO_CS, SCK);
-//     // bmi088GyroSetBandwidth(&gyroConfig, BMI088_GYRO_ODR_400_BW_47HZ);
-//     // bmi088GyroSetRange(&gyroConfig, BMI088_GYRO_RANGE_250DPS);
-
-//     // mmc5983maInitSPI(&mmc5983maConfig, SPI, MISO, MOSI, MMC_CS, SCK);
-//     // mmc5983maSetContinuousModeODR(&mmc5983maConfig, MMC5983MA_ODR_200HZ);
-
-//     // bme688Init(&bme688Config, SPI, MISO, MOSI, SCK, BME_CS);
-//     // bme688SetConfig(&bme688Config, BME688_SENSOR_OSR_8X, BME688_SENSOR_OSR_8X, BME688_SENSOR_OSR_16X, BME688_IIR_FILTER_COEFF_OFF);
-//     // bme688SetHeaterConfig(&bme688Config, 0, 0, 300, 0, 100);
-//     // bme688SetMode(&bme688Config, BME688_MODE_FORCED);
-
-//     // sleepMiliseconds(100);
-
-//     // TIME offset = 0;
-
-//     // while (TRUE)
-//     // {
-//     //     if (runEveryUs(DT * 1000000, &offset))
-//     //     {
-//     //         vec3 accel;
-//     //         vec3 gyro;
-//     //         vec3 mag = {0};
-//     //         vec3 eulerData;
-//     //         BME688Data baro = {0};
-
-//     //         bmi088AccelRead(&accelConfig, &accel);
-//     //         bmi088GyroRead(&gyroConfig, &gyro);
-//     //         mmc5983maRead(&mmc5983maConfig, &mag);
-//     //         bme688Read(&bme688Config, &baro);
-
-//     //         mahonyUpdateIMU(&mahonyFilterData, gyro, accel);
-//     //         madgwickUpdateMARG(&madgwickFilterData, gyro, accel, mag);
-//     //         quatToEuler(&eulerData, &mahonyFilterData.q);
-
-//     //         // if (getMsSinceBoot() >= 20000)
-//     //         {
-//     //             rotateVectorThroughQuaternion(&accel, &mahonyFilterData.q);
-
-//     //             accel.z -= EARTH_GRAVITY;
-
-//     //             accel = (vec3){0};
-
-//     //             kalmanFilterInputData.acc = accel;
-//     //             kalmanFilterInputData.gpsPos = (vec3){.x = 0, .y = 0, .z = 128};
-//     //             kalmanFilterInputData.pressure = 99796.74f;
-//     //             kalmanFilterInputData.temperature = 288.15f;
-
-//     //             insKalmanFilterUpdate(&kalmanFilterState, &kalmanFilterInputData, &kalmanFilterOutputData);
-
-//     //             // printf("X: %f, Y: %f, Z: %f\n", kalmanFilterOutputData.pos.x, kalmanFilterOutputData.pos.y, kalmanFilterOutputData.pos.z);
-//     //         }
-
-//     //         bme688SetMode(&bme688Config, BME688_MODE_FORCED);
-//     //     }
-//     // }
-
-//     return 0;
-// }
-
 #include <stdio.h>
+#include "pico/stdlib.h"
+#include "modules/drivers/accelerometer/bmi088_driver.h"
 
 int main()
 {
-    printf("ASASD\n");
+    stdio_init_all();
+    _bmi088_accel_soft_reset(NULL);
 
-    int i = 0;
-    return 0;
+    while (1)
+    {
+        printf("Hello, world!\n");
+
+        sleep_ms(1000);
+    }
 }

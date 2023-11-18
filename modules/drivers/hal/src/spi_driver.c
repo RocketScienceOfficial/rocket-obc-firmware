@@ -1,22 +1,22 @@
-#include "drivers/gpio/spi_driver.h"
+#include "modules/drivers/hal/spi_driver.h"
 #include "hardware/spi.h"
 #include "pico/stdlib.h"
 
-static spi_inst_t *getSPI(SPIInstance spi)
+static spi_inst_t *__get_spi(spi_instance_t spi)
 {
     return (spi == 0 ? spi0 : spi1);
 }
 
-BOOL spiCheckInstance(SPIInstance spi)
+bool spi_check_instance(spi_instance_t spi)
 {
     return spi >= 0 && spi <= 1;
 }
 
-BOOL spiCheckMISO(SPIInstance spi, PinNumber miso)
+bool spi_check_miso(spi_instance_t spi, pin_number_t miso)
 {
-    if (!spiCheckInstance(spi))
+    if (!spi_check_instance(spi))
     {
-        return FALSE;
+        return false;
     }
 
     if (spi == 0)
@@ -29,15 +29,15 @@ BOOL spiCheckMISO(SPIInstance spi, PinNumber miso)
     }
     else
     {
-        return FALSE;
+        return false;
     }
 }
 
-BOOL spiCheckMOSI(SPIInstance spi, PinNumber mosi)
+bool spi_check_mosi(spi_instance_t spi, pin_number_t mosi)
 {
-    if (!spiCheckInstance(spi))
+    if (!spi_check_instance(spi))
     {
-        return FALSE;
+        return false;
     }
 
     if (spi == 0)
@@ -50,15 +50,15 @@ BOOL spiCheckMOSI(SPIInstance spi, PinNumber mosi)
     }
     else
     {
-        return FALSE;
+        return false;
     }
 }
 
-BOOL spiCheckSCK(SPIInstance spi, PinNumber sck)
+bool spi_check_sck(spi_instance_t spi, pin_number_t sck)
 {
-    if (!spiCheckInstance(spi))
+    if (!spi_check_instance(spi))
     {
-        return FALSE;
+        return false;
     }
 
     if (spi == 0)
@@ -71,90 +71,76 @@ BOOL spiCheckSCK(SPIInstance spi, PinNumber sck)
     }
     else
     {
-        return FALSE;
+        return false;
     }
 }
 
-FUNCRESULT spiInitAll(SPIInstance spi, BaudRate baudrate)
+void spi_init_all(spi_instance_t spi, unsigned long baudrate)
 {
-    if (!spiCheckInstance(spi))
+    if (!spi_check_instance(spi))
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
-    spi_init(getSPI(spi), baudrate);
-
-    return SUC_OK;
+    spi_init(__get_spi(spi), baudrate);
 }
 
-FUNCRESULT spiInitPins(SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber sck, PinNumber cs)
+void spi_init_pins(spi_instance_t spi, pin_number_t miso, pin_number_t mosi, pin_number_t sck, pin_number_t cs)
 {
-    if (!spiCheckInstance(spi) || !spiCheckMISO(spi, miso) || !spiCheckMOSI(spi, mosi) || !spiCheckSCK(spi, sck))
+    if (!spi_check_instance(spi) || !spi_check_miso(spi, miso) || !spi_check_mosi(spi, mosi) || !spi_check_sck(spi, sck))
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
-    gpioInitPin(cs, GPIO_OUTPUT);
-    gpioSetPinState(cs, GPIO_HIGH);
+    gpio_init_pin(cs, GPIO_OUTPUT);
+    gpio_set_pin_state(cs, GPIO_HIGH);
 
-    gpioSetPinFunction(miso, GPIO_FUNCTION_SPI);
-    gpioSetPinFunction(mosi, GPIO_FUNCTION_SPI);
-    gpioSetPinFunction(sck, GPIO_FUNCTION_SPI);
-
-    return SUC_OK;
+    gpio_set_pin_function(miso, GPIO_FUNCTION_SPI);
+    gpio_set_pin_function(mosi, GPIO_FUNCTION_SPI);
+    gpio_set_pin_function(sck, GPIO_FUNCTION_SPI);
 }
 
-FUNCRESULT spiWriteBlocking(SPIInstance spi, const BYTE *data, SIZE size)
+bool spi_write(spi_instance_t spi, const uint8_t *data, size_t size)
 {
-    if (!spiCheckInstance(spi) || !data)
+    if (!spi_check_instance(spi) || !data)
     {
-        return ERR_INVALIDARG;
+        return false;
     }
 
-    if (spi_write_blocking(getSPI(spi), data, size) < 0)
+    if (spi_write_blocking(__get_spi(spi), data, size) < 0)
     {
-        return ERR_FAIL;
+        return false;
     }
 
-    return SUC_OK;
+    return true;
 }
 
-FUNCRESULT spiReadBlocking(SPIInstance spi, BYTE repeatedTXData, BYTE *destination, SIZE size)
+bool spi_read(spi_instance_t spi, uint8_t repeatedTXData, uint8_t *destination, size_t size)
 {
-    if (!spiCheckInstance(spi) || !destination)
+    if (!spi_check_instance(spi) || !destination)
     {
-        return ERR_INVALIDARG;
+        return false;
     }
 
-    if (spi_read_blocking(getSPI(spi), repeatedTXData, destination, size) < 0)
+    if (spi_read_blocking(__get_spi(spi), repeatedTXData, destination, size) < 0)
     {
-        return ERR_FAIL;
+        return false;
     }
 
-    return SUC_OK;
+    return true;
 }
 
-FUNCRESULT spiWriteReadBlocking(SPIInstance spi, const BYTE *data, BYTE *destination, SIZE size)
+bool spi_write_read(spi_instance_t spi, const uint8_t *data, uint8_t *destination, size_t size)
 {
-    if (!spiCheckInstance(spi) || !destination)
+    if (!spi_check_instance(spi) || !destination)
     {
-        return ERR_INVALIDARG;
+        return false;
     }
 
-    if (spi_write_read_blocking(getSPI(spi), data, destination, size) < 0)
+    if (spi_write_read_blocking(__get_spi(spi), data, destination, size) < 0)
     {
-        return ERR_FAIL;
+        return false;
     }
 
-    return SUC_OK;
-}
-
-BOOL spiCheckDevice(SPIInstance spi)
-{
-    if (!spiCheckInstance(spi))
-    {
-        return FALSE;
-    }
-
-    return spi_is_readable(getSPI(spi));
+    return true;
 }

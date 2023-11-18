@@ -1,19 +1,19 @@
-#include "drivers/tools/board_control.h"
+#include "modules/drivers/hal/board_control.h"
 #include "pico/stdlib.h"
 
-VOID boardInit(TIME sleepTimeMS)
+void board_init(time_t sleepTimeMS)
 {
-    sleep_ms(1000);
+    time_sleep_ms(1000);
     
     stdio_init_all();
 
     if (sleepTimeMS > 0)
     {
-        sleep_ms(sleepTimeMS);
+        time_sleep_ms(sleepTimeMS);
     }
 }
 
-VOID tightLoop()
+void tight_loop(void)
 {
     tight_loop_contents();
 }

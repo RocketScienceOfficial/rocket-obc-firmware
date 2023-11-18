@@ -1,56 +1,50 @@
-#include "drivers/gpio/gpio_driver.h"
+#include "modules/drivers/hal/gpio_driver.h"
 #include "pico/stdlib.h"
 
-BOOL gpioIsPinValid(PinNumber pin)
+bool gpio_is_pin_valid(pin_number_t pin)
 {
     return pin >= 0 && pin <= 28;
 }
 
-FUNCRESULT gpioInitPin(PinNumber pin, GPIODirection dir)
+void gpio_init_pin(pin_number_t pin, gpio_direction_t dir)
 {
-    if (!gpioIsPinValid(pin))
+    if (!gpio_is_pin_valid(pin))
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
     gpio_init(pin);
     gpio_set_dir(pin, dir == GPIO_INPUT ? GPIO_IN : GPIO_OUT);
-
-    return SUC_OK;
 }
 
-FUNCRESULT gpioSetPinState(PinNumber pin, GPIOState state)
+void gpio_set_pin_state(pin_number_t pin, gpio_state_t state)
 {
-    if (!gpioIsPinValid(pin))
+    if (!gpio_is_pin_valid(pin))
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
     gpio_put(pin, state == GPIO_HIGH ? 1 : 0);
-
-    return SUC_OK;
 }
 
-FUNCRESULT gpioGetPinState(PinNumber pin, GPIOState *state)
+void gpio_get_pin_state(pin_number_t pin, gpio_state_t *state)
 {
-    if (!gpioIsPinValid(pin))
+    if (!gpio_is_pin_valid(pin))
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
     gpio_get(pin) ? (*state = GPIO_HIGH) : (*state = GPIO_LOW);
-
-    return SUC_OK;
 }
 
-FUNCRESULT gpioSetPinFunction(PinNumber pin, GPIOFunction function)
+void gpio_set_pin_function(pin_number_t pin, gpio_function_t function)
 {
-    if (!gpioIsPinValid(pin))
+    if (!gpio_is_pin_valid(pin))
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
-    INT32 func = 0;
+    enum gpio_function func = GPIO_FUNC_NULL;
 
     switch (function)
     {
@@ -76,22 +70,18 @@ FUNCRESULT gpioSetPinFunction(PinNumber pin, GPIOFunction function)
         func = GPIO_FUNC_PIO1;
         break;
     default:
-        return ERR_INVALIDARG;
+        return;
     }
 
     gpio_set_function(pin, func);
-
-    return SUC_OK;
 }
 
-FUNCRESULT gpioPullUpPin(PinNumber pin)
+void gpio_pull_up_pin(pin_number_t pin)
 {
-    if (!gpioIsPinValid(pin))
+    if (!gpio_is_pin_valid(pin))
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
     gpio_pull_up(pin);
-
-    return SUC_OK;
 }

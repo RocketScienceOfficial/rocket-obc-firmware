@@ -1,5 +1,5 @@
-#include "maths/math_utils.h"
-#include "maths/math_constants.h"
+#include "modules/maths/math_utils.h"
+#include "modules/maths/math_constants.h"
 #include <math.h>
 
 float fast_inv_sqrt(float x)
@@ -13,6 +13,11 @@ float fast_inv_sqrt(float x)
     x = x * (1.5f - xhalf * x * x);
 
     return x;
+}
+
+float clamp_value(float x, float min, float max)
+{
+    return x > max ? max : (x < min ? min : x);
 }
 
 float height_from_baro_formula(float pressure, float temperature)

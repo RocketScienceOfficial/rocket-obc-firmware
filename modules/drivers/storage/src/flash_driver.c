@@ -1,66 +1,24 @@
-#include "drivers/storage/flash_driver.h"
-#include "hardware/flash.h"
-#include "hardware/sync.h"
+#include "modules/drivers/storage/flash_driver.h"
+#include "modules/drivers/hal/flash_hal_driver.h"
 
 #define FLASH_BASE_OFFSET (512 * 1024)
 
-SIZE flashWriteBufferSize()
+void flash_read(size_t offset, const uint8_t **data)
 {
-    return FLASH_PAGE_SIZE;
+    hal_flash_read(FLASH_BASE_OFFSET + offset, data);
 }
 
-SIZE flashSectorSize()
+void flash_write_page(size_t offsetPages, uint8_t *buffer)
 {
-    return FLASH_SECTOR_SIZE;
+    flash_write_pages(offsetPages, buffer, 1);
 }
 
-FUNCRESULT flashRead(SIZE offset, const BYTE **data)
+void flash_write_pages(size_t offsetPages, uint8_t *buffer, size_t pagesCount)
 {
-    if (!data)
-    {
-        return ERR_INVALIDARG;
-    }
-
-    *data = (const BYTE *)(XIP_BASE + FLASH_BASE_OFFSET + offset);
-
-    return SUC_OK;
+    hal_flash_write_pages(FLASH_BASE_OFFSET / hal_flash_write_buffer_size() + offsetPages, buffer, pagesCount);
 }
 
-FUNCRESULT flashWritePage(SIZE offsetPages, BYTE *buffer)
+void flash_erase_sectors(size_t sectorsOffset, size_t sectorsCount)
 {
-    return flashWritePages(offsetPages, buffer, 1);
-}
-
-FUNCRESULT flashWritePages(SIZE offsetPages, BYTE *buffer, SIZE pagesCount)
-{
-    if (!buffer || pagesCount == 0)
-    {
-        return ERR_INVALIDARG;
-    }
-
-    SIZE offset = FLASH_BASE_OFFSET + offsetPages * flashWriteBufferSize();
-    SIZE size = pagesCount * flashWriteBufferSize();
-
-    UINT32 ints = save_and_disable_interrupts();
-    flash_range_program(offset, buffer, size);
-    restore_interrupts(ints);
-
-    return SUC_OK;
-}
-
-FUNCRESULT flashEraseSectors(SIZE sectorsOffset, SIZE sectorsCount)
-{
-    if (sectorsCount == 0)
-    {
-        return ERR_INVALIDARG;
-    }
-
-    SIZE offset = FLASH_BASE_OFFSET + sectorsOffset * flashSectorSize();
-    SIZE size = sectorsCount * flashSectorSize();
-
-    UINT32 ints = save_and_disable_interrupts();
-    flash_range_erase(offset, size);
-    restore_interrupts(ints);
-
-    return SUC_OK;
+    hal_flash_erase_sectors(FLASH_BASE_OFFSET / hal_flash_sector_size() + sectorsOffset, sectorsCount);
 }

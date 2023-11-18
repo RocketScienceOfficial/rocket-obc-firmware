@@ -48,33 +48,3 @@ $ git clone https://github.com/Filipeak/project-rocket.git
    ``` console
    $ ./scripts/runEnv.sh
    ```
-
-## Programming Style
-
-- Use provided types in api folder.
-- Backend functions (drivers, etc.) should return FUNCRESULT.
-- Always initialize local variables.
-
-## Naming Conventions
-
-- Struct -> PascalCase
-- Struct Members -> camelCase
-- Union -> PascalCase
-- Union Members -> camelCase
-- Enum -> PascalCase
-- Enum Members -> SCREAMING_SNAKE_CASE
-- Typedef -> PascalCase
-- Functions -> camelCase
-- Local Variables -> camelCase
-- Static Variables -> s_PascalCase
-- Global Variables -> <ins>Don't use them!</ins>
-- Pointers -> p_PascalCase
-- Constants -> SCREAMING_SNAKE_CASE
-- Macros -> SCREAMING_SNAKE_CASE
-
-## Using Comments
-
-- Use comments ONLY in header files or when it is REALLY necessary (but it should't be).
-- Use @brief, @param, @return.
-- Use /** */ for struct members.
-- Don't add dots at the end of comments (unless there are more sentences).

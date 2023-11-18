@@ -1,5 +1,5 @@
-#include "drivers/barometer/bmp581_driver.h"
-#include "drivers/tools/time_tracker.h"
+#include "modules/drivers/barometer/bmp581_driver.h"
+#include "modules/drivers/hal/time_tracker.h"
 
 #define CHIP_ID 0x01
 #define REV_ID 0x02
@@ -35,9 +35,9 @@
 
 #define I2C_ADDRESS 0x46
 
-FUNCRESULT bmp581InitSPI(BMP581Config *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
+void bmp581_init_spi(bmp581_config_t *config, spi_instance_t spi, pin_number_t miso, pin_number_t mosi, pin_number_t cs, pin_number_t sck)
 {
-    config->gpioConfig = (GPIOCommunicationConfig){
+    config->gpioConfig = (gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_SPI,
         .spi = spi,
         .cs = cs,
@@ -46,12 +46,12 @@ FUNCRESULT bmp581InitSPI(BMP581Config *config, SPIInstance spi, PinNumber miso, 
         .writeMask = 0x7F,
     };
 
-    return spiInitPins(spi, miso, mosi, cs, sck);
+    return spi_init_pins(spi, miso, mosi, cs, sck);
 }
 
-FUNCRESULT bmp581InitI2C(BMP581Config *config, I2CInstance i2c, PinNumber sda, PinNumber scl)
+void bmp581_init_i2c(bmp581_config_t *config, i2c_instance_t i2c, pin_number_t sda, pin_number_t scl)
 {
-    config->gpioConfig = (GPIOCommunicationConfig){
+    config->gpioConfig = (gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_I2C,
         .i2c = i2c,
         .i2cAddress = I2C_ADDRESS,
@@ -60,53 +60,45 @@ FUNCRESULT bmp581InitI2C(BMP581Config *config, I2CInstance i2c, PinNumber sda, P
         .writeMask = 0x7F,
     };
 
-    return i2cInitPins(i2c, sda, scl);
+    return i2c_init_pins(i2c, sda, scl);
 }
 
-FUNCRESULT bmp581ValidateId(BMP581Config *config, BOOL *pValid)
+void bmp581_validate_id(bmp581_config_t *config, bool *pValid)
 {
-    BYTE buffer[2];
+    uint8_t buffer[2];
 
-    gpioReadRegs(&config->gpioConfig, CHIP_ID, buffer, 2);
+    gpio_read_regs(&config->gpioConfig, CHIP_ID, buffer, 2);
 
     *pValid = buffer[0] == 0x58 && buffer[1] == 0x01;
-
-    return SUC_OK;
 }
 
-FUNCRESULT bmp581SetODR_OSR(BMP581Config *config, BMP581OSR tempOSR, BMP581OSR pressOSR, BMP581ODR odr)
+void bmp581_set_odr__osr(bmp581_config_t *config, bmp581_osr_t tempOSR, bmp581_osr_t pressOSR, bmp581_odr_t odr)
 {
-    gpioWriteReg(&config->gpioConfig, OSR_CONFIG, ((BYTE)pressOSR << 3) | (BYTE)tempOSR | 1 << 6);
-    gpioWriteRegField(&config->gpioConfig, ODR_CONFIG, 5, 2, (BYTE)odr);
-
-    return SUC_OK;
+    gpio_write_reg(&config->gpioConfig, OSR_CONFIG, ((uint8_t)pressOSR << 3) | (uint8_t)tempOSR | 1 << 6);
+    gpio_write_reg_field(&config->gpioConfig, ODR_CONFIG, 5, 2, (uint8_t)odr);
 }
 
-FUNCRESULT bmp581SetMode(BMP581Config *config, BMP581Mode mode)
+void bmp581_set_mode(bmp581_config_t *config, bmp581_mode_t mode)
 {
-    gpioWriteRegField(&config->gpioConfig, ODR_CONFIG, 2, 0, (BYTE)mode);
-
-    return SUC_OK;
+    gpio_write_reg_field(&config->gpioConfig, ODR_CONFIG, 2, 0, (uint8_t)mode);
 }
 
-FUNCRESULT bmp581Read(BMP581Config *config, BMP581Data *data)
+void bmp581_read(bmp581_config_t *config, bmp581_data_t *data)
 {
-    BYTE buffer[6];
+    uint8_t buffer[6];
 
-    gpioReadRegs(&config->gpioConfig, TEMP_DATA_XLSB, buffer, 6);
+    gpio_read_regs(&config->gpioConfig, TEMP_DATA_XLSB, buffer, 6);
 
-    INT32 raw_temp = (INT32)buffer[2] << 16 | (INT32)buffer[1] << 8 | (INT32)buffer[0];
-    INT32 raw_press = (INT32)buffer[5] << 16 | (INT32)buffer[4] << 8 | (INT32)buffer[3];
+    int raw_temp = (int)buffer[2] << 16 | (int)buffer[1] << 8 | (int)buffer[0];
+    int raw_press = (int)buffer[5] << 16 | (int)buffer[4] << 8 | (int)buffer[3];
 
-    data->temperature = (FLOAT)raw_temp / 65536.0f;
-    data->pressure = (FLOAT)raw_press / 64.0f;
-
-    return SUC_OK;
+    data->temperature = (float)raw_temp / 65536.0f;
+    data->pressure = (float)raw_press / 64.0f;
 }
 
-VOID __bmp581SoftReset(BMP581Config *config)
+void _bmp581_soft_reset(bmp581_config_t *config)
 {
-    gpioWriteReg(&config->gpioConfig, CMD, 0xB6);
+    gpio_write_reg(&config->gpioConfig, CMD, 0xB6);
 
-    sleepMiliseconds(10);
+    time_sleep_ms(10);
 }

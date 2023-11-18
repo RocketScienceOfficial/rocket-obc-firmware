@@ -1,1 +1,1 @@
-obc_add_module(maths math_utils.c quaternion.c vector.c)
+obc_add_module(maths crc.c math_utils.c quaternion.c vector.c)

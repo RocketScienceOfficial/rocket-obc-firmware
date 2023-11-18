@@ -1,5 +1,5 @@
-#include "drivers/lora/sx126X_driver.h"
-#include "drivers/tools/time_tracker.h"
+#include "modules/drivers/lora/sx126X_driver.h"
+#include "modules/drivers/hal/time_tracker.h"
 #include <string.h>
 
 #define CMD_SET_SLEEP 0x84
@@ -84,134 +84,132 @@
 #define RTC_FREQ 64000
 #define XTAL_FREQ 32000000
 
-FUNCRESULT sx126XInit(SX126XConfig *data, SX126XPinout *pinout)
+void sx126x_init(sx126x_config_t *data, sx126x_pinout_t *pinout)
 {
     if (!data || !pinout)
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
     data->pinout = *pinout;
 
-    gpioInitPin(pinout->busy, GPIO_INPUT);
-    gpioInitPin(pinout->reset, GPIO_OUTPUT);
+    gpio_init_pin(pinout->busy, GPIO_INPUT);
+    gpio_init_pin(pinout->reset, GPIO_OUTPUT);
 
-    spiInitPins(data->pinout.spi, data->pinout.miso, data->pinout.mosi, data->pinout.sck, data->pinout.cs);
-
-    return SUC_OK;
+    spi_init_pins(data->pinout.spi, data->pinout.miso, data->pinout.mosi, data->pinout.sck, data->pinout.cs);
 }
 
-FUNCRESULT sx126XSetSleep(SX126XConfig *data, BOOL coldStart)
+void sx126x_set_sleep(sx126x_config_t *data, bool coldStart)
 {
-    BYTE buff[1];
+    uint8_t buff[1];
 
-    buff[0] = (BYTE)(coldStart ? 0 : (1 << 2));
+    buff[0] = (uint8_t)(coldStart ? 0 : (1 << 2));
 
-    return __sx126XCMD(data, CMD_SET_SLEEP, buff, 1, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_SLEEP, buff, 1, NULL, 0);
 }
 
-FUNCRESULT sx126XSetStandby(SX126XConfig *data, SX126XStandbyMode mode)
+void sx126x_set_standby(sx126x_config_t *data, sx126x_standby_mode_t mode)
 {
-    BYTE buff[1];
+    uint8_t buff[1];
 
-    buff[0] = (BYTE)mode;
+    buff[0] = (uint8_t)mode;
 
-    return __sx126XCMD(data, CMD_SET_STANDBY, buff, 1, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_STANDBY, buff, 1, NULL, 0);
 }
 
-FUNCRESULT sx126XSetFS(SX126XConfig *data)
+void sx126x_set_fs(sx126x_config_t *data)
 {
-    return __sx126XCMD(data, CMD_SET_FS, NULL, 0, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_FS, NULL, 0, NULL, 0);
 }
 
-FUNCRESULT sx126XSetTX(SX126XConfig *data, UINT32 timeout_ms)
+void sx126x_set_tx(sx126x_config_t *data, unsigned int timeout_ms)
 {
-    BYTE buff[3];
+    uint8_t buff[3];
 
-    UINT32 timeout = __sx126XConvertTimeoutToRTCStep(timeout_ms);
+    unsigned int timeout = _sx126x_convert_timeout_to_rtc_step(timeout_ms);
 
-    buff[0] = (BYTE)(timeout >> 16);
-    buff[1] = (BYTE)(timeout >> 8);
-    buff[2] = (BYTE)(timeout);
+    buff[0] = (uint8_t)(timeout >> 16);
+    buff[1] = (uint8_t)(timeout >> 8);
+    buff[2] = (uint8_t)(timeout);
 
-    return __sx126XCMD(data, CMD_SET_TX, buff, 3, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_TX, buff, 3, NULL, 0);
 }
 
-FUNCRESULT sx126XSetRX(SX126XConfig *data, UINT32 timeout_ms)
+void sx126x_set_rx(sx126x_config_t *data, unsigned int timeout_ms)
 {
-    BYTE buff[3];
+    uint8_t buff[3];
 
-    UINT32 timeout = __sx126XConvertTimeoutToRTCStep(timeout_ms);
+    unsigned int timeout = _sx126x_convert_timeout_to_rtc_step(timeout_ms);
 
-    buff[0] = (BYTE)(timeout >> 16);
-    buff[1] = (BYTE)(timeout >> 8);
-    buff[2] = (BYTE)(timeout);
+    buff[0] = (uint8_t)(timeout >> 16);
+    buff[1] = (uint8_t)(timeout >> 8);
+    buff[2] = (uint8_t)(timeout);
 
-    return __sx126XCMD(data, CMD_SET_RX, buff, 3, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_RX, buff, 3, NULL, 0);
 }
 
-FUNCRESULT sx126XStopTimerOnPreamble(SX126XConfig *data, BOOL enable)
+void sx126x_stop_timer_on_preamble(sx126x_config_t *data, bool enable)
 {
-    BYTE buff[1];
+    uint8_t buff[1];
 
-    buff[0] = (BYTE)enable;
+    buff[0] = (uint8_t)enable;
 
-    return __sx126XCMD(data, CMD_STOP_TIMER_ON_PREAMBLE, buff, 1, NULL, 0);
+    _sx126x_cmd(data, CMD_STOP_TIMER_ON_PREAMBLE, buff, 1, NULL, 0);
 }
 
-FUNCRESULT sx126XSetRXDutyCycle(SX126XConfig *data, UINT32 rxPeriod_ms, UINT32 sleepPeriod_ms)
+void sx126x_set_rx_duty_cycle(sx126x_config_t *data, unsigned int rxPeriod_ms, unsigned int sleepPeriod_ms)
 {
-    BYTE buff[6];
+    uint8_t buff[6];
 
-    UINT32 rxPeriod = __sx126XConvertTimeoutToRTCStep(rxPeriod_ms);
-    UINT32 sleepPeriod = __sx126XConvertTimeoutToRTCStep(sleepPeriod_ms);
+    unsigned int rxPeriod = _sx126x_convert_timeout_to_rtc_step(rxPeriod_ms);
+    unsigned int sleepPeriod = _sx126x_convert_timeout_to_rtc_step(sleepPeriod_ms);
 
-    buff[0] = (BYTE)(rxPeriod >> 16);
-    buff[1] = (BYTE)(rxPeriod >> 8);
-    buff[2] = (BYTE)(rxPeriod);
-    buff[3] = (BYTE)(sleepPeriod >> 16);
-    buff[4] = (BYTE)(sleepPeriod >> 8);
-    buff[5] = (BYTE)(sleepPeriod);
+    buff[0] = (uint8_t)(rxPeriod >> 16);
+    buff[1] = (uint8_t)(rxPeriod >> 8);
+    buff[2] = (uint8_t)(rxPeriod);
+    buff[3] = (uint8_t)(sleepPeriod >> 16);
+    buff[4] = (uint8_t)(sleepPeriod >> 8);
+    buff[5] = (uint8_t)(sleepPeriod);
 
-    return __sx126XCMD(data, CMD_SET_RX_DUTY_CYCLE, buff, 6, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_RX_DUTY_CYCLE, buff, 6, NULL, 0);
 }
 
-FUNCRESULT sx126XSetCAD(SX126XConfig *data)
+void sx126x_set_cad(sx126x_config_t *data)
 {
-    return __sx126XCMD(data, CMD_SET_CAD, NULL, 0, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_CAD, NULL, 0, NULL, 0);
 }
 
-FUNCRESULT sx126XSetTXContinuousWave(SX126XConfig *data)
+void sx126x_set_tx_continuous_wave(sx126x_config_t *data)
 {
-    return __sx126XCMD(data, CMD_SET_TX_CONTINUOUS_WAVE, NULL, 0, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_TX_CONTINUOUS_WAVE, NULL, 0, NULL, 0);
 }
 
-FUNCRESULT sx126XSetTXInfinitePreamble(SX126XConfig *data)
+void sx126x_set_tx_infinite_preamble(sx126x_config_t *data)
 {
-    return __sx126XCMD(data, CMD_SET_TX_INFINITE_PREAMBLE, NULL, 0, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_TX_INFINITE_PREAMBLE, NULL, 0, NULL, 0);
 }
 
-FUNCRESULT sx126XSetRegulatorMode(SX126XConfig *data, SX126XRegulatorMode mode)
+void sx126x_set_regulator_mode(sx126x_config_t *data, sx126x_regulator_mode_t mode)
 {
-    BYTE buff[1];
+    uint8_t buff[1];
 
-    buff[0] = (BYTE)mode;
+    buff[0] = (uint8_t)mode;
 
-    return __sx126XCMD(data, CMD_SET_REGULATOR_MODE, buff, 1, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_REGULATOR_MODE, buff, 1, NULL, 0);
 }
 
-FUNCRESULT sx126XCalibrate(SX126XConfig *data, UINT8 calibParam)
+void sx126x_calibrate(sx126x_config_t *data, uint8_t calibParam)
 {
-    BYTE buff[1];
+    uint8_t buff[1];
 
     buff[0] = calibParam;
 
-    return __sx126XCMD(data, CMD_CALIBRATE, buff, 1, NULL, 0);
+    _sx126x_cmd(data, CMD_CALIBRATE, buff, 1, NULL, 0);
 }
 
-FUNCRESULT sx126XCalibrateImage(SX126XConfig *data, UINT32 freq_hz)
+void sx126x_calibrate_image(sx126x_config_t *data, unsigned int freq_hz)
 {
-    BYTE buff[2];
+    uint8_t buff[2];
 
     if (freq_hz >= 430E6 && freq_hz <= 440E6)
     {
@@ -230,240 +228,224 @@ FUNCRESULT sx126XCalibrateImage(SX126XConfig *data, UINT32 freq_hz)
     }
     else
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
-    return __sx126XCMD(data, CMD_CALIBRATE_IMAGE, buff, 2, NULL, 0);
+    _sx126x_cmd(data, CMD_CALIBRATE_IMAGE, buff, 2, NULL, 0);
 }
 
-FUNCRESULT sx126XSetPAConfig(SX126XConfig *data, UINT8 paDutyCycle, UINT8 hpMax)
+void sx126x_set_p_a_config(sx126x_config_t *data, uint8_t paDutyCycle, uint8_t hpMax)
 {
-    BYTE buff[4];
+    uint8_t buff[4];
 
     buff[0] = paDutyCycle;
     buff[1] = hpMax;
     buff[2] = 0x00;
     buff[3] = 0x01;
 
-    return __sx126XCMD(data, CMD_SET_PA_CONFIG, buff, 4, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_PA_CONFIG, buff, 4, NULL, 0);
 }
 
-FUNCRESULT sx126XSetRXTXFallbackMode(SX126XConfig *data, SX126XFallbackMode fallbackMode)
+void sx126x_set_rx_tx_fallback_mode(sx126x_config_t *data, sx126x_fallback_mode_t fallbackMode)
 {
-    BYTE buff[1];
+    uint8_t buff[1];
 
-    buff[0] = (BYTE)fallbackMode;
+    buff[0] = (uint8_t)fallbackMode;
 
-    return __sx126XCMD(data, CMD_SET_RX_TX_FALLBACK_MODE, buff, 1, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_RX_TX_FALLBACK_MODE, buff, 1, NULL, 0);
 }
 
-FUNCRESULT sx126XWriteBuffer(SX126XConfig *data, UINT8 offset, BYTE *buffer, SIZE szBuffer)
+void sx126x_write_buffer(sx126x_config_t *data, uint8_t offset, uint8_t *buffer, size_t szBuffer)
 {
-    BYTE buff[16];
+    uint8_t buff[16];
 
-    buff[0] = (BYTE)offset;
+    buff[0] = (uint8_t)offset;
 
     memcpy(buff + 1, buffer, szBuffer);
 
-    return __sx126XCMD(data, CMD_WRITE_BUFFER, buff, szBuffer + 1, NULL, 0);
+    _sx126x_cmd(data, CMD_WRITE_BUFFER, buff, szBuffer + 1, NULL, 0);
 }
 
-FUNCRESULT sx126XReadBuffer(SX126XConfig *data, UINT8 offset, BYTE *buffer, SIZE szBuffer)
+void sx126x_read_buffer(sx126x_config_t *data, uint8_t offset, uint8_t *buffer, size_t szBuffer)
 {
-    BYTE buff[1];
+    uint8_t buff[1];
 
-    buff[0] = (BYTE)offset;
+    buff[0] = (uint8_t)offset;
 
-    BYTE resBuff[16];
+    uint8_t resBuff[16];
 
-    __sx126XCMD(data, CMD_READ_BUFFER, buff, 1, resBuff, szBuffer + 1);
+    _sx126x_cmd(data, CMD_READ_BUFFER, buff, 1, resBuff, szBuffer + 1);
 
     memcpy(buffer, resBuff + 1, szBuffer);
-
-    return SUC_OK;
 }
 
-FUNCRESULT sx126XSetDIOIRQParams(SX126XConfig *data, UINT16 irqMask, UINT16 dio1Mask, UINT16 dio2Mask, UINT16 dio3Mask)
+void sx126x_set_dio_irq_params(sx126x_config_t *data, uint16_t irqMask, uint16_t dio1Mask, uint16_t dio2Mask, uint16_t dio3Mask)
 {
-    BYTE buff[8];
+    uint8_t buff[8];
 
-    buff[0] = (BYTE)(irqMask >> 8);
-    buff[1] = (BYTE)(irqMask);
-    buff[2] = (BYTE)(dio1Mask >> 8);
-    buff[3] = (BYTE)(dio1Mask);
-    buff[4] = (BYTE)(dio2Mask >> 8);
-    buff[5] = (BYTE)(dio2Mask);
-    buff[6] = (BYTE)(dio3Mask >> 8);
-    buff[7] = (BYTE)(dio3Mask);
+    buff[0] = (uint8_t)(irqMask >> 8);
+    buff[1] = (uint8_t)(irqMask);
+    buff[2] = (uint8_t)(dio1Mask >> 8);
+    buff[3] = (uint8_t)(dio1Mask);
+    buff[4] = (uint8_t)(dio2Mask >> 8);
+    buff[5] = (uint8_t)(dio2Mask);
+    buff[6] = (uint8_t)(dio3Mask >> 8);
+    buff[7] = (uint8_t)(dio3Mask);
 
-    return __sx126XCMD(data, CMD_SET_DIO_IRQ_PARAMS, buff, 8, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_DIO_IRQ_PARAMS, buff, 8, NULL, 0);
 }
 
-FUNCRESULT sx126XGetIRQStatus(SX126XConfig *data, UINT16 *irqStatus)
+void sx126x_get_irq_status(sx126x_config_t *data, uint16_t *irqStatus)
 {
-    BYTE buff[3];
+    uint8_t buff[3];
 
-    FUNCRESULT res = __sx126XCMD(data, CMD_GET_IRQ_STATUS, NULL, 0, buff, 3);
+    _sx126x_cmd(data, CMD_GET_IRQ_STATUS, NULL, 0, buff, 3);
 
-    if (res == SUC_OK)
-    {
-        *irqStatus = (UINT16)((buff[1] << 8) | buff[2]);
-    }
-
-    return res;
+    *irqStatus = (uint16_t)((buff[1] << 8) | buff[2]);
 }
 
-FUNCRESULT sx126XClearIRQStatus(SX126XConfig *data, UINT16 clearIrqParam)
+void sx126x_clear_irq_status(sx126x_config_t *data, uint16_t clearIrqParam)
 {
-    BYTE buff[2];
+    uint8_t buff[2];
 
-    buff[0] = (BYTE)(clearIrqParam >> 8);
-    buff[1] = (BYTE)(clearIrqParam);
+    buff[0] = (uint8_t)(clearIrqParam >> 8);
+    buff[1] = (uint8_t)(clearIrqParam);
 
-    return __sx126XCMD(data, CMD_CLEAR_IRQ_STATUS, buff, 2, NULL, 0);
+    _sx126x_cmd(data, CMD_CLEAR_IRQ_STATUS, buff, 2, NULL, 0);
 }
 
-FUNCRESULT sx126XSetDIO2AsRFSwitchCtrl(SX126XConfig *data, BOOL enable)
+void sx126x_set_dio2_as_rf_switch_ctrl(sx126x_config_t *data, bool enable)
 {
-    BYTE buff[1];
+    uint8_t buff[1];
 
-    buff[0] = (BYTE)enable;
+    buff[0] = (uint8_t)enable;
 
-    return __sx126XCMD(data, CMD_SET_DIO2_AS_RF_SWITCH_CTRL, buff, 1, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_DIO2_AS_RF_SWITCH_CTRL, buff, 1, NULL, 0);
 }
 
-FUNCRESULT sx126XSetDIO3AsTCXOCtrl(SX126XConfig *data, SX126XTCXOVoltage voltage, UINT32 timeout_ms)
+void sx126x_set_dio3_as_tcxo_ctrl(sx126x_config_t *data, sx126x_tcxo_voltage_t voltage, unsigned int timeout_ms)
 {
-    BYTE buff[4];
+    uint8_t buff[4];
 
-    UINT32 timeout = __sx126XConvertTimeoutToRTCStep(timeout_ms);
+    unsigned int timeout = _sx126x_convert_timeout_to_rtc_step(timeout_ms);
 
-    buff[0] = (BYTE)voltage;
-    buff[1] = (BYTE)(timeout >> 16);
-    buff[2] = (BYTE)(timeout >> 8);
-    buff[3] = (BYTE)(timeout);
+    buff[0] = (uint8_t)voltage;
+    buff[1] = (uint8_t)(timeout >> 16);
+    buff[2] = (uint8_t)(timeout >> 8);
+    buff[3] = (uint8_t)(timeout);
 
-    return __sx126XCMD(data, CMD_SET_DIO3_AS_TCXO_CTRL, buff, 3, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_DIO3_AS_TCXO_CTRL, buff, 3, NULL, 0);
 }
 
-FUNCRESULT sx126XSetRFFrequency(SX126XConfig *data, UINT32 frequency)
+void sx126x_set_rf_frequency(sx126x_config_t *data, unsigned int frequency)
 {
-    BYTE buff[4];
+    uint8_t buff[4];
 
-    UINT32 freq = __sx126XConvertFrequencyToRegisterValue(frequency);
+    unsigned int freq = _sx126x_convert_frequency_to_register_value(frequency);
 
-    buff[0] = (BYTE)(freq >> 24);
-    buff[1] = (BYTE)(freq >> 16);
-    buff[2] = (BYTE)(freq >> 8);
-    buff[3] = (BYTE)(freq);
+    buff[0] = (uint8_t)(freq >> 24);
+    buff[1] = (uint8_t)(freq >> 16);
+    buff[2] = (uint8_t)(freq >> 8);
+    buff[3] = (uint8_t)(freq);
 
-    return __sx126XCMD(data, CMD_SET_RF_FREQUENCY, buff, 4, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_RF_FREQUENCY, buff, 4, NULL, 0);
 }
 
-FUNCRESULT sx126XSetPacketType(SX126XConfig *data, SX126XPacketType packetType)
+void sx126x_set_packet_type(sx126x_config_t *data, sx126x_packet_type_t packetType)
 {
-    BYTE buff[1];
+    uint8_t buff[1];
 
-    buff[0] = (BYTE)packetType;
+    buff[0] = (uint8_t)packetType;
 
-    return __sx126XCMD(data, CMD_SET_PACKET_TYPE, buff, 1, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_PACKET_TYPE, buff, 1, NULL, 0);
 }
 
-FUNCRESULT sx126XGetPacketType(SX126XConfig *data, SX126XPacketType *packetType)
+void sx126x_get_packet_type(sx126x_config_t *data, sx126x_packet_type_t *packetType)
 {
-    BYTE buff[2];
+    uint8_t buff[2];
 
-    FUNCRESULT res = __sx126XCMD(data, CMD_GET_PACKET_TYPE, NULL, 0, buff, 2);
+    _sx126x_cmd(data, CMD_GET_PACKET_TYPE, NULL, 0, buff, 2);
 
-    if (res == SUC_OK)
-    {
-        *packetType = (SX126XPacketType)buff[1];
-    }
-
-    return res;
+    *packetType = (sx126x_packet_type_t)buff[1];
 }
 
-FUNCRESULT sx126XSetTXParams(SX126XConfig *data, INT8 power, SX126XRampTime rampTime)
+void sx126x_set_tx_params(sx126x_config_t *data, int8_t power, sx126x_ramp_time_t rampTime)
 {
-    BYTE buff[2];
+    uint8_t buff[2];
 
-    buff[0] = (BYTE)power;
-    buff[1] = (BYTE)rampTime;
+    buff[0] = (uint8_t)power;
+    buff[1] = (uint8_t)rampTime;
 
-    return __sx126XCMD(data, CMD_SET_TX_PARAMS, buff, 2, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_TX_PARAMS, buff, 2, NULL, 0);
 }
 
-FUNCRESULT sx126XSetGFSKModulationParams(SX126XConfig *data, UINT32 bitrate, SX126XGFSKPulseShape pulseShape, SX126XGFSKBandwidth bandwidth, UINT32 freq_dev_hz)
+void sx126x_set_gfsk_modulation_params(sx126x_config_t *data, unsigned int bitrate, sx126x_gfsk_pulse_shape_t pulseShape, sx126x_gfsk_bandwidth_t bandwidth, unsigned int freq_dev_hz)
 {
-    BYTE buff[8];
+    uint8_t buff[8];
 
-    UINT32 br = (UINT32)(32 * (double)XTAL_FREQ / (double)bitrate);
-    UINT32 freq_dev = __sx126XConvertFrequencyToRegisterValue(freq_dev_hz);
+    unsigned int br = (unsigned int)(32 * (double)XTAL_FREQ / (double)bitrate);
+    unsigned int freq_dev = _sx126x_convert_frequency_to_register_value(freq_dev_hz);
 
-    buff[0] = (BYTE)(br >> 16);
-    buff[1] = (BYTE)(br >> 8);
-    buff[2] = (BYTE)(br);
-    buff[3] = (BYTE)pulseShape;
-    buff[4] = (BYTE)bandwidth;
-    buff[5] = (BYTE)(freq_dev >> 16);
-    buff[6] = (BYTE)(freq_dev >> 8);
-    buff[7] = (BYTE)(freq_dev);
+    buff[0] = (uint8_t)(br >> 16);
+    buff[1] = (uint8_t)(br >> 8);
+    buff[2] = (uint8_t)(br);
+    buff[3] = (uint8_t)pulseShape;
+    buff[4] = (uint8_t)bandwidth;
+    buff[5] = (uint8_t)(freq_dev >> 16);
+    buff[6] = (uint8_t)(freq_dev >> 8);
+    buff[7] = (uint8_t)(freq_dev);
 
-    __sx126XCMD(data, CMD_SET_MODULATION_PARAMS, buff, 8, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_MODULATION_PARAMS, buff, 8, NULL, 0);
 
-    __sx126XTXModulationWorkaround(data, SX126X_PACKET_TYPE_LORA, 0);
-
-    return SUC_OK;
+    _sx126x_tx_modulation_workaround(data, SX126X_PACKET_TYPE_LORA, 0);
 }
 
-FUNCRESULT sx126XSetLoRaModulationParams(SX126XConfig *data, SX126XLoRaSF sf, SX126XLoRaBW bw, SX126XLoRaCR cr, BOOL lowDataRateOptimize)
+void sx126x_set_lora_modulation_params(sx126x_config_t *data, sx126x_lora_sf_t sf, sx126x_lora_bw_t bw, sx126x_lora_cr_t cr, bool lowDataRateOptimize)
 {
-    BYTE buff[4];
+    uint8_t buff[4];
 
-    buff[0] = (BYTE)sf;
-    buff[1] = (BYTE)bw;
-    buff[2] = (BYTE)cr;
-    buff[3] = (BYTE)lowDataRateOptimize;
+    buff[0] = (uint8_t)sf;
+    buff[1] = (uint8_t)bw;
+    buff[2] = (uint8_t)cr;
+    buff[3] = (uint8_t)lowDataRateOptimize;
 
-    __sx126XCMD(data, CMD_SET_PACKET_PARAMS, buff, 4, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_PACKET_PARAMS, buff, 4, NULL, 0);
 
-    __sx126XTXModulationWorkaround(data, SX126X_PACKET_TYPE_LORA, bw);
-
-    return SUC_OK;
+    _sx126x_tx_modulation_workaround(data, SX126X_PACKET_TYPE_LORA, bw);
 }
 
-FUNCRESULT sx126XSetPacketGFSKParams(SX126XConfig *data, UINT16 preambleLength, SX126XGFSKPreambleDetectorLength detectorLength, UINT8 syncWordLength, SX126XGFSKAddressFiltering addressFiltering, SX126XGFSKPacketType packetType, UINT8 payloadLength, SX126XGFSKCRCType crcType, BOOL whitening)
+void sx126x_set_packet_gfsk_params(sx126x_config_t *data, uint16_t preambleLength, sx126x_gfsk_preamble_detector_length_t detectorLength, uint8_t syncWordLength, sx126x_gfsk_address_filtering_t addressFiltering, sx126x_gfsk_packet_type_t packetType, uint8_t payloadLength, sx126x_gfsk_crc_type_t crcType, bool whitening)
 {
-    BYTE buff[9];
+    uint8_t buff[9];
 
-    buff[0] = (BYTE)(preambleLength >> 8);
-    buff[1] = (BYTE)(preambleLength);
-    buff[2] = (BYTE)detectorLength;
-    buff[3] = (BYTE)syncWordLength;
-    buff[4] = (BYTE)addressFiltering;
-    buff[5] = (BYTE)packetType;
-    buff[6] = (BYTE)payloadLength;
-    buff[7] = (BYTE)crcType;
-    buff[8] = (BYTE)whitening;
+    buff[0] = (uint8_t)(preambleLength >> 8);
+    buff[1] = (uint8_t)(preambleLength);
+    buff[2] = (uint8_t)detectorLength;
+    buff[3] = (uint8_t)syncWordLength;
+    buff[4] = (uint8_t)addressFiltering;
+    buff[5] = (uint8_t)packetType;
+    buff[6] = (uint8_t)payloadLength;
+    buff[7] = (uint8_t)crcType;
+    buff[8] = (uint8_t)whitening;
 
-    return __sx126XCMD(data, CMD_SET_PACKET_PARAMS, buff, 9, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_PACKET_PARAMS, buff, 9, NULL, 0);
 }
 
-FUNCRESULT sx126XSetPacketLoRaParams(SX126XConfig *data, UINT16 preambleLength, SX126XLoRaHeaderType headerType, UINT8 payloadLength, BOOL crc, BOOL invertIQ)
+void sx126x_set_packet_lora_params(sx126x_config_t *data, uint16_t preambleLength, sx126x_lora_header_type_t headerType, uint8_t payloadLength, bool crc, bool invertIQ)
 {
-    BYTE buff[6];
+    uint8_t buff[6];
 
-    buff[0] = (BYTE)(preambleLength >> 8);
-    buff[1] = (BYTE)(preambleLength);
-    buff[2] = (BYTE)headerType;
-    buff[3] = (BYTE)payloadLength;
-    buff[4] = (BYTE)crc;
-    buff[5] = (BYTE)invertIQ;
+    buff[0] = (uint8_t)(preambleLength >> 8);
+    buff[1] = (uint8_t)(preambleLength);
+    buff[2] = (uint8_t)headerType;
+    buff[3] = (uint8_t)payloadLength;
+    buff[4] = (uint8_t)crc;
+    buff[5] = (uint8_t)invertIQ;
 
-    __sx126XCMD(data, CMD_SET_PACKET_PARAMS, buff, 6, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_PACKET_PARAMS, buff, 6, NULL, 0);
 
-    BYTE reg;
-    __sx126XReadRegister(data, REG_IQ_POLARITY_SETUP, &reg, 1);
+    uint8_t reg;
+    _sx126x_read_register(data, REG_IQ_POLARITY_SETUP, &reg, 1);
 
     if (invertIQ)
     {
@@ -474,275 +456,221 @@ FUNCRESULT sx126XSetPacketLoRaParams(SX126XConfig *data, UINT16 preambleLength, 
         reg |= (1 << 2);
     }
 
-    __sx126XWriteRegister(data, REG_IQ_POLARITY_SETUP, &reg, 1);
-
-    return SUC_OK;
+    _sx126x_write_register(data, REG_IQ_POLARITY_SETUP, &reg, 1);
 }
 
-FUNCRESULT sx126XSetCADParams(SX126XConfig *data, SX126XCADSymbol cadSymbolNum, UINT8 cadDetPeak, UINT8 cadDetMin, SX126XLoRaCADExitMode cadExitMode, UINT32 timeout_ms)
+void sx126x_set_cad_params(sx126x_config_t *data, sx126x_cad_symbol_t cadSymbolNum, uint8_t cadDetPeak, uint8_t cadDetMin, sx126x_lora_cad_exit_mode_t cadExitMode, unsigned int timeout_ms)
 {
-    BYTE buff[7];
+    uint8_t buff[7];
 
-    UINT32 timeout = __sx126XConvertTimeoutToRTCStep(timeout_ms);
+    unsigned int timeout = _sx126x_convert_timeout_to_rtc_step(timeout_ms);
 
-    buff[0] = (BYTE)cadSymbolNum;
-    buff[1] = (BYTE)cadDetPeak;
-    buff[2] = (BYTE)cadDetMin;
-    buff[3] = (BYTE)cadExitMode;
-    buff[4] = (BYTE)(timeout >> 16);
-    buff[5] = (BYTE)(timeout >> 8);
-    buff[6] = (BYTE)(timeout);
+    buff[0] = (uint8_t)cadSymbolNum;
+    buff[1] = (uint8_t)cadDetPeak;
+    buff[2] = (uint8_t)cadDetMin;
+    buff[3] = (uint8_t)cadExitMode;
+    buff[4] = (uint8_t)(timeout >> 16);
+    buff[5] = (uint8_t)(timeout >> 8);
+    buff[6] = (uint8_t)(timeout);
 
-    return __sx126XCMD(data, CMD_SET_CAD_PARAMS, buff, 7, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_CAD_PARAMS, buff, 7, NULL, 0);
 }
 
-FUNCRESULT sx126XSetBufferBaseAddress(SX126XConfig *data, UINT8 txBaseAddress, UINT8 rxBaseAddress)
+void sx126x_set_buffer_base_address(sx126x_config_t *data, uint8_t txBaseAddress, uint8_t rxBaseAddress)
 {
-    BYTE buff[2];
+    uint8_t buff[2];
 
-    buff[0] = (BYTE)txBaseAddress;
-    buff[1] = (BYTE)rxBaseAddress;
+    buff[0] = (uint8_t)txBaseAddress;
+    buff[1] = (uint8_t)rxBaseAddress;
 
-    return __sx126XCMD(data, CMD_SET_BUFFER_BASE_ADDRESS, buff, 2, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_BUFFER_BASE_ADDRESS, buff, 2, NULL, 0);
 }
 
-FUNCRESULT sx126XSetLoRaSymbNumTimeout(SX126XConfig *data, UINT8 symbNum)
+void sx126x_set_lora_symb_num_timeout(sx126x_config_t *data, uint8_t symbNum)
 {
-    BYTE buff[1];
+    uint8_t buff[1];
 
-    buff[0] = (BYTE)symbNum;
+    buff[0] = (uint8_t)symbNum;
 
-    return __sx126XCMD(data, CMD_SET_LORA_SYMB_NUM_TIMEOUT, buff, 1, NULL, 0);
+    _sx126x_cmd(data, CMD_SET_LORA_SYMB_NUM_TIMEOUT, buff, 1, NULL, 0);
 }
 
-FUNCRESULT sx126XGetStatus(SX126XConfig *data, SX126XChipMode *pChipMode, SX126XCommandStatus *pCmdStatus)
+void sx126x_get_status(sx126x_config_t *data, sx126x_chip_mode_t *pChipMode, sx126x_command_status_t *pCmdStatus)
 {
-    BYTE buff[1];
+    uint8_t buff[1];
 
-    FUNCRESULT res = __sx126XCMD(data, CMD_GET_STATUS, NULL, 0, buff, 1);
+    _sx126x_cmd(data, CMD_GET_STATUS, NULL, 0, buff, 1);
 
-    if (res == SUC_OK)
-    {
-        BYTE d = buff[0];
+    uint8_t d = buff[0];
 
-        *pChipMode = (SX126XChipMode)((d & 0x70) >> 4);
-        *pCmdStatus = (SX126XCommandStatus)((d & 0x0E) >> 1);
-    }
-
-    return res;
+    *pChipMode = (sx126x_chip_mode_t)((d & 0x70) >> 4);
+    *pCmdStatus = (sx126x_command_status_t)((d & 0x0E) >> 1);
 }
 
-FUNCRESULT sx126XGetRXBufferStatus(SX126XConfig *data, UINT8 *pPayloadLength, UINT8 *pRXStartBufferPtr)
+void sx126x_get_rx_buffer_status(sx126x_config_t *data, uint8_t *pPayloadLength, uint8_t *pRXStartBufferPtr)
 {
-    BYTE buff[3];
+    uint8_t buff[3];
 
-    FUNCRESULT res = __sx126XCMD(data, CMD_GET_RX_BUFFER_STATUS, NULL, 0, buff, 3);
+    _sx126x_cmd(data, CMD_GET_RX_BUFFER_STATUS, NULL, 0, buff, 3);
 
-    if (res == SUC_OK)
-    {
-        *pPayloadLength = buff[1];
-        *pRXStartBufferPtr = buff[2];
-    }
-
-    return res;
+    *pPayloadLength = buff[1];
+    *pRXStartBufferPtr = buff[2];
 }
 
-FUNCRESULT sx126XGetGFSKPacketStatus(SX126XConfig *data, SX126XGFSKPacketRXStatus *pRXStatus, INT8 *pRssiSync, INT8 *pRssiAvg)
+void sx126x_get_gfsk_packet_status(sx126x_config_t *data, sx126x_gfsk_packet_rx_status_t *pRXStatus, int8_t *pRssiSync, int8_t *pRssiAvg)
 {
-    BYTE buff[4];
+    uint8_t buff[4];
 
-    FUNCRESULT res = __sx126XCMD(data, CMD_GET_PACKET_STATUS, NULL, 0, buff, 4);
+    _sx126x_cmd(data, CMD_GET_PACKET_STATUS, NULL, 0, buff, 4);
 
-    if (res == SUC_OK)
-    {
-        memcpy(pRXStatus, &buff[1], 1);
+    memcpy(pRXStatus, &buff[1], 1);
 
-        *pRssiSync = (INT8)(-buff[2] >> 1);
-        *pRssiAvg = (INT8)(-buff[3] >> 1);
-    }
-
-    return res;
+    *pRssiSync = (int8_t)(-buff[2] >> 1);
+    *pRssiAvg = (int8_t)(-buff[3] >> 1);
 }
 
-FUNCRESULT sx126XGetLoRaPacketStatus(SX126XConfig *data, INT8 *pRssiPacket, INT8 *pSnrPkt, INT8 *pSignalRssiPkt)
+void sx126x_get_lora_packet_status(sx126x_config_t *data, int8_t *pRssiPacket, int8_t *pSnrPkt, int8_t *pSignalRssiPkt)
 {
-    BYTE buff[4];
+    uint8_t buff[4];
 
-    FUNCRESULT res = __sx126XCMD(data, CMD_GET_PACKET_STATUS, NULL, 0, buff, 4);
+    _sx126x_cmd(data, CMD_GET_PACKET_STATUS, NULL, 0, buff, 4);
 
-    if (res == SUC_OK)
-    {
-        *pRssiPacket = (INT8)(-buff[1] >> 1);
-        *pSnrPkt = (INT8)(buff[2] >> 2);
-        *pSignalRssiPkt = (INT8)(-buff[3] >> 1);
-    }
-
-    return res;
+    *pRssiPacket = (int8_t)(-buff[1] >> 1);
+    *pSnrPkt = (int8_t)(buff[2] >> 2);
+    *pSignalRssiPkt = (int8_t)(-buff[3] >> 1);
 }
 
-FUNCRESULT sx126XGetRssiInst(SX126XConfig *data, INT8 *pRssiInst)
+void sx126x_get_rssi_inst(sx126x_config_t *data, int8_t *pRssiInst)
 {
-    BYTE buff[2];
+    uint8_t buff[2];
 
-    FUNCRESULT res = __sx126XCMD(data, CMD_GET_RSSI_INST, NULL, 0, buff, 2);
+    _sx126x_cmd(data, CMD_GET_RSSI_INST, NULL, 0, buff, 2);
 
-    if (res == SUC_OK)
-    {
-        *pRssiInst = (INT8)(-buff[1] >> 1);
-    }
-
-    return res;
+    *pRssiInst = (int8_t)(-buff[1] >> 1);
 }
 
-FUNCRESULT sx126XGetGFSKStats(SX126XConfig *data, UINT16 *pNbPktReceived, UINT16 *pNbPktCrcErr, UINT16 *pNbPktLenErr)
+void sx126x_get_gfsk_stats(sx126x_config_t *data, uint16_t *pNbPktReceived, uint16_t *pNbPktCrcErr, uint16_t *pNbPktLenErr)
 {
-    BYTE buff[7];
+    uint8_t buff[7];
 
-    FUNCRESULT res = __sx126XCMD(data, CMD_GET_STATS, NULL, 0, buff, 7);
+    _sx126x_cmd(data, CMD_GET_STATS, NULL, 0, buff, 7);
 
-    if (res == SUC_OK)
-    {
-        *pNbPktReceived = (UINT16)((buff[1] << 8) | buff[2]);
-        *pNbPktCrcErr = (UINT16)((buff[3] << 8) | buff[4]);
-        *pNbPktLenErr = (UINT16)((buff[5] << 8) | buff[6]);
-    }
-
-    return res;
+    *pNbPktReceived = (uint16_t)((buff[1] << 8) | buff[2]);
+    *pNbPktCrcErr = (uint16_t)((buff[3] << 8) | buff[4]);
+    *pNbPktLenErr = (uint16_t)((buff[5] << 8) | buff[6]);
 }
 
-FUNCRESULT sx126XGetLoRaStats(SX126XConfig *data, UINT16 *pNbPktReceived, UINT16 *pNbPktCrcErr, UINT16 *pNbPktHeaderErr)
+void sx126x_get_lora_stats(sx126x_config_t *data, uint16_t *pNbPktReceived, uint16_t *pNbPktCrcErr, uint16_t *pNbPktHeaderErr)
 {
-    BYTE buff[7];
+    uint8_t buff[7];
 
-    FUNCRESULT res = __sx126XCMD(data, CMD_GET_STATS, NULL, 0, buff, 7);
+    sx126x_cmd(data, CMD_GET_STATS, NULL, 0, buff, 7);
 
-    if (res == SUC_OK)
-    {
-        *pNbPktReceived = (UINT16)((buff[1] << 8) | buff[2]);
-        *pNbPktCrcErr = (UINT16)((buff[3] << 8) | buff[4]);
-        *pNbPktHeaderErr = (UINT16)((buff[5] << 8) | buff[6]);
-    }
-
-    return res;
+    *pNbPktReceived = (uint16_t)((buff[1] << 8) | buff[2]);
+    *pNbPktCrcErr = (uint16_t)((buff[3] << 8) | buff[4]);
+    *pNbPktHeaderErr = (uint16_t)((buff[5] << 8) | buff[6]);
 }
 
-FUNCRESULT sx126XResetStats(SX126XConfig *data)
+void sx126x_reset_stats(sx126x_config_t *data)
 {
-    BYTE buff[6];
+    uint8_t buff[6];
     memset(buff, 0, 6);
 
-    return __sx126XCMD(data, CMD_RESET_STATS, buff, 6, NULL, 0);
+    _sx126x_cmd(data, CMD_RESET_STATS, buff, 6, NULL, 0);
 }
 
-FUNCRESULT sx126XGetDeviceErrors(SX126XConfig *data, UINT16 *pErrors)
+void sx126x_get_device_errors(sx126x_config_t *data, uint16_t *pErrors)
 {
-    BYTE buff[3];
+    uint8_t buff[3];
 
-    FUNCRESULT res = __sx126XCMD(data, CMD_GET_DEVICE_ERRORS, NULL, 0, buff, 3);
+    _sx126x_cmd(data, CMD_GET_DEVICE_ERRORS, NULL, 0, buff, 3);
 
-    if (res == SUC_OK)
-    {
-        *pErrors = (UINT16)((buff[1] << 8) | buff[2]);
-    }
-
-    return res;
+    *pErrors = (uint16_t)((buff[1] << 8) | buff[2]);
 }
 
-FUNCRESULT sx126XClearDeviceErrors(SX126XConfig *data)
+void sx126x_clear_device_errors(sx126x_config_t *data)
 {
-    BYTE buff[2];
+    uint8_t buff[2];
     memset(buff, 0, 2);
 
-    return __sx126XCMD(data, CMD_CLEAR_DEVICE_ERRORS, buff, 2, NULL, 0);
+    _sx126x_cmd(data, CMD_CLEAR_DEVICE_ERRORS, buff, 2, NULL, 0);
 }
 
-FUNCRESULT sx126XIsBusy(SX126XConfig *data, BOOL *pStatus)
+void sx126x_is_busy(sx126x_config_t *data, bool *pStatus)
 {
-    GPIOState state;
-    gpioGetPinState(data->pinout.busy, &state);
+    gpio_state_t state;
+    gpio_get_pin_state(data->pinout.busy, &state);
 
     *pStatus = state == GPIO_HIGH;
-
-    return SUC_OK;
 }
 
-FUNCRESULT sx126XCheckBusy(SX126XConfig *data)
+void sx126x_check_busy(sx126x_config_t *data)
 {
-    BOOL busy;
-    sx126XIsBusy(data, &busy);
+    bool busy;
+    sx126x_is_busy(data, &busy);
 
     while (busy)
     {
-        sx126XIsBusy(data, &busy);
-        sleepMicroseconds(1);
+        sx126x_is_busy(data, &busy);
+        time_sleep_us(1);
     }
-
-    return SUC_OK;
 }
 
-FUNCRESULT sx126XReset(SX126XConfig *data)
+void sx126x_reset(sx126x_config_t *data)
 {
-    sleepMiliseconds(20);
-    gpioSetPinState(data->pinout.reset, GPIO_LOW);
-    sleepMiliseconds(50);
-    gpioSetPinState(data->pinout.reset, GPIO_HIGH);
-    sleepMiliseconds(20);
-
-    return SUC_OK;
+    time_sleep_ms(20);
+    gpio_set_pin_state(data->pinout.reset, GPIO_LOW);
+    time_sleep_ms(50);
+    gpio_set_pin_state(data->pinout.reset, GPIO_HIGH);
+    time_sleep_ms(20);
 }
 
-FUNCRESULT sx126XWakeup(SX126XConfig *data)
+void sx126x_wakeup(sx126x_config_t *data)
 {
-    gpioSetPinState(data->pinout.cs, GPIO_LOW);
-    sleepMiliseconds(2);
-    gpioSetPinState(data->pinout.cs, GPIO_HIGH);
-    sleepMiliseconds(2);
-
-    return SUC_OK;
+    gpio_set_pin_state(data->pinout.cs, GPIO_LOW);
+    time_sleep_ms(2);
+    gpio_set_pin_state(data->pinout.cs, GPIO_HIGH);
+    time_sleep_ms(2);
 }
 
-FUNCRESULT sx126XClampTX(SX126XConfig *data)
+void sx126x_clamp_tx(sx126x_config_t *data)
 {
-    BYTE reg;
+    uint8_t reg;
 
-    __sx126XReadRegister(data, REG_TX_CLAMP_CONFIG, &reg, 1);
+    _sx126x_read_register(data, REG_TX_CLAMP_CONFIG, &reg, 1);
 
     reg |= 0x1E;
 
-    __sx126XWriteRegister(data, REG_TX_CLAMP_CONFIG, &reg, 1);
-
-    return SUC_OK;
+    _sx126x_write_register(data, REG_TX_CLAMP_CONFIG, &reg, 1);
 }
 
-FUNCRESULT sx126XStopRTC(SX126XConfig *data)
+void sx126x_stop_rtc(sx126x_config_t *data)
 {
-    BYTE reg = 0;
+    uint8_t reg = 0;
 
-    __sx126XWriteRegister(data, REG_RTC_CONTROL, &reg, 1);
-    __sx126XReadRegister(data, REG_RTC_CONTROL, &reg, 1);
+    _sx126x_write_register(data, REG_RTC_CONTROL, &reg, 1);
+    _sx126x_read_register(data, REG_RTC_CONTROL, &reg, 1);
 
     reg |= 0x02;
 
-    __sx126XWriteRegister(data, REG_RTC_CONTROL, &reg, 1);
-
-    return SUC_OK;
+    _sx126x_write_register(data, REG_RTC_CONTROL, &reg, 1);
 }
 
-UINT32 __sx126XConvertTimeoutToRTCStep(UINT32 timeout_ms)
+unsigned int _sx126x_convert_timeout_to_rtc_step(unsigned int timeout_ms)
 {
     return timeout_ms * RTC_FREQ / 1000;
 }
 
-UINT32 __sx126XConvertFrequencyToRegisterValue(UINT32 frequency)
+unsigned int _sx126x_convert_frequency_to_register_value(unsigned int frequency)
 {
-    return (UINT32)((frequency / (double)XTAL_FREQ) * (double)(1 << 25));
+    return (unsigned int)((frequency / (double)XTAL_FREQ) * (double)(1 << 25));
 }
 
-VOID __sx126XTXModulationWorkaround(SX126XConfig *data, SX126XPacketType packetType, SX126XLoRaBW bw)
+void _sx126x_tx_modulation_workaround(sx126x_config_t *data, sx126x_packet_type_t packetType, sx126x_lora_bw_t bw)
 {
-    BYTE reg;
+    uint8_t reg;
 
-    __sx126XReadRegister(data, REG_TX_MODULATION, &reg, 1);
+    _sx126x_read_register(data, REG_TX_MODULATION, &reg, 1);
 
     if (packetType == SX126X_PACKET_TYPE_GFSK)
     {
@@ -760,31 +688,31 @@ VOID __sx126XTXModulationWorkaround(SX126XConfig *data, SX126XPacketType packetT
         }
     }
 
-    __sx126XWriteRegister(data, REG_TX_MODULATION, &reg, 1);
+    _sx126x_write_register(data, REG_TX_MODULATION, &reg, 1);
 }
 
-VOID __sx126XWriteRegister(SX126XConfig *data, UINT16 address, BYTE *buffer, SIZE szBuffer)
+void _sx126x_write_register(sx126x_config_t *data, uint16_t address, uint8_t *buffer, size_t szBuffer)
 {
-    BYTE buff[16];
+    uint8_t buff[16];
 
-    buff[0] = (BYTE)(address >> 8);
-    buff[1] = (BYTE)(address);
+    buff[0] = (uint8_t)(address >> 8);
+    buff[1] = (uint8_t)(address);
 
     memcpy(buff + 2, buffer, szBuffer);
 
-    __sx126XCMD(data, CMD_WRITE_REGISTER, buff, szBuffer + 2, NULL, 0);
+    _sx126x_cmd(data, CMD_WRITE_REGISTER, buff, szBuffer + 2, NULL, 0);
 }
 
-VOID __sx126XReadRegister(SX126XConfig *data, UINT16 address, BYTE *buffer, SIZE szBuffer)
+void _sx126x_read_register(sx126x_config_t *data, uint16_t address, uint8_t *buffer, size_t szBuffer)
 {
-    __sx126XCMD(data, CMD_READ_REGISTER, (BYTE *)&address, 2, buffer, szBuffer);
+    _sx126x_cmd(data, CMD_READ_REGISTER, (uint8_t *)&address, 2, buffer, szBuffer);
 }
 
-FUNCRESULT __sx126XCMD(SX126XConfig *data, BYTE command, BYTE *params, SIZE szParams, BYTE *resultBuffer, SIZE szBuffer)
+void _sx126x_cmd(sx126x_config_t *data, uint8_t command, uint8_t *params, size_t szParams, uint8_t *resultBuffer, size_t szBuffer)
 {
-    sx126XCheckBusy(data);
+    sx126x_check_busy(data);
 
-    BYTE buff[16];
+    uint8_t buff[16];
 
     buff[0] = command;
 
@@ -793,16 +721,14 @@ FUNCRESULT __sx126XCMD(SX126XConfig *data, BYTE command, BYTE *params, SIZE szPa
         memcpy(buff + 1, params, szParams);
     }
 
-    gpioSetPinState(data->pinout.cs, GPIO_LOW);
+    gpio_set_pin_state(data->pinout.cs, GPIO_LOW);
 
-    spiWriteBlocking(data->pinout.spi, buff, szParams + 1);
+    spi_write(data->pinout.spi, buff, szParams + 1);
 
     if (resultBuffer && szBuffer > 0)
     {
-        spiReadBlocking(data->pinout.spi, 0, resultBuffer, szBuffer);
+        spi_read(data->pinout.spi, 0, resultBuffer, szBuffer);
     }
 
-    gpioSetPinState(data->pinout.cs, GPIO_HIGH);
-
-    return SUC_OK;
+    gpio_set_pin_state(data->pinout.cs, GPIO_HIGH);
 }

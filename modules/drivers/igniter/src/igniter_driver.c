@@ -1,43 +1,37 @@
-#include "drivers/igniter/igniter_driver.h"
-#include "drivers/tools/time_tracker.h"
+#include "modules/drivers/igniter/igniter_driver.h"
+#include "modules/drivers/hal/time_tracker.h"
 
-static TIME s_Offset;
-static BOOL s_Fire;
-static SIZE s_CurrentIgniter;
+static time_t s_Offset;
+static bool s_Fire;
+static size_t s_CurrentIgniter;
 
-FUNCRESULT ignInit(IgniterData *data)
+void ign_init(igniter_data_t *data)
 {
-    for (SIZE i = 0; i < data->count; i++)
+    for (size_t i = 0; i < data->count; i++)
     {
-        gpioInitPin(data->pins[i], GPIO_OUTPUT);
+        gpio_init_pin(data->pins[i], GPIO_OUTPUT);
     }
-
-    return SUC_OK;
 }
 
-FUNCRESULT ignFire(IgniterData *data)
+void ign_fire(igniter_data_t *data)
 {
-    s_Offset = getMsSinceBoot();
-    s_Fire = TRUE;
+    s_Offset = time_get_ms_since_boot();
+    s_Fire = true;
     s_CurrentIgniter = 0;
-
-    return SUC_OK;
 }
 
-FUNCRESULT ignUpdate(IgniterData *data)
+void ign_update(igniter_data_t *data)
 {
     if (!s_Fire || s_CurrentIgniter >= data->count)
     {
-        return SUC_OK;
+        return;
     }
 
-    if (getMsSinceBoot() - s_Offset >= data->delay)
+    if (time_get_ms_since_boot() - s_Offset >= data->delay)
     {
-        gpioSetPinState(data->pins[s_CurrentIgniter], GPIO_HIGH);
+        gpio_set_pin_state(data->pins[s_CurrentIgniter], GPIO_HIGH);
 
-        s_Offset = getMsSinceBoot();
+        s_Offset = time_get_ms_since_boot();
         s_CurrentIgniter++;
     }
-
-    return SUC_OK;
 }

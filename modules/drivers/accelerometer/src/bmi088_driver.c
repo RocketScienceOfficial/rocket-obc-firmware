@@ -1,6 +1,6 @@
-#include "drivers/accelerometer/bmi088_driver.h"
-#include "drivers/tools/time_tracker.h"
-#include "maths/constants.h"
+#include "modules/drivers/accelerometer/bmi088_driver.h"
+#include "modules/drivers/hal/time_tracker.h"
+#include "modules/maths/math_constants.h"
 #include <math.h>
 #include <string.h>
 
@@ -8,7 +8,7 @@
 #define ACC_ERR_REG 0x02
 #define ACC_STATUS 0x03
 #define ACC_DATA 0x12
-#define ACC_SENSORTIME 0x18
+#define ACC_SENSORtime_t 0x18
 #define ACC_INT_STAT_1 0x1D
 #define ACC_TEMP 0x22
 #define ACC_FIFO_LENGTH 0x24
@@ -63,9 +63,9 @@
 #define GYRO_GND_I2C_ADDRESS 0x68
 #define GYRO_VDD_I2C_ADDRESS 0x69
 
-FUNCRESULT bmi088AccelInitSPI(BMI088AccelConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
+void bmi088_accel_init_spi(bmi088_accel_config_t *config, spi_instance_t spi, pin_number_t miso, pin_number_t mosi, pin_number_t cs, pin_number_t sck)
 {
-    config->gpioConfig = (GPIOCommunicationConfig){
+    config->gpioConfig = (gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_SPI,
         .spi = spi,
         .cs = cs,
@@ -75,16 +75,14 @@ FUNCRESULT bmi088AccelInitSPI(BMI088AccelConfig *config, SPIInstance spi, PinNum
     };
     config->rangeConstant = 0.0f;
 
-    spiInitPins(spi, miso, mosi, sck, cs);
+    spi_init_pins(spi, miso, mosi, sck, cs);
 
-    __bmi088InitBase(config);
-
-    return SUC_OK;
+    _bmi088_init_base(config);
 }
 
-FUNCRESULT bmi088AccelInitI2C(BMI088AccelConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl, BOOL sdo1Grounded)
+void bmi088_accel_init_i2c(bmi088_accel_config_t *config, i2c_instance_t i2c, pin_number_t sda, pin_number_t scl, bool sdo1Grounded)
 {
-    config->gpioConfig = (GPIOCommunicationConfig){
+    config->gpioConfig = (gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_I2C,
         .i2c = i2c,
         .i2cAddress = sdo1Grounded ? ACC_GND_I2C_ADDRESS : ACC_VDD_I2C_ADDRESS,
@@ -94,107 +92,99 @@ FUNCRESULT bmi088AccelInitI2C(BMI088AccelConfig *config, I2CInstance i2c, PinNum
     };
     config->rangeConstant = 0.0f;
 
-    i2cInitPins(i2c, sda, scl);
+    i2c_init_pins(i2c, sda, scl);
 
-    __bmi088InitBase(config);
-
-    return SUC_OK;
+    _bmi088_init_base(config);
 }
 
-FUNCRESULT bmi088AccelSetConf(BMI088AccelConfig *config, BMI088AccelODR odr, BMI088AccelOSR osr)
+void bmi088_accel_set_conf(bmi088_accel_config_t *config, bmi088_accel_odr_t odr, bmi088_accel_osr_t osr)
 {
-    __bmi088AccelWriteReg(config, ACC_CONF, odr | (osr << 4));
+    _bmi088_accel_write_reg(config, ACC_CONF, odr | (osr << 4));
 
-    sleepMiliseconds(5);
-
-    return SUC_OK;
+    time_sleep_ms(5);
 }
 
-FUNCRESULT bmi088AccelSetRange(BMI088AccelConfig *config, BMI088AccelRange range)
+void bmi088_accel_set_range(bmi088_accel_config_t *config, bmi088_accel_range_t range)
 {
     config->rangeConstant = powf(2, range + 1) * 1.5f * EARTH_GRAVITY;
 
-    __bmi088AccelWriteReg(config, ACC_RANGE, range);
+    _bmi088_accel_write_reg(config, ACC_RANGE, range);
 
-    sleepMiliseconds(5);
-
-    return SUC_OK;
+    time_sleep_ms(5);
 }
 
-FUNCRESULT bmi088AccelRead(BMI088AccelConfig *config, vec3 *accel)
+void bmi088_accel_read(bmi088_accel_config_t *config, vec3_t *accel)
 {
-    BYTE buff[6];
+    uint8_t buff[6];
 
-    __bmi088AccelReadRegs(config, ACC_DATA, buff, 6);
+    _bmi088_accel_read_regs(config, ACC_DATA, buff, 6);
 
-    INT16 accelX = (INT16)((buff[1] << 8) | buff[0]);
-    INT16 accelY = (INT16)((buff[3] << 8) | buff[2]);
-    INT16 accelZ = (INT16)((buff[5] << 8) | buff[4]);
+    int16_t accelX = (int16_t)((buff[1] << 8) | buff[0]);
+    int16_t accelY = (int16_t)((buff[3] << 8) | buff[2]);
+    int16_t accelZ = (int16_t)((buff[5] << 8) | buff[4]);
 
     accel->x = accelX / 32768.0f * config->rangeConstant;
     accel->y = accelY / 32768.0f * config->rangeConstant;
     accel->z = accelZ / 32768.0f * config->rangeConstant;
-
-    return SUC_OK;
 }
 
-VOID __bmi088AccelSoftReset(BMI088AccelConfig *config)
+void _bmi088_accel_soft_reset(bmi088_accel_config_t *config)
 {
-    __bmi088AccelWriteReg(config, ACC_SOFTRESET, ACC_SOFTRESET_CMD);
+    _bmi088_accel_write_reg(config, ACC_SOFTRESET, ACC_SOFTRESET_CMD);
 
-    sleepMiliseconds(50);
+    time_sleep_ms(50);
 }
 
-VOID __bmi088AccelSetMode(BMI088AccelConfig *config, BOOL active)
+void _bmi088_accel_set_mode(bmi088_accel_config_t *config, bool active)
 {
-    BYTE data = active ? ACC_PWR_CONF_ACTIVE_CMD : ACC_PWR_CONF_SUSPEND_CMD;
+    uint8_t data = active ? ACC_PWR_CONF_ACTIVE_CMD : ACC_PWR_CONF_SUSPEND_CMD;
 
-    __bmi088AccelWriteReg(config, ACC_PWR_CONF, data);
+    _bmi088_accel_write_reg(config, ACC_PWR_CONF, data);
 
-    sleepMiliseconds(5);
+    time_sleep_ms(5);
 }
 
-VOID __bmi088AccelSetPower(BMI088AccelConfig *config, BOOL on)
+void _bmi088_accel_set_power(bmi088_accel_config_t *config, bool on)
 {
-    BYTE data = on ? ACC_PWR_CTRL_ON_CMD : ACC_PWR_CTRL_OFF_CMD;
+    uint8_t data = on ? ACC_PWR_CTRL_ON_CMD : ACC_PWR_CTRL_OFF_CMD;
 
-    __bmi088AccelWriteReg(config, ACC_PWR_CTRL, data);
+    _bmi088_accel_write_reg(config, ACC_PWR_CTRL, data);
 
-    sleepMiliseconds(5);
+    time_sleep_ms(5);
 }
 
-VOID __bmi088InitBase(BMI088AccelConfig *config)
+void _bmi088_init_base(bmi088_accel_config_t *config)
 {
-    __bmi088AccelSetPower(config, TRUE);
-    __bmi088AccelSetMode(config, TRUE);
+    _bmi088_accel_set_power(config, true);
+    _bmi088_accel_set_mode(config, true);
 }
 
-BYTE __bmi088AccelReadReg(BMI088AccelConfig *config, BYTE address)
+uint8_t _bmi088_accel_read_reg(bmi088_accel_config_t *config, uint8_t address)
 {
-    BYTE data[2];
+    uint8_t data[2];
 
-    gpioReadRegs(&config->gpioConfig, address, data, 2);
+    gpio_read_regs(&config->gpioConfig, address, data, 2);
 
     return data[1];
 }
 
-VOID __bmi088AccelReadRegs(BMI088AccelConfig *config, BYTE address, BYTE *buffer, SIZE count)
+void _bmi088_accel_read_regs(bmi088_accel_config_t *config, uint8_t address, uint8_t *buffer, size_t count)
 {
-    BYTE tmp_buffer[16];
+    uint8_t tmp_buffer[16];
 
-    gpioReadRegs(&config->gpioConfig, address, tmp_buffer, count + 1);
+    gpio_read_regs(&config->gpioConfig, address, tmp_buffer, count + 1);
 
     memcpy(buffer, tmp_buffer + 1, count);
 }
 
-VOID __bmi088AccelWriteReg(BMI088AccelConfig *config, BYTE address, BYTE data)
+void _bmi088_accel_write_reg(bmi088_accel_config_t *config, uint8_t address, uint8_t data)
 {
-    gpioWriteReg(&config->gpioConfig, address, data);
+    gpio_write_reg(&config->gpioConfig, address, data);
 }
 
-FUNCRESULT bmi088GyroInitSPI(BMI088GyroConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
+void bmi088_gyro_init_spi(bmi088_gyro_config_t *config, spi_instance_t spi, pin_number_t miso, pin_number_t mosi, pin_number_t cs, pin_number_t sck)
 {
-    config->gpioConfig = (GPIOCommunicationConfig){
+    config->gpioConfig = (gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_SPI,
         .spi = spi,
         .cs = cs,
@@ -204,12 +194,12 @@ FUNCRESULT bmi088GyroInitSPI(BMI088GyroConfig *config, SPIInstance spi, PinNumbe
     };
     config->rangeConstant = 0.0f;
 
-    return spiInitPins(spi, miso, mosi, sck, cs);
+    spi_init_pins(spi, miso, mosi, sck, cs);
 }
 
-FUNCRESULT bmi088GyroInitI2C(BMI088GyroConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl, BOOL sdo1Grounded)
+void bmi088_gyro_init_i2c(bmi088_gyro_config_t *config, i2c_instance_t i2c, pin_number_t sda, pin_number_t scl, bool sdo1Grounded)
 {
-    config->gpioConfig = (GPIOCommunicationConfig){
+    config->gpioConfig = (gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_I2C,
         .i2c = i2c,
         .i2cAddress = sdo1Grounded ? GYRO_GND_I2C_ADDRESS : GYRO_VDD_I2C_ADDRESS,
@@ -219,21 +209,19 @@ FUNCRESULT bmi088GyroInitI2C(BMI088GyroConfig *config, I2CInstance i2c, PinNumbe
     };
     config->rangeConstant = 0.0f;
 
-    return i2cInitPins(i2c, sda, scl);
+    i2c_init_pins(i2c, sda, scl);
 }
 
-FUNCRESULT bmi088GyroSetBandwidth(BMI088GyroConfig *config, BMI088GyroBandwidth bw)
+void bmi088_gyro_set_bandwidth(bmi088_gyro_config_t *config, bmi088_gyro_bandwidth_t bw)
 {
-    gpioWriteReg(&config->gpioConfig, GYRO_BANDWIDTH, (BYTE)bw | 0x80);
+    gpio_write_reg(&config->gpioConfig, GYRO_BANDWIDTH, (uint8_t)bw | 0x80);
 
-    sleepMiliseconds(5);
-
-    return SUC_OK;
+    time_sleep_ms(5);
 }
 
-FUNCRESULT bmi088GyroSetRange(BMI088GyroConfig *config, BMI088GyroRange range)
+void bmi088_gyro_set_range(bmi088_gyro_config_t *config, bmi088_gyro_range_t range)
 {
-    FLOAT val = 0.0f;
+    float val = 0.0f;
 
     if (range == BMI088_GYRO_RANGE_125DPS)
         val = 125.0f;
@@ -248,33 +236,29 @@ FUNCRESULT bmi088GyroSetRange(BMI088GyroConfig *config, BMI088GyroRange range)
 
     config->rangeConstant = DEG_2_RAD(val);
 
-    gpioWriteReg(&config->gpioConfig, GYRO_RANGE, (BYTE)range);
+    gpio_write_reg(&config->gpioConfig, GYRO_RANGE, (uint8_t)range);
 
-    sleepMiliseconds(5);
-
-    return SUC_OK;
+    time_sleep_ms(5);
 }
 
-FUNCRESULT bmi088GyroRead(BMI088GyroConfig *config, vec3 *gyro)
+void bmi088_gyro_read(bmi088_gyro_config_t *config, vec3_t *gyro)
 {
-    BYTE buff[6];
+    uint8_t buff[6];
 
-    gpioReadRegs(&config->gpioConfig, GYRO_RATE, buff, 6);
+    gpio_read_regs(&config->gpioConfig, GYRO_RATE, buff, 6);
 
-    INT16 gyroX = (INT16)((buff[1] << 8) | buff[0]);
-    INT16 gyroY = (INT16)((buff[3] << 8) | buff[2]);
-    INT16 gyroZ = (INT16)((buff[5] << 8) | buff[4]);
+    int16_t gyroX = (int16_t)((buff[1] << 8) | buff[0]);
+    int16_t gyroY = (int16_t)((buff[3] << 8) | buff[2]);
+    int16_t gyroZ = (int16_t)((buff[5] << 8) | buff[4]);
 
     gyro->x = gyroX / 32767.0f * config->rangeConstant;
     gyro->y = gyroY / 32767.0f * config->rangeConstant;
     gyro->z = gyroZ / 32767.0f * config->rangeConstant;
-
-    return SUC_OK;
 }
 
-VOID __bmi088GyroSoftReset(BMI088GyroConfig *config)
+void _bmi088_gyro_soft_reset(bmi088_gyro_config_t *config)
 {
-    gpioWriteReg(&config->gpioConfig, GYRO_SOFTRESET, GYRO_SOFTRESET_CMD);
+    gpio_write_reg(&config->gpioConfig, GYRO_SOFTRESET, GYRO_SOFTRESET_CMD);
 
-    sleepMiliseconds(50);
+    time_sleep_ms(50);
 }

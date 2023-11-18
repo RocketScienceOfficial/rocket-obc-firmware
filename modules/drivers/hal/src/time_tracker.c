@@ -1,50 +1,46 @@
-#include "drivers/tools/time_tracker.h"
+#include "modules/drivers/hal/time_tracker.h"
 #include "pico/time.h"
 
-TIME getMsSinceBoot()
+time_t time_get_ms_since_boot()
 {
-	TIME time_ms = to_ms_since_boot(get_absolute_time());
-
-	return time_ms;
+	return to_ms_since_boot(get_absolute_time());
 }
 
-TIME getUsSinceBoot()
+time_t time_get_us_since_boot()
 {
-	TIME time_us = to_us_since_boot(get_absolute_time());
-
-	return time_us;
+	return to_us_since_boot(get_absolute_time());
 }
 
-BOOL runEveryMs(TIME ms, TIME *timerOffset)
+bool time_run_every_ms(time_t ms, time_t *timerOffset)
 {
-	if (getMsSinceBoot() - *timerOffset >= ms)
+	if (time_get_ms_since_boot() - *timerOffset >= ms)
 	{
-		*timerOffset = getMsSinceBoot();
+		*timerOffset = time_get_ms_since_boot();
 
-		return TRUE;
+		return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
-BOOL runEveryUs(TIME us, TIME *timerOffset)
+bool time_run_every_us(time_t us, time_t *timerOffset)
 {
-	if (getUsSinceBoot() - *timerOffset >= us)
+	if (time_get_us_since_boot() - *timerOffset >= us)
 	{
-		*timerOffset = getUsSinceBoot();
+		*timerOffset = time_get_us_since_boot();
 
-		return TRUE;
+		return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
-VOID sleepMiliseconds(TIME ms)
+void time_sleep_ms(time_t ms)
 {
 	sleep_ms(ms);
 }
 
-VOID sleepMicroseconds(TIME us)
+void time_sleep_us(time_t us)
 {
 	sleep_us(us);
 }

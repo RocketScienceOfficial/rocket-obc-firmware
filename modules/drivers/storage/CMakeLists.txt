@@ -1,14 +1,3 @@
-set(MODULE_NAME drivers)
-set(LIB_NAME storage)
-set(LIB_GENERAL_NAME "${MODULE_NAME}_${LIB_NAME}_lib")
+obc_add_submodule(storage drivers flash_driver.c sd_driver.c)
 
-add_library(${LIB_GENERAL_NAME} STATIC
-    include/${MODULE_NAME}/${LIB_NAME}/flash_driver.h
-    include/${MODULE_NAME}/${LIB_NAME}/sd_driver.h
-    src/flash_driver.c
-    src/sd_driver.c
-)
-
-target_link_libraries(${LIB_GENERAL_NAME} PUBLIC drivers_gpio_lib FatFs_SPI)
-target_link_libraries(${LIB_GENERAL_NAME} PRIVATE hardware_flash hardware_sync)
-target_include_directories(${LIB_GENERAL_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(${MODULE_NAME} INTERFACE module_drivers_hal FatFs_SPI)

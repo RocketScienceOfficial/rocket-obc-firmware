@@ -1,23 +1,25 @@
-#include "drivers/hal/adc_driver.h"
+#include "modules/drivers/hal/adc_driver.h"
 #include "hardware/adc.h"
 
 #define ADC_VOLTAGE 3.3f
 #define ADC_BITS 12
 #define ADC_CONVERSION_FACTOR (ADC_VOLTAGE / (1 << ADC_BITS))
 
-BOOL adcCheckPin(PinNumber pin)
+#define ADC_TEMP_SENSOR_INPUT 4
+
+bool adc_check_pin(pin_number_t pin)
 {
     return pin == 26 || pin == 27 || pin == 28 || pin == 29;
 }
 
-BOOL adcCheckInput(ADCInput input)
+bool adc_check_input(adc_input_t input)
 {
     return input >= 0 && input <= 4;
 }
 
-ADCInput adcConvertPinToInput(PinNumber pin)
+adc_input_t adc_convert_pin_to_input(pin_number_t pin)
 {
-    if (!adcCheckPin(pin))
+    if (!adc_check_pin(pin))
     {
         return ADC_INPUT_INVALID;
     }
@@ -37,11 +39,11 @@ ADCInput adcConvertPinToInput(PinNumber pin)
     }
 }
 
-PinNumber adcConvertInputToPin(ADCInput input)
+pin_number_t adc_convert_input_to_pin(adc_input_t input)
 {
-    if (!adcCheckInput(input))
+    if (!adc_check_input(input))
     {
-        return INVALID_PIN_NUMBER;
+        return PIN_NUMBER_INVALID;
     }
 
     switch (input)
@@ -55,41 +57,37 @@ PinNumber adcConvertInputToPin(ADCInput input)
     case 3:
         return 29;
     default:
-        return INVALID_PIN_NUMBER;
+        return PIN_NUMBER_INVALID;
     }
 }
 
-FUNCRESULT adcInitAll()
+void adc_init_all(void)
 {
     adc_init();
-
-    return SUC_OK;
 }
 
-FUNCRESULT adcInitPin(ADCInput input)
+void adc_init_pin(adc_input_t input)
 {
-    if (!adcCheckInput(input))
+    if (!adc_check_input(input))
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
     if (input != ADC_TEMP_SENSOR_INPUT)
     {
-        adc_gpio_init(adcConvertInputToPin(input));
+        adc_gpio_init(adc_convert_input_to_pin(input));
     }
     else
     {
-        adc_set_temp_sensor_enabled(TRUE);
+        adc_set_temp_sensor_enabled(1);
     }
-
-    return SUC_OK;
 }
 
-FUNCRESULT adcRead(ADCInput input, VoltageLevel *voltage)
+voltage_level_t adc_read_voltage(adc_input_t input)
 {
-    if (!adcCheckInput(input) || !voltage)
+    if (!adc_check_input(input))
     {
-        return ERR_INVALIDARG;
+        return 0;
     }
 
     if (adc_get_selected_input() != input)
@@ -97,7 +95,5 @@ FUNCRESULT adcRead(ADCInput input, VoltageLevel *voltage)
         adc_select_input(input);
     }
 
-    *voltage = (FLOAT)adc_read() * ADC_CONVERSION_FACTOR;
-
-    return SUC_OK;
+    return (float)adc_read() * ADC_CONVERSION_FACTOR;
 }

@@ -1,46 +1,34 @@
-#include "drivers/battery/battery_driver.h"
+#include "modules/drivers/battery/battery_driver.h"
 
-FUNCRESULT batteryInit(BatteryConfig *config, ADCInput input, BatteryInterval *intervals, SIZE8 intervalsCount)
+void battery_init(battery_config_t *config, adc_input_t input, battery_interval_t *intervals, uint8_t intervalsCount)
 {
     if (!config)
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
-    if (FUNCFAILED(adcInitPin(input)))
-    {
-        return ERR_FAIL;
-    }
+    adc_init_pin(input);
 
     config->input = input;
     config->intervals = intervals;
     config->intervalsCount = intervalsCount;
-
-    return SUC_OK;
 }
 
-FUNCRESULT batteryReadPercent(BatteryConfig *config, FLOAT *percentage)
+float battery_read_percent(battery_config_t *config)
 {
-    if (!config || !percentage)
+    if (!config)
     {
-        return ERR_INVALIDARG;
+        return 0;
     }
 
-    VoltageLevel voltage = 0;
+    voltage_level_t voltage = adc_read_voltage(config->input);
 
-    if (FUNCFAILED(adcRead(config->input, &voltage)))
-    {
-        return ERR_FAIL;
-    }
-
-    *percentage = batteryConvertVoltageToPercent(config->intervals, config->intervalsCount, voltage);
-
-    return ERR_UNEXPECTED;
+    return battery_convert_voltage_to_percent(config->intervals, config->intervalsCount, voltage);
 }
 
-FLOAT batteryConvertVoltageToPercent(BatteryInterval *intervals, SIZE8 intervalsCount, VoltageLevel voltage)
+float battery_convert_voltage_to_percent(battery_interval_t *intervals, uint8_t intervalsCount, voltage_level_t voltage)
 {
-    for (SIZE8 i = 0; i < intervalsCount; i++)
+    for (uint8_t i = 0; i < intervalsCount; i++)
     {
         if (voltage >= intervals[i].minVolts && voltage <= intervals[i].maxVolts)
         {

@@ -1,18 +1,18 @@
-#include "drivers/buzzer/passive_buzzer_driver.h"
+#include "modules/drivers/buzzer/passive_buzzer_driver.h"
 
 #define DUTY_CYCLE 0.5f
 
-FUNCRESULT passiveBuzzerInit(PWMConfig *config, PinNumber pin, UINT32 frequency)
+void passive_buzzer_init(pwm_config_t *config, pin_number_t pin, unsigned int frequency)
 {
-    if (!config || FUNCFAILED(pwmInit(config, pin, frequency)))
+    if (!config)
     {
-        return ERR_FAIL;
+        return;
     }
 
-    return SUC_OK;
+    pwm_init_pin(config, pin, frequency);
 }
 
-FUNCRESULT passiveBuzzerSetActive(PWMConfig *config, BOOL active)
+void passive_buzzer_set_active(pwm_config_t *config, bool active)
 {
-    return pwmSetDuty(config, active ? DUTY_CYCLE : 0.0f);
+    return pwm_set_duty(config, active ? DUTY_CYCLE : 0.0f);
 }

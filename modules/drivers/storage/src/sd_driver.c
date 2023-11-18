@@ -1,8 +1,8 @@
-#include "drivers/storage/sd_driver.h"
+#include "modules/drivers/storage/sd_driver.h"
 #include "hw_config.h"
 #include <string.h>
 
-static SDFile *__getSDFileByName(SDCard *sdCard, const STRING name)
+static sd_file_t *_getSDFileByName(sd_card_inst_t *sdCard, const char *name)
 {
     for (size_t i = 0; i < sdCard->filesCount; ++i)
     {
@@ -15,111 +15,97 @@ static SDFile *__getSDFileByName(SDCard *sdCard, const STRING name)
     return NULL;
 }
 
-FUNCRESULT sdInit(SDCard *sdCard, PinNumber checkPin)
+void sd_init(sd_card_inst_t *sdCard, pin_number_t checkPin)
 {
     if (!sdCard)
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
     if (sdCard->isInitialized)
     {
-        return ERR_ACCESSDENIED;
+        return;
     }
 
-    BOOL connected = FALSE;
-
-    if (FUNCFAILED(sdCheck(checkPin, &connected)))
-    {
-        return ERR_UNEXPECTED;
-    }
+    bool connected = false;
+    sd_check(checkPin, &connected);
 
     if (!connected)
     {
-        return ERR_ACCESSDENIED;
+        return;
     }
 
-    memset(sdCard, 0, sizeof(SDCard));
+    memset(sdCard, 0, sizeof(sd_card_inst_t));
 
     sdCard->sd = sd_get_by_num(0);
 
     if (!sdCard->sd)
     {
-        return ERR_UNEXPECTED;
+        return;
     }
 
     FRESULT fr = f_mount(&sdCard->sd->fatfs, sdCard->sd->pcName, 1);
 
     if (fr != FR_OK)
     {
-        return ERR_FAIL;
+        return;
     }
 
-    sdCard->isInitialized = TRUE;
-
-    return SUC_OK;
+    sdCard->isInitialized = true;
 }
 
-FUNCRESULT sdCheck(PinNumber pin, BOOL *result)
+void sd_check(pin_number_t pin, bool *result)
 {
-    GPIOState state = GPIO_LOW;
-
-    if (FUNCFAILED(gpioGetPinState(pin, &state)))
-    {
-        return ERR_UNEXPECTED;
-    }
+    gpio_state_t state;
+    gpio_get_pin_state(pin, &state);
 
     *result = state == GPIO_HIGH;
-
-    return SUC_OK;
 }
 
-FUNCRESULT sdInitFile(SDCard *sdCard, const STRING fileName)
+void sd_init_file(sd_card_inst_t *sdCard, const char *fileName)
 {
     if (!sdCard || !fileName)
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
     if (!sdCard->isInitialized)
     {
-        return ERR_UNINITIALIZED;
+        return;
     }
 
-    SDFile f = {
+    sd_file_t f = {
         .name = fileName,
         .isOpened = 0,
     };
 
     sdCard->files[sdCard->filesCount++] = f;
-
-    return SUC_OK;
 }
 
-FUNCRESULT sdBegin(SDCard *sdCard, const STRING fileName)
+void sd_begin(sd_card_inst_t *sdCard, const char *fileName)
 {
     if (!sdCard || !fileName)
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
     if (!sdCard->isInitialized)
     {
-        return ERR_UNINITIALIZED;
+        return;
     }
 
-    SDFile *sdFile = __getSDFileByName(sdCard, fileName);
+    sd_file_t *sdFile = _getSDFileByName(sdCard, fileName);
 
     if (!sdFile)
     {
-        return ERR_POINTER;
+        return;
     }
 
     FIL *f = &sdFile->file;
 
     if (sdFile->isOpened)
     {
-        return ERR_ACCESSDENIED;
+        return;
     }
 
     sdFile->isOpened = true;
@@ -128,155 +114,145 @@ FUNCRESULT sdBegin(SDCard *sdCard, const STRING fileName)
 
     if (fr != FR_OK && fr != FR_EXIST)
     {
-        sdFile->isOpened = FALSE;
+        sdFile->isOpened = false;
 
-        return ERR_FAIL;
+        return;
     }
-
-    return SUC_OK;
 }
 
-FUNCRESULT sdWrite(SDCard *sdCard, const STRING msg, const STRING fileName)
+void sd_write(sd_card_inst_t *sdCard, const char *msg, const char *fileName)
 {
     if (!sdCard || !msg || !fileName)
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
     if (!sdCard->isInitialized)
     {
-        return ERR_UNINITIALIZED;
+        return;
     }
 
-    SDFile *sdFile = __getSDFileByName(sdCard, fileName);
+    sd_file_t *sdFile = _getSDFileByName(sdCard, fileName);
 
     if (!sdFile)
     {
-        return ERR_POINTER;
+        return;
     }
 
     FIL *f = &sdFile->file;
 
     if (!sdFile->isOpened)
     {
-        return ERR_ACCESSDENIED;
+        return;
     }
 
     if (!f)
     {
-        sdFile->isOpened = FALSE;
+        sdFile->isOpened = false;
 
-        return ERR_POINTER;
+        return;
     }
 
-    INT32 ret = f_printf(f, msg);
+    int ret = f_printf(f, msg);
 
     if (ret < 0)
     {
-        sdFile->isOpened = FALSE;
+        sdFile->isOpened = false;
 
-        return ERR_FAIL;
+        return;
     }
-
-    return SUC_OK;
 }
 
-FUNCRESULT sdEnd(SDCard *sdCard, const STRING fileName)
+void sd_end(sd_card_inst_t *sdCard, const char *fileName)
 {
     if (!sdCard || !fileName)
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
     if (!sdCard->isInitialized)
     {
-        return ERR_UNINITIALIZED;
+        return;
     }
 
-    SDFile *sdFile = __getSDFileByName(sdCard, fileName);
+    sd_file_t *sdFile = _getSDFileByName(sdCard, fileName);
 
     if (!sdFile)
     {
-        return ERR_POINTER;
+        return;
     }
 
     FIL *f = &sdFile->file;
 
     if (!sdFile->isOpened)
     {
-        return ERR_ACCESSDENIED;
+        return;
     }
 
     if (!f)
     {
-        sdFile->isOpened = FALSE;
+        sdFile->isOpened = false;
 
-        return ERR_POINTER;
+        return;
     }
 
     FRESULT fr = f_close(f);
 
     if (fr != FR_OK)
     {
-        sdFile->isOpened = FALSE;
+        sdFile->isOpened = false;
 
-        return ERR_FAIL;
+        return;
     }
 
-    sdFile->isOpened = FALSE;
-
-    return SUC_OK;
+    sdFile->isOpened = false;
 }
 
-FUNCRESULT sdClearFile(SDCard *sdCard, const STRING fileName)
+void sd_clear_file(sd_card_inst_t *sdCard, const char *fileName)
 {
     if (!sdCard || !fileName)
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
     if (!sdCard->isInitialized)
     {
-        return ERR_UNINITIALIZED;
+        return;
     }
 
-    SDFile *sdFile = __getSDFileByName(sdCard, fileName);
+    sd_file_t *sdFile = _getSDFileByName(sdCard, fileName);
 
     if (!sdFile)
     {
-        return ERR_POINTER;
+        return;
     }
 
     FRESULT fr = f_unlink(fileName);
 
     if (fr != FR_OK && fr != FR_NO_FILE)
     {
-        return ERR_FAIL;
+        return;
     }
-
-    return SUC_OK;
 }
 
-FUNCRESULT sdTerminate(SDCard *sdCard)
+void sd_terminate(sd_card_inst_t *sdCard)
 {
     if (!sdCard)
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
     if (!sdCard->isInitialized)
     {
-        return ERR_UNINITIALIZED;
+        return;
     }
 
     FRESULT fr = f_unmount(sdCard->sd->pcName);
 
     if (fr != FR_OK)
     {
-        return ERR_FAIL;
+        return;
     }
 
-    sdCard->isInitialized = FALSE;
-
-    return SUC_OK;
+    sdCard->isInitialized = false;
 }

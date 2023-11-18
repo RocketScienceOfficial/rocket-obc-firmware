@@ -1,37 +1,33 @@
-#include "drivers/lora/e19_433m20sc_driver.h"
+#include "modules/drivers/lora/e19_433m20sc_driver.h"
 
-FUNCRESULT e19_433m20sc_Init(E19_433M20SC_Config *config, PinNumber rxen, PinNumber txen)
+void e19_433m20sc_init(e19_433m20sc_config_t *config, pin_number_t rxen, pin_number_t txen)
 {
     config->rxen = rxen;
     config->txen = txen;
 
-    gpioInitPin(rxen, GPIO_OUTPUT);
-    gpioInitPin(txen, GPIO_OUTPUT);
+    gpio_init_pin(rxen, GPIO_OUTPUT);
+    gpio_init_pin(txen, GPIO_OUTPUT);
 
-    e19_433m20sc_SetState(config, E19_433M20SC_STATE_OFF);
-
-    return SUC_OK;
+    e19_433m20sc_set_state(config, E19_433M20SC_STATE_OFF);
 }
 
-FUNCRESULT e19_433m20sc_SetState(E19_433M20SC_Config *config, E19_433M20SC_State state)
+void e19_433m20sc_set_state(e19_433m20sc_config_t *config, e19_433m20sc_state_t state)
 {
     switch (state)
     {
     case E19_433M20SC_STATE_RECEIVE:
-        gpioSetPinState(config->rxen, GPIO_HIGH);
-        gpioSetPinState(config->txen, GPIO_LOW);
+        gpio_set_pin_state(config->rxen, GPIO_HIGH);
+        gpio_set_pin_state(config->txen, GPIO_LOW);
         break;
     case E19_433M20SC_STATE_TRANSMIT:
-        gpioSetPinState(config->rxen, GPIO_LOW);
-        gpioSetPinState(config->txen, GPIO_HIGH);
+        gpio_set_pin_state(config->rxen, GPIO_LOW);
+        gpio_set_pin_state(config->txen, GPIO_HIGH);
         break;
     case E19_433M20SC_STATE_OFF:
-        gpioSetPinState(config->rxen, GPIO_LOW);
-        gpioSetPinState(config->txen, GPIO_LOW);
+        gpio_set_pin_state(config->rxen, GPIO_LOW);
+        gpio_set_pin_state(config->txen, GPIO_LOW);
         break;
     default:
-        return ERR_INVALIDARG;
+        return;
     }
-
-    return SUC_OK;
 }

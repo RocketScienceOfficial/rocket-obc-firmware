@@ -1,58 +1,53 @@
-#include "drivers/gps/u_blox_sam_m10q_driver.h"
+#include "modules/drivers/gps/u_blox_sam_m10q_driver.h"
 #include <string.h>
-#include <stdlib.h>
 
 #define I2C_ADDRESS 0x42
 
-FUNCRESULT uBloxSamM10QInitSPI(UBloxSamM10QConfig *config, SPIInstance spi, PinNumber miso, PinNumber mosi, PinNumber cs, PinNumber sck)
+void ublox_sam_m10q_init_spi(ublox_sam_m10q_config_t *config, spi_instance_t spi, pin_number_t miso, pin_number_t mosi, pin_number_t cs, pin_number_t sck)
 {
-    config->gpioConfig = (GPIOCommunicationConfig){
+    config->gpioConfig = (gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_SPI,
         .spi = spi,
         .cs = cs,
     };
 
-    spiInitPins(spi, miso, mosi, sck, cs);
-
-    return SUC_OK;
+    spi_init_pins(spi, miso, mosi, sck, cs);
 }
 
-FUNCRESULT uBloxSamM10QInitI2C(UBloxSamM10QConfig *config, I2CInstance i2c, PinNumber sda, PinNumber scl)
+void ublox_sam_m10q_init_i2c(ublox_sam_m10q_config_t *config, i2c_instance_t i2c, pin_number_t sda, pin_number_t scl)
 {
-    config->gpioConfig = (GPIOCommunicationConfig){
+    config->gpioConfig = (gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_I2C,
         .i2c = i2c,
         .i2cAddress = I2C_ADDRESS,
     };
 
-    i2cInitPins(i2c, sda, scl);
-
-    return SUC_OK;
+    i2c_init_pins(i2c, sda, scl);
 }
 
-FUNCRESULT uBloxSamM10QReadData(UBloxSamM10QConfig *config, UBloxSamM10QData *data)
+void ublox_sam_m10q_read_data(ublox_sam_m10q_config_t *config, ublox_sam_m10q_data_t *data)
 {
-    BYTE b = gpioSingleRead(&config->gpioConfig);
+    uint8_t b = gpio_single_read(&config->gpioConfig);
 
     if (b == 0xFF)
     {
-        return SUC_OK;
+        return;
     }
 
     if (b == '$')
     {
-        data->isValid = TRUE;
+        data->isValid = true;
         data->currentIndex = 0;
-        data->isFinishedSentence = FALSE;
+        data->isFinishedSentence = false;
 
-        memset(data->sentence, 0, NMEA_SENTENCE_MAX_LENGTH);
+        memset(data->sentence, 0, UBLOX_SAM_M10Q_SENTENCE_LENGTH);
     }
     else if (b == '\n')
     {
         data->sentence[data->currentIndex] = b;
         data->sentence[data->currentIndex + 1] = '\0';
-        data->isValid = FALSE;
-        data->isFinishedSentence = TRUE;
+        data->isValid = false;
+        data->isFinishedSentence = true;
     }
 
     if (data->isValid)
@@ -60,6 +55,4 @@ FUNCRESULT uBloxSamM10QReadData(UBloxSamM10QConfig *config, UBloxSamM10QData *da
         data->sentence[data->currentIndex] = b;
         data->currentIndex++;
     }
-
-    return SUC_OK;
 }

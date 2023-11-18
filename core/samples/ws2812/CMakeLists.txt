@@ -1,2 +1,0 @@
-add_subdirectory(ws2812_reset)
-add_subdirectory(ws2812_static)

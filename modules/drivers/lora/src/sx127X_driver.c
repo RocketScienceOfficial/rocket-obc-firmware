@@ -1,5 +1,4 @@
-#include "drivers/lora/sx127X_driver.h"
-#include "pico/stdlib.h"
+#include "modules/drivers/lora/sx127X_driver.h"
 #include <string.h>
 
 #define REG_FIFO 0x00
@@ -15,7 +14,7 @@
 #define REG_FIFO_RX_BASE_ADDR 0x0f
 #define REG_FIFO_RX_CURRENT_ADDR 0x10
 #define REG_IRQ_FLAGS 0x12
-#define REG_RX_NB_BYTES 0x13
+#define REG_RX_NB_uint8_tS 0x13
 #define REG_PKT_SNR_VALUE 0x19
 #define REG_PKT_RSSI_VALUE 0x1a
 #define REG_RSSI_VALUE 0x1b
@@ -61,117 +60,111 @@
 
 #define LORA_DEFAULT_TX_POWER 17
 
-FUNCRESULT sx127XInit(SX127XData *data, SX127XPinout *pinout, UINT64 frequency)
+void sx127x_init(sx127x_data_t *data, sx127x_pinout_t *pinout, unsigned long long frequency)
 {
     if (!data || !pinout)
     {
-        return ERR_INVALIDARG;
+        return;
     }
 
     data->pinout = *pinout;
     data->txPower = LORA_DEFAULT_TX_POWER;
     data->frequency = frequency;
     data->packetIndex = 0;
-    data->implicitHeaderMode = FALSE;
+    data->implicitHeaderMode = false;
 
-    gpioInitPin(data->pinout.cs, GPIO_OUTPUT);
-    gpioSetPinState(data->pinout.cs, GPIO_HIGH);
+    gpio_init_pin(data->pinout.cs, GPIO_OUTPUT);
+    gpio_set_pin_state(data->pinout.cs, GPIO_HIGH);
 
     if (data->pinout.reset != -1)
     {
-        gpioInitPin(data->pinout.reset, GPIO_OUTPUT);
+        gpio_init_pin(data->pinout.reset, GPIO_OUTPUT);
 
-        gpioSetPinState(data->pinout.reset, GPIO_LOW);
+        gpio_set_pin_state(data->pinout.reset, GPIO_LOW);
         sleep_ms(10);
 
-        gpioSetPinState(data->pinout.reset, GPIO_HIGH);
+        gpio_set_pin_state(data->pinout.reset, GPIO_HIGH);
         sleep_ms(10);
     }
 
-    spiInitPins(data->pinout.spi, data->pinout.miso, data->pinout.mosi, data->pinout.sck, data->pinout.cs);
+    spi_init_pins(data->pinout.spi, data->pinout.miso, data->pinout.mosi, data->pinout.sck, data->pinout.cs);
 
-    BYTE version = __sx127XReadRegister(data, REG_VERSION);
+    uint8_t version = _sx127x_read_register(data, REG_VERSION);
 
     if (version != 0x12)
     {
-        return ERR_UNEXPECTED;
+        return;
     }
 
-    sx127XSleep(data);
+    sx127x_sleep(data);
 
-    sx127XSetFrequency(data, data->frequency);
-    sx127XSetTxPower(data, data->txPower);
+    sx127x_set_frequency(data, data->frequency);
+    sx127x_set_tx_power(data, data->txPower);
 
-    __sx127XWriteRegister(data, REG_FIFO_TX_BASE_ADDR, 0);
-    __sx127XWriteRegister(data, REG_FIFO_RX_BASE_ADDR, 0);
-    __sx127XWriteRegister(data, REG_LNA, __sx127XReadRegister(data, REG_LNA) | 0x03);
-    __sx127XWriteRegister(data, REG_MODEM_CONFIG_3, 0x04);
+    _sx127x_write_register(data, REG_FIFO_TX_BASE_ADDR, 0);
+    _sx127x_write_register(data, REG_FIFO_RX_BASE_ADDR, 0);
+    _sx127x_write_register(data, REG_LNA, _sx127x_read_register(data, REG_LNA) | 0x03);
+    _sx127x_write_register(data, REG_MODEM_CONFIG_3, 0x04);
 
-    sx127XIdle(data);
-
-    return SUC_OK;
+    sx127x_idle(data);
 }
 
-FUNCRESULT sx127XWriteBuffer(SX127XData *data, const BYTE *buffer, SIZE size)
+void sx127x_write_buffer(sx127x_data_t *data, const uint8_t *buffer, size_t size)
 {
-    if (__sx127XIsTransmitting(data))
+    if (_sx127x_is_transmitting(data))
     {
-        return ERR_ACCESSDENIED;
+        return;
     }
 
-    sx127XIdle(data);
+    sx127x_idle(data);
 
-    __sx127XExplicitHeaderMode(data);
-    __sx127XWriteRegister(data, REG_FIFO_ADDR_PTR, 0);
-    __sx127XWriteRegister(data, REG_PAYLOAD_LENGTH, 0);
+    _sx127x_explicit_header_mode(data);
+    _sx127x_write_register(data, REG_FIFO_ADDR_PTR, 0);
+    _sx127x_write_register(data, REG_PAYLOAD_LENGTH, 0);
 
     if (size > MAX_PKT_LENGTH)
     {
         size = MAX_PKT_LENGTH;
     }
 
-    for (SIZE i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
     {
-        __sx127XWriteRegister(data, REG_FIFO, buffer[i]);
+        _sx127x_write_register(data, REG_FIFO, buffer[i]);
     }
 
-    __sx127XWriteRegister(data, REG_PAYLOAD_LENGTH, size);
-    __sx127XWriteRegister(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_TX);
+    _sx127x_write_register(data, REG_PAYLOAD_LENGTH, size);
+    _sx127x_write_register(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_TX);
 
-    while ((__sx127XReadRegister(data, REG_IRQ_FLAGS) & IRQ_TX_DONE_MASK) == 0)
+    while ((_sx127x_read_register(data, REG_IRQ_FLAGS) & IRQ_TX_DONE_MASK) == 0)
     {
         sleep_ms(0);
     }
 
-    __sx127XWriteRegister(data, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
-
-    return SUC_OK;
+    _sx127x_write_register(data, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
 }
 
-FUNCRESULT sx127XAvailable(SX127XData *data, BOOL *available)
+void sx127x_available(sx127x_data_t *data, bool *available)
 {
-    *available = (__sx127XReadRegister(data, REG_RX_NB_BYTES) - data->packetIndex);
-
-    return SUC_OK;
+    *available = (_sx127x_read_register(data, REG_RX_NB_uint8_tS) - data->packetIndex);
 }
 
-FUNCRESULT sx127XParsePacket(SX127XData *data, SIZE size, SIZE *packetLengthOut)
+void sx127x_parse_packet(sx127x_data_t *data, size_t size, size_t *packetLengthOut)
 {
-    SIZE packetLength = 0;
-    INT32 irqFlags = __sx127XReadRegister(data, REG_IRQ_FLAGS);
+    size_t packetLength = 0;
+    int irqFlags = _sx127x_read_register(data, REG_IRQ_FLAGS);
 
     if (size > 0)
     {
-        __sx127XImplicitHeaderMode(data);
-        __sx127XWriteRegister(data, REG_PAYLOAD_LENGTH, size & 0xff);
+        _sx127x_implicit_header_mode(data);
+        _sx127x_write_register(data, REG_PAYLOAD_LENGTH, size & 0xff);
     }
     else
     {
-        __sx127XExplicitHeaderMode(data);
+        _sx127x_explicit_header_mode(data);
     }
 
-    __sx127XWriteRegister(data, REG_IRQ_FLAGS, irqFlags);
-    __sx127XWriteRegister(data, REG_IRQ_FLAGS, irqFlags);
+    _sx127x_write_register(data, REG_IRQ_FLAGS, irqFlags);
+    _sx127x_write_register(data, REG_IRQ_FLAGS, irqFlags);
 
     if ((irqFlags & IRQ_RX_DONE_MASK) && (irqFlags & IRQ_PAYLOAD_CRC_ERROR_MASK) == 0)
     {
@@ -179,126 +172,108 @@ FUNCRESULT sx127XParsePacket(SX127XData *data, SIZE size, SIZE *packetLengthOut)
 
         if (data->implicitHeaderMode)
         {
-            packetLength = __sx127XReadRegister(data, REG_PAYLOAD_LENGTH);
+            packetLength = _sx127x_read_register(data, REG_PAYLOAD_LENGTH);
         }
         else
         {
-            packetLength = __sx127XReadRegister(data, REG_RX_NB_BYTES);
+            packetLength = _sx127x_read_register(data, REG_RX_NB_uint8_tS);
         }
 
-        __sx127XWriteRegister(data, REG_FIFO_ADDR_PTR, __sx127XReadRegister(data, REG_FIFO_RX_CURRENT_ADDR));
+        _sx127x_write_register(data, REG_FIFO_ADDR_PTR, _sx127x_read_register(data, REG_FIFO_RX_CURRENT_ADDR));
 
-        sx127XIdle(data);
+        sx127x_idle(data);
     }
-    else if (__sx127XReadRegister(data, REG_OP_MODE) != (MODE_LONG_RANGE_MODE | MODE_RX_SINGLE))
+    else if (_sx127x_read_register(data, REG_OP_MODE) != (MODE_LONG_RANGE_MODE | MODE_RX_SINGLE))
     {
-        __sx127XWriteRegister(data, REG_FIFO_ADDR_PTR, 0);
-        __sx127XWriteRegister(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_RX_SINGLE);
+        _sx127x_write_register(data, REG_FIFO_ADDR_PTR, 0);
+        _sx127x_write_register(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_RX_SINGLE);
     }
 
     *packetLengthOut = packetLength;
-
-    return SUC_OK;
 }
 
-FUNCRESULT sx127XRead(SX127XData *data, BYTE *dataOut)
+void sx127x_read(sx127x_data_t *data, uint8_t *dataOut)
 {
-    BOOL available = FALSE;
+    bool available = false;
 
-    sx127XAvailable(data, &available);
+    sx127x_available(data, &available);
 
     if (!available)
     {
-        return ERR_ACCESSDENIED;
+        return;
     }
 
     data->packetIndex++;
 
-    *dataOut = __sx127XReadRegister(data, REG_FIFO);
-
-    return SUC_OK;
+    *dataOut = _sx127x_read_register(data, REG_FIFO);
 }
 
-FUNCRESULT sx127XPeek(SX127XData *data, BYTE *dataOut)
+void sx127x_peek(sx127x_data_t *data, uint8_t *dataOut)
 {
-    BOOL available = FALSE;
+    bool available = false;
 
-    sx127XAvailable(data, &available);
+    sx127x_available(data, &available);
 
     if (!available)
     {
-        return ERR_ACCESSDENIED;
+        return;
     }
 
-    BYTE currentAddress = __sx127XReadRegister(data, REG_FIFO_ADDR_PTR);
+    uint8_t currentAddress = _sx127x_read_register(data, REG_FIFO_ADDR_PTR);
 
-    *dataOut = __sx127XReadRegister(data, REG_FIFO);
+    *dataOut = _sx127x_read_register(data, REG_FIFO);
 
-    __sx127XWriteRegister(data, REG_FIFO_ADDR_PTR, currentAddress);
-
-    return SUC_OK;
+    _sx127x_write_register(data, REG_FIFO_ADDR_PTR, currentAddress);
 }
 
-FUNCRESULT sx127XIdle(SX127XData *data)
+void sx127x_idle(sx127x_data_t *data)
 {
-    __sx127XWriteRegister(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
-
-    return SUC_OK;
+    _sx127x_write_register(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
 }
 
-FUNCRESULT sx127XSleep(SX127XData *data)
+void sx127x_sleep(sx127x_data_t *data)
 {
-    __sx127XWriteRegister(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
-
-    return SUC_OK;
+    _sx127x_write_register(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
 }
 
-FUNCRESULT sx127XPacketRssi(SX127XData *data, INT32 *rssi)
+void sx127x_packet_rssi(sx127x_data_t *data, int *rssi)
 {
-    *rssi = (__sx127XReadRegister(data, REG_PKT_RSSI_VALUE) - (data->frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
-
-    return SUC_OK;
+    *rssi = (_sx127x_read_register(data, REG_PKT_RSSI_VALUE) - (data->frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
 }
 
-FUNCRESULT sx127XPacketSnr(SX127XData *data, FLOAT *snr)
+void sx127x_packet_snr(sx127x_data_t *data, float *snr)
 {
-    *snr = ((UINT8)__sx127XReadRegister(data, REG_PKT_SNR_VALUE)) * 0.25;
-
-    return SUC_OK;
+    *snr = ((uint8_t)_sx127x_read_register(data, REG_PKT_SNR_VALUE)) * 0.25;
 }
 
-FUNCRESULT sx127XPacketFrequencyError(SX127XData *data, INT64 *error)
+void sx127x_packet_frequency_error(sx127x_data_t *data, long *error)
 {
-    INT32 freqError = 0;
-    freqError = (INT32)(__sx127XReadRegister(data, REG_FREQ_ERROR_MSB) & 0x111);
+    int freqError = 0;
+    freqError = (int)(_sx127x_read_register(data, REG_FREQ_ERROR_MSB) & 0x111);
     freqError <<= 8L;
-    freqError += (INT32)(__sx127XReadRegister(data, REG_FREQ_ERROR_MID));
+    freqError += (int)(_sx127x_read_register(data, REG_FREQ_ERROR_MID));
     freqError <<= 8L;
-    freqError += (INT32)(__sx127XReadRegister(data, REG_FREQ_ERROR_LSB));
+    freqError += (int)(_sx127x_read_register(data, REG_FREQ_ERROR_LSB));
 
-    if (__sx127XReadRegister(data, REG_FREQ_ERROR_MSB) & 0x1000)
+    if (_sx127x_read_register(data, REG_FREQ_ERROR_MSB) & 0x1000)
     {
         freqError -= 524288;
     }
 
-    const FLOAT fXtal = 32E6;
-    const FLOAT fError = (((FLOAT)(freqError) * (1L << 24)) / fXtal) * (__sx127XGetSignalBandwidth(data) / 500000.0f);
+    const float fXtal = 32E6;
+    const float fError = (((float)(freqError) * (1L << 24)) / fXtal) * (_sx127XGetSignalBandwidth(data) / 500000.0f);
 
     *error = (long)(fError);
-
-    return SUC_OK;
 }
 
-FUNCRESULT sx127XRssi(SX127XData *data, INT32 *rssi)
+void sx127x_rssi(sx127x_data_t *data, int *rssi)
 {
-    *rssi = (__sx127XReadRegister(data, REG_RSSI_VALUE) - (data->frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
-
-    return SUC_OK;
+    *rssi = (_sx127x_read_register(data, REG_RSSI_VALUE) - (data->frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
 }
 
-FUNCRESULT sx127XSetTxPower(SX127XData *data, INT32 level)
+void sx127x_set_tx_power(sx127x_data_t *data, int level)
 {
-    INT32 outputPin = PA_OUTPUT_PA_BOOST_PIN;
+    int outputPin = PA_OUTPUT_PA_BOOST_PIN;
 
     if (outputPin == PA_OUTPUT_RFO_PIN)
     {
@@ -311,7 +286,7 @@ FUNCRESULT sx127XSetTxPower(SX127XData *data, INT32 level)
             level = 14;
         }
 
-        __sx127XWriteRegister(data, REG_PA_CONFIG, 0x70 | level);
+        _sx127x_write_register(data, REG_PA_CONFIG, 0x70 | level);
     }
     else
     {
@@ -324,8 +299,8 @@ FUNCRESULT sx127XSetTxPower(SX127XData *data, INT32 level)
 
             level -= 3;
 
-            __sx127XWriteRegister(data, REG_PA_DAC, 0x87);
-            sx127XSetOCP(data, 140);
+            _sx127x_write_register(data, REG_PA_DAC, 0x87);
+            sx127x_set_o_c_p(data, 140);
         }
         else
         {
@@ -334,32 +309,28 @@ FUNCRESULT sx127XSetTxPower(SX127XData *data, INT32 level)
                 level = 2;
             }
 
-            __sx127XWriteRegister(data, REG_PA_DAC, 0x84);
-            sx127XSetOCP(data, 100);
+            _sx127x_write_register(data, REG_PA_DAC, 0x84);
+            sx127x_set_o_c_p(data, 100);
         }
 
-        __sx127XWriteRegister(data, REG_PA_CONFIG, PA_BOOST | (level - 2));
+        _sx127x_write_register(data, REG_PA_CONFIG, PA_BOOST | (level - 2));
     }
 
     data->txPower = level;
-
-    return SUC_OK;
 }
 
-FUNCRESULT sx127XSetFrequency(SX127XData *data, UINT64 frequency)
+void sx127x_set_frequency(sx127x_data_t *data, unsigned long long frequency)
 {
     data->frequency = frequency;
 
-    UINT64 frf = (frequency << 19) / 32000000;
+    unsigned long long frf = (frequency << 19) / 32000000;
 
-    __sx127XWriteRegister(data, REG_FRF_MSB, (BYTE)(frf >> 16));
-    __sx127XWriteRegister(data, REG_FRF_MID, (BYTE)(frf >> 8));
-    __sx127XWriteRegister(data, REG_FRF_LSB, (BYTE)(frf >> 0));
-
-    return SUC_OK;
+    _sx127x_write_register(data, REG_FRF_MSB, (uint8_t)(frf >> 16));
+    _sx127x_write_register(data, REG_FRF_MID, (uint8_t)(frf >> 8));
+    _sx127x_write_register(data, REG_FRF_LSB, (uint8_t)(frf >> 0));
 }
 
-FUNCRESULT sx127XSetSpreadingFactor(SX127XData *data, INT32 sf)
+void sx127x_set_spreading_factor(sx127x_data_t *data, int sf)
 {
     if (sf < 6)
     {
@@ -372,24 +343,22 @@ FUNCRESULT sx127XSetSpreadingFactor(SX127XData *data, INT32 sf)
 
     if (sf == 6)
     {
-        __sx127XWriteRegister(data, REG_DETECTION_OPTIMIZE, 0xc5);
-        __sx127XWriteRegister(data, REG_DETECTION_THRESHOLD, 0x0c);
+        _sx127x_write_register(data, REG_DETECTION_OPTIMIZE, 0xc5);
+        _sx127x_write_register(data, REG_DETECTION_THRESHOLD, 0x0c);
     }
     else
     {
-        __sx127XWriteRegister(data, REG_DETECTION_OPTIMIZE, 0xc3);
-        __sx127XWriteRegister(data, REG_DETECTION_THRESHOLD, 0x0a);
+        _sx127x_write_register(data, REG_DETECTION_OPTIMIZE, 0xc3);
+        _sx127x_write_register(data, REG_DETECTION_THRESHOLD, 0x0a);
     }
 
-    __sx127XWriteRegister(data, REG_MODEM_CONFIG_2, (__sx127XReadRegister(data, REG_MODEM_CONFIG_2) & 0x0f) | ((sf << 4) & 0xf0));
-    __sx127XSetLdoFlag(data);
-
-    return SUC_OK;
+    _sx127x_write_register(data, REG_MODEM_CONFIG_2, (_sx127x_read_register(data, REG_MODEM_CONFIG_2) & 0x0f) | ((sf << 4) & 0xf0));
+    _sx127x_set_ldo_flag(data);
 }
 
-FUNCRESULT sx127XSetSignalBandwidth(SX127XData *data, INT64 sbw)
+void sx127x_set_signal_bandwidth(sx127x_data_t *data, long sbw)
 {
-    INT32 bw;
+    int bw;
 
     if (sbw <= 7.8E3)
     {
@@ -432,13 +401,11 @@ FUNCRESULT sx127XSetSignalBandwidth(SX127XData *data, INT64 sbw)
         bw = 9;
     }
 
-    __sx127XWriteRegister(data, REG_MODEM_CONFIG_1, (__sx127XReadRegister(data, REG_MODEM_CONFIG_1) & 0x0f) | (bw << 4));
-    __sx127XSetLdoFlag(data);
-
-    return SUC_OK;
+    _sx127x_write_register(data, REG_MODEM_CONFIG_1, (_sx127x_read_register(data, REG_MODEM_CONFIG_1) & 0x0f) | (bw << 4));
+    _sx127x_set_ldo_flag(data);
 }
 
-FUNCRESULT sx127XSetCodingRate4(SX127XData *data, INT32 denominator)
+void sx127x_set_coding_rate4(sx127x_data_t *data, int denominator)
 {
     if (denominator < 5)
     {
@@ -449,61 +416,47 @@ FUNCRESULT sx127XSetCodingRate4(SX127XData *data, INT32 denominator)
         denominator = 8;
     }
 
-    INT32 cr = denominator - 4;
+    int cr = denominator - 4;
 
-    __sx127XWriteRegister(data, REG_MODEM_CONFIG_1, (__sx127XReadRegister(data, REG_MODEM_CONFIG_1) & 0xf1) | (cr << 1));
-
-    return SUC_OK;
+    _sx127x_write_register(data, REG_MODEM_CONFIG_1, (_sx127x_read_register(data, REG_MODEM_CONFIG_1) & 0xf1) | (cr << 1));
 }
 
-FUNCRESULT sx127XSetPreambleLength(SX127XData *data, INT64 length)
+void sx127x_set_preamble_length(sx127x_data_t *data, long length)
 {
-    __sx127XWriteRegister(data, REG_PREAMBLE_MSB, (BYTE)(length >> 8));
-    __sx127XWriteRegister(data, REG_PREAMBLE_LSB, (BYTE)(length >> 0));
-
-    return SUC_OK;
+    _sx127x_write_register(data, REG_PREAMBLE_MSB, (uint8_t)(length >> 8));
+    _sx127x_write_register(data, REG_PREAMBLE_LSB, (uint8_t)(length >> 0));
 }
 
-FUNCRESULT sx127XSetSyncWord(SX127XData *data, INT32 sw)
+void sx127x_set_sync_word(sx127x_data_t *data, int sw)
 {
-    __sx127XWriteRegister(data, REG_SYNC_WORD, sw);
-
-    return SUC_OK;
+    _sx127x_write_register(data, REG_SYNC_WORD, sw);
 }
 
-FUNCRESULT sx127XEnableCrc(SX127XData *data)
+void sx127x_enable_crc(sx127x_data_t *data)
 {
-    __sx127XWriteRegister(data, REG_MODEM_CONFIG_2, __sx127XReadRegister(data, REG_MODEM_CONFIG_2) | 0x04);
-
-    return SUC_OK;
+    _sx127x_write_register(data, REG_MODEM_CONFIG_2, _sx127x_read_register(data, REG_MODEM_CONFIG_2) | 0x04);
 }
 
-FUNCRESULT sx127XDisableCrc(SX127XData *data)
+void sx127x_disable_crc(sx127x_data_t *data)
 {
-    __sx127XWriteRegister(data, REG_MODEM_CONFIG_2, __sx127XReadRegister(data, REG_MODEM_CONFIG_2) & 0xfb);
-
-    return SUC_OK;
+    _sx127x_write_register(data, REG_MODEM_CONFIG_2, _sx127x_read_register(data, REG_MODEM_CONFIG_2) & 0xfb);
 }
 
-FUNCRESULT sx127XEnableInvertIQ(SX127XData *data)
+void sx127x_enable_invert_i_q(sx127x_data_t *data)
 {
-    __sx127XWriteRegister(data, REG_INVERTIQ, 0x66);
-    __sx127XWriteRegister(data, REG_INVERTIQ2, 0x19);
-
-    return SUC_OK;
+    _sx127x_write_register(data, REG_INVERTIQ, 0x66);
+    _sx127x_write_register(data, REG_INVERTIQ2, 0x19);
 }
 
-FUNCRESULT sx127XDisableInvertIQ(SX127XData *data)
+void sx127x_disable_invert_i_q(sx127x_data_t *data)
 {
-    __sx127XWriteRegister(data, REG_INVERTIQ, 0x27);
-    __sx127XWriteRegister(data, REG_INVERTIQ2, 0x1d);
-
-    return SUC_OK;
+    _sx127x_write_register(data, REG_INVERTIQ, 0x27);
+    _sx127x_write_register(data, REG_INVERTIQ2, 0x1d);
 }
 
-FUNCRESULT sx127XSetOCP(SX127XData *data, BYTE mA)
+void sx127x_set_o_c_p(sx127x_data_t *data, uint8_t mA)
 {
-    BYTE ocpTrim = 27;
+    uint8_t ocpTrim = 27;
 
     if (mA <= 120)
     {
@@ -514,71 +467,69 @@ FUNCRESULT sx127XSetOCP(SX127XData *data, BYTE mA)
         ocpTrim = (mA + 30) / 10;
     }
 
-    __sx127XWriteRegister(data, REG_OCP, 0x20 | (0x1F & ocpTrim));
+    _sx127x_write_register(data, REG_OCP, 0x20 | (0x1F & ocpTrim));
 }
 
-FUNCRESULT sx127XSetGain(SX127XData *data, BYTE gain)
+void sx127x_set_gain(sx127x_data_t *data, uint8_t gain)
 {
     if (gain > 6)
     {
         gain = 6;
     }
 
-    sx127XIdle(data);
+    sx127x_idle(data);
 
     if (gain == 0)
     {
-        __sx127XWriteRegister(data, REG_MODEM_CONFIG_3, 0x04);
+        _sx127x_write_register(data, REG_MODEM_CONFIG_3, 0x04);
     }
     else
     {
-        __sx127XWriteRegister(data, REG_MODEM_CONFIG_3, 0x00);
+        _sx127x_write_register(data, REG_MODEM_CONFIG_3, 0x00);
 
-        __sx127XWriteRegister(data, REG_LNA, 0x03);
+        _sx127x_write_register(data, REG_LNA, 0x03);
 
-        __sx127XWriteRegister(data, REG_LNA, __sx127XReadRegister(data, REG_LNA) | (gain << 5));
+        _sx127x_write_register(data, REG_LNA, _sx127x_read_register(data, REG_LNA) | (gain << 5));
     }
-
-    return SUC_OK;
 }
 
-VOID __sx127XExplicitHeaderMode(SX127XData *data)
+void _sx127x_explicit_header_mode(sx127x_data_t *data)
 {
-    data->implicitHeaderMode = FALSE;
+    data->implicitHeaderMode = false;
 
-    __sx127XWriteRegister(data, REG_MODEM_CONFIG_1, __sx127XReadRegister(data, REG_MODEM_CONFIG_1) & 0xfe);
+    _sx127x_write_register(data, REG_MODEM_CONFIG_1, _sx127x_read_register(data, REG_MODEM_CONFIG_1) & 0xfe);
 }
 
-VOID __sx127XImplicitHeaderMode(SX127XData *data)
+void _sx127x_implicit_header_mode(sx127x_data_t *data)
 {
-    data->implicitHeaderMode = TRUE;
+    data->implicitHeaderMode = true;
 
-    __sx127XWriteRegister(data, REG_MODEM_CONFIG_1, __sx127XReadRegister(data, REG_MODEM_CONFIG_1) | 0x01);
+    _sx127x_write_register(data, REG_MODEM_CONFIG_1, _sx127x_read_register(data, REG_MODEM_CONFIG_1) | 0x01);
 }
 
-BOOL __sx127XIsTransmitting(SX127XData *data)
+bool _sx127x_is_transmitting(sx127x_data_t *data)
 {
-    if ((__sx127XReadRegister(data, REG_OP_MODE) & MODE_TX) == MODE_TX)
+    if ((_sx127x_read_register(data, REG_OP_MODE) & MODE_TX) == MODE_TX)
     {
-        return TRUE;
+        return true;
     }
 
-    if (__sx127XReadRegister(data, REG_IRQ_FLAGS) & IRQ_TX_DONE_MASK)
+    if (_sx127x_read_register(data, REG_IRQ_FLAGS) & IRQ_TX_DONE_MASK)
     {
-        __sx127XWriteRegister(data, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
+        _sx127x_write_register(data, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
     }
 
-    return FALSE;
+    return false;
 }
 
-INT32 __sx127XGetSpreadingFactor(SX127XData *data)
+int _sx127XGetSpreadingFactor(sx127x_data_t *data)
 {
-    return __sx127XReadRegister(data, REG_MODEM_CONFIG_2) >> 4;
+    return _sx127x_read_register(data, REG_MODEM_CONFIG_2) >> 4;
 }
 
-INT64 __sx127XGetSignalBandwidth(SX127XData *data)
+long _sx127XGetSignalBandwidth(sx127x_data_t *data)
 {
-    BYTE bw = (__sx127XReadRegister(data, REG_MODEM_CONFIG_1) >> 4);
+    uint8_t bw = (_sx127x_read_register(data, REG_MODEM_CONFIG_1) >> 4);
 
     switch (bw)
     {
@@ -607,37 +558,37 @@ INT64 __sx127XGetSignalBandwidth(SX127XData *data)
     return -1;
 }
 
-VOID __sx127XSetLdoFlag(SX127XData *data)
+void _sx127x_set_ldo_flag(sx127x_data_t *data)
 {
-    INT64 symbolDuration = 1000 / (__sx127XGetSignalBandwidth(data) / (1L << __sx127XGetSpreadingFactor(data)));
-    BOOL ldoOn = symbolDuration > 16;
-    BYTE config3 = __sx127XReadRegister(data, REG_MODEM_CONFIG_3);
+    long symbolDuration = 1000 / (_sx127XGetSignalBandwidth(data) / (1L << _sx127XGetSpreadingFactor(data)));
+    bool ldoOn = symbolDuration > 16;
+    uint8_t config3 = _sx127x_read_register(data, REG_MODEM_CONFIG_3);
 
     config3 = ldoOn ? config3 | (1 << 3) : config3 & ~(1 << 3);
 
-    __sx127XWriteRegister(data, REG_MODEM_CONFIG_3, config3);
+    _sx127x_write_register(data, REG_MODEM_CONFIG_3, config3);
 }
 
-BYTE __sx127XReadRegister(SX127XData *data, BYTE address)
+uint8_t _sx127x_read_register(sx127x_data_t *data, uint8_t address)
 {
-    return __sx127XSingleTransfer(data, address & 0x7f, 0x00);
+    return _sx127x_single_transfer(data, address & 0x7f, 0x00);
 }
 
-VOID __sx127XWriteRegister(SX127XData *data, BYTE address, BYTE value)
+void _sx127x_write_register(sx127x_data_t *data, uint8_t address, uint8_t value)
 {
-    __sx127XSingleTransfer(data, address | 0x80, value);
+    _sx127x_single_transfer(data, address | 0x80, value);
 }
 
-BYTE __sx127XSingleTransfer(SX127XData *data, BYTE address, BYTE value)
+uint8_t _sx127x_single_transfer(sx127x_data_t *data, uint8_t address, uint8_t value)
 {
-    BYTE response;
+    uint8_t response;
 
-    gpioSetPinState(data->pinout.cs, GPIO_LOW);
+    gpio_set_pin_state(data->pinout.cs, GPIO_LOW);
 
-    spiWriteBlocking(data->pinout.spi, &address, 1);
-    spiWriteReadBlocking(data->pinout.spi, &value, &response, 1);
+    spi_write(data->pinout.spi, &address, 1);
+    spi_write_read(data->pinout.spi, &value, &response, 1);
 
-    gpioSetPinState(data->pinout.cs, GPIO_HIGH);
+    gpio_set_pin_state(data->pinout.cs, GPIO_HIGH);
 
     return response;
 }
