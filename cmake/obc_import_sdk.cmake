@@ -3,7 +3,7 @@ macro(obc_include_sdk)
         set(PICO_BOARD_HEADER_DIRS ${CMAKE_SOURCE_DIR}/platform/pico)
         set(PICO_BOARD myboard)
 
-        include(pico-sdk/pico_sdk_init.cmake)
+        include(lib/pico-sdk/pico_sdk_init.cmake)
 
         add_compile_definitions(OBC_PLATFORM_PICO)
     endif()
