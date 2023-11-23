@@ -7,10 +7,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Verify
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Build
         working-directory: .
         run: |
+          sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib build-essential ninja-build
           git submodule update --init
           mkdir build
           cd build
