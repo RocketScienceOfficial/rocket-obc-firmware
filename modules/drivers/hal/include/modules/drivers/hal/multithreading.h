@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-typedef void (*core_func_t)(void); /** Type for thread function */
+typedef void (*hal_core_func_t)(void); /** Type for thread function */
 
 /**
  * @brief Starts Core 1
@@ -14,29 +14,29 @@ typedef void (*core_func_t)(void); /** Type for thread function */
  * @param fifoElementsCount Number of FIFO elements
  * @return true if success
  */
-bool core_start_next(core_func_t function, size_t fifoElementSize, size_t fifoElementsCount);
+bool hal_core_start_next(hal_core_func_t function, size_t fifoElementSize, size_t fifoElementsCount);
 
 /**
  * @brief Sets current core as victim for pausing.
  */
-void core_set_as_victim(void);
+void hal_core_set_as_victim(void);
 
 /**
  * @brief Starts lockout for victim core
  */
-void core_start_lock(void);
+void hal_core_start_lock(void);
 
 /**
  * @brief Ends lockout for victim core
  */
-void core_end_lock(void);
+void hal_core_end_lock(void);
 
 /**
  * @brief Sends data to other core
  *
  * @param data Data to send
  */
-void core_send_data(void *data);
+void hal_core_send_data(void *data);
 
 /**
  * @brief Receives data from other core
@@ -44,6 +44,6 @@ void core_send_data(void *data);
  * @param data Data to receive
  * @return true if success
  */
-bool core_receive_data(void *data);
+bool hal_core_receive_data(void *data);
 
 #endif

@@ -19,7 +19,7 @@ typedef unsigned int WS2812COLOR; /** WS2812 color */
  * @param pin Pin number
  * @param rgbw true if RGBW LEDs are used, false if RGB LEDs are used
  */
-void ws2812_init(pin_number_t pin, bool rgbw);
+void ws2812_init(hal_pin_number_t pin, bool rgbw);
 
 /**
  * @brief Sets colors of all LEDs
@@ -38,12 +38,5 @@ void ws2812_set_colors(WS2812COLOR *colors, size_t count);
  * @return Color
  */
 WS2812COLOR ws2812_get_color(uint8_t r, uint8_t g, uint8_t b);
-
-/**
- * @brief Sets color of a single LED
- *
- * @param color Color
- */
-void _ws2812_send_color(WS2812COLOR color);
 
 #endif

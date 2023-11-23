@@ -1,4 +1,3 @@
-# Creates variable MODULE_NAME
 macro(obc_add_module NAME)
     set(SOURCES "")
 
@@ -17,7 +16,6 @@ macro(obc_add_module NAME)
     target_include_directories(${MODULE_NAME} INTERFACE ${CMAKE_CURRENT_LIST_DIR}/include)
 endmacro()
 
-# Creates variable MODULE_NAME
 macro(obc_add_submodule NAME MODULE)
     set(SOURCES "")
 

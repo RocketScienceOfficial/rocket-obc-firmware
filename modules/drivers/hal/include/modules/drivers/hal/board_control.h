@@ -8,11 +8,11 @@
  *
  * @param sleepTimeMS The time to sleep after startup
  */
-void board_init(time_t sleepTimeMS);
+void hal_board_init(hal_time_t sleepTimeMS);
 
 /**
  * @brief Tight loop
  */
-void tight_loop(void);
+void hal_tight_loop(void);
 
 #endif

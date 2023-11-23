@@ -15,9 +15,9 @@
  */
 typedef struct sd_file
 {
-    char *name;    /** File name */
-    FIL file;      /** File instance */
-    bool isOpened; /** Is file opened */
+    const char *name; /** File name */
+    FIL file;         /** File instance */
+    bool isOpened;    /** Is file opened */
 } sd_file_t;
 
 /**
@@ -37,7 +37,7 @@ typedef struct sd_card_inst
  * @param sd_card Data to setup
  * @param checkPin Pin to check if SD card is connected
  */
-void sd_init(sd_card_inst_t *sd_card, pin_number_t checkPin);
+void sd_init(sd_card_inst_t *sd_card, hal_pin_number_t checkPin);
 
 /**
  * @brief Check if SD card is connected
@@ -45,7 +45,7 @@ void sd_init(sd_card_inst_t *sd_card, pin_number_t checkPin);
  * @param pin Pin to check
  * @param result Result of check
  */
-void sd_check(pin_number_t pin, bool *result);
+void sd_check(hal_pin_number_t pin, bool *result);
 
 /**
  * @brief Initialize file

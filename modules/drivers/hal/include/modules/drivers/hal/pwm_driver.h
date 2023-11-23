@@ -6,9 +6,9 @@
 
 typedef struct pwm_config
 {
-    pin_number_t pin;
+    hal_pin_number_t pin;
     unsigned long frequency;
-} pwm_config_t;
+} hal_pwm_config_t;
 
 /**
  * @brief Checks whenether the given pin is valid for PWM
@@ -16,7 +16,7 @@ typedef struct pwm_config
  * @param pin Pin number to check
  * @return True if pin is valid
  */
-bool pwm_check_pin(pin_number_t pin);
+bool hal_pwm_check_pin(hal_pin_number_t pin);
 
 /**
  * @brief Initialize PWM on pin
@@ -25,7 +25,7 @@ bool pwm_check_pin(pin_number_t pin);
  * @param pin Pin to intialize
  * @param frequency Frequency in Hz of PWM
  */
-void pwm_init_pin(pwm_config_t *config, pin_number_t pin, unsigned long frequency);
+void hal_pwm_init_pin(hal_pwm_config_t *config, hal_pin_number_t pin, unsigned long frequency);
 
 /**
  * @brief Sets frequency of PWM
@@ -33,7 +33,7 @@ void pwm_init_pin(pwm_config_t *config, pin_number_t pin, unsigned long frequenc
  * @param config PWM configuration
  * @param frequency Frequency in Hz of PWM
  */
-void pwm_set_frequency(pwm_config_t *config, unsigned long frequency);
+void hal_pwm_set_frequency(hal_pwm_config_t *config, unsigned long frequency);
 
 /**
  * @brief Set duty cycle of PWM
@@ -41,6 +41,6 @@ void pwm_set_frequency(pwm_config_t *config, unsigned long frequency);
  * @param config PWM configuration
  * @param dutyCyclePercent Duty cycle in percent
  */
-void pwm_set_duty(pwm_config_t *config, float dutyCyclePercent);
+void hal_pwm_set_duty(hal_pwm_config_t *config, float dutyCyclePercent);
 
 #endif

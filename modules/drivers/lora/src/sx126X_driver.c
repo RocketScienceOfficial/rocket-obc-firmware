@@ -84,6 +84,13 @@
 #define RTC_FREQ 64000
 #define XTAL_FREQ 32000000
 
+static unsigned int _sx126x_convert_timeout_to_rtc_step(unsigned int timeout_ms);
+static unsigned int _sx126x_convert_frequency_to_register_value(unsigned int frequency);
+static void _sx126x_tx_modulation_workaround(sx126x_config_t *data, sx126x_packet_type_t packetType, sx126x_lora_bw_t bw);
+static void _sx126x_write_register(sx126x_config_t *data, uint16_t address, uint8_t *buffer, size_t szBuffer);
+static void _sx126x_read_register(sx126x_config_t *data, uint16_t address, uint8_t *buffer, size_t szBuffer);
+static void _sx126x_cmd(sx126x_config_t *data, uint8_t command, uint8_t *params, size_t szParams, uint8_t *resultBuffer, size_t szBuffer);
+
 void sx126x_init(sx126x_config_t *data, sx126x_pinout_t *pinout)
 {
     if (!data || !pinout)
@@ -93,10 +100,10 @@ void sx126x_init(sx126x_config_t *data, sx126x_pinout_t *pinout)
 
     data->pinout = *pinout;
 
-    gpio_init_pin(pinout->busy, GPIO_INPUT);
-    gpio_init_pin(pinout->reset, GPIO_OUTPUT);
+    hal_gpio_init_pin(pinout->busy, GPIO_INPUT);
+    hal_gpio_init_pin(pinout->reset, GPIO_OUTPUT);
 
-    spi_init_pins(data->pinout.spi, data->pinout.miso, data->pinout.mosi, data->pinout.sck, data->pinout.cs);
+    hal_spi_init_pins(data->pinout.spi, data->pinout.miso, data->pinout.mosi, data->pinout.sck, data->pinout.cs);
 }
 
 void sx126x_set_sleep(sx126x_config_t *data, bool coldStart)
@@ -234,7 +241,7 @@ void sx126x_calibrate_image(sx126x_config_t *data, unsigned int freq_hz)
     _sx126x_cmd(data, CMD_CALIBRATE_IMAGE, buff, 2, NULL, 0);
 }
 
-void sx126x_set_p_a_config(sx126x_config_t *data, uint8_t paDutyCycle, uint8_t hpMax)
+void sx126x_set_pa_config(sx126x_config_t *data, uint8_t paDutyCycle, uint8_t hpMax)
 {
     uint8_t buff[4];
 
@@ -564,7 +571,7 @@ void sx126x_get_lora_stats(sx126x_config_t *data, uint16_t *pNbPktReceived, uint
 {
     uint8_t buff[7];
 
-    sx126x_cmd(data, CMD_GET_STATS, NULL, 0, buff, 7);
+    _sx126x_cmd(data, CMD_GET_STATS, NULL, 0, buff, 7);
 
     *pNbPktReceived = (uint16_t)((buff[1] << 8) | buff[2]);
     *pNbPktCrcErr = (uint16_t)((buff[3] << 8) | buff[4]);
@@ -599,7 +606,7 @@ void sx126x_clear_device_errors(sx126x_config_t *data)
 void sx126x_is_busy(sx126x_config_t *data, bool *pStatus)
 {
     gpio_state_t state;
-    gpio_get_pin_state(data->pinout.busy, &state);
+    hal_gpio_get_pin_state(data->pinout.busy, &state);
 
     *pStatus = state == GPIO_HIGH;
 }
@@ -612,25 +619,25 @@ void sx126x_check_busy(sx126x_config_t *data)
     while (busy)
     {
         sx126x_is_busy(data, &busy);
-        time_sleep_us(1);
+        hal_time_sleep_us(1);
     }
 }
 
 void sx126x_reset(sx126x_config_t *data)
 {
-    time_sleep_ms(20);
-    gpio_set_pin_state(data->pinout.reset, GPIO_LOW);
-    time_sleep_ms(50);
-    gpio_set_pin_state(data->pinout.reset, GPIO_HIGH);
-    time_sleep_ms(20);
+    hal_time_sleep_ms(20);
+    hal_gpio_set_pin_state(data->pinout.reset, GPIO_LOW);
+    hal_time_sleep_ms(50);
+    hal_gpio_set_pin_state(data->pinout.reset, GPIO_HIGH);
+    hal_time_sleep_ms(20);
 }
 
 void sx126x_wakeup(sx126x_config_t *data)
 {
-    gpio_set_pin_state(data->pinout.cs, GPIO_LOW);
-    time_sleep_ms(2);
-    gpio_set_pin_state(data->pinout.cs, GPIO_HIGH);
-    time_sleep_ms(2);
+    hal_gpio_set_pin_state(data->pinout.cs, GPIO_LOW);
+    hal_time_sleep_ms(2);
+    hal_gpio_set_pin_state(data->pinout.cs, GPIO_HIGH);
+    hal_time_sleep_ms(2);
 }
 
 void sx126x_clamp_tx(sx126x_config_t *data)
@@ -656,17 +663,17 @@ void sx126x_stop_rtc(sx126x_config_t *data)
     _sx126x_write_register(data, REG_RTC_CONTROL, &reg, 1);
 }
 
-unsigned int _sx126x_convert_timeout_to_rtc_step(unsigned int timeout_ms)
+static unsigned int _sx126x_convert_timeout_to_rtc_step(unsigned int timeout_ms)
 {
     return timeout_ms * RTC_FREQ / 1000;
 }
 
-unsigned int _sx126x_convert_frequency_to_register_value(unsigned int frequency)
+static unsigned int _sx126x_convert_frequency_to_register_value(unsigned int frequency)
 {
     return (unsigned int)((frequency / (double)XTAL_FREQ) * (double)(1 << 25));
 }
 
-void _sx126x_tx_modulation_workaround(sx126x_config_t *data, sx126x_packet_type_t packetType, sx126x_lora_bw_t bw)
+static void _sx126x_tx_modulation_workaround(sx126x_config_t *data, sx126x_packet_type_t packetType, sx126x_lora_bw_t bw)
 {
     uint8_t reg;
 
@@ -691,7 +698,7 @@ void _sx126x_tx_modulation_workaround(sx126x_config_t *data, sx126x_packet_type_
     _sx126x_write_register(data, REG_TX_MODULATION, &reg, 1);
 }
 
-void _sx126x_write_register(sx126x_config_t *data, uint16_t address, uint8_t *buffer, size_t szBuffer)
+static void _sx126x_write_register(sx126x_config_t *data, uint16_t address, uint8_t *buffer, size_t szBuffer)
 {
     uint8_t buff[16];
 
@@ -703,12 +710,12 @@ void _sx126x_write_register(sx126x_config_t *data, uint16_t address, uint8_t *bu
     _sx126x_cmd(data, CMD_WRITE_REGISTER, buff, szBuffer + 2, NULL, 0);
 }
 
-void _sx126x_read_register(sx126x_config_t *data, uint16_t address, uint8_t *buffer, size_t szBuffer)
+static void _sx126x_read_register(sx126x_config_t *data, uint16_t address, uint8_t *buffer, size_t szBuffer)
 {
     _sx126x_cmd(data, CMD_READ_REGISTER, (uint8_t *)&address, 2, buffer, szBuffer);
 }
 
-void _sx126x_cmd(sx126x_config_t *data, uint8_t command, uint8_t *params, size_t szParams, uint8_t *resultBuffer, size_t szBuffer)
+static void _sx126x_cmd(sx126x_config_t *data, uint8_t command, uint8_t *params, size_t szParams, uint8_t *resultBuffer, size_t szBuffer)
 {
     sx126x_check_busy(data);
 
@@ -721,14 +728,14 @@ void _sx126x_cmd(sx126x_config_t *data, uint8_t command, uint8_t *params, size_t
         memcpy(buff + 1, params, szParams);
     }
 
-    gpio_set_pin_state(data->pinout.cs, GPIO_LOW);
+    hal_gpio_set_pin_state(data->pinout.cs, GPIO_LOW);
 
-    spi_write(data->pinout.spi, buff, szParams + 1);
+    hal_spi_write(data->pinout.spi, buff, szParams + 1);
 
     if (resultBuffer && szBuffer > 0)
     {
-        spi_read(data->pinout.spi, 0, resultBuffer, szBuffer);
+        hal_spi_read(data->pinout.spi, 0, resultBuffer, szBuffer);
     }
 
-    gpio_set_pin_state(data->pinout.cs, GPIO_HIGH);
+    hal_gpio_set_pin_state(data->pinout.cs, GPIO_HIGH);
 }

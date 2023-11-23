@@ -2,17 +2,12 @@
 
 #define DUTY_CYCLE 0.5f
 
-void passive_buzzer_init(pwm_config_t *config, pin_number_t pin, unsigned int frequency)
+void passive_buzzer_init(hal_pwm_config_t *config, hal_pin_number_t pin, unsigned int frequency)
 {
-    if (!config)
-    {
-        return;
-    }
-
-    pwm_init_pin(config, pin, frequency);
+    hal_pwm_init_pin(config, pin, frequency);
 }
 
-void passive_buzzer_set_active(pwm_config_t *config, bool active)
+void passive_buzzer_set_active(hal_pwm_config_t *config, bool active)
 {
-    return pwm_set_duty(config, active ? DUTY_CYCLE : 0.0f);
+    hal_pwm_set_duty(config, active ? DUTY_CYCLE : 0.0f);
 }

@@ -33,9 +33,9 @@
 #define Y_OFFSET -45
 #define Z_OFFSET 420
 
-void h3lis331dl_init_spi(h3lis331dl_config_t *config, spi_instance_t spi, pin_number_t miso, pin_number_t mosi, pin_number_t cs, pin_number_t sck)
+void h3lis331dl_init_spi(h3lis331dl_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck)
 {
-    config->gpioConfig = (gpio_communication_config_t){
+    config->gpioConfig = (hal_gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_SPI,
         .spi = spi,
         .cs = cs,
@@ -45,12 +45,12 @@ void h3lis331dl_init_spi(h3lis331dl_config_t *config, spi_instance_t spi, pin_nu
     };
     config->rangeFactor = 0;
 
-    spi_init_pins(spi, miso, mosi, sck, cs);
+    hal_spi_init_pins(spi, miso, mosi, sck, cs);
 }
 
-void h3lis331dl_init_i2c(h3lis331dl_config_t *config, i2c_instance_t i2c, pin_number_t sda, pin_number_t scl)
+void h3lis331dl_init_i2c(h3lis331dl_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl)
 {
-    config->gpioConfig = (gpio_communication_config_t){
+    config->gpioConfig = (hal_gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_I2C,
         .i2c = i2c,
         .i2cAddress = I2C_ADDRESS,
@@ -60,32 +60,32 @@ void h3lis331dl_init_i2c(h3lis331dl_config_t *config, i2c_instance_t i2c, pin_nu
     };
     config->rangeFactor = 0;
 
-    i2c_init_pins(i2c, sda, scl);
+    hal_i2c_init_pins(i2c, sda, scl);
 }
 
 void h3lis331dl_validate_id(h3lis331dl_config_t *config, bool *valid)
 {
-    *valid = gpio_read_reg(&config->gpioConfig, WHO_AM_I) == WHO_AM_I_VALUE;
+    *valid = hal_gpio_read_reg(&config->gpioConfig, WHO_AM_I) == WHO_AM_I_VALUE;
 }
 
 void h3lis331dl_set_power_mode(h3lis331dl_config_t *config, h3lis331dl_power_mode_t power)
 {
-    gpio_write_reg_field(&config->gpioConfig, CTRL_REG1, 3, 5, (uint8_t)power);
+    hal_gpio_write_reg_field(&config->gpioConfig, CTRL_REG1, 3, 5, (uint8_t)power);
 }
 
 void h3lis331dl_set_odr(h3lis331dl_config_t *config, h3lis331dl_odr_t odr)
 {
-    gpio_write_reg_field(&config->gpioConfig, CTRL_REG1, 2, 3, (uint8_t)odr);
+    hal_gpio_write_reg_field(&config->gpioConfig, CTRL_REG1, 2, 3, (uint8_t)odr);
 }
 
 void h3lis331dl_set_hpfc(h3lis331dl_config_t *config, h3lis331dl_hpfc_t hpcf)
 {
-    gpio_write_reg_field(&config->gpioConfig, CTRL_REG2, 2, 0, (uint8_t)hpcf);
+    hal_gpio_write_reg_field(&config->gpioConfig, CTRL_REG2, 2, 0, (uint8_t)hpcf);
 }
 
 void h3lis331dl_set_range(h3lis331dl_config_t *config, h3lis331dl_range_t range)
 {
-    gpio_write_reg_field(&config->gpioConfig, CTRL_REG4, 2, 4, (uint8_t)range);
+    hal_gpio_write_reg_field(&config->gpioConfig, CTRL_REG4, 2, 4, (uint8_t)range);
 
     switch (range)
     {
@@ -107,7 +107,7 @@ void h3lis331dl_read(h3lis331dl_config_t *config, vec3_t *accel)
 {
     uint8_t buffer[6];
 
-    gpio_read_regs(&config->gpioConfig, OUT_X_L, buffer, 6);
+    hal_gpio_read_regs(&config->gpioConfig, OUT_X_L, buffer, 6);
 
     int16_t x = (int16_t)((buffer[1] << 8) | buffer[0]) - X_OFFSET;
     int16_t y = (int16_t)((buffer[3] << 8) | buffer[2]) - Y_OFFSET;

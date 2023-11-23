@@ -17,12 +17,12 @@
  */
 typedef struct sx127x_pinout
 {
-    spi_instance_t spi; /** SPI */
-    pin_number_t sck;   /** SCK */
-    pin_number_t miso;  /** MISO */
-    pin_number_t mosi;  /** MOSI */
-    pin_number_t cs;    /** CS */
-    pin_number_t reset; /** RESET */
+    hal_spi_instance_t spi; /** SPI */
+    hal_pin_number_t sck;   /** SCK */
+    hal_pin_number_t miso;  /** MISO */
+    hal_pin_number_t mosi;  /** MOSI */
+    hal_pin_number_t cs;    /** CS */
+    hal_pin_number_t reset; /** RESET */
 } sx127x_pinout_t;
 
 /**
@@ -209,14 +209,14 @@ void sx127x_disable_crc(sx127x_data_t *data);
  *
  * @param data Radio data
  */
-void sx127x_enable_invert_i_q(sx127x_data_t *data);
+void sx127x_enable_invert_iq(sx127x_data_t *data);
 
 /**
  * @brief Disable the radio invert IQ
  *
  * @param data Radio data
  */
-void sx127x_disable_invert_i_q(sx127x_data_t *data);
+void sx127x_disable_invert_iq(sx127x_data_t *data);
 
 /**
  * @brief Set the radio OCP
@@ -224,7 +224,7 @@ void sx127x_disable_invert_i_q(sx127x_data_t *data);
  * @param data Radio data
  * @param mA OCP current
  */
-void sx127x_set_o_c_p(sx127x_data_t *data, uint8_t mA);
+void sx127x_set_ocp(sx127x_data_t *data, uint8_t mA);
 
 /**
  * @brief Set the radio gain
@@ -233,77 +233,5 @@ void sx127x_set_o_c_p(sx127x_data_t *data, uint8_t mA);
  * @param gain Gain
  */
 void sx127x_set_gain(sx127x_data_t *data, uint8_t gain);
-
-/**
- * @brief Set the explicit header mode
- *
- * @param data Radio data
- */
-void _sx127x_explicit_header_mode(sx127x_data_t *data);
-
-/**
- * @brief Set the implicit header mode
- *
- * @param data Radio data
- */
-void _sx127x_implicit_header_mode(sx127x_data_t *data);
-
-/**
- * @brief Check if the radio is transmitting
- *
- * @param data Radio data
- * @return true if transmitting, false otherwise
- */
-bool _sx127x_is_transmitting(sx127x_data_t *data);
-
-/**
- * @brief Get the radio spreading factor
- *
- * @param data Radio data
- */
-int _sx127XGetSpreadingFactor(sx127x_data_t *data);
-
-/**
- * @brief Get the radio signal bandwidth
- *
- * @param data Radio data
- * @return Signal bandwidth
- */
-long _sx127XGetSignalBandwidth(sx127x_data_t *data);
-
-/**
- * @brief Set the radio LDO flag
- *
- * @param data Radio data
- */
-void _sx127x_set_ldo_flag(sx127x_data_t *data);
-
-/**
- * @brief Read a register from the radio
- *
- * @param data Radio data
- * @param address Register address
- * @return Register value
- */
-uint8_t _sx127x_read_register(sx127x_data_t *data, uint8_t address);
-
-/**
- * @brief Write a register to the radio
- *
- * @param data Radio data
- * @param address Register address
- * @param value Register value
- */
-void _sx127x_write_register(sx127x_data_t *data, uint8_t address, uint8_t value);
-
-/**
- * @brief Trasnfer a byte to or from the radio
- *
- * @param data Radio data
- * @param address Register address
- * @param value Register value
- * @return Register value
- */
-uint8_t _sx127x_single_transfer(sx127x_data_t *data, uint8_t address, uint8_t value);
 
 #endif

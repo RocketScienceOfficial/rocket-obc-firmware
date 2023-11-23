@@ -3,9 +3,9 @@
 
 #include <stdbool.h>
 
-typedef unsigned int pin_number_t; /** Type for GPIO pin number */
-typedef float voltage_level_t;     /** Type for voltage level */
-typedef unsigned int baud_rate_t;  /** Type for baud rate */
+typedef unsigned int hal_pin_number_t; /** Type for GPIO pin number */
+typedef float hal_voltage_level_t;     /** Type for voltage level */
+typedef unsigned int hal_baud_rate_t;  /** Type for baud rate */
 
 #define PIN_NUMBER_INVALID 0xFFFFFFFF /** Invalid pin number */
 
@@ -58,7 +58,7 @@ typedef enum gpio_protocol
  * @param pin Pin number
  * @return true if pin is valid, false otherwise
  */
-bool gpio_is_pin_valid(pin_number_t pin);
+bool hal_gpio_is_pin_valid(hal_pin_number_t pin);
 
 /**
  * @brief Initialize GPIO pin
@@ -66,7 +66,7 @@ bool gpio_is_pin_valid(pin_number_t pin);
  * @param pin Pin to initialize
  * @param dir Direction of pin
  */
-void gpio_init_pin(pin_number_t pin, gpio_direction_t dir);
+void hal_gpio_init_pin(hal_pin_number_t pin, gpio_direction_t dir);
 
 /**
  * @brief Set state of GPIO pin
@@ -74,7 +74,7 @@ void gpio_init_pin(pin_number_t pin, gpio_direction_t dir);
  * @param pin Pin to set state
  * @param state State to set
  */
-void gpio_set_pin_state(pin_number_t pin, gpio_state_t state);
+void hal_gpio_set_pin_state(hal_pin_number_t pin, gpio_state_t state);
 
 /**
  * @brief Gety state of GPIO pin
@@ -82,7 +82,7 @@ void gpio_set_pin_state(pin_number_t pin, gpio_state_t state);
  * @param pin Pin to get state of
  * @param state State to get
  */
-void gpio_get_pin_state(pin_number_t pin, gpio_state_t *state);
+void hal_gpio_get_pin_state(hal_pin_number_t pin, gpio_state_t *state);
 
 /**
  * @brief Set function of GPIO pin
@@ -90,13 +90,13 @@ void gpio_get_pin_state(pin_number_t pin, gpio_state_t *state);
  * @param pin Pin to set function
  * @param function Function to set
  */
-void gpio_set_pin_function(pin_number_t pin, gpio_function_t function);
+void hal_gpio_set_pin_function(hal_pin_number_t pin, gpio_function_t function);
 
 /**
  * @brief Pull GPIO pin up
  *
  * @param pin Pin to pull up
  */
-void gpio_pull_up_pin(pin_number_t pin);
+void hal_gpio_pull_up_pin(hal_pin_number_t pin);
 
 #endif

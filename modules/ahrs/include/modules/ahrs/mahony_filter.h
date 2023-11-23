@@ -14,13 +14,13 @@
  */
 typedef struct mahony_filter_data
 {
-    quat_t q;
-    float Kp;
-    float Ki;
-    float integralFBx;
-    float integralFBy;
-    float integralFBz;
-    float samplePeriod;
+    quat_t q;           /** Quaternion */
+    float Kp;           /** Proportional gain */
+    float Ki;           /** Integral gain */
+    float integralFBx;  /** Integral X error */
+    float integralFBy;  /** Integral Y error */
+    float integralFBz;  /** Integral Z error */
+    float samplePeriod; /** Sample period in seconds */
 } mahony_filter_data_t;
 
 /**
@@ -51,16 +51,5 @@ void mahony_update_imu(mahony_filter_data_t *data, vec3_t gyroVec, vec3_t accVec
  * @param magVec Magnetometer vector in Gauss
  */
 void mahony_update_marg(mahony_filter_data_t *data, vec3_t gyroVec, vec3_t accVec, vec3_t magVec);
-
-/**
- * @brief Internal function for updating Mahony filter
- *
- * @param data Mahony filter data
- * @param gyroVec Gyrosopce vector in radians per second
- * @param halfex Half of the error in x axis
- * @param halfey Half of the error in y axis
- * @param halfez Half of the error in z axis
- */
-void _mahony_update_base(mahony_filter_data_t *data, vec3_t gyroVec, float halfex, float halfey, float halfez);
 
 #endif

@@ -11,7 +11,7 @@
  * @param config The PWM config to use for the buzzer
  * @param pin The pin to use for the buzzer
  */
-void passive_buzzer_init(pwm_config_t *config, pin_number_t pin, unsigned int frequency);
+void passive_buzzer_init(hal_pwm_config_t *config, hal_pin_number_t pin, unsigned int frequency);
 
 /**
  * @brief Sets the buzzer active or inactive
@@ -19,6 +19,6 @@ void passive_buzzer_init(pwm_config_t *config, pin_number_t pin, unsigned int fr
  * @param config The PWM config to use for the buzzer
  * @param active true to set the buzzer active, false to set it inactive
  */
-void passive_buzzer_set_active(pwm_config_t *config, bool active);
+void passive_buzzer_set_active(hal_pwm_config_t *config, bool active);
 
 #endif

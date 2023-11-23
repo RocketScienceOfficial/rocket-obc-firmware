@@ -9,7 +9,6 @@ target_link_libraries(prototyping
    module_drivers_barometer
    module_drivers_battery
    module_drivers_buzzer
-   module_drivers_console
    module_drivers_gps
    module_drivers_hal
    module_drivers_igniter

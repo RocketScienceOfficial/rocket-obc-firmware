@@ -1,4 +1,5 @@
 add_subdirectory(hal)
+add_subdirectory(utils)
 
 add_subdirectory(accelerometer)
 add_subdirectory(adc)

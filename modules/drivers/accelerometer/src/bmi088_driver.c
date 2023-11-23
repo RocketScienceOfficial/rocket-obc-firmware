@@ -8,7 +8,7 @@
 #define ACC_ERR_REG 0x02
 #define ACC_STATUS 0x03
 #define ACC_DATA 0x12
-#define ACC_SENSORtime_t 0x18
+#define ACC_SENSORTIME 0x18
 #define ACC_INT_STAT_1 0x1D
 #define ACC_TEMP 0x22
 #define ACC_FIFO_LENGTH 0x24
@@ -63,9 +63,18 @@
 #define GYRO_GND_I2C_ADDRESS 0x68
 #define GYRO_VDD_I2C_ADDRESS 0x69
 
-void bmi088_accel_init_spi(bmi088_accel_config_t *config, spi_instance_t spi, pin_number_t miso, pin_number_t mosi, pin_number_t cs, pin_number_t sck)
+static void _bmi088_accel_soft_reset(bmi088_accel_config_t *config);
+static void _bmi088_accel_set_mode(bmi088_accel_config_t *config, bool active);
+static void _bmi088_accel_set_power(bmi088_accel_config_t *config, bool on);
+static void _bmi088_init_base(bmi088_accel_config_t *config);
+static uint8_t _bmi088_accel_read_reg(bmi088_accel_config_t *config, uint8_t address);
+static void _bmi088_accel_read_regs(bmi088_accel_config_t *config, uint8_t address, uint8_t *buffer, size_t count);
+static void _bmi088_accel_write_reg(bmi088_accel_config_t *config, uint8_t address, uint8_t data);
+static void _bmi088_gyro_soft_reset(bmi088_gyro_config_t *config);
+
+void bmi088_accel_init_spi(bmi088_accel_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck)
 {
-    config->gpioConfig = (gpio_communication_config_t){
+    config->gpioConfig = (hal_gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_SPI,
         .spi = spi,
         .cs = cs,
@@ -75,14 +84,14 @@ void bmi088_accel_init_spi(bmi088_accel_config_t *config, spi_instance_t spi, pi
     };
     config->rangeConstant = 0.0f;
 
-    spi_init_pins(spi, miso, mosi, sck, cs);
+    hal_spi_init_pins(spi, miso, mosi, sck, cs);
 
     _bmi088_init_base(config);
 }
 
-void bmi088_accel_init_i2c(bmi088_accel_config_t *config, i2c_instance_t i2c, pin_number_t sda, pin_number_t scl, bool sdo1Grounded)
+void bmi088_accel_init_i2c(bmi088_accel_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl, bool sdo1Grounded)
 {
-    config->gpioConfig = (gpio_communication_config_t){
+    config->gpioConfig = (hal_gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_I2C,
         .i2c = i2c,
         .i2cAddress = sdo1Grounded ? ACC_GND_I2C_ADDRESS : ACC_VDD_I2C_ADDRESS,
@@ -92,7 +101,7 @@ void bmi088_accel_init_i2c(bmi088_accel_config_t *config, i2c_instance_t i2c, pi
     };
     config->rangeConstant = 0.0f;
 
-    i2c_init_pins(i2c, sda, scl);
+    hal_i2c_init_pins(i2c, sda, scl);
 
     _bmi088_init_base(config);
 }
@@ -101,7 +110,7 @@ void bmi088_accel_set_conf(bmi088_accel_config_t *config, bmi088_accel_odr_t odr
 {
     _bmi088_accel_write_reg(config, ACC_CONF, odr | (osr << 4));
 
-    time_sleep_ms(5);
+    hal_time_sleep_ms(5);
 }
 
 void bmi088_accel_set_range(bmi088_accel_config_t *config, bmi088_accel_range_t range)
@@ -110,7 +119,7 @@ void bmi088_accel_set_range(bmi088_accel_config_t *config, bmi088_accel_range_t 
 
     _bmi088_accel_write_reg(config, ACC_RANGE, range);
 
-    time_sleep_ms(5);
+    hal_time_sleep_ms(5);
 }
 
 void bmi088_accel_read(bmi088_accel_config_t *config, vec3_t *accel)
@@ -128,63 +137,9 @@ void bmi088_accel_read(bmi088_accel_config_t *config, vec3_t *accel)
     accel->z = accelZ / 32768.0f * config->rangeConstant;
 }
 
-void _bmi088_accel_soft_reset(bmi088_accel_config_t *config)
+void bmi088_gyro_init_spi(bmi088_gyro_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck)
 {
-    _bmi088_accel_write_reg(config, ACC_SOFTRESET, ACC_SOFTRESET_CMD);
-
-    time_sleep_ms(50);
-}
-
-void _bmi088_accel_set_mode(bmi088_accel_config_t *config, bool active)
-{
-    uint8_t data = active ? ACC_PWR_CONF_ACTIVE_CMD : ACC_PWR_CONF_SUSPEND_CMD;
-
-    _bmi088_accel_write_reg(config, ACC_PWR_CONF, data);
-
-    time_sleep_ms(5);
-}
-
-void _bmi088_accel_set_power(bmi088_accel_config_t *config, bool on)
-{
-    uint8_t data = on ? ACC_PWR_CTRL_ON_CMD : ACC_PWR_CTRL_OFF_CMD;
-
-    _bmi088_accel_write_reg(config, ACC_PWR_CTRL, data);
-
-    time_sleep_ms(5);
-}
-
-void _bmi088_init_base(bmi088_accel_config_t *config)
-{
-    _bmi088_accel_set_power(config, true);
-    _bmi088_accel_set_mode(config, true);
-}
-
-uint8_t _bmi088_accel_read_reg(bmi088_accel_config_t *config, uint8_t address)
-{
-    uint8_t data[2];
-
-    gpio_read_regs(&config->gpioConfig, address, data, 2);
-
-    return data[1];
-}
-
-void _bmi088_accel_read_regs(bmi088_accel_config_t *config, uint8_t address, uint8_t *buffer, size_t count)
-{
-    uint8_t tmp_buffer[16];
-
-    gpio_read_regs(&config->gpioConfig, address, tmp_buffer, count + 1);
-
-    memcpy(buffer, tmp_buffer + 1, count);
-}
-
-void _bmi088_accel_write_reg(bmi088_accel_config_t *config, uint8_t address, uint8_t data)
-{
-    gpio_write_reg(&config->gpioConfig, address, data);
-}
-
-void bmi088_gyro_init_spi(bmi088_gyro_config_t *config, spi_instance_t spi, pin_number_t miso, pin_number_t mosi, pin_number_t cs, pin_number_t sck)
-{
-    config->gpioConfig = (gpio_communication_config_t){
+    config->gpioConfig = (hal_gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_SPI,
         .spi = spi,
         .cs = cs,
@@ -194,12 +149,12 @@ void bmi088_gyro_init_spi(bmi088_gyro_config_t *config, spi_instance_t spi, pin_
     };
     config->rangeConstant = 0.0f;
 
-    spi_init_pins(spi, miso, mosi, sck, cs);
+    hal_spi_init_pins(spi, miso, mosi, sck, cs);
 }
 
-void bmi088_gyro_init_i2c(bmi088_gyro_config_t *config, i2c_instance_t i2c, pin_number_t sda, pin_number_t scl, bool sdo1Grounded)
+void bmi088_gyro_init_i2c(bmi088_gyro_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl, bool sdo1Grounded)
 {
-    config->gpioConfig = (gpio_communication_config_t){
+    config->gpioConfig = (hal_gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_I2C,
         .i2c = i2c,
         .i2cAddress = sdo1Grounded ? GYRO_GND_I2C_ADDRESS : GYRO_VDD_I2C_ADDRESS,
@@ -209,14 +164,14 @@ void bmi088_gyro_init_i2c(bmi088_gyro_config_t *config, i2c_instance_t i2c, pin_
     };
     config->rangeConstant = 0.0f;
 
-    i2c_init_pins(i2c, sda, scl);
+    hal_i2c_init_pins(i2c, sda, scl);
 }
 
 void bmi088_gyro_set_bandwidth(bmi088_gyro_config_t *config, bmi088_gyro_bandwidth_t bw)
 {
-    gpio_write_reg(&config->gpioConfig, GYRO_BANDWIDTH, (uint8_t)bw | 0x80);
+    hal_gpio_write_reg(&config->gpioConfig, GYRO_BANDWIDTH, (uint8_t)bw | 0x80);
 
-    time_sleep_ms(5);
+    hal_time_sleep_ms(5);
 }
 
 void bmi088_gyro_set_range(bmi088_gyro_config_t *config, bmi088_gyro_range_t range)
@@ -236,16 +191,16 @@ void bmi088_gyro_set_range(bmi088_gyro_config_t *config, bmi088_gyro_range_t ran
 
     config->rangeConstant = DEG_2_RAD(val);
 
-    gpio_write_reg(&config->gpioConfig, GYRO_RANGE, (uint8_t)range);
+    hal_gpio_write_reg(&config->gpioConfig, GYRO_RANGE, (uint8_t)range);
 
-    time_sleep_ms(5);
+    hal_time_sleep_ms(5);
 }
 
 void bmi088_gyro_read(bmi088_gyro_config_t *config, vec3_t *gyro)
 {
     uint8_t buff[6];
 
-    gpio_read_regs(&config->gpioConfig, GYRO_RATE, buff, 6);
+    hal_gpio_read_regs(&config->gpioConfig, GYRO_RATE, buff, 6);
 
     int16_t gyroX = (int16_t)((buff[1] << 8) | buff[0]);
     int16_t gyroY = (int16_t)((buff[3] << 8) | buff[2]);
@@ -256,9 +211,63 @@ void bmi088_gyro_read(bmi088_gyro_config_t *config, vec3_t *gyro)
     gyro->z = gyroZ / 32767.0f * config->rangeConstant;
 }
 
-void _bmi088_gyro_soft_reset(bmi088_gyro_config_t *config)
+static void _bmi088_accel_soft_reset(bmi088_accel_config_t *config)
 {
-    gpio_write_reg(&config->gpioConfig, GYRO_SOFTRESET, GYRO_SOFTRESET_CMD);
+    _bmi088_accel_write_reg(config, ACC_SOFTRESET, ACC_SOFTRESET_CMD);
 
-    time_sleep_ms(50);
+    hal_time_sleep_ms(50);
+}
+
+static void _bmi088_accel_set_mode(bmi088_accel_config_t *config, bool active)
+{
+    uint8_t data = active ? ACC_PWR_CONF_ACTIVE_CMD : ACC_PWR_CONF_SUSPEND_CMD;
+
+    _bmi088_accel_write_reg(config, ACC_PWR_CONF, data);
+
+    hal_time_sleep_ms(5);
+}
+
+static void _bmi088_accel_set_power(bmi088_accel_config_t *config, bool on)
+{
+    uint8_t data = on ? ACC_PWR_CTRL_ON_CMD : ACC_PWR_CTRL_OFF_CMD;
+
+    _bmi088_accel_write_reg(config, ACC_PWR_CTRL, data);
+
+    hal_time_sleep_ms(5);
+}
+
+static void _bmi088_init_base(bmi088_accel_config_t *config)
+{
+    _bmi088_accel_set_power(config, true);
+    _bmi088_accel_set_mode(config, true);
+}
+
+static uint8_t _bmi088_accel_read_reg(bmi088_accel_config_t *config, uint8_t address)
+{
+    uint8_t data[2];
+
+    hal_gpio_read_regs(&config->gpioConfig, address, data, 2);
+
+    return data[1];
+}
+
+static void _bmi088_accel_read_regs(bmi088_accel_config_t *config, uint8_t address, uint8_t *buffer, size_t count)
+{
+    uint8_t tmp_buffer[16];
+
+    hal_gpio_read_regs(&config->gpioConfig, address, tmp_buffer, count + 1);
+
+    memcpy(buffer, tmp_buffer + 1, count);
+}
+
+static void _bmi088_accel_write_reg(bmi088_accel_config_t *config, uint8_t address, uint8_t data)
+{
+    hal_gpio_write_reg(&config->gpioConfig, address, data);
+}
+
+static void _bmi088_gyro_soft_reset(bmi088_gyro_config_t *config)
+{
+    hal_gpio_write_reg(&config->gpioConfig, GYRO_SOFTRESET, GYRO_SOFTRESET_CMD);
+
+    hal_time_sleep_ms(50);
 }

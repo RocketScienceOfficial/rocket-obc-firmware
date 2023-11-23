@@ -35,9 +35,11 @@
 
 #define I2C_ADDRESS 0x46
 
-void bmp581_init_spi(bmp581_config_t *config, spi_instance_t spi, pin_number_t miso, pin_number_t mosi, pin_number_t cs, pin_number_t sck)
+static void _bmp581_soft_reset(bmp581_config_t *config);
+
+void bmp581_init_spi(bmp581_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck)
 {
-    config->gpioConfig = (gpio_communication_config_t){
+    config->gpioConfig = (hal_gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_SPI,
         .spi = spi,
         .cs = cs,
@@ -46,12 +48,12 @@ void bmp581_init_spi(bmp581_config_t *config, spi_instance_t spi, pin_number_t m
         .writeMask = 0x7F,
     };
 
-    return spi_init_pins(spi, miso, mosi, cs, sck);
+    hal_spi_init_pins(spi, miso, mosi, cs, sck);
 }
 
-void bmp581_init_i2c(bmp581_config_t *config, i2c_instance_t i2c, pin_number_t sda, pin_number_t scl)
+void bmp581_init_i2c(bmp581_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl)
 {
-    config->gpioConfig = (gpio_communication_config_t){
+    config->gpioConfig = (hal_gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_I2C,
         .i2c = i2c,
         .i2cAddress = I2C_ADDRESS,
@@ -60,34 +62,34 @@ void bmp581_init_i2c(bmp581_config_t *config, i2c_instance_t i2c, pin_number_t s
         .writeMask = 0x7F,
     };
 
-    return i2c_init_pins(i2c, sda, scl);
+    hal_i2c_init_pins(i2c, sda, scl);
 }
 
-void bmp581_validate_id(bmp581_config_t *config, bool *pValid)
+bool bmp581_validate_id(bmp581_config_t *config)
 {
     uint8_t buffer[2];
 
-    gpio_read_regs(&config->gpioConfig, CHIP_ID, buffer, 2);
+    hal_gpio_read_regs(&config->gpioConfig, CHIP_ID, buffer, 2);
 
-    *pValid = buffer[0] == 0x58 && buffer[1] == 0x01;
+    return buffer[0] == 0x58 && buffer[1] == 0x01;
 }
 
-void bmp581_set_odr__osr(bmp581_config_t *config, bmp581_osr_t tempOSR, bmp581_osr_t pressOSR, bmp581_odr_t odr)
+void bmp581_set_odr_osr(bmp581_config_t *config, bmp581_osr_t tempOSR, bmp581_osr_t pressOSR, bmp581_odr_t odr)
 {
-    gpio_write_reg(&config->gpioConfig, OSR_CONFIG, ((uint8_t)pressOSR << 3) | (uint8_t)tempOSR | 1 << 6);
-    gpio_write_reg_field(&config->gpioConfig, ODR_CONFIG, 5, 2, (uint8_t)odr);
+    hal_gpio_write_reg(&config->gpioConfig, OSR_CONFIG, ((uint8_t)pressOSR << 3) | (uint8_t)tempOSR | 1 << 6);
+    hal_gpio_write_reg_field(&config->gpioConfig, ODR_CONFIG, 5, 2, (uint8_t)odr);
 }
 
 void bmp581_set_mode(bmp581_config_t *config, bmp581_mode_t mode)
 {
-    gpio_write_reg_field(&config->gpioConfig, ODR_CONFIG, 2, 0, (uint8_t)mode);
+    hal_gpio_write_reg_field(&config->gpioConfig, ODR_CONFIG, 2, 0, (uint8_t)mode);
 }
 
 void bmp581_read(bmp581_config_t *config, bmp581_data_t *data)
 {
     uint8_t buffer[6];
 
-    gpio_read_regs(&config->gpioConfig, TEMP_DATA_XLSB, buffer, 6);
+    hal_gpio_read_regs(&config->gpioConfig, TEMP_DATA_XLSB, buffer, 6);
 
     int raw_temp = (int)buffer[2] << 16 | (int)buffer[1] << 8 | (int)buffer[0];
     int raw_press = (int)buffer[5] << 16 | (int)buffer[4] << 8 | (int)buffer[3];
@@ -96,9 +98,9 @@ void bmp581_read(bmp581_config_t *config, bmp581_data_t *data)
     data->pressure = (float)raw_press / 64.0f;
 }
 
-void _bmp581_soft_reset(bmp581_config_t *config)
+static void _bmp581_soft_reset(bmp581_config_t *config)
 {
-    gpio_write_reg(&config->gpioConfig, CMD, 0xB6);
+    hal_gpio_write_reg(&config->gpioConfig, CMD, 0xB6);
 
-    time_sleep_ms(10);
+    hal_time_sleep_ms(10);
 }

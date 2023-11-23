@@ -4,7 +4,7 @@
 
 static queue_t s_FIFO;
 
-bool core_start_next(core_func_t function, size_t fifoElementSize, size_t fifoElementsCount)
+bool hal_core_start_next(hal_core_func_t function, size_t fifoElementSize, size_t fifoElementsCount)
 {
     if (function)
     {
@@ -19,27 +19,27 @@ bool core_start_next(core_func_t function, size_t fifoElementSize, size_t fifoEl
     }
 }
 
-void core_set_as_victim(void)
+void hal_core_set_as_victim(void)
 {
     multicore_lockout_victim_init();
 }
 
-void core_start_lock(void)
+void hal_core_start_lock(void)
 {
     multicore_lockout_start_blocking();
 }
 
-void core_end_lock(void)
+void hal_core_end_lock(void)
 {
     multicore_lockout_end_blocking();
 }
 
-void core_send_data(void *data)
+void hal_core_send_data(void *data)
 {
     queue_add_blocking(&s_FIFO, data);
 }
 
-bool core_receive_data(void *data)
+bool hal_core_receive_data(void *data)
 {
     if (data)
     {

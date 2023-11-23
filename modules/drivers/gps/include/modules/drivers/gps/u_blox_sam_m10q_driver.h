@@ -1,8 +1,8 @@
 #ifndef _U_BLOX_SAM_M10Q_DRIVER_H
 #define _U_BLOX_SAM_M10Q_DRIVER_H
 
+#include "modules/drivers/utils/gpio_utils.h"
 #include "modules/drivers/hal/gpio_driver.h"
-#include "modules/drivers/hal/gpio_utils.h"
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -13,7 +13,7 @@
  */
 typedef struct ublox_sam_m10q_config
 {
-    gpio_communication_config_t gpioConfig; /** The GPIO communication configuration */
+    hal_gpio_communication_config_t gpioConfig; /** The GPIO communication configuration */
 } ublox_sam_m10q_config_t;
 
 /**
@@ -37,7 +37,7 @@ typedef struct ublox_sam_m10q_data
  * @param cs The CS pin to use
  * @param sck The SCK pin to use
  */
-void ublox_sam_m10q_init_spi(ublox_sam_m10q_config_t *config, spi_instance_t spi, pin_number_t miso, pin_number_t mosi, pin_number_t cs, pin_number_t sck);
+void ublox_sam_m10q_init_spi(ublox_sam_m10q_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck);
 
 /**
  * @brief Initializes the u-blox SAM-M10Q GPS module with I2C
@@ -47,7 +47,7 @@ void ublox_sam_m10q_init_spi(ublox_sam_m10q_config_t *config, spi_instance_t spi
  * @param sda The SDA pin to use
  * @param scl The SCL pin to use
  */
-void ublox_sam_m10q_init_i2c(ublox_sam_m10q_config_t *config, i2c_instance_t i2c, pin_number_t sda, pin_number_t scl);
+void ublox_sam_m10q_init_i2c(ublox_sam_m10q_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl);
 
 /**
  * @brief Reads a NMEA sentence from the u-blox SAM-M10Q GPS module

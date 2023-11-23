@@ -9,11 +9,11 @@
  */
 typedef struct max1161x_config
 {
-    i2c_instance_t i2c;
-    pin_number_t sda;
-    pin_number_t scl;
-    uint8_t address;
-    float vRef;
+    hal_i2c_instance_t i2c; /** Selected I2C */
+    hal_pin_number_t sda;   /** SDA Pin*/
+    hal_pin_number_t scl;   /** SCL Pin */
+    uint8_t address;        /** I2C Address */
+    float vRef;             /** Reference voltage */
 } max1161x_config_t;
 
 /**
@@ -57,7 +57,7 @@ typedef enum max1161x_channel
  * @param sda SDA pin
  * @param scl SCL pin
  */
-void max1161_x_init(max1161x_config_t *config, max1161x_type_t type, i2c_instance_t i2c, pin_number_t sda, pin_number_t scl);
+void max1161x_init(max1161x_config_t *config, max1161x_type_t type, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl);
 
 /**
  * @brief Reads MAX1161X value
@@ -66,22 +66,6 @@ void max1161_x_init(max1161x_config_t *config, max1161x_type_t type, i2c_instanc
  * @param channel Channel
  * @param voltage Voltage value to return
  */
-void max1161_x_read(max1161x_config_t *config, max1161x_channel_t channel, voltage_level_t *voltage);
-
-/**
- * @brief Sets up MAX1161X
- *
- * @param config Configuration
- * @param data Data
- */
-void _max1161_x_setup(max1161x_config_t *config, uint8_t data);
-
-/**
- * @brief Configures MAX1161X
- *
- * @param config Configuration
- * @param data Data
- */
-void _max1161_x_config(max1161x_config_t *config, uint8_t data);
+void max1161x_read(max1161x_config_t *config, max1161x_channel_t channel, hal_voltage_level_t *voltage);
 
 #endif

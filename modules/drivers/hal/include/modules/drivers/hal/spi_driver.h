@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-typedef uint8_t spi_instance_t; /** SPI instance */
+typedef uint8_t hal_spi_instance_t; /** SPI instance */
 
 #define SPI_INSTANCE_INVALID 0xFF /** SPI invalid instance */
 
@@ -16,7 +16,7 @@ typedef uint8_t spi_instance_t; /** SPI instance */
  * @param instance SPI Instance
  * @return True if instance is valid
  */
-bool spi_check_instance(spi_instance_t spi);
+bool hal_spi_check_instance(hal_spi_instance_t spi);
 
 /**
  * @brief Checks if SPI MISO pin is valid
@@ -25,7 +25,7 @@ bool spi_check_instance(spi_instance_t spi);
  * @param miso MISO pin
  * @return True if miso is valid
  */
-bool spi_check_miso(spi_instance_t spi, pin_number_t miso);
+bool hal_spi_check_miso(hal_spi_instance_t spi, hal_pin_number_t miso);
 
 /**
  * @brief Checks if SPI MOSI pin is valid
@@ -34,7 +34,7 @@ bool spi_check_miso(spi_instance_t spi, pin_number_t miso);
  * @param mosi MOSI pin
  * @return True if mosi is valid
  */
-bool spi_check_mosi(spi_instance_t spi, pin_number_t mosi);
+bool hal_spi_check_mosi(hal_spi_instance_t spi, hal_pin_number_t mosi);
 
 /**
  * @brief Checks if SPI SCK pin is valid
@@ -43,7 +43,7 @@ bool spi_check_mosi(spi_instance_t spi, pin_number_t mosi);
  * @param sck SCK pin
  * @return True if sck is valid
  */
-bool spi_check_sck(spi_instance_t spi, pin_number_t sck);
+bool hal_spi_check_sck(hal_spi_instance_t spi, hal_pin_number_t sck);
 
 /**
  * @brief Initialize SPI instance
@@ -51,7 +51,7 @@ bool spi_check_sck(spi_instance_t spi, pin_number_t sck);
  * @param spi SPI Instance
  * @param baudrate Baud rate
  */
-void spi_init_all(spi_instance_t spi, unsigned long baudrate);
+void hal_spi_init_all(hal_spi_instance_t spi, unsigned long baudrate);
 
 /**
  * @brief Initialize SPI pins
@@ -62,7 +62,21 @@ void spi_init_all(spi_instance_t spi, unsigned long baudrate);
  * @param sck SCK pin
  * @param cs CS pin
  */
-void spi_init_pins(spi_instance_t spi, pin_number_t miso, pin_number_t mosi, pin_number_t sck, pin_number_t cs);
+void hal_spi_init_pins(hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t sck, hal_pin_number_t cs);
+
+/**
+ * @brief Selects CS pin of SPI
+ *
+ * @param cs CS Pin
+ */
+void hal_spi_cs_select(hal_pin_number_t cs);
+
+/**
+ * @brief Deselects CS pin of SPI
+ *
+ * @param cs CS Pin
+ */
+void hal_spi_cs_deselect(hal_pin_number_t cs);
 
 /**
  * @brief Write to SPI with blocking
@@ -72,7 +86,7 @@ void spi_init_pins(spi_instance_t spi, pin_number_t miso, pin_number_t mosi, pin
  * @param size Size of data
  * @return True if operation was successful
  */
-bool spi_write(spi_instance_t spi, const uint8_t *data, size_t size);
+bool hal_spi_write(hal_spi_instance_t spi, const uint8_t *data, size_t size);
 
 /**
  * @brief Read from SPI with blocking
@@ -83,7 +97,7 @@ bool spi_write(spi_instance_t spi, const uint8_t *data, size_t size);
  * @param size Size of data to receive
  * @return True if operation was successful
  */
-bool spi_read(spi_instance_t spi, uint8_t repeatedTXData, uint8_t *destination, size_t size);
+bool hal_spi_read(hal_spi_instance_t spi, uint8_t repeatedTXData, uint8_t *destination, size_t size);
 
 /**
  * @brief Write and read from SPI with blocking
@@ -94,6 +108,6 @@ bool spi_read(spi_instance_t spi, uint8_t repeatedTXData, uint8_t *destination, 
  * @param size Size of data
  * @return True if operation was successful
  */
-bool spi_write_read(spi_instance_t spi, const uint8_t *data, uint8_t *destination, size_t size);
+bool hal_spi_write_read(hal_spi_instance_t spi, const uint8_t *data, uint8_t *destination, size_t size);
 
 #endif

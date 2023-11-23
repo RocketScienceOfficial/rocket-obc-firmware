@@ -6,7 +6,7 @@
  * REF: https://github.com/boschsensortec/BMI08x-Sensor-API
  */
 
-#include "modules/drivers/hal/gpio_utils.h"
+#include "modules/drivers/utils/gpio_utils.h"
 #include "modules/maths/vector.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -17,8 +17,8 @@
  */
 typedef struct bmi088_accel_config
 {
-    gpio_communication_config_t gpioConfig; /** GPIO communication configuration */
-    float rangeConstant;                    /** Range Constant */
+    hal_gpio_communication_config_t gpioConfig; /** GPIO communication configuration */
+    float rangeConstant;                        /** Range Constant */
 } bmi088_accel_config_t;
 
 /**
@@ -62,8 +62,8 @@ typedef enum bmi088_accel_osr
  */
 typedef struct bmi088_gyro_config
 {
-    gpio_communication_config_t gpioConfig; /** GPIO communication configuration */
-    float rangeConstant;                    /** Range constant */
+    hal_gpio_communication_config_t gpioConfig; /** GPIO communication configuration */
+    float rangeConstant;                        /** Range constant */
 } bmi088_gyro_config_t;
 
 /**
@@ -103,7 +103,7 @@ typedef enum bmi088_gyro_bandwidth
  * @param cs CS
  * @param sck SCK
  */
-void bmi088_accel_init_spi(bmi088_accel_config_t *config, spi_instance_t spi, pin_number_t miso, pin_number_t mosi, pin_number_t cs, pin_number_t sck);
+void bmi088_accel_init_spi(bmi088_accel_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck);
 
 /**
  * @brief Initialize BMI088 accelerometer
@@ -114,7 +114,7 @@ void bmi088_accel_init_spi(bmi088_accel_config_t *config, spi_instance_t spi, pi
  * @param scl SCL
  * @param sdo1Grounded Is SDO1 pulled to GND
  */
-void bmi088_accel_init_i2c(bmi088_accel_config_t *config, i2c_instance_t i2c, pin_number_t sda, pin_number_t scl, bool sdo1Grounded);
+void bmi088_accel_init_i2c(bmi088_accel_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl, bool sdo1Grounded);
 
 /**
  * @brief Set BMI088 accelerometer configuration
@@ -142,64 +142,6 @@ void bmi088_accel_set_range(bmi088_accel_config_t *config, bmi088_accel_range_t 
 void bmi088_accel_read(bmi088_accel_config_t *config, vec3_t *accel);
 
 /**
- * @brief Soft reset BMI088 accelerometer
- *
- * @param config Configuration
- */
-void _bmi088_accel_soft_reset(bmi088_accel_config_t *config);
-
-/**
- * @brief Set BMI088 accelerometer mode
- *
- * @param config Configuration
- * @param active Active
- */
-void _bmi088_accel_set_mode(bmi088_accel_config_t *config, bool active);
-
-/**
- * @brief Set BMI088 accelerometer power
- *
- * @param config Configuration
- * @param on On
- */
-void _bmi088_accel_set_power(bmi088_accel_config_t *config, bool on);
-
-/**
- * @brief Initialize BMI088 accelerometer base
- *
- * @param config Configuration
- */
-void _bmi088_init_base(bmi088_accel_config_t *config);
-
-/**
- * @brief Read BMI088 accelerometer register
- *
- * @param config Configuration
- * @param address Address
- * @return Register value
- */
-uint8_t _bmi088_accel_read_reg(bmi088_accel_config_t *config, uint8_t address);
-
-/**
- * @brief Read BMI088 accelerometer registers
- *
- * @param config Configuration
- * @param address Address
- * @param buffer Buffer
- * @param count Count
- */
-void _bmi088_accel_read_regs(bmi088_accel_config_t *config, uint8_t address, uint8_t *buffer, size_t count);
-
-/**
- * @brief Write BMI088 accelerometer register
- *
- * @param config Configuration
- * @param address Address
- * @param data Data
- */
-void _bmi088_accel_write_reg(bmi088_accel_config_t *config, uint8_t address, uint8_t data);
-
-/**
  * @brief Initialize BMI088 gyroscope
  *
  * @param config Configuration
@@ -209,7 +151,7 @@ void _bmi088_accel_write_reg(bmi088_accel_config_t *config, uint8_t address, uin
  * @param cs CS
  * @param sck SCK
  */
-void bmi088_gyro_init_spi(bmi088_gyro_config_t *config, spi_instance_t spi, pin_number_t miso, pin_number_t mosi, pin_number_t cs, pin_number_t sck);
+void bmi088_gyro_init_spi(bmi088_gyro_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck);
 
 /**
  * @brief Initialize BMI088 gyroscope
@@ -220,7 +162,7 @@ void bmi088_gyro_init_spi(bmi088_gyro_config_t *config, spi_instance_t spi, pin_
  * @param scl SCL
  * @param sdo1Grounded Is SDO1 pulled to GND
  */
-void bmi088_gyro_init_i2c(bmi088_gyro_config_t *config, i2c_instance_t i2c, pin_number_t sda, pin_number_t scl, bool sdo1Grounded);
+void bmi088_gyro_init_i2c(bmi088_gyro_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl, bool sdo1Grounded);
 
 /**
  * @brief Set BMI088 gyroscope bandwidth
@@ -245,12 +187,5 @@ void bmi088_gyro_set_range(bmi088_gyro_config_t *config, bmi088_gyro_range_t ran
  * @param gyro Angular velocity in radians per second
  */
 void bmi088_gyro_read(bmi088_gyro_config_t *config, vec3_t *gyro);
-
-/**
- * @brief Soft reset BMI088 gyroscope
- *
- * @param config Configuration
- */
-void _bmi088_gyro_soft_reset(bmi088_gyro_config_t *config);
 
 #endif

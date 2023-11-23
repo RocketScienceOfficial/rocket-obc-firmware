@@ -14,6 +14,5 @@ CTestTestfile.cmake
 _deps
 
 build/
-executables/
 
 **/__pycache__/

@@ -8,8 +8,8 @@
  */
 typedef struct e19_433m20sc_config
 {
-    pin_number_t rxen; /** Switch to enable receiving */
-    pin_number_t txen; /** Switch to enable transmitting */
+    hal_pin_number_t rxen; /** Switch to enable receiving */
+    hal_pin_number_t txen; /** Switch to enable transmitting */
 } e19_433m20sc_config_t;
 
 /**
@@ -29,7 +29,7 @@ typedef enum e19_433m20sc_state
  * @param rxen Pin number of RXEN pin
  * @param txen Pin number of TXEN pin
  */
-void e19_433m20sc_init(e19_433m20sc_config_t *config, pin_number_t rxen, pin_number_t txen);
+void e19_433m20sc_init(e19_433m20sc_config_t *config, hal_pin_number_t rxen, hal_pin_number_t txen);
 
 /**
  * @brief Set state of E19-433M20SC LoRa module

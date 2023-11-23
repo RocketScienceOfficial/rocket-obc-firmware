@@ -1,7 +1,7 @@
 #ifndef _BMP581_DRIVER_H
 #define _BMP581_DRIVER_H
 
-#include "modules/drivers/hal/gpio_utils.h"
+#include "modules/drivers/utils/gpio_utils.h"
 #include <stdbool.h>
 
 /**
@@ -9,7 +9,7 @@
  */
 typedef struct bmp581_config
 {
-    gpio_communication_config_t gpioConfig; /** GPIO communication configuration */
+    hal_gpio_communication_config_t gpioConfig; /** GPIO communication configuration */
 } bmp581_config_t;
 
 /**
@@ -96,7 +96,7 @@ typedef enum bmp581_mode
  * @param cs CS pin
  * @param sck SCK pin
  */
-void bmp581_init_spi(bmp581_config_t *config, spi_instance_t spi, pin_number_t miso, pin_number_t mosi, pin_number_t cs, pin_number_t sck);
+void bmp581_init_spi(bmp581_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck);
 
 /**
  * @brief Initializes BMP581 using I2C
@@ -106,15 +106,15 @@ void bmp581_init_spi(bmp581_config_t *config, spi_instance_t spi, pin_number_t m
  * @param sda SDA pin
  * @param scl SCL pin
  */
-void bmp581_init_i2c(bmp581_config_t *config, i2c_instance_t i2c, pin_number_t sda, pin_number_t scl);
+void bmp581_init_i2c(bmp581_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl);
 
 /**
  * @brief Validates BMP581 ID
  *
  * @param config BMP581 configuration
- * @param pValid Pointer to store validation result
+ * @return Validation result
  */
-void bmp581_validate_id(bmp581_config_t *config, bool *pValid);
+bool bmp581_validate_id(bmp581_config_t *config);
 
 /**
  * @brief Sets BMP581 OSR of temperature and pressure
@@ -124,7 +124,7 @@ void bmp581_validate_id(bmp581_config_t *config, bool *pValid);
  * @param pressOSR OSR of pressure
  * @param odr ODR of BMP581. Refer to datasheet for allowed values!
  */
-void bmp581_set_odr__osr(bmp581_config_t *config, bmp581_osr_t tempOSR, bmp581_osr_t pressOSR, bmp581_odr_t odr);
+void bmp581_set_odr_osr(bmp581_config_t *config, bmp581_osr_t tempOSR, bmp581_osr_t pressOSR, bmp581_odr_t odr);
 
 /**
  * @brief Sets BMP581 mode
@@ -141,12 +141,5 @@ void bmp581_set_mode(bmp581_config_t *config, bmp581_mode_t mode);
  * @param data BMP581 data pointer
  */
 void bmp581_read(bmp581_config_t *config, bmp581_data_t *data);
-
-/**
- * @brief BMP581 soft reset
- *
- * @param config BMP581 configuration
- */
-void _bmp581_soft_reset(bmp581_config_t *config);
 
 #endif

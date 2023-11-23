@@ -1,6 +1,8 @@
 #include "modules/ahrs/mahony_filter.h"
 #include <math.h>
 
+static void _mahony_update_base(mahony_filter_data_t *data, vec3_t gyroVec, float ex, float ey, float ez);
+
 void mahony_init(mahony_filter_data_t *data, float kp, float ki, float samplePeriod)
 {
     data->q = (quat_t){1.0f, 0.0f, 0.0f, 0.0f};
@@ -64,7 +66,7 @@ void mahony_update_marg(mahony_filter_data_t *data, vec3_t gyroVec, vec3_t accVe
         (accVec.x * vy - accVec.y * vx) + (magVec.x * wy - magVec.y * wx));
 }
 
-void _mahony_update_base(mahony_filter_data_t *data, vec3_t gyroVec, float ex, float ey, float ez)
+static void _mahony_update_base(mahony_filter_data_t *data, vec3_t gyroVec, float ex, float ey, float ez)
 {
     if (data->Ki > 0.0f)
     {

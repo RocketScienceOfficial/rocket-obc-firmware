@@ -2,19 +2,19 @@
 #include "hardware/i2c.h"
 #include "pico/stdlib.h"
 
-static i2c_inst_t *__get_i2c(i2c_instance_t i2c)
+static i2c_inst_t *__get_i2c(hal_i2c_instance_t i2c)
 {
     return (i2c == 0 ? i2c0 : i2c1);
 }
 
-bool i2c_check_instance(i2c_instance_t i2c)
+bool hal_i2c_check_instance(hal_i2c_instance_t i2c)
 {
     return i2c >= 0 && i2c <= 1;
 }
 
-bool i2c_check_sda(i2c_instance_t i2c, pin_number_t sda)
+bool hal_i2c_check_sda(hal_i2c_instance_t i2c, hal_pin_number_t sda)
 {
-    if (!i2c_check_instance(i2c))
+    if (!hal_i2c_check_instance(i2c))
     {
         return false;
     }
@@ -33,9 +33,9 @@ bool i2c_check_sda(i2c_instance_t i2c, pin_number_t sda)
     }
 }
 
-bool i2c_check_scl(i2c_instance_t i2c, pin_number_t scl)
+bool hal_i2c_check_scl(hal_i2c_instance_t i2c, hal_pin_number_t scl)
 {
-    if (!i2c_check_instance(i2c))
+    if (!hal_i2c_check_instance(i2c))
     {
         return false;
     }
@@ -54,9 +54,9 @@ bool i2c_check_scl(i2c_instance_t i2c, pin_number_t scl)
     }
 }
 
-void i2c_init_all(i2c_instance_t i2c, unsigned long baudrate)
+void hal_i2c_init_all(hal_i2c_instance_t i2c, unsigned long baudrate)
 {
-    if (!i2c_check_instance(i2c))
+    if (!hal_i2c_check_instance(i2c))
     {
         return;
     }
@@ -64,22 +64,22 @@ void i2c_init_all(i2c_instance_t i2c, unsigned long baudrate)
     i2c_init(__get_i2c(i2c), baudrate);
 }
 
-void i2c_init_pins(i2c_instance_t i2c, pin_number_t sda, pin_number_t scl)
+void hal_i2c_init_pins(hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl)
 {
-    if (!i2c_check_instance(i2c) || !i2c_check_sda(i2c, sda) || !i2c_check_scl(i2c, scl))
+    if (!hal_i2c_check_instance(i2c) || !hal_i2c_check_sda(i2c, sda) || !hal_i2c_check_scl(i2c, scl))
     {
         return;
     }
 
-    gpio_set_pin_function(sda, GPIO_FUNCTION_I2C);
-    gpio_set_pin_function(scl, GPIO_FUNCTION_I2C);
-    gpio_pull_up_pin(sda);
-    gpio_pull_up_pin(scl);
+    hal_gpio_set_pin_function(sda, GPIO_FUNCTION_I2C);
+    hal_gpio_set_pin_function(scl, GPIO_FUNCTION_I2C);
+    hal_gpio_pull_up_pin(sda);
+    hal_gpio_pull_up_pin(scl);
 }
 
-bool i2c_write(i2c_instance_t i2c, uint8_t address, const uint8_t *data, size_t size, bool nostop)
+bool hal_i2c_write(hal_i2c_instance_t i2c, uint8_t address, const uint8_t *data, size_t size, bool nostop)
 {
-    if (!i2c_check_instance(i2c) || !data)
+    if (!hal_i2c_check_instance(i2c) || !data)
     {
         return false;
     }
@@ -92,9 +92,9 @@ bool i2c_write(i2c_instance_t i2c, uint8_t address, const uint8_t *data, size_t 
     return true;
 }
 
-bool i2c_read(i2c_instance_t i2c, uint8_t address, uint8_t *destination, size_t size, bool nostop)
+bool hal_i2c_read(hal_i2c_instance_t i2c, uint8_t address, uint8_t *destination, size_t size, bool nostop)
 {
-    if (!i2c_check_instance(i2c) || !destination)
+    if (!hal_i2c_check_instance(i2c) || !destination)
     {
         return false;
     }

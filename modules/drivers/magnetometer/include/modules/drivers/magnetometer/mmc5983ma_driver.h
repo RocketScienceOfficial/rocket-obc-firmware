@@ -6,7 +6,7 @@
  * REF: https://www.vectornav.com/resources/inertial-navigation-primer/specifications--and--error-budgets/specs-hsicalibration
  */
 
-#include "modules/drivers/hal/gpio_utils.h"
+#include "modules/drivers/utils/gpio_utils.h"
 #include "modules/maths/vector.h"
 #include <stdbool.h>
 
@@ -15,7 +15,7 @@
  */
 typedef struct mmc5983ma_config
 {
-    gpio_communication_config_t gpioConfig; /** The GPIO communication configuration */
+    hal_gpio_communication_config_t gpioConfig; /** The GPIO communication configuration */
 } mmc5983ma_config_t;
 
 /**
@@ -53,7 +53,7 @@ typedef enum mmc5983_odr
  * @param cs CS pin
  * @param sck SCK pin
  */
-void mmc5983ma_init_spi(mmc5983ma_config_t *config, spi_instance_t spi, pin_number_t miso, pin_number_t mosi, pin_number_t cs, pin_number_t sck);
+void mmc5983ma_init_spi(mmc5983ma_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck);
 
 /**
  * @brief MMC5983MA Magnetometer initialization using I2C
@@ -63,7 +63,7 @@ void mmc5983ma_init_spi(mmc5983ma_config_t *config, spi_instance_t spi, pin_numb
  * @param sda SDA pin
  * @param scl SCL pin
  */
-void mmc5983ma_init_i2c(mmc5983ma_config_t *config, i2c_instance_t i2c, pin_number_t sda, pin_number_t scl);
+void mmc5983ma_init_i2c(mmc5983ma_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl);
 
 /**
  * @brief Check if product id is valid
@@ -119,26 +119,5 @@ void mmc5983ma_read(mmc5983ma_config_t *config, vec3_t *mag);
  * @param temp Temperature
  */
 void mmc5983ma_read_temp(mmc5983ma_config_t *config, float *temp);
-
-/**
- * @brief Enable SET current
- *
- * @param config MMC5983MA configuration
- */
-void _mmc5983ma_set(mmc5983ma_config_t *config);
-
-/**
- * @brief Enable RESET current
- *
- * @param config MMC5983MA configuration
- */
-void _mmc5983ma_reset(mmc5983ma_config_t *config);
-
-/**
- * @brief Magnetometer initialization base
- *
- * @param config MMC5983MA configuration
- */
-void _mmc5983ma_init_base(mmc5983ma_config_t *config);
 
 #endif

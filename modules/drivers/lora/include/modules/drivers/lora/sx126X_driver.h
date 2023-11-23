@@ -12,13 +12,13 @@
  */
 typedef struct sx126x_pinout
 {
-    spi_instance_t spi; /** SPI */
-    pin_number_t sck;   /** SCK */
-    pin_number_t miso;  /** MISO */
-    pin_number_t mosi;  /** MOSI */
-    pin_number_t cs;    /** CS */
-    pin_number_t reset; /** RESET */
-    pin_number_t busy;  /** BUSY */
+    hal_spi_instance_t spi; /** SPI */
+    hal_pin_number_t sck;   /** SCK */
+    hal_pin_number_t miso;  /** MISO */
+    hal_pin_number_t mosi;  /** MOSI */
+    hal_pin_number_t cs;    /** CS */
+    hal_pin_number_t reset; /** RESET */
+    hal_pin_number_t busy;  /** BUSY */
 } sx126x_pinout_t;
 
 /**
@@ -443,7 +443,7 @@ void sx126x_calibrate_image(sx126x_config_t *data, unsigned int freq_hz);
  * @param paDutyCycle The PA duty cycle
  * @param hpMax The HP max
  */
-void sx126x_set_p_a_config(sx126x_config_t *data, uint8_t paDutyCycle, uint8_t hpMax);
+void sx126x_set_pa_config(sx126x_config_t *data, uint8_t paDutyCycle, uint8_t hpMax);
 
 /**
  * @brief Sets the RX TX fallback mode
@@ -758,62 +758,5 @@ void sx126x_clamp_tx(sx126x_config_t *data);
  * @param data The radio configuration
  */
 void sx126x_stop_rtc(sx126x_config_t *data);
-
-/**
- * @brief Converts timeout is ms to RTC step
- *
- * @param timeout_ms The timeout in ms
- * @return The RTC step
- */
-unsigned int _sx126x_convert_timeout_to_rtc_step(unsigned int timeout_ms);
-
-/**
- * @brief Converts frequency to register value
- *
- * @param frequency The frequency in Hz
- * @return The register value
- */
-unsigned int _sx126x_convert_frequency_to_register_value(unsigned int frequency);
-
-/**
- * @brief Does the TX modulation workaround
- *
- * @param data The radio configuration
- * @param packetType The packet type
- * @param bw The bandwidth
- */
-void _sx126x_tx_modulation_workaround(sx126x_config_t *data, sx126x_packet_type_t packetType, sx126x_lora_bw_t bw);
-
-/**
- * @brief Writes data to radio register
- *
- * @param data The radio configuration
- * @param address The register address
- * @param buffer The buffer
- * @param szBuffer The buffer size
- */
-void _sx126x_write_register(sx126x_config_t *data, uint16_t address, uint8_t *buffer, size_t szBuffer);
-
-/**
- * @brief Reads data from radio register
- *
- * @param data The radio configuration
- * @param address The register address
- * @param buffer The buffer
- * @param szBuffer The buffer size
- */
-void _sx126x_read_register(sx126x_config_t *data, uint16_t address, uint8_t *buffer, size_t szBuffer);
-
-/**
- * @brief Executes command on radio
- *
- * @param data The radio configuration
- * @param command The command
- * @param params The command parameters
- * @param szParams The command parameters size
- * @param resultBuffer The result buffer
- * @param szBuffer The result buffer size
- */
-void _sx126x_cmd(sx126x_config_t *data, uint8_t command, uint8_t *params, size_t szParams, uint8_t *resultBuffer, size_t szBuffer);
 
 #endif

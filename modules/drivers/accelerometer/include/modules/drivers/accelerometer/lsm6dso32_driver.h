@@ -1,7 +1,7 @@
 #ifndef _LSM6DSO32_DRIVER_H
 #define _LSM6DSO32_DRIVER_H
 
-#include "modules/drivers/hal/gpio_utils.h"
+#include "modules/drivers/utils/gpio_utils.h"
 #include "modules/maths/vector.h"
 #include <stdbool.h>
 
@@ -10,9 +10,9 @@
  */
 typedef struct lsm6dso32_config
 {
-    gpio_communication_config_t gpioConfig; /** GPIO communication config */
-    float accelRangeConstant;               /** Accelerometer range constant */
-    float gyroRangeConstant;                /** Gyroscope range constant */
+    hal_gpio_communication_config_t gpioConfig; /** GPIO communication config */
+    float accelRangeConstant;                   /** Accelerometer range constant */
+    float gyroRangeConstant;                    /** Gyroscope range constant */
 } lsm6dso32_config_t;
 
 /**
@@ -65,7 +65,7 @@ typedef enum lsm6dso32_gyro_range
  * @param cs CS pin
  * @param sck SCK pin
  */
-void lsm6dso32_init_spi(lsm6dso32_config_t *config, spi_instance_t spi, pin_number_t miso, pin_number_t mosi, pin_number_t cs, pin_number_t sck);
+void lsm6dso32_init_spi(lsm6dso32_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck);
 
 /**
  * @brief Initialize LSM6DSO accelerometer using I2C
@@ -75,7 +75,7 @@ void lsm6dso32_init_spi(lsm6dso32_config_t *config, spi_instance_t spi, pin_numb
  * @param sda SDA pin
  * @param scl SCL pin
  */
-void lsm6dso32_init_i2c(lsm6dso32_config_t *config, i2c_instance_t i2c, pin_number_t sda, pin_number_t scl);
+void lsm6dso32_init_i2c(lsm6dso32_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl);
 
 /**
  * @brief Validate LSM6DSO32 ID

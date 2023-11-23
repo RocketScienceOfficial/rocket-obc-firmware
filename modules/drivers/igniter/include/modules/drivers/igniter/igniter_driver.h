@@ -2,6 +2,7 @@
 #define _IGNITER_DRIVER_H
 
 #include "modules/drivers/hal/gpio_driver.h"
+#include "modules/drivers/hal/time_tracker.h"
 #include <stddef.h>
 
 #define IGNITERS_MAX_COUNT 8
@@ -11,9 +12,9 @@
  */
 typedef struct igniter_data
 {
-    pin_number_t pins[IGNITERS_MAX_COUNT];
-    size_t count;
-    unsigned int delay;
+    hal_pin_number_t pins[IGNITERS_MAX_COUNT]; /** Pins of igniters */
+    size_t count;                              /** Count of igniters */
+    hal_time_t delay;                          /** Delay of each pin to trigger */
 } igniter_data_t;
 
 /**

@@ -2,7 +2,7 @@
 #include "hw_config.h"
 #include <string.h>
 
-static sd_file_t *_getSDFileByName(sd_card_inst_t *sdCard, const char *name)
+static sd_file_t *_get_sd_file_by_name(sd_card_inst_t *sdCard, const char *name)
 {
     for (size_t i = 0; i < sdCard->filesCount; ++i)
     {
@@ -15,7 +15,7 @@ static sd_file_t *_getSDFileByName(sd_card_inst_t *sdCard, const char *name)
     return NULL;
 }
 
-void sd_init(sd_card_inst_t *sdCard, pin_number_t checkPin)
+void sd_init(sd_card_inst_t *sdCard, hal_pin_number_t checkPin)
 {
     if (!sdCard)
     {
@@ -54,10 +54,10 @@ void sd_init(sd_card_inst_t *sdCard, pin_number_t checkPin)
     sdCard->isInitialized = true;
 }
 
-void sd_check(pin_number_t pin, bool *result)
+void sd_check(hal_pin_number_t pin, bool *result)
 {
     gpio_state_t state;
-    gpio_get_pin_state(pin, &state);
+    hal_gpio_get_pin_state(pin, &state);
 
     *result = state == GPIO_HIGH;
 }
@@ -94,7 +94,7 @@ void sd_begin(sd_card_inst_t *sdCard, const char *fileName)
         return;
     }
 
-    sd_file_t *sdFile = _getSDFileByName(sdCard, fileName);
+    sd_file_t *sdFile = _get_sd_file_by_name(sdCard, fileName);
 
     if (!sdFile)
     {
@@ -132,7 +132,7 @@ void sd_write(sd_card_inst_t *sdCard, const char *msg, const char *fileName)
         return;
     }
 
-    sd_file_t *sdFile = _getSDFileByName(sdCard, fileName);
+    sd_file_t *sdFile = _get_sd_file_by_name(sdCard, fileName);
 
     if (!sdFile)
     {
@@ -175,7 +175,7 @@ void sd_end(sd_card_inst_t *sdCard, const char *fileName)
         return;
     }
 
-    sd_file_t *sdFile = _getSDFileByName(sdCard, fileName);
+    sd_file_t *sdFile = _get_sd_file_by_name(sdCard, fileName);
 
     if (!sdFile)
     {
@@ -220,7 +220,7 @@ void sd_clear_file(sd_card_inst_t *sdCard, const char *fileName)
         return;
     }
 
-    sd_file_t *sdFile = _getSDFileByName(sdCard, fileName);
+    sd_file_t *sdFile = _get_sd_file_by_name(sdCard, fileName);
 
     if (!sdFile)
     {

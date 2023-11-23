@@ -4,6 +4,13 @@
 #include <stdint.h>
 #include <stddef.h>
 
-uint8_t crc_calculate(const char *sentence, size_t length);
+/**
+ * @brief Calculate CRC Checksum
+ *
+ * @param data Data to calculate checksum from
+ * @param length Length of data
+ * @return CRC Checksum
+ */
+uint8_t crc_calculate(const uint8_t *data, size_t length);
 
 #endif

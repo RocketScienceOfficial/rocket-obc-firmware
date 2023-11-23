@@ -48,3 +48,5 @@ $ git clone https://github.com/Filipeak/project-rocket.git
    ``` console
    $ ./scripts/runEnv.sh
    ```
+4. CMake Variables:
+   - OBC_PLATFORM: only 'pico'

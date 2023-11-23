@@ -21,7 +21,7 @@ typedef struct battery_interval
  */
 typedef struct battery_config
 {
-    adc_input_t input;             /** ADC input */
+    hal_adc_input_t input;         /** ADC input */
     battery_interval_t *intervals; /** Battery intervals */
     uint8_t intervalsCount;        /** Battery intervals count */
 } battery_config_t;
@@ -34,7 +34,7 @@ typedef struct battery_config
  * @param intervals Intervals
  * @param intervalsCount Count of intervals
  */
-void battery_init(battery_config_t *config, adc_input_t input, battery_interval_t *intervals, uint8_t intervalsCount);
+void battery_init(battery_config_t *config, hal_adc_input_t input, battery_interval_t *intervals, uint8_t intervalsCount);
 
 /**
  * @brief Read battery percentage
@@ -52,6 +52,6 @@ float battery_read_percent(battery_config_t *config);
  * @param voltage Voltage
  * @return Percent
  */
-float battery_convert_voltage_to_percent(battery_interval_t *intervals, uint8_t intervalsCount, voltage_level_t voltage);
+float battery_convert_voltage_to_percent(battery_interval_t *intervals, uint8_t intervalsCount, hal_voltage_level_t voltage);
 
 #endif

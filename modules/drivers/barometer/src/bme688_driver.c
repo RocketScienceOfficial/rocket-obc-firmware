@@ -92,13 +92,20 @@
 #define CALIB_RES_HEAT_RANGE 0x02
 #define CALIB_RES_HEAT_VAL 0x00
 
-void bme688_init(bme688_config_t *config, spi_instance_t spi, pin_number_t miso, pin_number_t mosi, pin_number_t sck, pin_number_t cs)
+static void _bme688_set_page(bme688_config_t *config, uint8_t page);
+static void _bme688_soft_reset(bme688_config_t *config);
+static bool _bme688_write_reg_field(bme688_config_t *config, uint8_t address, uint8_t length, uint8_t offset, uint8_t value);
+static uint8_t _bme688_read_reg(bme688_config_t *config, uint8_t address);
+static void _bme688_read_regs(bme688_config_t *config, uint8_t address, uint8_t *buffer, size_t count);
+static void _bme688_write_reg(bme688_config_t *config, uint8_t address, uint8_t data);
+
+void bme688_init(bme688_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t sck, hal_pin_number_t cs)
 {
     config->spi = spi;
     config->cs = cs;
     config->currentMode = BME688_MODE_SLEEP;
 
-    spi_init_pins(spi, miso, mosi, sck, cs);
+    hal_spi_init_pins(spi, miso, mosi, sck, cs);
 
     _bme688_set_page(config, 0);
 
@@ -348,7 +355,7 @@ void bme688_set_heater_config(bme688_config_t *config, uint8_t index, float curr
 
 void bme688_heater_off(bme688_config_t *config)
 {
-    FUNC_CHECK_bool(_bme688_write_reg_field(config, CTRL_GAS_0, 1, 3, 1));
+    _bme688_write_reg_field(config, CTRL_GAS_0, 1, 3, 1);
 }
 
 bool bme688_is_data_ready(bme688_config_t *config, uint8_t index)
@@ -386,19 +393,19 @@ uint8_t bme688_get_measurement_sequence_number(bme688_config_t *config, uint8_t 
     return _bme688_read_reg(config, SUB_MEAS_INDEX_0 + index * 0x0B);
 }
 
-void _bme688_set_page(bme688_config_t *config, uint8_t page)
+static void _bme688_set_page(bme688_config_t *config, uint8_t page)
 {
     _bme688_write_reg_field(config, STATUS, 1, 4, page);
 }
 
-void _bme688_soft_reset(bme688_config_t *config)
+static void _bme688_soft_reset(bme688_config_t *config)
 {
     _bme688_write_reg(config, RESET, SOFT_RESET_CMD);
 
-    time_sleep_ms(10);
+    hal_time_sleep_ms(10);
 }
 
-bool _bme688_write_reg_field(bme688_config_t *config, uint8_t address, uint8_t length, uint8_t offset, uint8_t value)
+static bool _bme688_write_reg_field(bme688_config_t *config, uint8_t address, uint8_t length, uint8_t offset, uint8_t value)
 {
     uint8_t data = _bme688_read_reg(config, address);
 
@@ -413,7 +420,7 @@ bool _bme688_write_reg_field(bme688_config_t *config, uint8_t address, uint8_t l
 
     _bme688_write_reg(config, address, data);
 
-#if OBC_DEBUG_MODE
+#if !NDEBUG
     uint8_t read = _bme688_read_reg(config, address);
 
     if (read != data)
@@ -425,42 +432,42 @@ bool _bme688_write_reg_field(bme688_config_t *config, uint8_t address, uint8_t l
     return true;
 }
 
-uint8_t _bme688_read_reg(bme688_config_t *config, uint8_t address)
+static uint8_t _bme688_read_reg(bme688_config_t *config, uint8_t address)
 {
     uint8_t data;
 
     address |= 0x80;
 
-    gpio_set_pin_state(config->cs, GPIO_LOW);
+    hal_spi_cs_select(config->cs);
 
-    spi_write(config->spi, &address, 1);
-    spi_read(config->spi, 0, &data, 1);
+    hal_spi_write(config->spi, &address, 1);
+    hal_spi_read(config->spi, 0, &data, 1);
 
-    gpio_set_pin_state(config->cs, GPIO_HIGH);
+    hal_spi_cs_deselect(config->cs);
 
     return data;
 }
 
-void _bme688_read_regs(bme688_config_t *config, uint8_t address, uint8_t *buffer, size_t count)
+static void _bme688_read_regs(bme688_config_t *config, uint8_t address, uint8_t *buffer, size_t count)
 {
     address |= 0x80;
 
-    gpio_set_pin_state(config->cs, GPIO_LOW);
+    hal_spi_cs_select(config->cs);
 
-    spi_write(config->spi, &address, 1);
-    spi_read(config->spi, 0, buffer, count);
+    hal_spi_write(config->spi, &address, 1);
+    hal_spi_read(config->spi, 0, buffer, count);
 
-    gpio_set_pin_state(config->cs, GPIO_HIGH);
+    hal_spi_cs_deselect(config->cs);
 }
 
-void _bme688_write_reg(bme688_config_t *config, uint8_t address, uint8_t data)
+static void _bme688_write_reg(bme688_config_t *config, uint8_t address, uint8_t data)
 {
     address &= 0x7F;
 
-    gpio_set_pin_state(config->cs, GPIO_LOW);
+    hal_spi_cs_select(config->cs);
 
-    spi_write(config->spi, &address, 1);
-    spi_write(config->spi, &data, 1);
+    hal_spi_write(config->spi, &address, 1);
+    hal_spi_write(config->spi, &data, 1);
 
-    gpio_set_pin_state(config->cs, GPIO_HIGH);
+    hal_spi_cs_deselect(config->cs);
 }

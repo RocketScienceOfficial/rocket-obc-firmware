@@ -1,4 +1,5 @@
 #include "modules/drivers/lora/sx127X_driver.h"
+#include "modules/drivers/hal/time_tracker.h"
 #include <string.h>
 
 #define REG_FIFO 0x00
@@ -60,6 +61,16 @@
 
 #define LORA_DEFAULT_TX_POWER 17
 
+static void _sx127x_explicit_header_mode(sx127x_data_t *data);
+static void _sx127x_implicit_header_mode(sx127x_data_t *data);
+static bool _sx127x_is_transmitting(sx127x_data_t *data);
+static int _sx127X_get_spreading_factor(sx127x_data_t *data);
+static long _sx127XGetSignalBandwidth(sx127x_data_t *data);
+static void _sx127x_set_ldo_flag(sx127x_data_t *data);
+static uint8_t _sx127x_read_register(sx127x_data_t *data, uint8_t address);
+static void _sx127x_write_register(sx127x_data_t *data, uint8_t address, uint8_t value);
+static uint8_t _sx127x_single_transfer(sx127x_data_t *data, uint8_t address, uint8_t value);
+
 void sx127x_init(sx127x_data_t *data, sx127x_pinout_t *pinout, unsigned long long frequency)
 {
     if (!data || !pinout)
@@ -73,21 +84,21 @@ void sx127x_init(sx127x_data_t *data, sx127x_pinout_t *pinout, unsigned long lon
     data->packetIndex = 0;
     data->implicitHeaderMode = false;
 
-    gpio_init_pin(data->pinout.cs, GPIO_OUTPUT);
-    gpio_set_pin_state(data->pinout.cs, GPIO_HIGH);
+    hal_gpio_init_pin(data->pinout.cs, GPIO_OUTPUT);
+    hal_gpio_set_pin_state(data->pinout.cs, GPIO_HIGH);
 
     if (data->pinout.reset != -1)
     {
-        gpio_init_pin(data->pinout.reset, GPIO_OUTPUT);
+        hal_gpio_init_pin(data->pinout.reset, GPIO_OUTPUT);
 
-        gpio_set_pin_state(data->pinout.reset, GPIO_LOW);
-        sleep_ms(10);
+        hal_gpio_set_pin_state(data->pinout.reset, GPIO_LOW);
+        hal_time_sleep_ms(10);
 
-        gpio_set_pin_state(data->pinout.reset, GPIO_HIGH);
-        sleep_ms(10);
+        hal_gpio_set_pin_state(data->pinout.reset, GPIO_HIGH);
+        hal_time_sleep_ms(10);
     }
 
-    spi_init_pins(data->pinout.spi, data->pinout.miso, data->pinout.mosi, data->pinout.sck, data->pinout.cs);
+    hal_spi_init_pins(data->pinout.spi, data->pinout.miso, data->pinout.mosi, data->pinout.sck, data->pinout.cs);
 
     uint8_t version = _sx127x_read_register(data, REG_VERSION);
 
@@ -137,7 +148,7 @@ void sx127x_write_buffer(sx127x_data_t *data, const uint8_t *buffer, size_t size
 
     while ((_sx127x_read_register(data, REG_IRQ_FLAGS) & IRQ_TX_DONE_MASK) == 0)
     {
-        sleep_ms(0);
+        hal_time_sleep_ms(0);
     }
 
     _sx127x_write_register(data, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
@@ -300,7 +311,7 @@ void sx127x_set_tx_power(sx127x_data_t *data, int level)
             level -= 3;
 
             _sx127x_write_register(data, REG_PA_DAC, 0x87);
-            sx127x_set_o_c_p(data, 140);
+            sx127x_set_ocp(data, 140);
         }
         else
         {
@@ -310,7 +321,7 @@ void sx127x_set_tx_power(sx127x_data_t *data, int level)
             }
 
             _sx127x_write_register(data, REG_PA_DAC, 0x84);
-            sx127x_set_o_c_p(data, 100);
+            sx127x_set_ocp(data, 100);
         }
 
         _sx127x_write_register(data, REG_PA_CONFIG, PA_BOOST | (level - 2));
@@ -442,19 +453,19 @@ void sx127x_disable_crc(sx127x_data_t *data)
     _sx127x_write_register(data, REG_MODEM_CONFIG_2, _sx127x_read_register(data, REG_MODEM_CONFIG_2) & 0xfb);
 }
 
-void sx127x_enable_invert_i_q(sx127x_data_t *data)
+void sx127x_enable_invert_iq(sx127x_data_t *data)
 {
     _sx127x_write_register(data, REG_INVERTIQ, 0x66);
     _sx127x_write_register(data, REG_INVERTIQ2, 0x19);
 }
 
-void sx127x_disable_invert_i_q(sx127x_data_t *data)
+void sx127x_disable_invert_iq(sx127x_data_t *data)
 {
     _sx127x_write_register(data, REG_INVERTIQ, 0x27);
     _sx127x_write_register(data, REG_INVERTIQ2, 0x1d);
 }
 
-void sx127x_set_o_c_p(sx127x_data_t *data, uint8_t mA)
+void sx127x_set_ocp(sx127x_data_t *data, uint8_t mA)
 {
     uint8_t ocpTrim = 27;
 
@@ -486,28 +497,26 @@ void sx127x_set_gain(sx127x_data_t *data, uint8_t gain)
     else
     {
         _sx127x_write_register(data, REG_MODEM_CONFIG_3, 0x00);
-
         _sx127x_write_register(data, REG_LNA, 0x03);
-
         _sx127x_write_register(data, REG_LNA, _sx127x_read_register(data, REG_LNA) | (gain << 5));
     }
 }
 
-void _sx127x_explicit_header_mode(sx127x_data_t *data)
+static void _sx127x_explicit_header_mode(sx127x_data_t *data)
 {
     data->implicitHeaderMode = false;
 
     _sx127x_write_register(data, REG_MODEM_CONFIG_1, _sx127x_read_register(data, REG_MODEM_CONFIG_1) & 0xfe);
 }
 
-void _sx127x_implicit_header_mode(sx127x_data_t *data)
+static void _sx127x_implicit_header_mode(sx127x_data_t *data)
 {
     data->implicitHeaderMode = true;
 
     _sx127x_write_register(data, REG_MODEM_CONFIG_1, _sx127x_read_register(data, REG_MODEM_CONFIG_1) | 0x01);
 }
 
-bool _sx127x_is_transmitting(sx127x_data_t *data)
+static bool _sx127x_is_transmitting(sx127x_data_t *data)
 {
     if ((_sx127x_read_register(data, REG_OP_MODE) & MODE_TX) == MODE_TX)
     {
@@ -522,12 +531,12 @@ bool _sx127x_is_transmitting(sx127x_data_t *data)
     return false;
 }
 
-int _sx127XGetSpreadingFactor(sx127x_data_t *data)
+static int _sx127X_get_spreading_factor(sx127x_data_t *data)
 {
     return _sx127x_read_register(data, REG_MODEM_CONFIG_2) >> 4;
 }
 
-long _sx127XGetSignalBandwidth(sx127x_data_t *data)
+static long _sx127XGetSignalBandwidth(sx127x_data_t *data)
 {
     uint8_t bw = (_sx127x_read_register(data, REG_MODEM_CONFIG_1) >> 4);
 
@@ -558,9 +567,9 @@ long _sx127XGetSignalBandwidth(sx127x_data_t *data)
     return -1;
 }
 
-void _sx127x_set_ldo_flag(sx127x_data_t *data)
+static void _sx127x_set_ldo_flag(sx127x_data_t *data)
 {
-    long symbolDuration = 1000 / (_sx127XGetSignalBandwidth(data) / (1L << _sx127XGetSpreadingFactor(data)));
+    long symbolDuration = 1000 / (_sx127XGetSignalBandwidth(data) / (1L << _sx127X_get_spreading_factor(data)));
     bool ldoOn = symbolDuration > 16;
     uint8_t config3 = _sx127x_read_register(data, REG_MODEM_CONFIG_3);
 
@@ -569,26 +578,26 @@ void _sx127x_set_ldo_flag(sx127x_data_t *data)
     _sx127x_write_register(data, REG_MODEM_CONFIG_3, config3);
 }
 
-uint8_t _sx127x_read_register(sx127x_data_t *data, uint8_t address)
+static uint8_t _sx127x_read_register(sx127x_data_t *data, uint8_t address)
 {
     return _sx127x_single_transfer(data, address & 0x7f, 0x00);
 }
 
-void _sx127x_write_register(sx127x_data_t *data, uint8_t address, uint8_t value)
+static void _sx127x_write_register(sx127x_data_t *data, uint8_t address, uint8_t value)
 {
     _sx127x_single_transfer(data, address | 0x80, value);
 }
 
-uint8_t _sx127x_single_transfer(sx127x_data_t *data, uint8_t address, uint8_t value)
+static uint8_t _sx127x_single_transfer(sx127x_data_t *data, uint8_t address, uint8_t value)
 {
     uint8_t response;
 
-    gpio_set_pin_state(data->pinout.cs, GPIO_LOW);
+    hal_gpio_set_pin_state(data->pinout.cs, GPIO_LOW);
 
-    spi_write(data->pinout.spi, &address, 1);
-    spi_write_read(data->pinout.spi, &value, &response, 1);
+    hal_spi_write(data->pinout.spi, &address, 1);
+    hal_spi_write_read(data->pinout.spi, &value, &response, 1);
 
-    gpio_set_pin_state(data->pinout.cs, GPIO_HIGH);
+    hal_gpio_set_pin_state(data->pinout.cs, GPIO_HIGH);
 
     return response;
 }

@@ -1,14 +1,14 @@
 #include "modules/drivers/hal/gpio_driver.h"
 #include "pico/stdlib.h"
 
-bool gpio_is_pin_valid(pin_number_t pin)
+bool hal_gpio_is_pin_valid(hal_pin_number_t pin)
 {
     return pin >= 0 && pin <= 28;
 }
 
-void gpio_init_pin(pin_number_t pin, gpio_direction_t dir)
+void hal_gpio_init_pin(hal_pin_number_t pin, gpio_direction_t dir)
 {
-    if (!gpio_is_pin_valid(pin))
+    if (!hal_gpio_is_pin_valid(pin))
     {
         return;
     }
@@ -17,9 +17,9 @@ void gpio_init_pin(pin_number_t pin, gpio_direction_t dir)
     gpio_set_dir(pin, dir == GPIO_INPUT ? GPIO_IN : GPIO_OUT);
 }
 
-void gpio_set_pin_state(pin_number_t pin, gpio_state_t state)
+void hal_gpio_set_pin_state(hal_pin_number_t pin, gpio_state_t state)
 {
-    if (!gpio_is_pin_valid(pin))
+    if (!hal_gpio_is_pin_valid(pin))
     {
         return;
     }
@@ -27,9 +27,9 @@ void gpio_set_pin_state(pin_number_t pin, gpio_state_t state)
     gpio_put(pin, state == GPIO_HIGH ? 1 : 0);
 }
 
-void gpio_get_pin_state(pin_number_t pin, gpio_state_t *state)
+void hal_gpio_get_pin_state(hal_pin_number_t pin, gpio_state_t *state)
 {
-    if (!gpio_is_pin_valid(pin))
+    if (!hal_gpio_is_pin_valid(pin))
     {
         return;
     }
@@ -37,9 +37,9 @@ void gpio_get_pin_state(pin_number_t pin, gpio_state_t *state)
     gpio_get(pin) ? (*state = GPIO_HIGH) : (*state = GPIO_LOW);
 }
 
-void gpio_set_pin_function(pin_number_t pin, gpio_function_t function)
+void hal_gpio_set_pin_function(hal_pin_number_t pin, gpio_function_t function)
 {
-    if (!gpio_is_pin_valid(pin))
+    if (!hal_gpio_is_pin_valid(pin))
     {
         return;
     }
@@ -76,9 +76,9 @@ void gpio_set_pin_function(pin_number_t pin, gpio_function_t function)
     gpio_set_function(pin, func);
 }
 
-void gpio_pull_up_pin(pin_number_t pin)
+void hal_gpio_pull_up_pin(hal_pin_number_t pin)
 {
-    if (!gpio_is_pin_valid(pin))
+    if (!hal_gpio_is_pin_valid(pin))
     {
         return;
     }

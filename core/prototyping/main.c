@@ -1,15 +1,16 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include "pico/stdlib.h"
-#include "modules/drivers/accelerometer/bmi088_driver.h"
 
 int main()
 {
     stdio_init_all();
-    _bmi088_accel_soft_reset(NULL);
+
+    sleep_ms(5000);
 
     while (1)
     {
-        printf("Hello, world!\n");
+        printf("Hello, world! %d\n", PICO_FLASH_SIZE_BYTES);
 
         sleep_ms(1000);
     }

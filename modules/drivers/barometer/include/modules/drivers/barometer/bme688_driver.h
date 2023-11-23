@@ -54,8 +54,8 @@ typedef enum bme688_i_i_r_filter_coefficient
  */
 typedef struct bme688_config
 {
-    spi_instance_t spi;
-    pin_number_t cs;
+    hal_spi_instance_t spi;
+    hal_pin_number_t cs;
     bme688_mode_t currentMode;
     uint16_t par_t1;
     int16_t par_t2;
@@ -91,8 +91,8 @@ typedef struct bme688_data
 {
     float temperature; /** Temperature in Celsius */
     float humidity;    /** Humidity in percentage */
-    int pressure;    /** Pressure in Pascals */
-    int gas;         /** Gas in Ohms */
+    int pressure;      /** Pressure in Pascals */
+    int gas;           /** Gas in Ohms */
 } bme688_data_t;
 
 /**
@@ -105,7 +105,7 @@ typedef struct bme688_data
  * @param sck SCK pin
  * @param cs CS pin
  */
-void bme688_init(bme688_config_t *config, spi_instance_t spi, pin_number_t miso, pin_number_t mosi, pin_number_t sck, pin_number_t cs);
+void bme688_init(bme688_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t sck, hal_pin_number_t cs);
 
 /**
  * @brief Read BME688 sensor data
@@ -223,60 +223,5 @@ bool bme688_is_heater_stable(bme688_config_t *config, uint8_t index);
  * @return true if data is ready, false otherwise
  */
 uint8_t bme688_get_measurement_sequence_number(bme688_config_t *config, uint8_t index);
-
-/**
- * @brief Set page of BME688 sensor
- *
- * @param config BME688 configuration
- * @param page Page (0 or 1)
- */
-void _bme688_set_page(bme688_config_t *config, uint8_t page);
-
-/**
- * @brief Reset BME688 sensor
- *
- * @param config BME688 configuration
- */
-void _bme688_soft_reset(bme688_config_t *config);
-
-/**
- * @brief Write BME688 sensor register field
- *
- * @param config BME688 configuration
- * @param address Register address
- * @param length Field length
- * @param offset Field offset
- * @param value Field value
- * @return true if success, false otherwise
- */
-bool _bme688_write_reg_field(bme688_config_t *config, uint8_t address, uint8_t length, uint8_t offset, uint8_t value);
-
-/**
- * @brief Read BME688 sensor register
- *
- * @param config BME688 configuration
- * @param address Register address
- * @return Register value
- */
-uint8_t _bme688_read_reg(bme688_config_t *config, uint8_t address);
-
-/**
- * @brief Read BME688 sensor registers
- *
- * @param config BME688 configuration
- * @param address Register address
- * @param buffer Buffer pointer
- * @param count Number of bytes to read
- */
-void _bme688_read_regs(bme688_config_t *config, uint8_t address, uint8_t *buffer, size_t count);
-
-/**
- * @brief Write BME688 sensor register
- *
- * @param config BME688 configuration
- * @param address Register address
- * @param data Register data
- */
-void _bme688_write_reg(bme688_config_t *config, uint8_t address, uint8_t data);
 
 #endif

@@ -11,7 +11,7 @@
  * @param config PWM configuration
  * @param pin GPIO pin to use for servo
  */
-void pwm_servo_init(pwm_config_t *config, pin_number_t pin);
+void pwm_servo_init(hal_pwm_config_t *config, hal_pin_number_t pin);
 
 /**
  * @brief Check if servo is connected
@@ -19,7 +19,7 @@ void pwm_servo_init(pwm_config_t *config, pin_number_t pin);
  * @param config PWM configuration
  * @param result Result of check
  */
-void pwm_servo_check(pwm_config_t *config, bool *result);
+void pwm_servo_check(hal_pwm_config_t *config, bool *result);
 
 /**
  * @brief Rotate servo to angle
@@ -27,6 +27,6 @@ void pwm_servo_check(pwm_config_t *config, bool *result);
  * @param config PWM configuration
  * @param angle Angle to rotate to (degrees)
  */
-void pwm_servo_rotate_angle(pwm_config_t *config, float destAngleDegrees);
+void pwm_servo_rotate_angle(hal_pwm_config_t *config, float destAngleDegrees);
 
 #endif

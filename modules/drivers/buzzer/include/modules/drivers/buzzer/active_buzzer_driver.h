@@ -9,7 +9,7 @@
  *
  * @param pin The pin to use for the buzzer
  */
-void active_buzzer_init(pin_number_t pin);
+void active_buzzer_init(hal_pin_number_t pin);
 
 /**
  * @brief Sets the buzzer active or inactive
@@ -17,6 +17,6 @@ void active_buzzer_init(pin_number_t pin);
  * @param pin The pin to use for the buzzer
  * @param active true to set the buzzer active, false to set it inactive
  */
-void active_buzzer_set_active(pin_number_t pin, bool active);
+void active_buzzer_set_active(hal_pin_number_t pin, bool active);
 
 #endif

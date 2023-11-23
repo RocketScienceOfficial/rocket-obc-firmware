@@ -7,19 +7,19 @@
 
 #define ADC_TEMP_SENSOR_INPUT 4
 
-bool adc_check_pin(pin_number_t pin)
+bool hal_adc_check_pin(hal_pin_number_t pin)
 {
     return pin == 26 || pin == 27 || pin == 28 || pin == 29;
 }
 
-bool adc_check_input(adc_input_t input)
+bool hal_adc_check_input(hal_adc_input_t input)
 {
     return input >= 0 && input <= 4;
 }
 
-adc_input_t adc_convert_pin_to_input(pin_number_t pin)
+hal_adc_input_t hal_adc_convert_pin_to_input(hal_pin_number_t pin)
 {
-    if (!adc_check_pin(pin))
+    if (!hal_adc_check_pin(pin))
     {
         return ADC_INPUT_INVALID;
     }
@@ -39,9 +39,9 @@ adc_input_t adc_convert_pin_to_input(pin_number_t pin)
     }
 }
 
-pin_number_t adc_convert_input_to_pin(adc_input_t input)
+hal_pin_number_t hal_adc_convert_input_to_pin(hal_adc_input_t input)
 {
-    if (!adc_check_input(input))
+    if (!hal_adc_check_input(input))
     {
         return PIN_NUMBER_INVALID;
     }
@@ -61,21 +61,21 @@ pin_number_t adc_convert_input_to_pin(adc_input_t input)
     }
 }
 
-void adc_init_all(void)
+void hal_adc_init_all(void)
 {
     adc_init();
 }
 
-void adc_init_pin(adc_input_t input)
+void hal_adc_init_pin(hal_adc_input_t input)
 {
-    if (!adc_check_input(input))
+    if (!hal_adc_check_input(input))
     {
         return;
     }
 
     if (input != ADC_TEMP_SENSOR_INPUT)
     {
-        adc_gpio_init(adc_convert_input_to_pin(input));
+        adc_gpio_init(hal_adc_convert_input_to_pin(input));
     }
     else
     {
@@ -83,9 +83,9 @@ void adc_init_pin(adc_input_t input)
     }
 }
 
-voltage_level_t adc_read_voltage(adc_input_t input)
+hal_voltage_level_t hal_adc_read_voltage(hal_adc_input_t input)
 {
-    if (!adc_check_input(input))
+    if (!hal_adc_check_input(input))
     {
         return 0;
     }

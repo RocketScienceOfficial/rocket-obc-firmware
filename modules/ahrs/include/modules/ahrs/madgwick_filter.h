@@ -17,7 +17,7 @@ typedef struct madgiwck_filter_data
 {
     quat_t q;           /** Current calculated quat_ternion as orientation */
     float beta;         /** Filter coefficent */
-    float samplePeriod; /** Inverse of frequency */
+    float samplePeriod; /** Sample period in seconds */
 } madgiwck_filter_data_t;
 
 /**
