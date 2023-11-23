@@ -2,7 +2,7 @@
 
 ## Overview
 
-Project for the rocket on board computer.
+Rocket on-board computer.
 
 ## Required Software
 
