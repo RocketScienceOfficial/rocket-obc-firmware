@@ -11,7 +11,7 @@
 #define READ_MAX_ITER 50000
 #define LOG_FRAME(fmt, ...) hal_serial_printf("/*" fmt "*/\n", ##__VA_ARGS__);
 
-static uint8_t s_Buffer[256 * 32];
+static uint8_t s_Buffer[256 * 2 * 16];
 static size_t s_BufferSize;
 static size_t s_OffsetPages;
 
