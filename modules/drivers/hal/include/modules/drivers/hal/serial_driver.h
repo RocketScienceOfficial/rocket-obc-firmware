@@ -4,6 +4,14 @@
 #include <stdbool.h>
 
 /**
+ * @brief Prints message to serial
+ * 
+ * @param fmt Format
+ * @param ... Params
+*/
+void hal_serial_printf(char* fmt, ...);
+
+/**
  * @brief Read char from serial
  * 
  * @param chr Char that was read

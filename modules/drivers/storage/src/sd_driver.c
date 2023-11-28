@@ -1,5 +1,4 @@
 #include "modules/drivers/storage/sd_driver.h"
-#include "modules/logger/logger.h"
 #include "hw_config.h"
 #include <string.h>
 
@@ -33,8 +32,6 @@ void sd_init(sd_card_inst_t *sdCard, hal_pin_number_t checkPin)
 
     if (fr != FR_OK)
     {
-        OBC_ERR("SD Card mount failed!");
-
         return;
     }
 
@@ -208,8 +205,6 @@ void sd_terminate(sd_card_inst_t *sdCard)
 
     if (fr != FR_OK)
     {
-        OBC_ERR("SD Card unmount failed!");
-        
         return;
     }
 

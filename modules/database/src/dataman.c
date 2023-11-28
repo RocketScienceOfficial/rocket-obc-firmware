@@ -2,13 +2,14 @@
 #include "modules/database/db_flash_sectors.h"
 #include "modules/drivers/storage/flash_driver.h"
 #include "modules/drivers/hal/flash_hal_driver.h"
+#include "modules/drivers/hal/serial_driver.h"
 #include "modules/logger/logger.h"
 #include <string.h>
 #include <stdbool.h>
 #include <string.h>
 
 #define READ_MAX_ITER 50000
-#define LOG_FRAME(fmt, ...) printf("/*" fmt "*/\n", ##__VA_ARGS__);
+#define LOG_FRAME(fmt, ...) hal_serial_printf("/*" fmt "*/\n", ##__VA_ARGS__);
 
 static uint8_t s_Buffer[256 * 32];
 static size_t s_BufferSize;

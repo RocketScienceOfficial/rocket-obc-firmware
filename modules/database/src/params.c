@@ -31,7 +31,7 @@ bool params_save(db_params_t *params)
     };
 
     flash_erase_sectors(PARAMS_SECTORS_OFFSET, 1);
-    flash_write_page(PARAMS_SECTORS_OFFSET * hal_flash_sector_size() / hal_flash_page_size(), (uint8_t *)&frame);
+    flash_write_page(PARAMS_SECTORS_OFFSET * hal_flash_sector_size() / hal_flash_write_buffer_size(), (uint8_t *)&frame);
 
     OBC_INFO("Saved params");
 
