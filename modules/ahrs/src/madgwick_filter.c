@@ -1,6 +1,5 @@
 #include "modules/ahrs/madgwick_filter.h"
 #include "modules/maths/math_constants.h"
-#include "modules/assert/assert.h"
 #include <math.h>
 
 #define MADGWICK_BETA_CONSTANT 0.8660254f

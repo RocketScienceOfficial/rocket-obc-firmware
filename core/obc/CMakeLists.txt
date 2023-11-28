@@ -1,0 +1,25 @@
+add_executable(obc
+    main.c
+    measurements.c
+)
+
+target_link_libraries(obc
+   module_drivers_hal
+   module_drivers_accel
+   module_drivers_adc
+   module_drivers_barometer
+   module_drivers_battery
+   module_drivers_buzzer
+   module_drivers_gps
+   module_drivers_hal
+   module_drivers_led
+   module_drivers_lora
+   module_drivers_magnetometer
+   module_drivers_servo
+   module_drivers_storage
+   module_flight_sm
+   module_nmea
+   module_ahrs
+)
+
+obc_add_outputs(obc)

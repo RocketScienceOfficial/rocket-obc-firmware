@@ -2,11 +2,6 @@
 
 void battery_init(battery_config_t *config, hal_adc_input_t input, battery_interval_t *intervals, uint8_t intervalsCount)
 {
-    if (!config)
-    {
-        return;
-    }
-
     hal_adc_init_pin(input);
 
     config->input = input;
@@ -16,11 +11,6 @@ void battery_init(battery_config_t *config, hal_adc_input_t input, battery_inter
 
 float battery_read_percent(battery_config_t *config)
 {
-    if (!config)
-    {
-        return 0;
-    }
-
     hal_voltage_level_t voltage = hal_adc_read_voltage(config->input);
 
     return battery_convert_voltage_to_percent(config->intervals, config->intervalsCount, voltage);

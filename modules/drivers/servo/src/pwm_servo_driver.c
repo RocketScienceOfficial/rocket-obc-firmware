@@ -9,11 +9,6 @@ static const float SERVO_MAX_ANGLE_DEG = 180.0f;
 
 void pwm_servo_init(hal_pwm_config_t *config, hal_pin_number_t pin)
 {
-    if (!config)
-    {
-        return;
-    }
-
     hal_pwm_init_pin(config, pin, SERVO_FREQ_HZ);
 
     bool connected = false;

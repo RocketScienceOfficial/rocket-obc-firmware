@@ -14,7 +14,7 @@
 /**
  * @brief NMEA sentence IDs
  */
-typedef enum nmea_sentence
+typedef enum nmea_sentence_id
 {
     NMEA_SENTENCE_UNKNOWN = -1,
     NMEA_SENTENCE_GBS,
@@ -26,7 +26,7 @@ typedef enum nmea_sentence
     NMEA_SENTENCE_RMC,
     NMEA_SENTENCE_VTG,
     NMEA_SENTENCE_ZDA,
-} nmea_sentence_t;
+} nmea_sentence_id_t;
 
 /**
  * @brief NMEA talker IDs
@@ -75,7 +75,7 @@ typedef struct nmea_satellite
 } nmea_satellite_t;
 
 /**
- * @brief NMEA latitude/longtitude type
+ * @brief NMEA latitude / longtitude type
  */
 typedef double nmea_lat_lon_t;
 
@@ -240,7 +240,7 @@ bool nmea_scan(const char *sentence, const char *format, ...);
  * @param sentence Sentence to parse
  * @return Sentence ID
  */
-nmea_sentence_t nmeaGetSentenceId(const char *sentence);
+nmea_sentence_id_t nmea_get_sentence_id(const char *sentence);
 
 /**
  * @brief Get the talker ID
@@ -248,7 +248,7 @@ nmea_sentence_t nmeaGetSentenceId(const char *sentence);
  * @param sentence Sentence to parse
  * @return Talker ID
  */
-nmea_talker_t nmeaGetTalkerId(const char *sentence);
+nmea_talker_t nmea_get_talker_id(const char *sentence);
 
 /**
  * @brief Parse the GBS sentence

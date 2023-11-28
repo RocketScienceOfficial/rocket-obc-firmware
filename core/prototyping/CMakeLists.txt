@@ -11,7 +11,6 @@ target_link_libraries(prototyping
    module_drivers_buzzer
    module_drivers_gps
    module_drivers_hal
-   module_drivers_igniter
    module_drivers_led
    module_drivers_lora
    module_drivers_magnetometer

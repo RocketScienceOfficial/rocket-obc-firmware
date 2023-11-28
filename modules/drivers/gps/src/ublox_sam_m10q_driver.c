@@ -1,4 +1,4 @@
-#include "modules/drivers/gps/u_blox_sam_m10q_driver.h"
+#include "modules/drivers/gps/ublox_sam_m10q_driver.h"
 #include <string.h>
 
 #define I2C_ADDRESS 0x42
@@ -36,23 +36,19 @@ void ublox_sam_m10q_read_data(ublox_sam_m10q_config_t *config, ublox_sam_m10q_da
 
     if (b == '$')
     {
-        data->isValid = true;
         data->currentIndex = 0;
-        data->isFinishedSentence = false;
+        data->sentence.isFinished = false;
 
-        memset(data->sentence, 0, UBLOX_SAM_M10Q_SENTENCE_LENGTH);
+        memset(data->sentence.data, 0, sizeof(data->sentence.data));
     }
     else if (b == '\n')
     {
-        data->sentence[data->currentIndex] = b;
-        data->sentence[data->currentIndex + 1] = '\0';
-        data->isValid = false;
-        data->isFinishedSentence = true;
+        data->sentence.data[data->currentIndex] = b;
+        data->sentence.data[data->currentIndex + 1] = '\0';
+        data->sentence.isFinished = true;
+
+        return;
     }
 
-    if (data->isValid)
-    {
-        data->sentence[data->currentIndex] = b;
-        data->currentIndex++;
-    }
+    data->sentence.data[data->currentIndex++] = b;
 }

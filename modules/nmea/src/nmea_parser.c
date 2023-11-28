@@ -1,4 +1,5 @@
 #include "modules/nmea/nmea_parser.h"
+#include "modules/logger/logger.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
@@ -9,6 +10,8 @@ bool nmea_check_sentence(const char *sentence)
 {
     if (sentence[0] != '$')
     {
+        OBC_ERR("Invalid sentence starting!");
+
         return false;
     }
 
@@ -48,6 +51,8 @@ bool nmea_check_sentence(const char *sentence)
         }
         else
         {
+            OBC_ERR("Checksum of sentence is not valid!");
+
             return false;
         }
 
@@ -61,11 +66,15 @@ bool nmea_check_sentence(const char *sentence)
         }
         else
         {
+            OBC_ERR("Checksum of sentence is not valid!");
+
             return false;
         }
 
         if (checksum != (checksum1 << 4 | checksum2))
         {
+            OBC_ERR("Checksum of sentence is not valid!");
+
             return false;
         }
 
@@ -269,7 +278,7 @@ bool nmea_scan(const char *sentence, const char *format, ...)
     return true;
 }
 
-nmea_sentence_t nmeaGetSentenceId(const char *sentence)
+nmea_sentence_id_t nmea_get_sentence_id(const char *sentence)
 {
     char s[6];
 
@@ -327,7 +336,7 @@ nmea_sentence_t nmeaGetSentenceId(const char *sentence)
     }
 }
 
-nmea_talker_t nmeaGetTalkerId(const char *sentence)
+nmea_talker_t nmea_get_talker_id(const char *sentence)
 {
     char s[6];
 

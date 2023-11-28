@@ -1,4 +1,5 @@
 #include "modules/drivers/utils/gpio_utils.h"
+#include "modules/logger/logger.h"
 
 bool hal_gpio_write_reg_field(hal_gpio_communication_config_t *config, uint8_t address, uint8_t length, uint8_t offset, uint8_t value)
 {
@@ -19,6 +20,8 @@ bool hal_gpio_write_reg_field(hal_gpio_communication_config_t *config, uint8_t a
 
     if (read != data)
     {
+        OBC_ERR("Read-check of register failed. Read: %d, Wrote: %d", read, data);
+
         return false;
     }
 #endif
@@ -46,6 +49,12 @@ uint8_t hal_gpio_read_reg(hal_gpio_communication_config_t *config, uint8_t addre
 
         hal_spi_cs_deselect(config->cs);
     }
+    else
+    {
+        OBC_WARN("Unsupported gpio protocol");
+
+        return 0;
+    }
 
     return data;
 }
@@ -68,6 +77,10 @@ void hal_gpio_read_regs(hal_gpio_communication_config_t *config, uint8_t address
 
         hal_spi_cs_deselect(config->cs);
     }
+    else
+    {
+        OBC_WARN("Unsupported gpio protocol");
+    }
 }
 
 void hal_gpio_write_reg(hal_gpio_communication_config_t *config, uint8_t address, uint8_t value)
@@ -88,6 +101,10 @@ void hal_gpio_write_reg(hal_gpio_communication_config_t *config, uint8_t address
 
         hal_spi_cs_deselect(config->cs);
     }
+    else
+    {
+        OBC_WARN("Unsupported gpio protocol");
+    }
 }
 
 uint8_t hal_gpio_single_read(hal_gpio_communication_config_t *config)
@@ -105,6 +122,12 @@ uint8_t hal_gpio_single_read(hal_gpio_communication_config_t *config)
         hal_spi_read(config->spi, 0, &data, 1);
 
         hal_spi_cs_deselect(config->cs);
+    }
+    else
+    {
+        OBC_WARN("Unsupported gpio protocol");
+
+        return 0;
     }
 
     return data;

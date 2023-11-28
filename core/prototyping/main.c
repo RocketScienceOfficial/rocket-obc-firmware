@@ -1,5 +1,5 @@
-#include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include "pico/stdlib.h"
 
 int main()
@@ -8,10 +8,5 @@ int main()
 
     sleep_ms(5000);
 
-    while (1)
-    {
-        printf("Hello, world! %d\n", PICO_FLASH_SIZE_BYTES);
-
-        sleep_ms(1000);
-    }
+    return 0;
 }

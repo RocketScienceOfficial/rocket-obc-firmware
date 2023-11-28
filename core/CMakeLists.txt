@@ -1,2 +1,2 @@
-add_subdirectory(board)
+add_subdirectory(obc)
 add_subdirectory(prototyping)

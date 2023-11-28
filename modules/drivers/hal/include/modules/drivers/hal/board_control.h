@@ -6,9 +6,9 @@
 /**
  * @brief Initialize the board
  *
- * @param sleepTimeMS The time to sleep after startup
+ * @param sleepTimeMs The time to sleep after startup
  */
-void hal_board_init(hal_time_t sleepTimeMS);
+void hal_board_init(msec_t sleepTimeMs);
 
 /**
  * @brief Tight loop

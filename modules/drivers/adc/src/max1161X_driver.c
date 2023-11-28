@@ -1,4 +1,5 @@
 #include "modules/drivers/adc/max1161X_driver.h"
+#include "modules/logger/logger.h"
 
 static void _max1161x_setup(max1161x_config_t *config, uint8_t data);
 static void _max1161x_config(max1161x_config_t *config, uint8_t data);
@@ -19,6 +20,8 @@ void max1161x_init(max1161x_config_t *config, max1161x_type_t type, hal_i2c_inst
     }
     else
     {
+        OBC_ERR("Unsupported type of MAX1161X: %d", type);
+
         return;
     }
 
@@ -41,6 +44,8 @@ void max1161x_init(max1161x_config_t *config, max1161x_type_t type, hal_i2c_inst
     }
     else
     {
+        OBC_ERR("Unsupported type of MAX1161X: %d", type);
+
         return;
     }
 }

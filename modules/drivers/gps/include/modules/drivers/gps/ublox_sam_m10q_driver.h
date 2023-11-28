@@ -1,12 +1,9 @@
 #ifndef _U_BLOX_SAM_M10Q_DRIVER_H
 #define _U_BLOX_SAM_M10Q_DRIVER_H
 
+#include "gps_defines.h"
 #include "modules/drivers/utils/gpio_utils.h"
-#include "modules/drivers/hal/gpio_driver.h"
-#include <stdbool.h>
 #include <stddef.h>
-
-#define UBLOX_SAM_M10Q_SENTENCE_LENGTH 83
 
 /**
  * @brief The configuration of the u-blox SAM-M10Q GPS module
@@ -21,10 +18,8 @@ typedef struct ublox_sam_m10q_config
  */
 typedef struct ublox_sam_m10q_data
 {
-    bool isValid;                                  /** Is current data valid */
-    char sentence[UBLOX_SAM_M10Q_SENTENCE_LENGTH]; /** Sentence buffer */
-    size_t currentIndex;                           /** Current index of buffer */
-    bool isFinishedSentence;                       /** Is current sentence ready */
+    gps_nmea_sentence_t sentence; /** Sentence */
+    size_t currentIndex;          /** Current index of buffer */
 } ublox_sam_m10q_data_t;
 
 /**

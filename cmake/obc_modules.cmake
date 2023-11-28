@@ -33,3 +33,10 @@ macro(obc_add_submodule NAME MODULE)
 
     target_include_directories(${MODULE_NAME} INTERFACE ${CMAKE_CURRENT_LIST_DIR}/include)
 endmacro()
+
+macro(obc_add_module_header_only NAME)
+    set(MODULE_NAME module_${NAME})
+
+    add_library(${MODULE_NAME} INTERFACE)
+    target_include_directories(${MODULE_NAME} INTERFACE ${CMAKE_CURRENT_LIST_DIR}/include)
+endmacro()

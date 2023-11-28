@@ -1,27 +1,12 @@
 #include "modules/drivers/storage/sd_driver.h"
+#include "modules/logger/logger.h"
 #include "hw_config.h"
 #include <string.h>
 
-static sd_file_t *_get_sd_file_by_name(sd_card_inst_t *sdCard, const char *name)
-{
-    for (size_t i = 0; i < sdCard->filesCount; ++i)
-    {
-        if (strcmp(name, sdCard->files[i].name) == 0)
-        {
-            return &sdCard->files[i];
-        }
-    }
-
-    return NULL;
-}
+static sd_file_t *_get_sd_file_by_name(sd_card_inst_t *sdCard, const char *name);
 
 void sd_init(sd_card_inst_t *sdCard, hal_pin_number_t checkPin)
 {
-    if (!sdCard)
-    {
-        return;
-    }
-
     if (sdCard->isInitialized)
     {
         return;
@@ -48,6 +33,8 @@ void sd_init(sd_card_inst_t *sdCard, hal_pin_number_t checkPin)
 
     if (fr != FR_OK)
     {
+        OBC_ERR("SD Card mount failed!");
+
         return;
     }
 
@@ -64,11 +51,6 @@ void sd_check(hal_pin_number_t pin, bool *result)
 
 void sd_init_file(sd_card_inst_t *sdCard, const char *fileName)
 {
-    if (!sdCard || !fileName)
-    {
-        return;
-    }
-
     if (!sdCard->isInitialized)
     {
         return;
@@ -84,11 +66,6 @@ void sd_init_file(sd_card_inst_t *sdCard, const char *fileName)
 
 void sd_begin(sd_card_inst_t *sdCard, const char *fileName)
 {
-    if (!sdCard || !fileName)
-    {
-        return;
-    }
-
     if (!sdCard->isInitialized)
     {
         return;
@@ -122,11 +99,6 @@ void sd_begin(sd_card_inst_t *sdCard, const char *fileName)
 
 void sd_write(sd_card_inst_t *sdCard, const char *msg, const char *fileName)
 {
-    if (!sdCard || !msg || !fileName)
-    {
-        return;
-    }
-
     if (!sdCard->isInitialized)
     {
         return;
@@ -165,11 +137,6 @@ void sd_write(sd_card_inst_t *sdCard, const char *msg, const char *fileName)
 
 void sd_end(sd_card_inst_t *sdCard, const char *fileName)
 {
-    if (!sdCard || !fileName)
-    {
-        return;
-    }
-
     if (!sdCard->isInitialized)
     {
         return;
@@ -210,11 +177,6 @@ void sd_end(sd_card_inst_t *sdCard, const char *fileName)
 
 void sd_clear_file(sd_card_inst_t *sdCard, const char *fileName)
 {
-    if (!sdCard || !fileName)
-    {
-        return;
-    }
-
     if (!sdCard->isInitialized)
     {
         return;
@@ -237,11 +199,6 @@ void sd_clear_file(sd_card_inst_t *sdCard, const char *fileName)
 
 void sd_terminate(sd_card_inst_t *sdCard)
 {
-    if (!sdCard)
-    {
-        return;
-    }
-
     if (!sdCard->isInitialized)
     {
         return;
@@ -251,8 +208,23 @@ void sd_terminate(sd_card_inst_t *sdCard)
 
     if (fr != FR_OK)
     {
+        OBC_ERR("SD Card unmount failed!");
+        
         return;
     }
 
     sdCard->isInitialized = false;
+}
+
+static sd_file_t *_get_sd_file_by_name(sd_card_inst_t *sdCard, const char *name)
+{
+    for (size_t i = 0; i < sdCard->filesCount; ++i)
+    {
+        if (strcmp(name, sdCard->files[i].name) == 0)
+        {
+            return &sdCard->files[i];
+        }
+    }
+
+    return NULL;
 }

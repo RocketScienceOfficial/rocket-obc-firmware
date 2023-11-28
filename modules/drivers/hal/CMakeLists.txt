@@ -4,7 +4,7 @@ obc_add_submodule(hal drivers
     ${OBC_PLATFORM}/flash_hal_driver.c
     ${OBC_PLATFORM}/gpio_driver.c
     ${OBC_PLATFORM}/i2c_driver.c
-    ${OBC_PLATFORM}/multithreading.c
+    ${OBC_PLATFORM}/multicore.c
     ${OBC_PLATFORM}/pwm_driver.c
     ${OBC_PLATFORM}/serial_driver.c
     ${OBC_PLATFORM}/spi_driver.c
