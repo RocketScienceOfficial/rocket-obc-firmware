@@ -22,11 +22,11 @@ typedef enum flight_state_type
  */
 typedef struct flight_sm_data
 {
-    flight_state_type_t state;
-    float apogee;
-    bool apogeeReached;
-    float lastAlt;
-    size_t lastAltInd;
+    flight_state_type_t state; /** Current state */
+    float apogee;              /** Apogee */
+    bool apogeeReached;        /** Has apogee been reached */
+    float lastAlt;             /** Last altitude */
+    size_t lastAltInd;         /** Last altitude verification index */
 } flight_sm_data_t;
 
 /**
@@ -34,8 +34,8 @@ typedef struct flight_sm_data
  */
 typedef struct flight_sm_input
 {
-    vec3_t accel;
-    float alt;
+    vec3_t accel; /** Acceleration */
+    float alt;    /** Altitude */
 } flight_sm_input_t;
 
 /**

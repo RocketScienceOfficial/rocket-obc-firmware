@@ -24,7 +24,7 @@ typedef struct ign_pins
 typedef struct ign_settings
 {
     float mainAlt;
-    float secondIgnDelay;
+    msec_t secondIgnDelay;
 } ign_settings_t;
 
 /**
@@ -33,8 +33,9 @@ typedef struct ign_settings
 typedef struct ign_pin_data
 {
     hal_pin_number_t pin;
+    bool setHigh;
     bool fired;
-    float delay;
+    msec_t delay;
     msec_t time;
     bool finished;
 } ign_pin_data_t;

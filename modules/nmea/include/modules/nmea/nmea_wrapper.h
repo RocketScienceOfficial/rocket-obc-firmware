@@ -10,9 +10,9 @@
  */
 typedef struct gnss_data
 {
-    nmea_lat_lon_t lat;
-    nmea_lat_lon_t lon;
-    float alt;
+    nmea_lat_lon_t lat; /** Latitude */
+    nmea_lat_lon_t lon; /** Longitude */
+    float alt;          /** Altitude */
 } gnss_data_t;
 
 /**

@@ -1,9 +1,10 @@
 #include "modules/ign/ign_controller.h"
+#include "modules/logger/logger.h"
 #include <string.h>
 
 #define IGN_UP_TIME_MS 500
 
-static void _ign_try_fire(ign_data_t *ign, ign_pin_data_t *data, float delay);
+static void _ign_try_fire(ign_data_t *ign, ign_pin_data_t *data, msec_t delay);
 static void _ign_try_update(ign_pin_data_t *data);
 
 void ign_init(ign_data_t *data, const ign_pins_t *pins, const ign_settings_t *settings)
@@ -29,6 +30,8 @@ void ign_init(ign_data_t *data, const ign_pins_t *pins, const ign_settings_t *se
 void ign_arm(ign_data_t *data)
 {
     data->armed = true;
+
+    OBC_INFO("Armed igniters!");
 }
 
 void ign_update(ign_data_t *data, const flight_sm_data_t *sm)
@@ -68,7 +71,7 @@ void ign_update(ign_data_t *data, const flight_sm_data_t *sm)
     _ign_try_update(&data->secondData);
 }
 
-static void _ign_try_fire(ign_data_t *ign, ign_pin_data_t *data, float delay)
+static void _ign_try_fire(ign_data_t *ign, ign_pin_data_t *data, msec_t delay)
 {
     if (ign->armed)
     {
@@ -77,15 +80,22 @@ static void _ign_try_fire(ign_data_t *ign, ign_pin_data_t *data, float delay)
             data->fired = true;
             data->delay = delay;
             data->time = hal_time_get_ms_since_boot();
-
-            hal_gpio_set_pin_state(data->pin, GPIO_HIGH);
         }
     }
 }
 
 static void _ign_try_update(ign_pin_data_t *data)
 {
-    if (data->fired && !data->finished && data->time - hal_time_get_ms_since_boot() >= IGN_UP_TIME_MS)
+    msec_t diff = hal_time_get_ms_since_boot() - data->time;
+
+    if (data->fired && !data->setHigh && diff >= data->delay)
+    {
+        data->setHigh = true;
+
+        hal_gpio_set_pin_state(data->pin, GPIO_HIGH);
+    }
+
+    if (data->fired && !data->finished && diff >= data->delay + IGN_UP_TIME_MS)
     {
         data->finished = true;
 

@@ -88,7 +88,30 @@ void dataman_read(void)
                 dataman_sensor_frame_t newFrame;
                 memcpy(&newFrame, frame->payload, frame->len);
 
-                LOG_FRAME("%f,%f,%f,%f,%f,%f,%f,%f,%f", newFrame.accel.x, newFrame.accel.y, newFrame.accel.z, newFrame.gyro.x, newFrame.gyro.y, newFrame.gyro.z, newFrame.mag.x, newFrame.mag.y, newFrame.mag.z);
+                LOG_FRAME("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f",
+                          newFrame.acc1.x,
+                          newFrame.acc1.y,
+                          newFrame.acc1.z,
+                          newFrame.acc2.x,
+                          newFrame.acc2.y,
+                          newFrame.acc2.z,
+                          newFrame.acc3.x,
+                          newFrame.acc3.y,
+                          newFrame.acc3.z,
+                          newFrame.gyro1.x,
+                          newFrame.gyro1.y,
+                          newFrame.gyro1.z,
+                          newFrame.gyro2.x,
+                          newFrame.gyro2.y,
+                          newFrame.gyro2.z,
+                          newFrame.mag.x,
+                          newFrame.mag.y,
+                          newFrame.mag.z,
+                          newFrame.press,
+                          newFrame.temp,
+                          newFrame.lat,
+                          newFrame.lon,
+                          newFrame.alt);
             }
             else
             {

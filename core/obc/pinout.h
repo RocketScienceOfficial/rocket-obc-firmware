@@ -9,4 +9,12 @@
 #define I2C 0
 #define I2C_FREQ 2 * 1000 * 100
 
+#define SDA 0
+#define SCL 0
+
+#define IGN_1 0
+#define IGN_2 0
+#define IGN_3 0
+#define IGN_4 0
+
 #endif
