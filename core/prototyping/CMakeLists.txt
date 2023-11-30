@@ -16,6 +16,13 @@ target_link_libraries(prototyping
    module_drivers_magnetometer
    module_drivers_servo
    module_drivers_storage
+   module_flight_sm
+   module_nmea
+   module_ahrs
+   module_radiolink
+   module_database
+   module_maths
+   module_logger
 )
 
 obc_add_outputs(prototyping)

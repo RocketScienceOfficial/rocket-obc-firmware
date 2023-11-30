@@ -49,12 +49,12 @@ void vec3_normalize(vec3_t *v);
 void vec3_mul_num(float n, vec3_t *v);
 
 /**
- * @brief Multiply vectors using dot product
- *
- * @param a First vector
- * @param b Second vector
- * @return Sum
- */
+ * @brief Calculate dot product of two vectors
+ * 
+ * @param a Vector A
+ * @param b Vector B
+ * @return Dot product
+*/
 float vec3_dot(vec3_t *a, vec3_t *b);
 
 #endif

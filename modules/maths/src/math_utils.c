@@ -24,3 +24,8 @@ float height_from_baro_formula(float pressure, float temperature)
 {
     return (1 - powf(pressure / SEA_LEVEL_PRESSURE, 0.190284)) * CELSIUS_2_KELVIN(temperature) / STANDARD_LAPSE_RATE;
 }
+
+bool value_approx_eql(float val, float des, float eps)
+{
+    return des - eps > val && des + eps < val;
+}

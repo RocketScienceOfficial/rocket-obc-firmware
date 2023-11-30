@@ -1,13 +1,14 @@
 #ifndef _GPIO_DRIVER_H
 #define _GPIO_DRIVER_H
 
+#include <stdint.h>
 #include <stdbool.h>
 
-typedef unsigned int hal_pin_number_t; /** Type for GPIO pin number */
-typedef float hal_voltage_level_t;     /** Type for voltage level */
-typedef unsigned int hal_baud_rate_t;  /** Type for baud rate */
+typedef uint8_t hal_pin_number_t;     /** Type for GPIO pin number */
+typedef float hal_voltage_level_t;    /** Type for voltage level */
+typedef unsigned int hal_baud_rate_t; /** Type for baud rate */
 
-#define PIN_NUMBER_INVALID 0xFFFFFFFF /** Invalid pin number */
+#define PIN_NUMBER_INVALID 0xFF /** Invalid pin number */
 
 /**
  * @brief Type for GPIO pin mode

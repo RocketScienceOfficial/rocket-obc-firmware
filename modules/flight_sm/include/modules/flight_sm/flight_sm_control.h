@@ -1,6 +1,10 @@
 #ifndef _FLIGHT_SM_H
 #define _FLIGHT_SM_H
 
+#include "modules/maths/vector.h"
+#include <stddef.h>
+#include <stdbool.h>
+
 /**
  * @brief Flight State Machine Type
  */
@@ -10,8 +14,7 @@ typedef enum flight_state_type
     FLIGHT_STATE_ACCELERATING = 1,
     FLIGHT_STATE_FREE_FLIGHT = 2,
     FLIGHT_STATE_FREE_FALL = 3,
-    FLIGHT_STATE_PARACHUTING = 4,
-    FLIGHT_STATE_FINISHED = 5,
+    FLIGHT_STATE_LANDED = 4,
 } flight_state_type_t;
 
 /**
@@ -19,7 +22,11 @@ typedef enum flight_state_type
  */
 typedef struct flight_sm_data
 {
-    flight_state_type_t type;
+    flight_state_type_t state;
+    float apogee;
+    bool apogeeReached;
+    float lastAlt;
+    size_t lastAltInd;
 } flight_sm_data_t;
 
 /**
@@ -27,7 +34,8 @@ typedef struct flight_sm_data
  */
 typedef struct flight_sm_input
 {
-
+    vec3_t accel;
+    float alt;
 } flight_sm_input_t;
 
 /**
