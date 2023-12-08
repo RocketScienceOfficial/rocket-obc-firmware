@@ -2,7 +2,7 @@
 #include "hardware/spi.h"
 #include "pico/stdlib.h"
 
-static spi_inst_t *__get_spi(hal_spi_instance_t spi)
+static spi_inst_t *_get_spi(hal_spi_instance_t spi)
 {
     return (spi == 0 ? spi0 : spi1);
 }
@@ -82,7 +82,7 @@ void hal_spi_init_all(hal_spi_instance_t spi, unsigned long baudrate)
         return;
     }
 
-    spi_init(__get_spi(spi), baudrate);
+    spi_init(_get_spi(spi), baudrate);
 }
 
 void hal_spi_init_pins(hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t sck, hal_pin_number_t cs)
@@ -117,7 +117,7 @@ bool hal_spi_write(hal_spi_instance_t spi, const uint8_t *data, size_t size)
         return false;
     }
 
-    if (spi_write_blocking(__get_spi(spi), data, size) < 0)
+    if (spi_write_blocking(_get_spi(spi), data, size) < 0)
     {
         return false;
     }
@@ -132,7 +132,7 @@ bool hal_spi_read(hal_spi_instance_t spi, uint8_t repeatedTXData, uint8_t *desti
         return false;
     }
 
-    if (spi_read_blocking(__get_spi(spi), repeatedTXData, destination, size) < 0)
+    if (spi_read_blocking(_get_spi(spi), repeatedTXData, destination, size) < 0)
     {
         return false;
     }
@@ -147,7 +147,7 @@ bool hal_spi_write_read(hal_spi_instance_t spi, const uint8_t *data, uint8_t *de
         return false;
     }
 
-    if (spi_write_read_blocking(__get_spi(spi), data, destination, size) < 0)
+    if (spi_write_read_blocking(_get_spi(spi), data, destination, size) < 0)
     {
         return false;
     }

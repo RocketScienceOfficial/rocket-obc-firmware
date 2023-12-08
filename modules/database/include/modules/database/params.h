@@ -1,6 +1,8 @@
 #ifndef _PARAMS_H
 #define _PARAMS_H
 
+#include "modules/drivers/hal/gpio_driver.h"
+#include "modules/drivers/hal/time_tracker.h"
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -11,6 +13,9 @@
  */
 typedef struct db_params
 {
+    hal_voltage_level_t vbat;
+    float ignMainAlt;
+    msec_t ignSecondDelay;
 } db_params_t;
 
 /**

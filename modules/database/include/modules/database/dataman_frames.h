@@ -21,7 +21,7 @@ typedef struct dataman_sensor_frame
     vec3_t acc3;
     vec3_t gyro1;
     vec3_t gyro2;
-    vec3_t mag;
+    vec3_t mag1;
     float press;
     float temp;
     double lat;

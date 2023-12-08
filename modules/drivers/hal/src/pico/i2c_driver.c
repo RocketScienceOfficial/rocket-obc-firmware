@@ -2,7 +2,7 @@
 #include "hardware/i2c.h"
 #include "pico/stdlib.h"
 
-static i2c_inst_t *__get_i2c(hal_i2c_instance_t i2c)
+static i2c_inst_t *_get_i2c(hal_i2c_instance_t i2c)
 {
     return (i2c == 0 ? i2c0 : i2c1);
 }
@@ -61,7 +61,7 @@ void hal_i2c_init_all(hal_i2c_instance_t i2c, unsigned long baudrate)
         return;
     }
 
-    i2c_init(__get_i2c(i2c), baudrate);
+    i2c_init(_get_i2c(i2c), baudrate);
 }
 
 void hal_i2c_init_pins(hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl)
@@ -84,7 +84,7 @@ bool hal_i2c_write(hal_i2c_instance_t i2c, uint8_t address, const uint8_t *data,
         return false;
     }
 
-    if (i2c_write_blocking(__get_i2c(i2c), address, data, size, nostop) < 0)
+    if (i2c_write_blocking(_get_i2c(i2c), address, data, size, nostop) < 0)
     {
         return false;
     }
@@ -99,7 +99,7 @@ bool hal_i2c_read(hal_i2c_instance_t i2c, uint8_t address, uint8_t *destination,
         return false;
     }
 
-    if (i2c_read_blocking(__get_i2c(i2c), address, destination, size, nostop) < 0)
+    if (i2c_read_blocking(_get_i2c(i2c), address, destination, size, nostop) < 0)
     {
         return false;
     }

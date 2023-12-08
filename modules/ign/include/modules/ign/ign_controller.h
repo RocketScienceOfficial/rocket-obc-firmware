@@ -23,6 +23,7 @@ typedef struct ign_pins
  */
 typedef struct ign_settings
 {
+    hal_voltage_level_t vbat;
     float mainAlt;
     msec_t secondIgnDelay;
 } ign_settings_t;

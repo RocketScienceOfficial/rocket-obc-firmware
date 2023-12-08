@@ -1,8 +1,8 @@
 #ifndef _MEASUREMENTS_H
 #define _MEASUREMENTS_H
 
-#include "modules/maths/vector.h"
-#include "modules/nmea/nmea_parser.h"
+#include "modules/flight_sm/flight_sm_control.h"
+#include "modules/drivers/hal/time_tracker.h"
 
 typedef struct measurement_data
 {
@@ -11,7 +11,7 @@ typedef struct measurement_data
     vec3_t acc3;
     vec3_t gyro1;
     vec3_t gyro2;
-    vec3_t mag;
+    vec3_t mag1;
     float press;
     float temp;
     double lat;
@@ -21,5 +21,8 @@ typedef struct measurement_data
 
 void measurements_init(void);
 void measurements_get(measurement_data_t *data);
+
+usec_t measurements_get_rate(const flight_sm_data_t *sm);
+bool measurements_is_save(const flight_sm_data_t *sm);
 
 #endif
