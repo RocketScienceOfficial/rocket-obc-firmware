@@ -40,7 +40,7 @@ void hal_core_send_data(size_t index, void *data);
 void hal_core_receive_data(size_t index, void *data);
 
 /**
- * @brief Sets current core as victim for pausing. Can be used for both.
+ * @brief Sets current core as victim for pausing. Can be used for both
  */
 void hal_core_set_as_victim(void);
 

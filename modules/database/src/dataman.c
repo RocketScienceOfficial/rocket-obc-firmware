@@ -147,7 +147,7 @@ void dataman_flush(void)
     }
 }
 
-void dataman_save_sensors_frame(dataman_sensor_frame_t *frame)
+void dataman_save_sensors_frame(const dataman_sensor_frame_t *frame)
 {
     dataman_frame_t dFrame = {
         .magic = DATAMAN_MAGIC_BYTE,
