@@ -114,6 +114,10 @@ static void _setup_ign(void)
         .drouge = IGN_2,
         .sep = IGN_3,
         .second = IGN_4,
+        .checkMain = MAX1161X_CHANNEL_AIN0,
+        .checkDrouge = MAX1161X_CHANNEL_AIN1,
+        .checkSep = MAX1161X_CHANNEL_AIN2,
+        .checkSecond = MAX1161X_CHANNEL_AIN3,
     };
     ign_settings_t ignSettings = {
         .vbat = s_Params.vbat,
