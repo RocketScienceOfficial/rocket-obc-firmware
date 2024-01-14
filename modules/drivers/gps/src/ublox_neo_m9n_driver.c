@@ -1,7 +1,7 @@
 #include "modules/drivers/gps/ublox_neo_m9n_driver.h"
 #include <string.h>
 
-void ublox_neo_m9n_init_spi(ublox_neo_m9n_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck)
+void ublox_neo_m9n_init_spi(ublox_neo_m9n_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
 {
     config->gpioConfig = (hal_gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_SPI,
@@ -9,7 +9,7 @@ void ublox_neo_m9n_init_spi(ublox_neo_m9n_config_t *config, hal_spi_instance_t s
         .cs = cs,
     };
 
-    hal_spi_init_pins(spi, miso, mosi, sck, cs);
+    hal_spi_init_cs(spi, cs);
 }
 
 void ublox_neo_m9n_read_data(ublox_neo_m9n_config_t *config, ublox_neo_m9n_data_t *data)

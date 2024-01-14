@@ -13,9 +13,10 @@
  */
 typedef struct db_params
 {
-    hal_voltage_level_t vbat;
-    float ignMainAlt;
+    float mainParachuteHeight;
+    float launcherHeight;
     msec_t ignSecondDelay;
+    float parachuteErrorSpeed;
 } db_params_t;
 
 /**

@@ -91,22 +91,17 @@ typedef enum bmp581_mode
  *
  * @param config BMP581 configuration
  * @param spi SPI instance
- * @param miso MISO pin
- * @param mosi MOSI pin
  * @param cs CS pin
- * @param sck SCK pin
  */
-void bmp581_init_spi(bmp581_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck);
+void bmp581_init_spi(bmp581_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs);
 
 /**
  * @brief Initializes BMP581 using I2C
  *
  * @param config BMP581 configuration
  * @param i2c I2C instance
- * @param sda SDA pin
- * @param scl SCL pin
  */
-void bmp581_init_i2c(bmp581_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl);
+void bmp581_init_i2c(bmp581_config_t *config, hal_i2c_instance_t i2c);
 
 /**
  * @brief Validates BMP581 ID

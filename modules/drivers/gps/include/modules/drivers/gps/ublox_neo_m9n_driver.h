@@ -27,12 +27,9 @@ typedef struct ublox_neo_m9n_data
  *
  * @param config The configuration of the u-blox NEO-M9N GPS module.
  * @param spi The SPI instance to use.
- * @param miso The MISO pin to use.
- * @param mosi The MOSI pin to use.
  * @param cs The CS pin to use.
- * @param sck The SCK pin to use.
  */
-void ublox_neo_m9n_init_spi(ublox_neo_m9n_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck);
+void ublox_neo_m9n_init_spi(ublox_neo_m9n_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs);
 
 /**
  * @brief Reads a NMEA sentence from the u-blox NEO-M9N GPS module.

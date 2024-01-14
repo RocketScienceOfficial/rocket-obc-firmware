@@ -33,7 +33,7 @@ static void _mmc5983ma_set(mmc5983ma_config_t *config);
 static void _mmc5983ma_reset(mmc5983ma_config_t *config);
 static void _mmc5983ma_init_base(mmc5983ma_config_t *config);
 
-void mmc5983ma_init_spi(mmc5983ma_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck)
+void mmc5983ma_init_spi(mmc5983ma_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
 {
     config->gpioConfig = (hal_gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_SPI,
@@ -44,12 +44,12 @@ void mmc5983ma_init_spi(mmc5983ma_config_t *config, hal_spi_instance_t spi, hal_
         .writeMask = 0x7F,
     };
 
-    hal_spi_init_pins(spi, miso, mosi, sck, cs);
+    hal_spi_init_cs(spi, cs);
 
     _mmc5983ma_init_base(config);
 }
 
-void mmc5983ma_init_i2c(mmc5983ma_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl)
+void mmc5983ma_init_i2c(mmc5983ma_config_t *config, hal_i2c_instance_t i2c)
 {
     config->gpioConfig = (hal_gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_I2C,
@@ -59,8 +59,6 @@ void mmc5983ma_init_i2c(mmc5983ma_config_t *config, hal_i2c_instance_t i2c, hal_
         .multipleReadMask = 0x80,
         .writeMask = 0x7F,
     };
-
-    hal_i2c_init_pins(i2c, sda, scl);
 }
 
 void mmc5983_validate_id(mmc5983ma_config_t *config, bool *valid)

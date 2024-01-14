@@ -37,7 +37,7 @@
 
 static void _bmp581_soft_reset(bmp581_config_t *config);
 
-void bmp581_init_spi(bmp581_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck)
+void bmp581_init_spi(bmp581_config_t *config, hal_spi_instance_t spi,  hal_pin_number_t cs)
 {
     config->gpioConfig = (hal_gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_SPI,
@@ -48,10 +48,10 @@ void bmp581_init_spi(bmp581_config_t *config, hal_spi_instance_t spi, hal_pin_nu
         .writeMask = 0x7F,
     };
 
-    hal_spi_init_pins(spi, miso, mosi, cs, sck);
+    hal_spi_init_cs(spi, cs);
 }
 
-void bmp581_init_i2c(bmp581_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl)
+void bmp581_init_i2c(bmp581_config_t *config, hal_i2c_instance_t i2c)
 {
     config->gpioConfig = (hal_gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_I2C,
@@ -61,8 +61,6 @@ void bmp581_init_i2c(bmp581_config_t *config, hal_i2c_instance_t i2c, hal_pin_nu
         .multipleReadMask = 0x80,
         .writeMask = 0x7F,
     };
-
-    hal_i2c_init_pins(i2c, sda, scl);
 }
 
 bool bmp581_validate_id(bmp581_config_t *config)

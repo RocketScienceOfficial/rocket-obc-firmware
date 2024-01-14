@@ -33,7 +33,7 @@
 #define Y_OFFSET -45
 #define Z_OFFSET 420
 
-void h3lis331dl_init_spi(h3lis331dl_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck)
+void h3lis331dl_init_spi(h3lis331dl_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
 {
     config->gpioConfig = (hal_gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_SPI,
@@ -45,10 +45,10 @@ void h3lis331dl_init_spi(h3lis331dl_config_t *config, hal_spi_instance_t spi, ha
     };
     config->rangeFactor = 0;
 
-    hal_spi_init_pins(spi, miso, mosi, sck, cs);
+    hal_spi_init_cs(spi, cs);
 }
 
-void h3lis331dl_init_i2c(h3lis331dl_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl)
+void h3lis331dl_init_i2c(h3lis331dl_config_t *config, hal_i2c_instance_t i2c)
 {
     config->gpioConfig = (hal_gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_I2C,
@@ -59,8 +59,6 @@ void h3lis331dl_init_i2c(h3lis331dl_config_t *config, hal_i2c_instance_t i2c, ha
         .writeMask = 0x7F,
     };
     config->rangeFactor = 0;
-
-    hal_i2c_init_pins(i2c, sda, scl);
 }
 
 void h3lis331dl_validate_id(h3lis331dl_config_t *config, bool *valid)

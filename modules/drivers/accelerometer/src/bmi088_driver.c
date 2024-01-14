@@ -72,7 +72,7 @@ static void _bmi088_accel_read_regs(bmi088_accel_config_t *config, uint8_t addre
 static void _bmi088_accel_write_reg(bmi088_accel_config_t *config, uint8_t address, uint8_t data);
 static void _bmi088_gyro_soft_reset(bmi088_gyro_config_t *config);
 
-void bmi088_accel_init_spi(bmi088_accel_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck)
+void bmi088_accel_init_spi(bmi088_accel_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
 {
     config->gpioConfig = (hal_gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_SPI,
@@ -84,12 +84,12 @@ void bmi088_accel_init_spi(bmi088_accel_config_t *config, hal_spi_instance_t spi
     };
     config->rangeConstant = 0.0f;
 
-    hal_spi_init_pins(spi, miso, mosi, sck, cs);
+    hal_spi_init_cs(spi, cs);
 
     _bmi088_init_base(config);
 }
 
-void bmi088_accel_init_i2c(bmi088_accel_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl, bool sdo1Grounded)
+void bmi088_accel_init_i2c(bmi088_accel_config_t *config, hal_i2c_instance_t i2c, bool sdo1Grounded)
 {
     config->gpioConfig = (hal_gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_I2C,
@@ -100,8 +100,6 @@ void bmi088_accel_init_i2c(bmi088_accel_config_t *config, hal_i2c_instance_t i2c
         .writeMask = 0x7F,
     };
     config->rangeConstant = 0.0f;
-
-    hal_i2c_init_pins(i2c, sda, scl);
 
     _bmi088_init_base(config);
 }
@@ -137,7 +135,7 @@ void bmi088_accel_read(bmi088_accel_config_t *config, vec3_t *accel)
     accel->z = accelZ / 32768.0f * config->rangeConstant;
 }
 
-void bmi088_gyro_init_spi(bmi088_gyro_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck)
+void bmi088_gyro_init_spi(bmi088_gyro_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
 {
     config->gpioConfig = (hal_gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_SPI,
@@ -149,10 +147,10 @@ void bmi088_gyro_init_spi(bmi088_gyro_config_t *config, hal_spi_instance_t spi, 
     };
     config->rangeConstant = 0.0f;
 
-    hal_spi_init_pins(spi, miso, mosi, sck, cs);
+    hal_spi_init_cs(spi, cs);
 }
 
-void bmi088_gyro_init_i2c(bmi088_gyro_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl, bool sdo1Grounded)
+void bmi088_gyro_init_i2c(bmi088_gyro_config_t *config, hal_i2c_instance_t i2c, bool sdo1Grounded)
 {
     config->gpioConfig = (hal_gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_I2C,
@@ -163,8 +161,6 @@ void bmi088_gyro_init_i2c(bmi088_gyro_config_t *config, hal_i2c_instance_t i2c, 
         .writeMask = 0x7F,
     };
     config->rangeConstant = 0.0f;
-
-    hal_i2c_init_pins(i2c, sda, scl);
 }
 
 void bmi088_gyro_set_bandwidth(bmi088_gyro_config_t *config, bmi088_gyro_bandwidth_t bw)

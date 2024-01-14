@@ -100,12 +100,9 @@ typedef struct bme688_data
  *
  * @param config BME688 configuration
  * @param spi SPI instance
- * @param miso MISO pin
- * @param mosi MOSI pin
- * @param sck SCK pin
  * @param cs CS pin
  */
-void bme688_init(bme688_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t sck, hal_pin_number_t cs);
+void bme688_init(bme688_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs);
 
 /**
  * @brief Read BME688 sensor data

@@ -60,22 +60,17 @@ typedef enum lsm6dso32_gyro_range
  *
  * @param config LSM6DSO configuration
  * @param spi SPI instance
- * @param miso MISO pin
- * @param mosi MOSI pin
  * @param cs CS pin
- * @param sck SCK pin
  */
-void lsm6dso32_init_spi(lsm6dso32_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck);
+void lsm6dso32_init_spi(lsm6dso32_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs);
 
 /**
  * @brief Initialize LSM6DSO accelerometer using I2C
  *
  * @param config LSM6DSO configuration
  * @param i2c I2C instance
- * @param sda SDA pin
- * @param scl SCL pin
  */
-void lsm6dso32_init_i2c(lsm6dso32_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl);
+void lsm6dso32_init_i2c(lsm6dso32_config_t *config, hal_i2c_instance_t i2c);
 
 /**
  * @brief Validate LSM6DSO32 ID

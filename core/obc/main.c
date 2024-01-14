@@ -86,6 +86,8 @@ static void _setup_board(void)
     hal_spi_init_all(SPI_INST, SPI_FREQ);
     hal_i2c_init_all(I2C_INST, I2C_FREQ);
     hal_adc_init_all();
+
+    hal_i2c_init_pins(I2C_INST, SDA, SCL);
 }
 
 static void _setup_db(void)
@@ -94,9 +96,7 @@ static void _setup_db(void)
 
     if (!params_get(&s_Params))
     {
-        s_Params.vbat = 3.3f;
-        s_Params.ignMainAlt = 500;
-        s_Params.ignSecondDelay = 1000;
+        // TODO: Fetch params
 
         params_save(&s_Params);
     }
@@ -120,8 +120,7 @@ static void _setup_ign(void)
         .checkSecond = MAX1161X_CHANNEL_AIN3,
     };
     ign_settings_t ignSettings = {
-        .vbat = s_Params.vbat,
-        .mainAlt = s_Params.ignMainAlt,
+        .mainAlt = s_Params.mainParachuteHeight,
         .secondIgnDelay = s_Params.ignSecondDelay,
     };
 

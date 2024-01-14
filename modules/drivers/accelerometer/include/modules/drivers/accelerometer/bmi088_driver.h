@@ -98,23 +98,18 @@ typedef enum bmi088_gyro_bandwidth
  *
  * @param config Configuration
  * @param spi SPI
- * @param miso MISO
- * @param mosi MOSI
  * @param cs CS
- * @param sck SCK
  */
-void bmi088_accel_init_spi(bmi088_accel_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck);
+void bmi088_accel_init_spi(bmi088_accel_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs);
 
 /**
  * @brief Initialize BMI088 accelerometer
  *
  * @param config Configuration
  * @param i2c I2C
- * @param sda SDA
- * @param scl SCL
  * @param sdo1Grounded Is SDO1 pulled to GND
  */
-void bmi088_accel_init_i2c(bmi088_accel_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl, bool sdo1Grounded);
+void bmi088_accel_init_i2c(bmi088_accel_config_t *config, hal_i2c_instance_t i2c, bool sdo1Grounded);
 
 /**
  * @brief Set BMI088 accelerometer configuration
@@ -146,23 +141,18 @@ void bmi088_accel_read(bmi088_accel_config_t *config, vec3_t *accel);
  *
  * @param config Configuration
  * @param spi SPI
- * @param miso MISO
- * @param mosi MOSI
  * @param cs CS
- * @param sck SCK
  */
-void bmi088_gyro_init_spi(bmi088_gyro_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck);
+void bmi088_gyro_init_spi(bmi088_gyro_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs);
 
 /**
  * @brief Initialize BMI088 gyroscope
  *
  * @param config Configuration
  * @param i2c I2C
- * @param sda SDA
- * @param scl SCL
  * @param sdo1Grounded Is SDO1 pulled to GND
  */
-void bmi088_gyro_init_i2c(bmi088_gyro_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl, bool sdo1Grounded);
+void bmi088_gyro_init_i2c(bmi088_gyro_config_t *config, hal_i2c_instance_t i2c, bool sdo1Grounded);
 
 /**
  * @brief Set BMI088 gyroscope bandwidth

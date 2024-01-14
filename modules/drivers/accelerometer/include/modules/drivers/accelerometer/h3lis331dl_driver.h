@@ -65,22 +65,17 @@ typedef enum h3lis331dl_range
  *
  * @param config H3lis331dl configuration
  * @param spi SPI
- * @param miso MISO
- * @param mosi MOSI
  * @param cs CS
- * @param sck SCK
  */
-void h3lis331dl_init_spi(h3lis331dl_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck);
+void h3lis331dl_init_spi(h3lis331dl_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs);
 
 /**
  * @brief Initializes H3lis331dl with I2C
  *
  * @param config H3lis331dl configuration
  * @param i2c I2C
- * @param sda SDA
- * @param scl SCL
  */
-void h3lis331dl_init_i2c(h3lis331dl_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl);
+void h3lis331dl_init_i2c(h3lis331dl_config_t *config, hal_i2c_instance_t i2c);
 
 /**
  * @brief Checks if H3lis331dl WHO_AM_I register is valid

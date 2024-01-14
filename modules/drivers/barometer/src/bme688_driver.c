@@ -99,13 +99,13 @@ static uint8_t _bme688_read_reg(bme688_config_t *config, uint8_t address);
 static void _bme688_read_regs(bme688_config_t *config, uint8_t address, uint8_t *buffer, size_t count);
 static void _bme688_write_reg(bme688_config_t *config, uint8_t address, uint8_t data);
 
-void bme688_init(bme688_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t sck, hal_pin_number_t cs)
+void bme688_init(bme688_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
 {
     config->spi = spi;
     config->cs = cs;
     config->currentMode = BME688_MODE_SLEEP;
 
-    hal_spi_init_pins(spi, miso, mosi, sck, cs);
+    hal_spi_init_cs(spi, cs);
 
     _bme688_set_page(config, 0);
 

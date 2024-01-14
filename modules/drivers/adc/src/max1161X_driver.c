@@ -4,7 +4,7 @@
 static void _max1161x_setup(max1161x_config_t *config, uint8_t data);
 static void _max1161x_config(max1161x_config_t *config, uint8_t data);
 
-void max1161x_init(max1161x_config_t *config, max1161x_type_t type, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl)
+void max1161x_init(max1161x_config_t *config, max1161x_type_t type, hal_i2c_instance_t i2c)
 {
     if (type == MAX1161X_TYPE_2 || type == MAX1161X_TYPE_3)
     {
@@ -26,10 +26,6 @@ void max1161x_init(max1161x_config_t *config, max1161x_type_t type, hal_i2c_inst
     }
 
     config->i2c = i2c;
-    config->sda = sda;
-    config->scl = scl;
-
-    hal_i2c_init_pins(i2c, sda, scl);
 
     _max1161x_setup(config, (0x05 << 4) | (0x01 << 1));
     _max1161x_config(config, (0x03 << 5) | 0x01);

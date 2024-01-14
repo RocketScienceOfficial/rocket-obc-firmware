@@ -85,19 +85,22 @@ void hal_spi_init_all(hal_spi_instance_t spi, unsigned long baudrate)
     spi_init(_get_spi(spi), baudrate);
 }
 
-void hal_spi_init_pins(hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t sck, hal_pin_number_t cs)
+void hal_spi_init_pins(hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t sck)
 {
     if (!hal_spi_check_instance(spi) || !hal_spi_check_miso(spi, miso) || !hal_spi_check_mosi(spi, mosi) || !hal_spi_check_sck(spi, sck))
     {
         return;
     }
 
-    hal_gpio_init_pin(cs, GPIO_OUTPUT);
-    hal_gpio_set_pin_state(cs, GPIO_HIGH);
-
     hal_gpio_set_pin_function(miso, GPIO_FUNCTION_SPI);
     hal_gpio_set_pin_function(mosi, GPIO_FUNCTION_SPI);
     hal_gpio_set_pin_function(sck, GPIO_FUNCTION_SPI);
+}
+
+void hal_spi_init_cs(hal_spi_instance_t spi, hal_pin_number_t cs)
+{
+    hal_gpio_init_pin(cs, GPIO_OUTPUT);
+    hal_gpio_set_pin_state(cs, GPIO_HIGH);
 }
 
 void hal_spi_cs_select(hal_pin_number_t cs)

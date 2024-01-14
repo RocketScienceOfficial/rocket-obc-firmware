@@ -10,8 +10,6 @@
 typedef struct max1161x_config
 {
     hal_i2c_instance_t i2c; /** Selected I2C */
-    hal_pin_number_t sda;   /** SDA Pin*/
-    hal_pin_number_t scl;   /** SCL Pin */
     uint8_t address;        /** I2C Address */
     float vRef;             /** Reference voltage */
 } max1161x_config_t;
@@ -54,10 +52,8 @@ typedef enum max1161x_channel
  * @param config Configuration
  * @param type Type
  * @param i2c I2C instance
- * @param sda SDA pin
- * @param scl SCL pin
  */
-void max1161x_init(max1161x_config_t *config, max1161x_type_t type, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl);
+void max1161x_init(max1161x_config_t *config, max1161x_type_t type, hal_i2c_instance_t i2c);
 
 /**
  * @brief Reads MAX1161X value

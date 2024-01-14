@@ -13,9 +13,6 @@
 typedef struct sx126x_pinout
 {
     hal_spi_instance_t spi; /** SPI */
-    hal_pin_number_t sck;   /** SCK */
-    hal_pin_number_t miso;  /** MISO */
-    hal_pin_number_t mosi;  /** MOSI */
     hal_pin_number_t cs;    /** CS */
     hal_pin_number_t reset; /** RESET */
     hal_pin_number_t busy;  /** BUSY */

@@ -19,7 +19,7 @@
 #define WHO_AM_I_VALUE 0x6C
 #define I2C_ADDRESS 0x6A
 
-void lsm6dso32_init_spi(lsm6dso32_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck)
+void lsm6dso32_init_spi(lsm6dso32_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
 {
     config->gpioConfig = (hal_gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_SPI,
@@ -30,10 +30,10 @@ void lsm6dso32_init_spi(lsm6dso32_config_t *config, hal_spi_instance_t spi, hal_
         .writeMask = 0x7F,
     };
 
-    hal_spi_init_pins(spi, miso, mosi, sck, cs);
+    hal_spi_init_cs(spi, cs);
 }
 
-void lsm6dso32_init_i2c(lsm6dso32_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl)
+void lsm6dso32_init_i2c(lsm6dso32_config_t *config, hal_i2c_instance_t i2c)
 {
     config->gpioConfig = (hal_gpio_communication_config_t){
         .protocol = GPIO_PROTOCOL_I2C,
@@ -43,8 +43,6 @@ void lsm6dso32_init_i2c(lsm6dso32_config_t *config, hal_i2c_instance_t i2c, hal_
         .multipleReadMask = 0x80,
         .writeMask = 0x7F,
     };
-
-    hal_i2c_init_pins(i2c, sda, scl);
 }
 
 void lsm6dso32_validate_id(lsm6dso32_config_t *config, bool *valid)

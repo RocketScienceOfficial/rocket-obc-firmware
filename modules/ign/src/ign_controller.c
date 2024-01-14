@@ -3,6 +3,7 @@
 #include "modules/maths/math_utils.h"
 #include <string.h>
 
+#define VBAT 3.3f
 #define IGN_UP_TIME_MS 1000
 #define IGN_PIN_CHECK_EPS 0.01f
 
@@ -82,22 +83,22 @@ void ign_check_pin(max1161x_config_t *adcConfig, const ign_pin_data_t *pinData, 
     hal_voltage_level_t voltage;
     max1161x_read(adcConfig, pinData->checkPin, &voltage);
 
-    if (value_approx_eql(voltage, 0, IGN_PIN_CHECK_EPS))
+    if (value_approx_eql(voltage, VBAT * 0, IGN_PIN_CHECK_EPS))
     {
         state->fuseWorking = true;
         state->ignPresent = true;
     }
-    else if (value_approx_eql(voltage, 0.0189607f, IGN_PIN_CHECK_EPS))
+    else if (value_approx_eql(voltage, VBAT * 0.0189607f, IGN_PIN_CHECK_EPS))
     {
         state->fuseWorking = true;
         state->ignPresent = false;
     }
-    else if (value_approx_eql(voltage, 0.0297897f, IGN_PIN_CHECK_EPS))
+    else if (value_approx_eql(voltage, VBAT * 0.0297897f, IGN_PIN_CHECK_EPS))
     {
         state->fuseWorking = false;
         state->ignPresent = true;
     }
-    else if (value_approx_eql(voltage, 0.0383104f, IGN_PIN_CHECK_EPS))
+    else if (value_approx_eql(voltage, VBAT * 0.0383104f, IGN_PIN_CHECK_EPS))
     {
         state->fuseWorking = false;
         state->ignPresent = false;

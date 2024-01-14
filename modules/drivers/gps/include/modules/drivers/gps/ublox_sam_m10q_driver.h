@@ -27,22 +27,17 @@ typedef struct ublox_sam_m10q_data
  *
  * @param config The configuration of the u-blox SAM-M10Q GPS module
  * @param spi The SPI instance to use
- * @param miso The MISO pin to use
- * @param mosi The MOSI pin to use
  * @param cs The CS pin to use
- * @param sck The SCK pin to use
  */
-void ublox_sam_m10q_init_spi(ublox_sam_m10q_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck);
+void ublox_sam_m10q_init_spi(ublox_sam_m10q_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs);
 
 /**
  * @brief Initializes the u-blox SAM-M10Q GPS module with I2C
  *
  * @param config The configuration of the u-blox SAM-M10Q GPS module
  * @param i2c The I2C instance to use
- * @param sda The SDA pin to use
- * @param scl The SCL pin to use
  */
-void ublox_sam_m10q_init_i2c(ublox_sam_m10q_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl);
+void ublox_sam_m10q_init_i2c(ublox_sam_m10q_config_t *config, hal_i2c_instance_t i2c);
 
 /**
  * @brief Reads a NMEA sentence from the u-blox SAM-M10Q GPS module

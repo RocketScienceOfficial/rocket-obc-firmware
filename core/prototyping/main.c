@@ -28,7 +28,7 @@ int main()
     hal_i2c_init_all(I2C_INST, I2C_FREQ);
     hal_adc_init_all();
 
-    mmc5983ma_init_i2c(&s_MMC5983MAConfig, I2C_INST, SDA, SCL);
+    mmc5983ma_init_i2c(&s_MMC5983MAConfig, I2C_INST);
     mmc5983ma_set_continuous_mode_odr(&s_MMC5983MAConfig, MMC5983MA_ODR_1000HZ);
 
     while (true)

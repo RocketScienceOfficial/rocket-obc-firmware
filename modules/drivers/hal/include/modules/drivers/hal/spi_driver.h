@@ -60,9 +60,16 @@ void hal_spi_init_all(hal_spi_instance_t spi, unsigned long baudrate);
  * @param miso MISO pin
  * @param mosi MOSI pin
  * @param sck SCK pin
- * @param cs CS pin
  */
-void hal_spi_init_pins(hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t sck, hal_pin_number_t cs);
+void hal_spi_init_pins(hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t sck);
+
+/**
+ * @brief Initializes CS pin
+ * 
+ * @param spi SPI Instance
+ * @param cs CS pin
+*/
+void hal_spi_init_cs(hal_spi_instance_t spi, hal_pin_number_t cs);
 
 /**
  * @brief Selects CS pin of SPI

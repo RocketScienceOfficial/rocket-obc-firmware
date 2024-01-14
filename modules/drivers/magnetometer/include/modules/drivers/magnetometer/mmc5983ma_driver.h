@@ -48,22 +48,17 @@ typedef enum mmc5983_odr
  *
  * @param config MMC5983MA configuration
  * @param spi SPI instance
- * @param miso MISO pin
- * @param mosi MOSI pin
  * @param cs CS pin
- * @param sck SCK pin
  */
-void mmc5983ma_init_spi(mmc5983ma_config_t *config, hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t cs, hal_pin_number_t sck);
+void mmc5983ma_init_spi(mmc5983ma_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs);
 
 /**
  * @brief MMC5983MA Magnetometer initialization using I2C
  *
  * @param config MMC5983MA configuration
  * @param i2c I2C instance
- * @param sda SDA pin
- * @param scl SCL pin
  */
-void mmc5983ma_init_i2c(mmc5983ma_config_t *config, hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl);
+void mmc5983ma_init_i2c(mmc5983ma_config_t *config, hal_i2c_instance_t i2c);
 
 /**
  * @brief Check if product id is valid
