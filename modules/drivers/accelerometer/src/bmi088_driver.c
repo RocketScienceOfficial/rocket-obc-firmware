@@ -66,7 +66,7 @@
 static void _bmi088_accel_soft_reset(bmi088_accel_config_t *config);
 static void _bmi088_accel_set_mode(bmi088_accel_config_t *config, bool active);
 static void _bmi088_accel_set_power(bmi088_accel_config_t *config, bool on);
-static void _bmi088_init_base(bmi088_accel_config_t *config);
+static void _bmi088_accel_init_base(bmi088_accel_config_t *config);
 static uint8_t _bmi088_accel_read_reg(bmi088_accel_config_t *config, uint8_t address);
 static void _bmi088_accel_read_regs(bmi088_accel_config_t *config, uint8_t address, uint8_t *buffer, size_t count);
 static void _bmi088_accel_write_reg(bmi088_accel_config_t *config, uint8_t address, uint8_t data);
@@ -86,7 +86,7 @@ void bmi088_accel_init_spi(bmi088_accel_config_t *config, hal_spi_instance_t spi
 
     hal_spi_init_cs(spi, cs);
 
-    _bmi088_init_base(config);
+    _bmi088_accel_init_base(config);
 }
 
 void bmi088_accel_init_i2c(bmi088_accel_config_t *config, hal_i2c_instance_t i2c, bool sdo1Grounded)
@@ -101,7 +101,7 @@ void bmi088_accel_init_i2c(bmi088_accel_config_t *config, hal_i2c_instance_t i2c
     };
     config->rangeConstant = 0.0f;
 
-    _bmi088_init_base(config);
+    _bmi088_accel_init_base(config);
 }
 
 void bmi088_accel_set_conf(bmi088_accel_config_t *config, bmi088_accel_odr_t odr, bmi088_accel_osr_t osr)
@@ -232,7 +232,7 @@ static void _bmi088_accel_set_power(bmi088_accel_config_t *config, bool on)
     hal_time_sleep_ms(5);
 }
 
-static void _bmi088_init_base(bmi088_accel_config_t *config)
+static void _bmi088_accel_init_base(bmi088_accel_config_t *config)
 {
     _bmi088_accel_set_power(config, true);
     _bmi088_accel_set_mode(config, true);
