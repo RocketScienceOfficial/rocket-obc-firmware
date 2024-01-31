@@ -116,5 +116,24 @@ int main()
     }
     TEST_END_SECTION();
 
+    TEST_START_SECTION("Invalid payload length");
+    {
+        radiolink_sensor_frame_t sensorFrame = {0};
+        radiolink_frame_t frame;
+        radiolink_serialize_sensor_frame(&frame, &sensorFrame);
+
+        uint8_t buffer[512];
+        size_t len = sizeof(buffer);
+        radiolink_get_bytes(&frame, buffer, &len);
+
+        buffer[1] = 0xFB;
+
+        radiolink_frame_t rawFrame;
+        bool deserializeResult = radiolink_deserialize(&rawFrame, buffer, len);
+
+        TEST_ASSERT(!deserializeResult);
+    }
+    TEST_END_SECTION();
+
     TEST_END();
 }
