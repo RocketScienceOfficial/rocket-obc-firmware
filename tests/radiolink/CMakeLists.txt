@@ -1,0 +1,1 @@
+obc_add_test(radiolink_tests module_radiolink module_maths)

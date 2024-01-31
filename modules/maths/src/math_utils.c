@@ -4,15 +4,19 @@
 
 float fast_inv_sqrt(float x)
 {
-    float xhalf = 0.5f * x;
-    long i = *(long *)&x;
+    long i;
+    float x2, y;
+    const float threehalfs = 1.5f;
 
+    x2 = x * 0.5f;
+    y = x;
+    i = *(long *)&y;
     i = 0x5f3759df - (i >> 1);
-    x = *(float *)&i;
-    x = x * (1.5f - xhalf * x * x);
-    x = x * (1.5f - xhalf * x * x);
+    y = *(float *)&i;
+    y = y * (threehalfs - (x2 * y * y));
+    y = y * (threehalfs - (x2 * y * y));
 
-    return x;
+    return y;
 }
 
 float clamp_value(float x, float min, float max)
@@ -22,10 +26,10 @@ float clamp_value(float x, float min, float max)
 
 float height_from_baro_formula(float pressure, float temperature)
 {
-    return (1 - powf(pressure / SEA_LEVEL_PRESSURE, 0.190284)) * CELSIUS_2_KELVIN(temperature) / STANDARD_LAPSE_RATE;
+    return (1 - powf(pressure / SEA_LEVEL_PRESSURE, 0.190284f)) * CELSIUS_2_KELVIN(temperature) / STANDARD_LAPSE_RATE;
 }
 
 bool value_approx_eql(float val, float des, float eps)
 {
-    return des - eps > val && des + eps < val;
+    return val >= des - eps && val <= des + eps;
 }

@@ -11,30 +11,44 @@ void radiolink_serialize_sensor_frame(radiolink_frame_t *rlFrame, radiolink_sens
 
     memcpy(rlFrame->payload, frame, rlFrame->len);
 
-    rlFrame->checksum = crc16_calculate((uint8_t *)rlFrame, (3 + rlFrame->len) * sizeof(uint8_t));
+    rlFrame->checksum = crc16_mcrf4xx_calculate((uint8_t *)rlFrame, 3 * sizeof(uint8_t) + rlFrame->len);
 }
 
-void radiolink_get_bytes(radiolink_frame_t *frame, uint8_t *data, size_t *len)
+bool radiolink_get_bytes(radiolink_frame_t *frame, uint8_t *data, size_t *len)
 {
     if (frame->len > RADIOLINK_MAX_PAYLOAD_LENGTH)
     {
         OBC_WARN("RadioLink frame length is too big: %d", frame->len);
 
-        return;
+        return false;
     }
 
-    size_t offset = (3 + frame->len) * sizeof(uint8_t);
+    size_t offset = 3 * sizeof(uint8_t) + frame->len;
+    size_t totalLength = 3 * sizeof(uint8_t) + frame->len + sizeof(uint16_t);
+
+    if (*len < totalLength)
+    {
+        OBC_ERR("RadioLink buffer length is too small!");
+
+        return false;
+    }
+
+    *len = totalLength;
 
     memcpy(data, frame, offset);
-    memcpy(data + offset, &frame->checksum, 2 * sizeof(uint8_t));
+    memcpy(data + offset, &frame->checksum, sizeof(frame->checksum));
 
-    *len = (3 + frame->len + 2) * sizeof(uint8_t);
+    return true;
 }
 
 bool radiolink_deserialize(radiolink_frame_t *frame, const uint8_t *data, size_t len)
 {
-    if (len > sizeof(radiolink_frame_t))
+    memset(frame, 0, sizeof(*frame));
+
+    if (len > sizeof(radiolink_frame_t) || len < 5)
     {
+        OBC_ERR("Invalid payload length!");
+
         return false;
     }
 
@@ -42,16 +56,28 @@ bool radiolink_deserialize(radiolink_frame_t *frame, const uint8_t *data, size_t
 
     memcpy(frame, data, offset);
 
-    if (frame->len > RADIOLINK_MAX_PAYLOAD_LENGTH || len - offset != frame->len + 2)
+    if (frame->magic != RADIOLINK_MAGIC)
+    {
+        OBC_ERR("RadioLink magic is incorrect!");
+
+        return false;
+    }
+
+    if (frame->len > RADIOLINK_MAX_PAYLOAD_LENGTH || len - offset != frame->len + sizeof(uint16_t))
     {
         OBC_ERR("RadioLink frame length is invalid!");
 
         return false;
     }
 
-    memcpy(frame + offset, data + offset, (frame->len + 2) * sizeof(uint8_t));
+    if (frame->len > 0)
+    {
+        memcpy(&frame->payload, data + offset, frame->len);
+    }
 
-    uint16_t checksum = crc16_calculate((uint8_t *)frame, (3 + frame->len) * sizeof(uint8_t));
+    memcpy(&frame->checksum, data + offset + frame->len, sizeof(frame->checksum));
+
+    uint16_t checksum = crc16_mcrf4xx_calculate((uint8_t *)frame, 3 * sizeof(uint8_t) + frame->len);
 
     if (frame->checksum != checksum)
     {

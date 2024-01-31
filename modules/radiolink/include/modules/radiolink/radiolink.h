@@ -38,9 +38,10 @@ void radiolink_serialize_sensor_frame(radiolink_frame_t *rlFrame, radiolink_sens
  *
  * @param frame Pointer to frame
  * @param data Bytes buffer
- * @param len Pointer to length
+ * @param len Pointer to length. Pass the length of the buffer and this will be set a new length
+ * @return True if success
  */
-void radiolink_get_bytes(radiolink_frame_t *frame, uint8_t *data, size_t *len);
+bool radiolink_get_bytes(radiolink_frame_t *frame, uint8_t *data, size_t *len);
 
 /**
  * @brief Deserialize RadioLink frame and validate it
@@ -48,6 +49,7 @@ void radiolink_get_bytes(radiolink_frame_t *frame, uint8_t *data, size_t *len);
  * @param frame Pointer to frame
  * @param data Bytes buffer
  * @param len Length of buffer
+ * @return True if success
  */
 bool radiolink_deserialize(radiolink_frame_t *frame, const uint8_t *data, size_t len);
 
