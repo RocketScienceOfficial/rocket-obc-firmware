@@ -1,0 +1,1 @@
+obc_add_test(ign_test module_ign module_maths)
