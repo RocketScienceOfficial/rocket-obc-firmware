@@ -211,7 +211,7 @@ typedef struct nmea_sentence_zda
 /**
  * @brief Check if the sentence is valid
  *
- * @param sentence Sentence to check
+ * @param sentence Sentence to check (with null terminator)
  * @return True if the sentence is valid, false otherwise
  */
 bool nmea_check_sentence(const char *sentence);
