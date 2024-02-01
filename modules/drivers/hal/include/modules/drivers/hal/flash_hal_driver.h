@@ -30,7 +30,7 @@ void hal_flash_read(size_t offset, const uint8_t **data);
  * @brief Write a single 256-byte page to flash
  *
  * @param offsetPages Offset of data
- * @param buffer Data to write
+ * @param buffer Data to write (Buffer must be at least one page size!)
  */
 void hal_flash_write_page(size_t offsetPages, const uint8_t *buffer);
 
@@ -38,7 +38,7 @@ void hal_flash_write_page(size_t offsetPages, const uint8_t *buffer);
  * @brief Write pages to flash. Only 256-byte pages are allowed!
  *
  * @param offsetPages Offset of data
- * @param buffer Data to write
+ * @param buffer Data to write (Buffer must be at least total pages size!)
  * @param pagesCount Number of pages to write (256 byte each)
  */
 void hal_flash_write_pages(size_t offsetPages, const uint8_t *buffer, size_t pagesCount);

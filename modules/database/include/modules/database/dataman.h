@@ -28,11 +28,13 @@ void dataman_clear(void);
 
 /**
  * @brief Reads frames from storage and sends it immediately to the serial
+ *
+ * @return Count of frames read
  */
-void dataman_read(void);
+size_t dataman_read(void);
 
 /**
- * @brief Flushes current buffer to the storage. Write may be unavailable after that
+ * @brief Flushes current buffer to the storage. Write may be unavailable after that!
  */
 void dataman_flush(void);
 

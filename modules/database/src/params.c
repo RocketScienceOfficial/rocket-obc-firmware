@@ -20,6 +20,8 @@ bool params_get(db_params_t *params)
         return false;
     }
 
+    *params = frame.params;
+
     return true;
 }
 
@@ -29,9 +31,12 @@ bool params_save(db_params_t *params)
         .magic = DB_PARAMS_MAGIC,
         .params = *params,
     };
+    uint8_t buffer[256];
+
+    memcpy(buffer, &frame, sizeof(frame));
 
     flash_erase_sectors(PARAMS_SECTORS_OFFSET, 1);
-    flash_write_page(PARAMS_SECTORS_OFFSET * hal_flash_sector_size() / hal_flash_write_buffer_size(), (uint8_t *)&frame);
+    flash_write_page(PARAMS_SECTORS_OFFSET * hal_flash_sector_size() / hal_flash_write_buffer_size(), buffer);
 
     OBC_INFO("Saved params");
 
