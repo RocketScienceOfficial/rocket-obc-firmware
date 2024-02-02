@@ -1,0 +1,1 @@
+obc_add_test(multicore_flash_test module_drivers_hal module_drivers_storage)

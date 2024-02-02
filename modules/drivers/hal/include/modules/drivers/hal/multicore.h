@@ -4,6 +4,10 @@
 #include <stddef.h>
 
 #define MULTICORE_MAX_FIFOS 2 /** Max fifos count */
+#define SAFE_FLASH_EXECUTE_MULTICORE(x) \
+    hal_core_start_lock();              \
+    (x);                                \
+    hal_core_end_lock();
 
 typedef void (*hal_core_func_t)(void); /** Type for core function */
 
