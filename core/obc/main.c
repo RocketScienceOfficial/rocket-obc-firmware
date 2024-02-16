@@ -1,7 +1,8 @@
 #include <stdbool.h>
 
-#include "pinout.h"
+#include "config.h"
 #include "measurements.h"
+#include "commands.h"
 
 #include "modules/drivers/hal/board_control.h"
 #include "modules/drivers/hal/time_tracker.h"
@@ -12,18 +13,16 @@
 #include "modules/flight_sm/flight_sm_control.h"
 #include "modules/ign/ign_controller.h"
 #include "modules/database/dataman.h"
-#include "modules/database/params.h"
 #include "modules/logger/logger.h"
 
-static db_params_t s_Params;
 static flight_sm_data_t s_SM;
 static ign_data_t s_IGN;
 static measurement_data_t s_MeasurementData;
 static flight_sm_input_t s_SMInput;
 static usec_t s_MeasurementTimeOffset;
 
-static void _init(void);
-static void _update(void);
+static bool _init(void);
+static bool _update(void);
 static void _terminate(void);
 
 static void _setup_board(void);
@@ -36,28 +35,42 @@ static void _update_sm(void);
 
 int main()
 {
-    _init();
-
-    while (true)
+    if (_init())
     {
-        _update();
+        while (true)
+        {
+            if (!_update())
+            {
+                break;
+            }
+        }
     }
 
     _terminate();
 }
 
-static void _init(void)
+static bool _init(void)
 {
     _setup_board();
-    _setup_db();
     _setup_sm();
     _setup_ign();
     _setup_meas();
 
     OBC_INFO("Initialized systems!");
+
+    if (command_check())
+    {
+        _setup_db();
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
-static void _update(void)
+static bool _update(void)
 {
     if (hal_time_run_every_us(measurements_get_rate(&s_SM), &s_MeasurementTimeOffset))
     {
@@ -68,11 +81,18 @@ static void _update(void)
     }
 
     ign_update(&s_IGN, &s_SM);
+
+    return true;
 }
 
 static void _terminate(void)
 {
     dataman_flush();
+
+    while (true)
+    {
+        hal_tight_loop();
+    }
 }
 
 static void _setup_board(void)
@@ -93,13 +113,6 @@ static void _setup_board(void)
 static void _setup_db(void)
 {
     dataman_clear();
-
-    if (!params_get(&s_Params))
-    {
-        // TODO: Fetch params
-
-        params_save(&s_Params);
-    }
 }
 
 static void _setup_sm(void)
@@ -120,8 +133,8 @@ static void _setup_ign(void)
         .checkSecond = MAX1161X_CHANNEL_AIN3,
     };
     ign_settings_t ignSettings = {
-        .mainAlt = s_Params.mainParachuteHeight,
-        .secondIgnDelay = s_Params.ignSecondDelay,
+        .mainAlt = MAIN_PARACHUTE_HEIGHT,
+        .secondIgnDelay = IGN_SECOND_DELAY,
     };
 
     ign_init(&s_IGN, &ignPins, &ignSettings);

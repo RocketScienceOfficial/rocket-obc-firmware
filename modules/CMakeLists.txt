@@ -4,7 +4,6 @@ add_subdirectory(drivers)
 add_subdirectory(logger)
 
 add_subdirectory(ahrs)
-add_subdirectory(commander)
 add_subdirectory(database)
 add_subdirectory(ekf)
 add_subdirectory(flight_sm)

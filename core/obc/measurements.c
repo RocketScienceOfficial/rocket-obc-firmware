@@ -1,5 +1,5 @@
 #include "measurements.h"
-#include "pinout.h"
+#include "config.h"
 
 #include "modules/drivers/accelerometer/bmi088_driver.h"
 #include "modules/drivers/accelerometer/lsm6dso32_driver.h"

@@ -23,6 +23,7 @@ int main()
                 .z = 30,
             },
         };
+        
         dataman_save_sensors_frame(&frame);
         dataman_save_sensors_frame(&frame);
         dataman_save_sensors_frame(&frame);
@@ -33,6 +34,7 @@ int main()
         dataman_save_sensors_frame(&frame);
         dataman_save_sensors_frame(&frame);
         dataman_save_sensors_frame(&frame);
+
         dataman_flush();
     }
     TEST_END_SECTION();

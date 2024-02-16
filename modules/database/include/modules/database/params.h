@@ -13,10 +13,10 @@
  */
 typedef struct db_params
 {
-    float mainParachuteHeight;
-    float launcherHeight;
+    uint16_t mainParachuteHeight;
+    uint16_t launcherHeight;
+    uint16_t parachuteErrorSpeed;
     msec_t ignSecondDelay;
-    float parachuteErrorSpeed;
 } db_params_t;
 
 /**

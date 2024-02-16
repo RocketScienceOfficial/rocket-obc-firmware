@@ -18,7 +18,6 @@ target_link_libraries(prototyping
    module_drivers_storage
    module_flight_sm
    module_ign
-   module_commander
    module_nmea
    module_ahrs
    module_radiolink

@@ -1,6 +1,7 @@
 add_executable(obc
     main.c
     measurements.c
+    commands.c
 )
 
 target_link_libraries(obc
@@ -19,7 +20,6 @@ target_link_libraries(obc
     module_drivers_storage
     module_flight_sm
     module_ign
-    module_commander
     module_nmea
     module_ahrs
     module_radiolink
