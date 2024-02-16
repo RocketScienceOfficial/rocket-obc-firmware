@@ -7,7 +7,7 @@
 #include <stddef.h>
 #include <string.h>
 
-static void _clear_input_buffer(void);
+#define CMD(x) hal_serial_printf("CMD:%s\n", x);
 
 bool command_check(void)
 {
@@ -16,11 +16,9 @@ bool command_check(void)
     char cmdBuffer[512];
     size_t currentSize = 0;
 
-    _clear_input_buffer();
-
     while (hal_time_get_ms_since_boot() - timeOffset < COMMAND_START_TIME_MS)
     {
-        if (hal_serial_read_char(&chr))
+        if (hal_serial_read_char(&chr) && chr <= 127)
         {
             if (chr != '\r')
             {
@@ -37,19 +35,12 @@ bool command_check(void)
 
     if (strcmp(cmdBuffer, "start-download") == 0)
     {
+        CMD("data-start");
         dataman_read();
+        CMD("data-end");
 
         return false;
     }
 
     return true;
-}
-
-static void _clear_input_buffer(void)
-{
-    int chr = 0;
-
-    while (hal_serial_read_char(&chr))
-    {
-    }
 }
