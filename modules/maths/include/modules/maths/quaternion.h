@@ -12,30 +12,6 @@ typedef struct quat
 } quat_t;
 
 /**
- * @brief Add quaternions
- *
- * @param a Quaternion to add to
- * @param b Second quaternion
- */
-void quat_add(quat_t *a, quat_t *b);
-
-/**
- * @brief Subtract quaternions
- *
- * @param a Quaternion to subtract from
- * @param b Second quaternion
- */
-void quat_sub(quat_t *a, quat_t *b);
-
-/**
- * @brief Multiply quaternion by a number
- *
- * @param n Number
- * @param q Quaternion to multiply
- */
-void quat_mul_num(float n, quat_t *q);
-
-/**
  * @brief Multiply quaternions
  *
  * @param res Result of multiplication

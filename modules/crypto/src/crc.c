@@ -1,4 +1,4 @@
-#include "modules/maths/crc.h"
+#include "modules/crypto/crc.h"
 
 uint16_t crc16_ccitt_calculate(const uint8_t *data, size_t length)
 {

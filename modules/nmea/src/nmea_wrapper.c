@@ -1,6 +1,7 @@
 #include "modules/nmea/nmea_wrapper.h"
+#include "modules/nmea/nmea_parser.h"
 
-bool gnss_update(gnss_data_t *data, gps_nmea_sentence_t *sentence)
+bool gnss_update(geo_position_wgs84_t *data, gps_nmea_sentence_t *sentence)
 {
     if (!sentence->isFinished)
     {

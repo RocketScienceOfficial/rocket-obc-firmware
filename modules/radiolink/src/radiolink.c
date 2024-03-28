@@ -1,5 +1,5 @@
 #include "modules/radiolink/radiolink.h"
-#include "modules/maths/crc.h"
+#include "modules/crypto/crc.h"
 #include "modules/logger/logger.h"
 #include <string.h>
 

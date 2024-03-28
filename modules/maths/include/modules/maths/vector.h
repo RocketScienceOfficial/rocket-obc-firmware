@@ -10,20 +10,12 @@ typedef struct vec3
 } vec3_t;
 
 /**
- * @brief Add vectors
- *
- * @param a Vector to add to
- * @param b Second vector
+ * @brief High precision 3D Vector
  */
-void vec3_add(vec3_t *a, vec3_t *b);
-
-/**
- * @brief Add vectors
- *
- * @param a Vector to subtract from
- * @param b Second vector
- */
-void vec3_sub(vec3_t *a, vec3_t *b);
+typedef struct vec3_prec
+{
+    double x, y, z;
+} vec3_prec_t;
 
 /**
  * @brief Calculate vector norm (length)
@@ -31,7 +23,7 @@ void vec3_sub(vec3_t *a, vec3_t *b);
  * @param v Vector
  * @return Vector norm
  */
-float vec3_mag(vec3_t *v);
+float vec3_mag(const vec3_t *v);
 
 /**
  * @brief Normalize vector
@@ -43,18 +35,18 @@ void vec3_normalize(vec3_t *v);
 /**
  * @brief Multiply vector by a number
  *
- * @param n Number
  * @param v Vector to multiply
+ * @param n Number
  */
-void vec3_mul_num(float n, vec3_t *v);
+void vec3_mul_num(vec3_t *v, float n);
 
 /**
  * @brief Calculate dot product of two vectors
- * 
+ *
  * @param a Vector A
  * @param b Vector B
  * @return Dot product
-*/
-float vec3_dot(vec3_t *a, vec3_t *b);
+ */
+float vec3_dot(const vec3_t *a, const vec3_t *b);
 
 #endif

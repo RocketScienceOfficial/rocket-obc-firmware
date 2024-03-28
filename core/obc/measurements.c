@@ -20,7 +20,7 @@ static mmc5983ma_config_t s_MMC5983MAConfig;
 static bmp581_config_t s_BMP581Config;
 static ublox_sam_m10q_config_t s_UBloxSamM10QConfig;
 static ublox_sam_m10q_data_t s_UBloxSamM10QData;
-static gnss_data_t s_GNSSData;
+static geo_position_wgs84_t s_GNSSData;
 
 void measurements_init(void)
 {

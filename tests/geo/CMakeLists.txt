@@ -1,0 +1,1 @@
+obc_add_test(geo_test module_geo module_maths)

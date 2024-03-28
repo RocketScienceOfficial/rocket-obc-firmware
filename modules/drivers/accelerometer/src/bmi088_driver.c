@@ -1,5 +1,6 @@
 #include "modules/drivers/accelerometer/bmi088_driver.h"
 #include "modules/drivers/hal/time_tracker.h"
+#include "modules/geo/physical_constants.h"
 #include "modules/maths/math_constants.h"
 #include <math.h>
 #include <string.h>

@@ -1,31 +1,8 @@
 #include "modules/maths/quaternion.h"
 #include "modules/maths/math_constants.h"
+#include "modules/maths/fast_math.h"
 #include "modules/maths/math_utils.h"
 #include <math.h>
-
-void quat_add(quat_t *a, quat_t *b)
-{
-    a->w += b->w;
-    a->x += b->x;
-    a->y += b->y;
-    a->z += b->z;
-}
-
-void quat_sub(quat_t *a, quat_t *b)
-{
-    a->w -= b->w;
-    a->x -= b->x;
-    a->y -= b->y;
-    a->z -= b->z;
-}
-
-void quat_mul_num(float n, quat_t *q)
-{
-    q->w *= n;
-    q->x *= n;
-    q->y *= n;
-    q->z *= n;
-}
 
 void quat_mul(quat_t *res, quat_t *a, quat_t *b)
 {

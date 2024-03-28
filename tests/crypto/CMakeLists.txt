@@ -1,0 +1,1 @@
+obc_add_test(crypto_test module_crypto)

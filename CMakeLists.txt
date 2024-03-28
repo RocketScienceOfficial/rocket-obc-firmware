@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 set(OBC_PLATFORM pico CACHE STRING "OBC Platform")
+message("OBC_PLATFORM is ${OBC_PLATFORM}")
 
 include(cmake/obc_import_sdk.cmake)
 include(cmake/obc_modules.cmake)

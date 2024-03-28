@@ -1,7 +1,6 @@
 #include "tests/test_framework.h"
 #include "modules/nmea/nmea_parser.h"
 #include "modules/nmea/nmea_wrapper.h"
-#include "modules/drivers/gps/gps_defines.h"
 
 int main()
 {
@@ -51,6 +50,8 @@ int main()
         const char *sentence = "$GRGYU,092725.00,4717.11399,N,00833.91590,E,1,08,1.01,499.6,M,48.0,M,,*5B\r\n";
 
         TEST_ASSERT(!nmea_check_sentence(sentence));
+        TEST_ASSERT(nmea_get_sentence_id(sentence) == NMEA_SENTENCE_UNKNOWN);
+        TEST_ASSERT(nmea_get_talker_id(sentence) == NMEA_TALKER_UNKNOWN);
     }
     TEST_END_SECTION();
 
@@ -60,12 +61,12 @@ int main()
             .data = "$GPGGA,092725.00,4717.11399,N,00833.91590,E,1,08,1.01,499.6,M,48.0,M,,*5B\r\n",
             .isFinished = true,
         };
-        gnss_data_t gnss = {0};
+        geo_position_wgs84_t pos = {0};
 
-        TEST_ASSERT(gnss_update(&gnss, &data));
-        TEST_ASSERT(gnss.lat == 47.28523316666666432);
-        TEST_ASSERT(gnss.lon == 8.565265);
-        TEST_ASSERT(gnss.alt == 499.6f);
+        TEST_ASSERT(gnss_update(&pos, &data));
+        TEST_ASSERT(pos.lat == 47.28523316666666432);
+        TEST_ASSERT(pos.lon == 8.565265);
+        TEST_ASSERT(pos.alt == 499.6f);
     }
     TEST_END_SECTION();
 

@@ -1,4 +1,5 @@
 #include "modules/drivers/accelerometer/lsm6dso32_driver.h"
+#include "modules/geo/physical_constants.h"
 #include "modules/maths/math_constants.h"
 #include <stdint.h>
 

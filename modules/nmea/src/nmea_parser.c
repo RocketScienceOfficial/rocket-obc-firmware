@@ -171,7 +171,7 @@ bool nmea_scan(const char *sentence, const char *format, ...)
         }
         case 'l':
         {
-            nmea_lat_lon_t *value = va_arg(ap, nmea_lat_lon_t *);
+            double *value = va_arg(ap, double *);
 
             if (field != NULL)
             {

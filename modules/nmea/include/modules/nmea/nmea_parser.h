@@ -75,11 +75,6 @@ typedef struct nmea_satellite
 } nmea_satellite_t;
 
 /**
- * @brief NMEA latitude / longtitude type
- */
-typedef double nmea_lat_lon_t;
-
-/**
  * @brief NMEA structure for GBS sentence
  */
 typedef struct nmea_sentence_gbs
@@ -102,9 +97,9 @@ typedef struct nmea_sentence_gbs
 typedef struct nmea_sentence_gga
 {
     nmea_time_t time;
-    nmea_lat_lon_t lat;
+    double lat;
     char NS;
-    nmea_lat_lon_t lon;
+    double lon;
     char EW;
     int quality;
     int numSV;
@@ -119,9 +114,9 @@ typedef struct nmea_sentence_gga
 
 typedef struct nmea_sentence_gll
 {
-    nmea_lat_lon_t lat;
+    double lat;
     char NS;
-    nmea_lat_lon_t lon;
+    double lon;
     char EW;
     nmea_time_t time;
     char status;
@@ -131,9 +126,9 @@ typedef struct nmea_sentence_gll
 typedef struct nmea_sentence_gns
 {
     nmea_time_t time;
-    nmea_lat_lon_t lat;
+    double lat;
     char NS;
-    nmea_lat_lon_t lon;
+    double lon;
     char EW;
     char posMode;
     int numSV;
@@ -172,9 +167,9 @@ typedef struct nmea_sentence_rmc
 {
     nmea_time_t time;
     char status;
-    nmea_lat_lon_t lat;
+    double lat;
     char NS;
-    nmea_lat_lon_t lon;
+    double lon;
     char EW;
     float spd;
     float cog;

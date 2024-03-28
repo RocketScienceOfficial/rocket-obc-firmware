@@ -23,6 +23,8 @@ target_link_libraries(prototyping
    module_radiolink
    module_database
    module_maths
+   module_geo
+   module_crypto
    module_logger
 )
 
