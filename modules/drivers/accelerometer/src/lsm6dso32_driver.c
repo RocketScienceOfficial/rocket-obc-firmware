@@ -82,7 +82,7 @@ void lsm6dso32_set_range(lsm6dso32_config_t *config, lsm6dso32_accel_range_t acc
     else if (gyroRange == LSM6DSO32_RANGE_2000DPS)
         gyr = 2000.0f;
 
-    config->accelRangeConstant = acc * EARTH_GRAVITY;
+    config->accelRangeConstant = acc * (-EARTH_GRAVITY);
     config->gyroRangeConstant = DEG_2_RAD(gyr);
 
     hal_gpio_write_reg_field(&config->gpioConfig, CTRL1_XL, 2, 2, (uint8_t)accelRange);

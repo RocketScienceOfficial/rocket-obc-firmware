@@ -1,5 +1,5 @@
 #include "modules/geo/geo_mag.h"
-#include "modules/geo/generated/mag_tables.h"
+#include "generated/mag_tables.h"
 #include <stdint.h>
 #include <math.h>
 

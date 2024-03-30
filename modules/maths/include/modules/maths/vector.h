@@ -18,6 +18,32 @@ typedef struct vec3_prec
 } vec3_prec_t;
 
 /**
+ * @brief Add two vectors
+ *
+ * @param a First vector
+ * @param a Second vector
+ * @return Result vector
+ */
+vec3_t vec3_add(const vec3_t *a, const vec3_t *b);
+
+/**
+ * @brief Subtract one vector from the other
+ *
+ * @param a First vector
+ * @param a Second vector
+ * @return Result vector
+ */
+vec3_t vec3_sub(const vec3_t *a, const vec3_t *b);
+
+/**
+ * @brief Multiply vector by a number
+ *
+ * @param v Vector to multiply
+ * @param n Number
+ */
+void vec3_mul_num(vec3_t *v, float n);
+
+/**
  * @brief Calculate vector norm (length)
  *
  * @param v Vector
@@ -31,14 +57,6 @@ float vec3_mag(const vec3_t *v);
  * @param v Vector to normalize
  */
 void vec3_normalize(vec3_t *v);
-
-/**
- * @brief Multiply vector by a number
- *
- * @param v Vector to multiply
- * @param n Number
- */
-void vec3_mul_num(vec3_t *v, float n);
 
 /**
  * @brief Calculate dot product of two vectors

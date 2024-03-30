@@ -14,24 +14,16 @@ typedef struct quat
 /**
  * @brief Multiply quaternions
  *
- * @param res Result of multiplication
  * @param a First quaternion
  * @param b Second quaternion
+ * @return Result of multiplication
  */
-void quat_mul(quat_t *res, quat_t *a, quat_t *b);
+quat_t quat_mul(const quat_t *a, const quat_t *b);
 
 /**
- * @brief Calculate quaternion norm (length)
+ * @brief Calculate conjugate of quaternion
  *
  * @param q Quaternion
- * @return Quaternion norm
- */
-float quat_norm(quat_t *q);
-
-/**
- * @brief Calculate conjugate of a quaternion
- *
- * @param q Quaternion to conjugate
  */
 void quat_conj(quat_t *q);
 
@@ -52,10 +44,10 @@ void quat_normalize(quat_t *q);
 /**
  * @brief Convert quaternion to Euler angles
  *
- * @param res Euler angles (in degrees) vector
  * @param q Quaternion
+ * @return Euler angles (in degrees) vector
  */
-void quat_to_euler(vec3_t *res, quat_t *q);
+vec3_t quat_to_euler(const quat_t *q);
 
 /**
  * @brief Rotate vector through quaternion
@@ -63,6 +55,6 @@ void quat_to_euler(vec3_t *res, quat_t *q);
  * @param v Vector to rotate
  * @param q Quaternion
  */
-void rotate_vec_through_quat(vec3_t *v, quat_t *q);
+void rotate_vec_through_quat(vec3_t *v, const quat_t *q);
 
 #endif
