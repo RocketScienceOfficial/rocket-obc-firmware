@@ -14,7 +14,7 @@ Rocket on-board computer software. Contains a lot of funcionality and can be use
 ### Download
 Run the following command to clone repo and initialize all submodules: ```git clone --recursive https://github.com/Filipeak/rocket-obc-firmware```
 
-If you already downloaded repo without ```--recursive``` flag, run: ```git submodule update --init```
+If you already downloaded repo without ```--recursive``` flag, run: ```git submodule update --init --recursive```
 
 ### Environment
 You have two ways to setup the project:
@@ -27,14 +27,14 @@ Run container: ```docker run --rm -it -v %cd%:/rocket rocket-firmware```
 
 <ins>**2. Manual**</ins>
 
-Install requireed software:
+Install required software:
 1. CMake
 2. ARM Toolchain
 3. A build system (Ninja, etc...)
 4. A compiler (GCC, Clang, MinGW, etc...)
 
 ### Build
-Project is done in CMake, so create build directory and run: ```cmake ..``` in it. You can also specify your build system (e.g. Ninja) or set some variables. Then you can build your project: ```make``` (Linux) or for example ```ninja```.
+Project is done in CMake, so create build directory and run: ```cmake ..``` in it. You can also specify your build system (e.g. Ninja) or set some variables (list of them is below). Then you can build your project: ```make``` (Linux) or for example ```ninja```.
 
 Here is a list of supported CMake variables:
  - OBC_PLATFORM: only 'pico'
