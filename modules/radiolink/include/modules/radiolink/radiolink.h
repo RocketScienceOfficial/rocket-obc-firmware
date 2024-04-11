@@ -12,6 +12,7 @@
 
 #define RADIOLINK_MAGIC 0x7B
 #define RADIOLINK_MAX_PAYLOAD_LENGTH 255
+#define RADIOLINK_HEADER_SIZE (4 * sizeof(uint8_t))
 
 /**
  * @brief RadioLink frame structure
@@ -21,6 +22,7 @@ typedef struct radiolink_frame
     uint8_t magic;
     uint8_t len;
     uint8_t msgId;
+    uint8_t seq;
     uint8_t payload[RADIOLINK_MAX_PAYLOAD_LENGTH];
     uint16_t checksum;
 } radiolink_frame_t;
@@ -29,9 +31,10 @@ typedef struct radiolink_frame
  * @brief Serialize sensors frame
  *
  * @param rlFrame Pointer to RadioLink frame
+ * @param seq Pointer to sequence counter, automaticly incremented and reset
  * @param frame Sensors frame
  */
-void radiolink_serialize_sensor_frame(radiolink_frame_t *rlFrame, radiolink_sensor_frame_t *frame);
+void radiolink_serialize_sensor_frame(radiolink_frame_t *rlFrame, uint8_t *seq, const radiolink_sensor_frame_t *frame);
 
 /**
  * @brief Get bytes from RadioLink frame
@@ -41,7 +44,7 @@ void radiolink_serialize_sensor_frame(radiolink_frame_t *rlFrame, radiolink_sens
  * @param len Pointer to length. Pass the length of the buffer and this will be set a new length
  * @return True if success
  */
-bool radiolink_get_bytes(radiolink_frame_t *frame, uint8_t *data, size_t *len);
+bool radiolink_get_bytes(const radiolink_frame_t *frame, uint8_t *data, size_t *len);
 
 /**
  * @brief Deserialize RadioLink frame and validate it

@@ -9,29 +9,21 @@ int main()
 
     TEST_START_SECTION("Serialize sensor frame");
     {
-        radiolink_sensor_frame_t sensorFrame = {
-            .accel = (vec3_t){
-                .x = 10,
-                .y = 20,
-                .z = 30,
-            },
-            .gyro = (vec3_t){
-                .x = 10,
-                .y = 20,
-                .z = 30,
-            },
-            .mag = (vec3_t){
-                .x = 10,
-                .y = 20,
-                .z = 30,
-            },
+        radiolink_sensor_frame_t sensorFrame = {0};
+        sensorFrame.gyro = (vec3_t){
+            .x = 10,
+            .y = 20,
+            .z = 30,
         };
 
         radiolink_frame_t frame;
-        radiolink_serialize_sensor_frame(&frame, &sensorFrame);
+        uint8_t seq = 0;
+        radiolink_serialize_sensor_frame(&frame, &seq, &sensorFrame);
 
         TEST_ASSERT(frame.len == sizeof(radiolink_sensor_frame_t));
         TEST_ASSERT(frame.magic == RADIOLINK_MAGIC);
+        TEST_ASSERT(frame.seq == 0);
+        TEST_ASSERT(seq == 1);
 
         uint8_t buffer[512];
         size_t len = sizeof(buffer);
@@ -47,15 +39,9 @@ int main()
 
         radiolink_sensor_frame_t *rawSensorFrame = (radiolink_sensor_frame_t *)rawFrame.payload;
 
-        TEST_ASSERT(rawSensorFrame->accel.x == 10);
-        TEST_ASSERT(rawSensorFrame->accel.y == 20);
-        TEST_ASSERT(rawSensorFrame->accel.z == 30);
         TEST_ASSERT(rawSensorFrame->gyro.x == 10);
         TEST_ASSERT(rawSensorFrame->gyro.y == 20);
         TEST_ASSERT(rawSensorFrame->gyro.z == 30);
-        TEST_ASSERT(rawSensorFrame->mag.x == 10);
-        TEST_ASSERT(rawSensorFrame->mag.y == 20);
-        TEST_ASSERT(rawSensorFrame->mag.z == 30);
     }
     TEST_END_SECTION();
 
@@ -63,7 +49,8 @@ int main()
     {
         radiolink_sensor_frame_t sensorFrame = {0};
         radiolink_frame_t frame;
-        radiolink_serialize_sensor_frame(&frame, &sensorFrame);
+        uint8_t seq = 0;
+        radiolink_serialize_sensor_frame(&frame, &seq, &sensorFrame);
 
         uint8_t buffer[10];
         size_t len = sizeof(buffer);
@@ -101,7 +88,8 @@ int main()
     {
         radiolink_sensor_frame_t sensorFrame = {0};
         radiolink_frame_t frame;
-        radiolink_serialize_sensor_frame(&frame, &sensorFrame);
+        uint8_t seq = 0;
+        radiolink_serialize_sensor_frame(&frame, &seq, &sensorFrame);
 
         uint8_t buffer[512];
         size_t len = sizeof(buffer);
@@ -120,7 +108,8 @@ int main()
     {
         radiolink_sensor_frame_t sensorFrame = {0};
         radiolink_frame_t frame;
-        radiolink_serialize_sensor_frame(&frame, &sensorFrame);
+        uint8_t seq = 0;
+        radiolink_serialize_sensor_frame(&frame, &seq, &sensorFrame);
 
         uint8_t buffer[512];
         size_t len = sizeof(buffer);
@@ -132,6 +121,18 @@ int main()
         bool deserializeResult = radiolink_deserialize(&rawFrame, buffer, len);
 
         TEST_ASSERT(!deserializeResult);
+    }
+    TEST_END_SECTION();
+
+    TEST_START_SECTION("Test sequence overlap");
+    {
+        radiolink_sensor_frame_t sensorFrame = {0};
+        radiolink_frame_t frame;
+        uint8_t seq = 255;
+        radiolink_serialize_sensor_frame(&frame, &seq, &sensorFrame);
+
+        TEST_ASSERT(frame.seq == 255);
+        TEST_ASSERT(seq == 0);
     }
     TEST_END_SECTION();
 

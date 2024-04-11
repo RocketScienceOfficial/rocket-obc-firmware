@@ -16,13 +16,20 @@ typedef enum radiolink_message_type
 } radiolink_message_type_t;
 
 /**
- * RadioLink Sensor Frame
+ * @brief RadioLink Sensor Frame
  */
 typedef struct radiolink_sensor_frame
 {
-    vec3_t accel;
+    vec3_t pos;
     vec3_t gyro;
-    vec3_t mag;
+    float lat;
+    float lon;
+    float alt;
+    float velocity;
+    float batteryVoltage;
+    uint8_t batteryPercentage;
+    float pressure;
+    float temperature;
 } radiolink_sensor_frame_t;
 
 #endif
