@@ -6,6 +6,8 @@
  */
 
 #include "modules/maths/vector.h"
+#include "modules/geo/geo.h"
+#include <stdint.h>
 
 /**
  * @brief List of available RadioLink messsages types
@@ -22,13 +24,11 @@ typedef struct radiolink_sensor_frame
 {
     vec3_t pos;
     vec3_t gyro;
-    float lat;
-    float lon;
-    float alt;
+    geo_position_wgs84_t wgsPos;
     float velocity;
     float batteryVoltage;
     uint8_t batteryPercentage;
-    float pressure;
+    int pressure;
     float temperature;
 } radiolink_sensor_frame_t;
 

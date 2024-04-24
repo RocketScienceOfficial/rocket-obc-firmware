@@ -23,7 +23,7 @@ void ublox_sam_m10q_init_i2c(ublox_sam_m10q_config_t *config, hal_i2c_instance_t
     };
 }
 
-void ublox_sam_m10q_read_data(ublox_sam_m10q_config_t *config, ublox_sam_m10q_data_t *data)
+void ublox_sam_m10q_read_data(ublox_sam_m10q_config_t *config, gps_nmea_sentence_t *sentence)
 {
     uint8_t b = hal_gpio_single_read(&config->gpioConfig);
 
@@ -34,19 +34,19 @@ void ublox_sam_m10q_read_data(ublox_sam_m10q_config_t *config, ublox_sam_m10q_da
 
     if (b == '$')
     {
-        data->currentIndex = 0;
-        data->sentence.isFinished = false;
+        sentence->currentIndex = 0;
+        sentence->isFinished = false;
 
-        memset(data->sentence.data, 0, sizeof(data->sentence.data));
+        memset(&sentence->data, 0, sizeof(sentence->data));
     }
     else if (b == '\n')
     {
-        data->sentence.data[data->currentIndex] = b;
-        data->sentence.data[data->currentIndex + 1] = '\0';
-        data->sentence.isFinished = true;
+        sentence->data[sentence->currentIndex] = b;
+        sentence->data[sentence->currentIndex + 1] = '\0';
+        sentence->isFinished = true;
 
         return;
     }
 
-    data->sentence.data[data->currentIndex++] = b;
+    sentence->data[sentence->currentIndex++] = b;
 }

@@ -1,8 +1,8 @@
-add_executable(obc
+add_executable(obc_read
     main.c
 )
 
-target_link_libraries(obc
+target_link_libraries(obc_read
     module_drivers_hal
     module_drivers_accel
     module_drivers_adc
@@ -20,7 +20,6 @@ target_link_libraries(obc
     module_ign
     module_nmea
     module_ahrs
-    module_ekf
     module_radiolink
     module_database
     module_maths
@@ -29,4 +28,4 @@ target_link_libraries(obc
     module_logger
 )
 
-obc_add_outputs(obc)
+obc_add_outputs(obc_read)

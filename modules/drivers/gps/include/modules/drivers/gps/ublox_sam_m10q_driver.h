@@ -14,15 +14,6 @@ typedef struct ublox_sam_m10q_config
 } ublox_sam_m10q_config_t;
 
 /**
- * @brief The data of the u-blox SAM-M10Q GPS module
- */
-typedef struct ublox_sam_m10q_data
-{
-    gps_nmea_sentence_t sentence; /** Sentence */
-    size_t currentIndex;          /** Current index of buffer */
-} ublox_sam_m10q_data_t;
-
-/**
  * @brief Initializes the u-blox SAM-M10Q GPS module with SPI
  *
  * @param config The configuration of the u-blox SAM-M10Q GPS module
@@ -43,8 +34,8 @@ void ublox_sam_m10q_init_i2c(ublox_sam_m10q_config_t *config, hal_i2c_instance_t
  * @brief Reads a NMEA sentence from the u-blox SAM-M10Q GPS module
  *
  * @param config The configuration of the u-blox SAM-M10Q GPS module
- * @param data The data of the u-blox SAM-M10Q GPS module
+ * @param sentence Sentence data
  */
-void ublox_sam_m10q_read_data(ublox_sam_m10q_config_t *config, ublox_sam_m10q_data_t *data);
+void ublox_sam_m10q_read_data(ublox_sam_m10q_config_t *config, gps_nmea_sentence_t *sentence);
 
 #endif

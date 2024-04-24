@@ -12,7 +12,7 @@ void ublox_neo_m9n_init_spi(ublox_neo_m9n_config_t *config, hal_spi_instance_t s
     hal_spi_init_cs(spi, cs);
 }
 
-void ublox_neo_m9n_read_data(ublox_neo_m9n_config_t *config, ublox_neo_m9n_data_t *data)
+void ublox_neo_m9n_read_data(ublox_neo_m9n_config_t *config, gps_nmea_sentence_t *sentence)
 {
     uint8_t b = hal_gpio_single_read(&config->gpioConfig);
 
@@ -23,19 +23,19 @@ void ublox_neo_m9n_read_data(ublox_neo_m9n_config_t *config, ublox_neo_m9n_data_
 
     if (b == '$')
     {
-        data->currentIndex = 0;
-        data->sentence.isFinished = false;
+        sentence->currentIndex = 0;
+        sentence->isFinished = false;
 
-        memset(data->sentence.data, 0, sizeof(data->sentence.data));
+        memset(&sentence->data, 0, sizeof(sentence->data));
     }
     else if (b == '\n')
     {
-        data->sentence.data[data->currentIndex] = b;
-        data->sentence.data[data->currentIndex + 1] = '\0';
-        data->sentence.isFinished = true;
+        sentence->data[sentence->currentIndex] = b;
+        sentence->data[sentence->currentIndex + 1] = '\0';
+        sentence->isFinished = true;
 
         return;
     }
 
-    data->sentence.data[data->currentIndex++] = b;
+    sentence->data[sentence->currentIndex++] = b;
 }

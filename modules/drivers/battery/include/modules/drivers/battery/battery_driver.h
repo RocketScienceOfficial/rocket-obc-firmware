@@ -12,8 +12,8 @@ typedef struct battery_interval
 {
     float minVolts;   /** Minimum voltage */
     float maxVolts;   /** Maximum voltage */
-    float minPercent; /** Minimum percent*/
-    float maxPercent; /** Maximum percent*/
+    uint8_t minPercent; /** Minimum percent*/
+    uint8_t maxPercent; /** Maximum percent*/
 } battery_interval_t;
 
 /**
@@ -37,12 +37,13 @@ typedef struct battery_config
 void battery_init(battery_config_t *config, hal_adc_input_t input, battery_interval_t *intervals, uint8_t intervalsCount);
 
 /**
- * @brief Read battery percentage
+ * @brief Read battery data
  *
  * @param config Battery data pointer
- * @return Percentage of battery
+ * @param percent Percentage of battery
+ * @param voltage Voltage of battery
  */
-float battery_read_percent(battery_config_t *config);
+void battery_read(battery_config_t *config, uint8_t *percent, hal_voltage_level_t *voltage);
 
 /**
  * @brief Convert voltage to percent
@@ -52,6 +53,6 @@ float battery_read_percent(battery_config_t *config);
  * @param voltage Voltage
  * @return Percent
  */
-float battery_convert_voltage_to_percent(battery_interval_t *intervals, uint8_t intervalsCount, hal_voltage_level_t voltage);
+uint8_t battery_convert_voltage_to_percent(battery_interval_t *intervals, uint8_t intervalsCount, hal_voltage_level_t voltage);
 
 #endif

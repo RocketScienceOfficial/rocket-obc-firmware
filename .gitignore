@@ -15,5 +15,6 @@ _deps
 
 build/
 res/
+backup/
 
 **/__pycache__/

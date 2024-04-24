@@ -6,7 +6,7 @@
 #include <stddef.h>
 
 /**
- * @brief The configuration of the u-blox NEO-M9N GPS module.
+ * @brief The configuration of the u-blox NEO-M9N GPS module
  */
 typedef struct ublox_neo_m9n_config
 {
@@ -14,29 +14,20 @@ typedef struct ublox_neo_m9n_config
 } ublox_neo_m9n_config_t;
 
 /**
- * @brief The data of the u-blox NEO-M9N GPS module.
- */
-typedef struct ublox_neo_m9n_data
-{
-    gps_nmea_sentence_t sentence; /** Sentence */
-    size_t currentIndex;          /** Current index of buffer */
-} ublox_neo_m9n_data_t;
-
-/**
- * @brief Initializes the u-blox NEO-M9N GPS module.
+ * @brief Initializes the u-blox NEO-M9N GPS module
  *
- * @param config The configuration of the u-blox NEO-M9N GPS module.
- * @param spi The SPI instance to use.
- * @param cs The CS pin to use.
+ * @param config The configuration of the u-blox NEO-M9N GPS module
+ * @param spi The SPI instance to use
+ * @param cs The CS pin to use
  */
 void ublox_neo_m9n_init_spi(ublox_neo_m9n_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs);
 
 /**
- * @brief Reads a NMEA sentence from the u-blox NEO-M9N GPS module.
+ * @brief Reads a NMEA sentence from the u-blox NEO-M9N GPS module
  *
- * @param config The configuration of the u-blox NEO-M9N GPS module.
- * @param data The data of the u-blox NEO-M9N GPS module.
+ * @param config The configuration of the u-blox NEO-M9N GPS module
+ * @param sentence Sentence data
  */
-void ublox_neo_m9n_read_data(ublox_neo_m9n_config_t *config, ublox_neo_m9n_data_t *data);
+void ublox_neo_m9n_read_data(ublox_neo_m9n_config_t *config, gps_nmea_sentence_t *sentence);
 
 #endif
