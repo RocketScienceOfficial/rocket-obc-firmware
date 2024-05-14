@@ -1,1 +1,1 @@
-obc_add_test(maths_test module_maths)
+obc_add_test(maths_test lib_maths)

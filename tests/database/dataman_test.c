@@ -2,7 +2,7 @@
 #include "modules/database/dataman.h"
 #include "modules/database/dataman_frames.h"
 #include "modules/database/db_flash_sectors.h"
-#include "modules/maths/vector.h"
+#include "lib/maths/vector.h"
 
 int main()
 {

@@ -1,8 +1,8 @@
 #ifndef _EKF_H
 #define _EKF_H
 
-#include "modules/maths/vector.h"
-#include "modules/maths/quaternion.h"
+#include "lib/maths/vector.h"
+#include "lib/maths/quaternion.h"
 
 #define EKF_NUM_STATES 22      /** Number of states */
 #define EKF_NUM_CONTROLS 6     /** Number of control variables */

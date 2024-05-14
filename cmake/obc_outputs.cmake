@@ -1,5 +1,5 @@
 macro(obc_add_outputs NAME)
-    if(OBC_PLATFORM STREQUAL pico)
+    if(OBC_PLATFORM STREQUAL rp2040)
         target_link_libraries(${NAME} pico_stdlib)
 
         pico_enable_stdio_usb(${NAME} 1)

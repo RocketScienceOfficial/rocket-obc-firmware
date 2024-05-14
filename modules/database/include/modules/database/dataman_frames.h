@@ -1,7 +1,7 @@
 #ifndef _DATAMAN_FRAMES_H
 #define _DATAMAN_FRAMES_H
 
-#include "modules/maths/vector.h"
+#include "lib/maths/vector.h"
 
 /**
  * @brief List of available Dataman messages types

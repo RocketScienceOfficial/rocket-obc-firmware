@@ -1,8 +1,8 @@
 #ifndef _PARAMS_H
 #define _PARAMS_H
 
-#include "modules/drivers/hal/gpio_driver.h"
-#include "modules/drivers/hal/time_tracker.h"
+#include "hal/gpio_driver.h"
+#include "hal/time_tracker.h"
 #include <stdint.h>
 #include <stdbool.h>
 

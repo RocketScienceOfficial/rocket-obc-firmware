@@ -1,1 +1,1 @@
-obc_add_test(geo_test module_geo module_maths)
+obc_add_test(geo_test lib_geo lib_maths)

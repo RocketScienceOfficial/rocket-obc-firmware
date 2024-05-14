@@ -1,8 +1,8 @@
 #include "modules/database/params.h"
 #include "modules/database/db_flash_sectors.h"
-#include "modules/drivers/storage/flash_driver.h"
-#include "modules/drivers/hal/flash_hal_driver.h"
-#include "modules/logger/logger.h"
+#include "lib/drivers/storage/flash_driver.h"
+#include "hal/flash_hal_driver.h"
+#include "hal/serial_driver.h"
 #include <string.h>
 
 bool params_get(db_params_t *params)
@@ -15,7 +15,7 @@ bool params_get(db_params_t *params)
 
     if (frame.magic != DB_PARAMS_MAGIC)
     {
-        OBC_WARN("DB Params magic did not match!");
+        hal_serial_printf("DB Params magic did not match!\n");
 
         return false;
     }
@@ -38,7 +38,7 @@ bool params_save(db_params_t *params)
     flash_erase_sectors(PARAMS_SECTORS_OFFSET, 1);
     flash_write_page(PARAMS_SECTORS_OFFSET * hal_flash_sector_size() / hal_flash_write_buffer_size(), buffer);
 
-    OBC_INFO("Saved params");
+    hal_serial_printf("Saved params\n");
 
     return true;
 }

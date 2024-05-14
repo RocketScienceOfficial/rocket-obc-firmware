@@ -1,6 +1,6 @@
 #include "modules/ign/ign_controller.h"
-#include "modules/logger/logger.h"
-#include "modules/maths/math_utils.h"
+#include "lib/maths/math_utils.h"
+#include "hal/serial_driver.h"
 #include <string.h>
 
 #define IGN_UP_TIME_MS 1000
@@ -31,10 +31,10 @@ void ign_arm(ign_data_t *data)
 {
     data->armed = true;
 
-    OBC_INFO("Armed igniters!");
+    hal_serial_printf("Armed igniters!\n");
 }
 
-void ign_update(ign_data_t *data, const flight_sm_data_t *sm)
+void ign_update(ign_data_t *data, const sm_data_t *sm)
 {
     if (sm->apogeeReached)
     {

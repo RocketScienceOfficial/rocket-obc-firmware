@@ -1,1 +1,1 @@
-obc_add_test(crypto_test module_crypto)
+obc_add_test(crypto_test lib_crypto)

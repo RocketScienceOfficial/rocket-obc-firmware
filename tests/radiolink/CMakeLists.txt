@@ -1,1 +1,1 @@
-obc_add_test(radiolink_test module_radiolink module_maths)
+obc_add_test(radiolink_test lib_radiolink lib_maths)

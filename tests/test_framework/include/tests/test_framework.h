@@ -2,9 +2,9 @@
 #define _TEST_FRAMEWORK_H
 
 #include <stdbool.h>
-#include "modules/drivers/hal/serial_driver.h"
-#include "modules/drivers/hal/time_tracker.h"
-#include "modules/drivers/hal/board_control.h"
+#include "hal/serial_driver.h"
+#include "hal/time_tracker.h"
+#include "hal/board_control.h"
 
 static msec_t s_TestsStartTime;
 static msec_t s_SectionStartTime;

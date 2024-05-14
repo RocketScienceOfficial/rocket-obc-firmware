@@ -1,0 +1,13 @@
+add_subdirectory(utils)
+
+add_subdirectory(accelerometer)
+add_subdirectory(adc)
+add_subdirectory(barometer)
+add_subdirectory(battery)
+add_subdirectory(buzzer)
+add_subdirectory(gps)
+add_subdirectory(led)
+add_subdirectory(lora)
+add_subdirectory(magnetometer)
+add_subdirectory(servo)
+add_subdirectory(storage)

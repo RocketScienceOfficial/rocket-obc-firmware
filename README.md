@@ -37,5 +37,6 @@ Install required software:
 Project is done in CMake, so create build directory and run: ```cmake ..``` in it. You can also specify your build system (e.g. Ninja) or set some variables (list of them is below). Then you can build your project: ```make``` (Linux) or for example ```ninja```.
 
 Here is a list of supported CMake variables:
- - OBC_PLATFORM: only 'pico'
+ - OBC_PLATFORM: only 'rp2040'
+ - OBC_BOARD: only 'obcv15_rp2040'
  - CMAKE_BUILD_TYPE: Debug / Release

@@ -1,9 +1,8 @@
 #include "modules/database/dataman.h"
 #include "modules/database/db_flash_sectors.h"
-#include "modules/drivers/storage/flash_driver.h"
-#include "modules/drivers/hal/flash_hal_driver.h"
-#include "modules/drivers/hal/serial_driver.h"
-#include "modules/logger/logger.h"
+#include "lib/drivers/storage/flash_driver.h"
+#include "hal/flash_hal_driver.h"
+#include "hal/serial_driver.h"
 #include <string.h>
 #include <stdbool.h>
 #include <string.h>
@@ -22,7 +21,7 @@ void dataman_clear(void)
 {
     flash_erase_sectors(DATAMAN_SECTORS_OFFSET, DATAMAN_SECTORS_COUNT);
 
-    OBC_INFO("Cleared database!");
+    hal_serial_printf("Cleared database!\n");
 }
 
 size_t dataman_read(void)
@@ -71,7 +70,7 @@ size_t dataman_read(void)
             }
             else
             {
-                OBC_ERR("Invalid frame Id!");
+                hal_serial_printf("Invalid frame Id!\n");
 
                 break;
             }
@@ -87,10 +86,10 @@ size_t dataman_read(void)
 
     if (i == READ_MAX_ITER)
     {
-        OBC_WARN("Database read max iterations reached!");
+        hal_serial_printf("Database read max iterations reached!\n");
     }
 
-    OBC_INFO("Finished reading");
+    hal_serial_printf("Finished reading\n");
 
     return i;
 }
@@ -123,7 +122,7 @@ static void _dataman_get_bytes(dataman_frame_t *frame, uint8_t *data, size_t *le
 {
     if (frame->len > DATAMAN_MAX_PAYLOAD_LENGTH)
     {
-        OBC_ERR("Invalid database frame length!");
+        hal_serial_printf("Invalid database frame length!\n");
 
         return;
     }
@@ -167,6 +166,6 @@ static void _dataman_save(dataman_frame_t *frame)
         memcpy(s_Buffer, data + tmpLen, len - tmpLen);
         s_BufferSize = len - tmpLen;
 
-        OBC_INFO("Successfully saved data!");
+        hal_serial_printf("Successfully saved data!\n");
     }
 }

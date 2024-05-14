@@ -1,0 +1,7 @@
+add_subdirectory(maths)
+add_subdirectory(crypto)
+add_subdirectory(geo)
+add_subdirectory(nmea)
+add_subdirectory(ahrs)
+add_subdirectory(drivers)
+add_subdirectory(radiolink)

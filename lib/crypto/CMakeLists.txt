@@ -1,0 +1,1 @@
+obc_add_lib(crypto crc.c)

@@ -1,0 +1,1 @@
+obc_add_lib(maths fast_math.c math_utils.c quaternion.c vector.c)

@@ -1,9 +1,9 @@
 #ifndef _IGN_CONTROLLER_H
 #define _IGN_CONTROLLER_H
 
-#include "modules/drivers/hal/gpio_driver.h"
-#include "modules/drivers/hal/time_tracker.h"
-#include "modules/flight_sm/flight_sm_control.h"
+#include "hal/gpio_driver.h"
+#include "hal/time_tracker.h"
+#include "modules/sm/sm_control.h"
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -87,7 +87,7 @@ void ign_arm(ign_data_t *data);
  * @param data Data
  * @param sm Flight State Machine data pointer
  */
-void ign_update(ign_data_t *data, const flight_sm_data_t *sm);
+void ign_update(ign_data_t *data, const sm_data_t *sm);
 
 /**
  * @brief Check provided pin state

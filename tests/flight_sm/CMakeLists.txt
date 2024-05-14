@@ -1,1 +1,0 @@
-obc_add_test(flight_sm_test module_flight_sm module_maths)

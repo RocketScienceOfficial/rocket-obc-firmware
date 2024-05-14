@@ -1,9 +1,13 @@
 cmake_minimum_required(VERSION 3.12)
 
-set(OBC_PLATFORM pico CACHE STRING "OBC Platform")
+set(OBC_PLATFORM rp2040 CACHE STRING "OBC Platform")
 message("OBC_PLATFORM is ${OBC_PLATFORM}")
 
+set(OBC_BOARD obcv15 CACHE STRING "OBC Board")
+message("OBC_BOARD is ${OBC_BOARD}")
+
 include(cmake/obc_import_sdk.cmake)
+include(cmake/obc_lib.cmake)
 include(cmake/obc_modules.cmake)
 include(cmake/obc_outputs.cmake)
 

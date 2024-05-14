@@ -3,30 +3,28 @@ add_executable(obc
 )
 
 target_link_libraries(obc
-    module_drivers_hal
-    module_drivers_accel
-    module_drivers_adc
-    module_drivers_barometer
-    module_drivers_battery
-    module_drivers_buzzer
-    module_drivers_gps
-    module_drivers_hal
-    module_drivers_led
-    module_drivers_lora
-    module_drivers_magnetometer
-    module_drivers_servo
-    module_drivers_storage
-    module_flight_sm
-    module_ign
-    module_nmea
-    module_ahrs
-    module_ekf
-    module_radiolink
+    obc_hal
+    lib_drivers_accel
+    lib_drivers_adc
+    lib_drivers_barometer
+    lib_drivers_battery
+    lib_drivers_buzzer
+    lib_drivers_gps
+    lib_drivers_led
+    lib_drivers_lora
+    lib_drivers_magnetometer
+    lib_drivers_servo
+    lib_drivers_storage
+    lib_nmea
+    lib_ahrs
+    lib_radiolink
+    lib_maths
+    lib_geo
+    lib_crypto
     module_database
-    module_maths
-    module_geo
-    module_crypto
-    module_logger
+    module_sm
+    module_ign
+    module_ekf
 )
 
 obc_add_outputs(obc)

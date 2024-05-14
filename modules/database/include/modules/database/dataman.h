@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "dataman_frames.h"
-#include "modules/drivers/hal/time_tracker.h"
+#include "hal/time_tracker.h"
 
 #define DATAMAN_MAGIC_BYTE 0x2E        /** Dataman magic byte */
 #define DATAMAN_MAX_PAYLOAD_LENGTH 255 /** Dataman max payload length */

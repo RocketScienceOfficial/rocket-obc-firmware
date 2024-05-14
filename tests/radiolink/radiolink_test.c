@@ -1,7 +1,7 @@
 #include "tests/test_framework.h"
-#include "modules/radiolink/radiolink.h"
-#include "modules/radiolink/radiolink_messages.h"
-#include "modules/maths/vector.h"
+#include "lib/radiolink/radiolink.h"
+#include "lib/radiolink/radiolink_messages.h"
+#include "lib/maths/vector.h"
 
 int main()
 {

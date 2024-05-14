@@ -1,6 +1,6 @@
 #include "tests/test_framework.h"
-#include "modules/drivers/hal/multicore.h"
-#include "modules/drivers/storage/flash_driver.h"
+#include "hal/multicore.h"
+#include "lib/drivers/storage/flash_driver.h"
 #include <stdbool.h>
 
 static void core_func()

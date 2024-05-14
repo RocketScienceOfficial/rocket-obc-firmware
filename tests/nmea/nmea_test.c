@@ -1,6 +1,6 @@
 #include "tests/test_framework.h"
-#include "modules/nmea/nmea_parser.h"
-#include "modules/nmea/nmea_wrapper.h"
+#include "lib/nmea/nmea_parser.h"
+#include "lib/nmea/nmea_wrapper.h"
 
 int main()
 {

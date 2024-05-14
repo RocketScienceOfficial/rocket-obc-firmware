@@ -1,5 +1,5 @@
 #include "modules/ekf/ekf.h"
-#include "modules/geo/physical_constants.h"
+#include "lib/geo/physical_constants.h"
 #include <stdint.h>
 #include <math.h>
 #include <string.h>
