@@ -24,7 +24,7 @@ void flash_write_page(size_t offsetPages, const uint8_t *buffer);
  * @brief Write pages to flash. If you are using multicore, you must lock core before!
  *
  * @param offsetPages Offset of data
- * @param buffer Data to write (Buffer must be at least total page size!)
+ * @param buffer Data to write (Buffer must be at least total pages size!)
  * @param pagesCount Number of pages to write
  */
 void flash_write_pages(size_t offsetPages, const uint8_t *buffer, size_t pagesCount);

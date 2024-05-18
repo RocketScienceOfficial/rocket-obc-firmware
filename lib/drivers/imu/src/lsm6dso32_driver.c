@@ -1,4 +1,4 @@
-#include "lib/drivers/accelerometer/lsm6dso32_driver.h"
+#include "lib/drivers/imu/lsm6dso32_driver.h"
 #include "lib/geo/physical_constants.h"
 #include "lib/maths/math_constants.h"
 #include <stdint.h>
@@ -31,7 +31,7 @@ void lsm6dso32_init_spi(lsm6dso32_config_t *config, hal_spi_instance_t spi, hal_
         .writeMask = 0x7F,
     };
 
-    hal_spi_init_cs(spi, cs);
+    hal_spi_init_cs(cs);
 }
 
 void lsm6dso32_init_i2c(lsm6dso32_config_t *config, hal_i2c_instance_t i2c)

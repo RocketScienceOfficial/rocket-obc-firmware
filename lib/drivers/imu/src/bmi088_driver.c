@@ -1,4 +1,4 @@
-#include "lib/drivers/accelerometer/bmi088_driver.h"
+#include "lib/drivers/imu/bmi088_driver.h"
 #include "lib/geo/physical_constants.h"
 #include "lib/maths/math_constants.h"
 #include "hal/time_tracker.h"
@@ -85,7 +85,7 @@ void bmi088_accel_init_spi(bmi088_accel_config_t *config, hal_spi_instance_t spi
     };
     config->rangeConstant = 0.0f;
 
-    hal_spi_init_cs(spi, cs);
+    hal_spi_init_cs(cs);
 
     _bmi088_accel_init_base(config);
 }
@@ -148,7 +148,7 @@ void bmi088_gyro_init_spi(bmi088_gyro_config_t *config, hal_spi_instance_t spi, 
     };
     config->rangeConstant = 0.0f;
 
-    hal_spi_init_cs(spi, cs);
+    hal_spi_init_cs(cs);
 }
 
 void bmi088_gyro_init_i2c(bmi088_gyro_config_t *config, hal_i2c_instance_t i2c, bool sdo1Grounded)

@@ -98,7 +98,7 @@ void sx127x_init(sx127x_data_t *data, sx127x_pinout_t *pinout, unsigned long lon
         hal_time_sleep_ms(10);
     }
 
-    hal_spi_init_cs(data->pinout.spi, data->pinout.cs);
+    hal_spi_init_cs(data->pinout.cs);
 
     uint8_t version = _sx127x_read_register(data, REG_VERSION);
 

@@ -18,7 +18,7 @@
 #define PIN_CS_H3LIS 0
 #define PIN_CS_LSM 1
 #define PIN_CS_MMC 9
-#define PIN_CS_BMI_ACC 9
+#define PIN_CS_BMI_ACC 6
 #define PIN_CS_BMI_GYRO 5
 #define PIN_CS_MS56 8
 #define PIN_CS_NEO 7
@@ -30,5 +30,11 @@
 #define OBC_SPI_SCK_PIN 2
 #define OBC_SPI_MOSI_PIN 3
 #define OBC_SPI_MISO_PIN 4
+
+// --- UART ---
+#define OBC_UART 0
+#define OBC_UART_FREQ 9600
+#define OBC_UART_TX 16
+#define OBC_UART_RX 17
 
 #endif

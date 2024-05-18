@@ -14,14 +14,6 @@
 void pwm_servo_init(hal_pwm_config_t *config, hal_pin_number_t pin);
 
 /**
- * @brief Check if servo is connected
- *
- * @param config PWM configuration
- * @param result Result of check
- */
-void pwm_servo_check(hal_pwm_config_t *config, bool *result);
-
-/**
  * @brief Rotate servo to angle
  *
  * @param config PWM configuration

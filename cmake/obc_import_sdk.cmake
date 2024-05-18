@@ -24,12 +24,13 @@ macro(obc_init_sdk)
         ${OBC_HAL_SOURCE_DIR}/serial_driver.c
         ${OBC_HAL_SOURCE_DIR}/spi_driver.c
         ${OBC_HAL_SOURCE_DIR}/time_tracker.c
+        ${OBC_HAL_SOURCE_DIR}/uart_driver.c
     )
     target_include_directories(obc_hal INTERFACE ${PROJECT_SOURCE_DIR}/platform/include ${PROJECT_SOURCE_DIR}/platform/rp2040/boards/${OBC_BOARD})
 
     if(OBC_PLATFORM STREQUAL rp2040)
         pico_sdk_init()
 
-        target_link_libraries(obc_hal INTERFACE hardware_adc hardware_i2c hardware_pwm hardware_spi hardware_flash hardware_sync pico_multicore pico_stdlib)
+        target_link_libraries(obc_hal INTERFACE hardware_adc hardware_i2c hardware_pwm hardware_spi hardware_uart hardware_flash hardware_sync pico_multicore pico_stdlib)
     endif()
 endmacro()

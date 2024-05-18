@@ -1,6 +1,5 @@
 #include "tests/test_framework.h"
 #include "lib/nmea/nmea_parser.h"
-#include "lib/nmea/nmea_wrapper.h"
 
 int main()
 {
@@ -52,21 +51,6 @@ int main()
         TEST_ASSERT(!nmea_check_sentence(sentence));
         TEST_ASSERT(nmea_get_sentence_id(sentence) == NMEA_SENTENCE_UNKNOWN);
         TEST_ASSERT(nmea_get_talker_id(sentence) == NMEA_TALKER_UNKNOWN);
-    }
-    TEST_END_SECTION();
-
-    TEST_START_SECTION("NMEA Wrapper");
-    {
-        gps_nmea_sentence_t data = {
-            .data = "$GPGGA,092725.00,4717.11399,N,00833.91590,E,1,08,1.01,499.6,M,48.0,M,,*5B\r\n",
-            .isFinished = true,
-        };
-        geo_position_wgs84_t pos = {0};
-
-        TEST_ASSERT(gnss_update(&pos, &data));
-        TEST_ASSERT(pos.lat == 47.28523316666666432);
-        TEST_ASSERT(pos.lon == 8.565265);
-        TEST_ASSERT(pos.alt == 499.6f);
     }
     TEST_END_SECTION();
 

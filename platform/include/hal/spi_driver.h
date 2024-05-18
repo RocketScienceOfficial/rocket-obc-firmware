@@ -23,7 +23,7 @@ bool hal_spi_check_instance(hal_spi_instance_t spi);
  *
  * @param spi SPI instance
  * @param miso MISO pin
- * @return True if miso is valid
+ * @return True if pin is valid
  */
 bool hal_spi_check_miso(hal_spi_instance_t spi, hal_pin_number_t miso);
 
@@ -32,7 +32,7 @@ bool hal_spi_check_miso(hal_spi_instance_t spi, hal_pin_number_t miso);
  *
  * @param spi SPI instance
  * @param mosi MOSI pin
- * @return True if mosi is valid
+ * @return True if pin is valid
  */
 bool hal_spi_check_mosi(hal_spi_instance_t spi, hal_pin_number_t mosi);
 
@@ -41,27 +41,20 @@ bool hal_spi_check_mosi(hal_spi_instance_t spi, hal_pin_number_t mosi);
  *
  * @param spi SPI instance
  * @param sck SCK pin
- * @return True if sck is valid
+ * @return True if pin is valid
  */
 bool hal_spi_check_sck(hal_spi_instance_t spi, hal_pin_number_t sck);
 
 /**
- * @brief Initialize SPI instance
- *
- * @param spi SPI Instance
- * @param baudrate Baud rate
- */
-void hal_spi_init_all(hal_spi_instance_t spi, unsigned long baudrate);
-
-/**
- * @brief Initialize SPI pins
+ * @brief Initialize SPI
  *
  * @param spi SPI Instance
  * @param miso MISO pin
  * @param mosi MOSI pin
  * @param sck SCK pin
+ * @param baudrate Baud rate
  */
-void hal_spi_init_pins(hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t sck);
+void hal_spi_init_all(hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t sck, hal_baud_rate_t baudrate);
 
 /**
  * @brief Initializes CS pin
@@ -69,7 +62,7 @@ void hal_spi_init_pins(hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_nu
  * @param spi SPI Instance
  * @param cs CS pin
 */
-void hal_spi_init_cs(hal_spi_instance_t spi, hal_pin_number_t cs);
+void hal_spi_init_cs(hal_pin_number_t cs);
 
 /**
  * @brief Selects CS pin of SPI

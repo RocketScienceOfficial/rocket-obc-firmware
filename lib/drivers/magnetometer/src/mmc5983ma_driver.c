@@ -44,7 +44,7 @@ void mmc5983ma_init_spi(mmc5983ma_config_t *config, hal_spi_instance_t spi, hal_
         .writeMask = 0x7F,
     };
 
-    hal_spi_init_cs(spi, cs);
+    hal_spi_init_cs(cs);
 
     _mmc5983ma_init_base(config);
 }

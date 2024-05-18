@@ -75,29 +75,21 @@ bool hal_spi_check_sck(hal_spi_instance_t spi, hal_pin_number_t sck)
     }
 }
 
-void hal_spi_init_all(hal_spi_instance_t spi, unsigned long baudrate)
-{
-    if (!hal_spi_check_instance(spi))
-    {
-        return;
-    }
-
-    spi_init(_get_spi(spi), baudrate);
-}
-
-void hal_spi_init_pins(hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t sck)
+void hal_spi_init_all(hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t sck, hal_baud_rate_t baudrate)
 {
     if (!hal_spi_check_instance(spi) || !hal_spi_check_miso(spi, miso) || !hal_spi_check_mosi(spi, mosi) || !hal_spi_check_sck(spi, sck))
     {
         return;
     }
 
+    spi_init(_get_spi(spi), baudrate);
+
     hal_gpio_set_pin_function(miso, GPIO_FUNCTION_SPI);
     hal_gpio_set_pin_function(mosi, GPIO_FUNCTION_SPI);
     hal_gpio_set_pin_function(sck, GPIO_FUNCTION_SPI);
 }
 
-void hal_spi_init_cs(hal_spi_instance_t spi, hal_pin_number_t cs)
+void hal_spi_init_cs(hal_pin_number_t cs)
 {
     hal_gpio_init_pin(cs, GPIO_OUTPUT);
     hal_gpio_set_pin_state(cs, GPIO_HIGH);
@@ -115,7 +107,7 @@ void hal_spi_cs_deselect(hal_pin_number_t cs)
 
 bool hal_spi_write(hal_spi_instance_t spi, const uint8_t *data, size_t size)
 {
-    if (!hal_spi_check_instance(spi) || !data)
+    if (!hal_spi_check_instance(spi) || !data || size == 0)
     {
         return false;
     }
@@ -130,7 +122,7 @@ bool hal_spi_write(hal_spi_instance_t spi, const uint8_t *data, size_t size)
 
 bool hal_spi_read(hal_spi_instance_t spi, uint8_t repeatedTXData, uint8_t *destination, size_t size)
 {
-    if (!hal_spi_check_instance(spi) || !destination)
+    if (!hal_spi_check_instance(spi) || !destination || size == 0)
     {
         return false;
     }
@@ -145,7 +137,7 @@ bool hal_spi_read(hal_spi_instance_t spi, uint8_t repeatedTXData, uint8_t *desti
 
 bool hal_spi_write_read(hal_spi_instance_t spi, const uint8_t *data, uint8_t *destination, size_t size)
 {
-    if (!hal_spi_check_instance(spi) || !destination)
+    if (!hal_spi_check_instance(spi) || !destination || size == 0)
     {
         return false;
     }

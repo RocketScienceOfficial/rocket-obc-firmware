@@ -103,7 +103,7 @@ void sx126x_init(sx126x_config_t *data, sx126x_pinout_t *pinout)
     hal_gpio_init_pin(pinout->busy, GPIO_INPUT);
     hal_gpio_init_pin(pinout->reset, GPIO_OUTPUT);
 
-    hal_spi_init_cs(data->pinout.spi, data->pinout.cs);
+    hal_spi_init_cs(data->pinout.cs);
 }
 
 void sx126x_set_sleep(sx126x_config_t *data, bool coldStart)

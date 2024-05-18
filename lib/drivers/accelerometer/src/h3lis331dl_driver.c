@@ -45,7 +45,7 @@ void h3lis331dl_init_spi(h3lis331dl_config_t *config, hal_spi_instance_t spi, ha
     };
     config->rangeFactor = 0;
 
-    hal_spi_init_cs(spi, cs);
+    hal_spi_init_cs(cs);
 }
 
 void h3lis331dl_init_i2c(h3lis331dl_config_t *config, hal_i2c_instance_t i2c)

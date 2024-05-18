@@ -7,9 +7,9 @@ target_link_libraries(obc
     lib_drivers_accel
     lib_drivers_adc
     lib_drivers_barometer
-    lib_drivers_battery
     lib_drivers_buzzer
     lib_drivers_gps
+    lib_drivers_imu
     lib_drivers_led
     lib_drivers_lora
     lib_drivers_magnetometer
@@ -17,6 +17,7 @@ target_link_libraries(obc
     lib_drivers_storage
     lib_nmea
     lib_ahrs
+    lib_battery
     lib_radiolink
     lib_maths
     lib_geo

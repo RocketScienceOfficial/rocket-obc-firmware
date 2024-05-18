@@ -1,25 +1,25 @@
-#include "lib/drivers/adc/ads7038_q1_driver.h"
+#include "lib/drivers/adc/ads7038_driver.h"
 
 #define SEQUENCE_CFG 0x10
 #define MANUAL_CH_SEL 0x11
 #define AUTO_SEQ_CH_SEL 0x12
 
-static uint8_t _readReg(const ads7038_q1_config_t *config, uint8_t addr);
-static void _writeReg(const ads7038_q1_config_t *config, uint8_t addr, uint8_t val, uint8_t len, uint8_t offset);
+static uint8_t _readReg(const ads7038_config_t *config, uint8_t addr);
+static void _writeReg(const ads7038_config_t *config, uint8_t addr, uint8_t val, uint8_t len, uint8_t offset);
 
-void ads7038_q1_init(ads7038_q1_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs, uint8_t channelsMask, hal_voltage_level_t vRef)
+void ads7038_init(ads7038_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs, uint8_t channelsMask, hal_voltage_level_t vRef)
 {
     config->spi = spi;
     config->cs = cs;
     config->vRef = vRef;
 
-    hal_spi_init_cs(spi, cs);
+    hal_spi_init_cs(cs);
 
     _writeReg(config, SEQUENCE_CFG, 1, 2, 0);
     _writeReg(config, AUTO_SEQ_CH_SEL, channelsMask, 8, 0);
 }
 
-void ads7038_q1_read_channels(const ads7038_q1_config_t *config, hal_voltage_level_t *values, size_t len)
+void ads7038_read_channels(const ads7038_config_t *config, hal_voltage_level_t *values, size_t len)
 {
     _writeReg(config, SEQUENCE_CFG, 1, 1, 4);
 
@@ -42,7 +42,7 @@ void ads7038_q1_read_channels(const ads7038_q1_config_t *config, hal_voltage_lev
     _writeReg(config, SEQUENCE_CFG, 0, 1, 4);
 }
 
-static uint8_t _readReg(const ads7038_q1_config_t *config, uint8_t addr)
+static uint8_t _readReg(const ads7038_config_t *config, uint8_t addr)
 {
     uint8_t data[3] = {1 << 4, addr, 0};
 
@@ -59,7 +59,7 @@ static uint8_t _readReg(const ads7038_q1_config_t *config, uint8_t addr)
     return newData;
 }
 
-static void _writeReg(const ads7038_q1_config_t *config, uint8_t addr, uint8_t val, uint8_t len, uint8_t offset)
+static void _writeReg(const ads7038_config_t *config, uint8_t addr, uint8_t val, uint8_t len, uint8_t offset)
 {
     uint8_t regValue = _readReg(config, addr);
     uint8_t mask = 0xFF;

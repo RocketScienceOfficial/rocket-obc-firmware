@@ -38,21 +38,14 @@ bool hal_i2c_check_sda(hal_i2c_instance_t i2c, hal_pin_number_t sda);
 bool hal_i2c_check_scl(hal_i2c_instance_t i2c, hal_pin_number_t scl);
 
 /**
- * @brief Initialize I2C instance
- *
- * @param i2c I2C Instance
- * @param baudrate Baud rate
- */
-void hal_i2c_init_all(hal_i2c_instance_t i2c, unsigned long baudrate);
-
-/**
- * @brief Initialize I2C pins
+ * @brief Initialize I2C
  *
  * @param i2c I2C Instance
  * @param sda SDA pin
  * @param scl SCL pin
+ * @param baudrate Baud rate
  */
-void hal_i2c_init_pins(hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl);
+void hal_i2c_init_all(hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl, hal_baud_rate_t baudrate);
 
 /**
  * @brief Write to I2C with blocking
