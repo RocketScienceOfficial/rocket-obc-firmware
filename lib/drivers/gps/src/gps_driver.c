@@ -1,8 +1,9 @@
 #include "lib/drivers/gps/gps_driver.h"
+#include <string.h>
 
 void gps_init_spi(gps_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
 {
-    config->gpioConfig = (hal_gpio_communication_config_t){
+    config->gpioConfig = (gpio_utils_communication_config_t){
         .protocol = GPIO_PROTOCOL_SPI,
         .spi = spi,
         .cs = cs,
@@ -13,7 +14,7 @@ void gps_init_spi(gps_config_t *config, hal_spi_instance_t spi, hal_pin_number_t
 
 void gps_read(gps_config_t *config)
 {
-    uint8_t b = hal_gpio_single_read(&config->gpioConfig);
+    uint8_t b = gpio_utils_single_read(&config->gpioConfig);
 
     if (b == 0xFF)
     {
@@ -25,7 +26,7 @@ void gps_read(gps_config_t *config)
         config->sentence.currentIndex = 0;
         config->sentence.isFinished = false;
 
-        memset(&config->sentence.data, 0, sizeof(config->sentence.data));
+        memset(config->sentence.data, 0, sizeof(config->sentence.data));
     }
     else if (b == '\n')
     {

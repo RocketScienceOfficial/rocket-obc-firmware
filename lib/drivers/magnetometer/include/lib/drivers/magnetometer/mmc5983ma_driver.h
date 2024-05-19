@@ -15,7 +15,7 @@
  */
 typedef struct mmc5983ma_config
 {
-    hal_gpio_communication_config_t gpioConfig; /** The GPIO communication configuration */
+    gpio_utils_communication_config_t gpioConfig; /** The GPIO communication configuration */
 } mmc5983ma_config_t;
 
 /**

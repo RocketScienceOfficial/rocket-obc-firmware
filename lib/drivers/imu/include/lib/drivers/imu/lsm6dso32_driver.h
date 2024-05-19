@@ -10,9 +10,9 @@
  */
 typedef struct lsm6dso32_config
 {
-    hal_gpio_communication_config_t gpioConfig; /** GPIO communication config */
-    float accelRangeConstant;                   /** Accelerometer range constant */
-    float gyroRangeConstant;                    /** Gyroscope range constant */
+    gpio_utils_communication_config_t gpioConfig; /** GPIO communication config */
+    float accelRangeConstant;                     /** Accelerometer range constant */
+    float gyroRangeConstant;                      /** Gyroscope range constant */
 } lsm6dso32_config_t;
 
 /**

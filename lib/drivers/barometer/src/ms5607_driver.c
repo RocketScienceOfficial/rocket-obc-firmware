@@ -21,6 +21,7 @@ static void _ms5607_reset(const ms5607_config_t *config);
 static void _ms5607_read_coefficents(ms5607_config_t *config);
 static uint32_t _ms5607_read_raw_value(const ms5607_config_t *config, bool pressure);
 static void _ms5607_convert_raw_values(const ms5607_prom_data_t *coeffs, uint32_t d1, uint32_t d2, int *pressure, float *temperature);
+static bool _ms5607_validate_crc(uint16_t *prom);
 
 void ms5607_init_spi(ms5607_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
 {
@@ -75,7 +76,7 @@ void _ms5607_read_coefficents(ms5607_config_t *config)
         ((uint16_t *)&coeffs)[i] = data[0] << 8 | data[1];
     }
 
-    // TODO: Calculate CRC-4 and validate it
+    _ms5607_validate_crc((uint16_t *)&coeffs);
 
     config->coeffs = coeffs;
 }
@@ -88,19 +89,17 @@ static uint32_t _ms5607_read_raw_value(const ms5607_config_t *config, bool press
     hal_spi_write(config->spi, &data, 1);
     hal_spi_cs_deselect(config->cs);
 
-    // TODO: Remove sleep
-
     uint8_t osr = pressure ? config->pressOSR : config->tempOSR;
     hal_time_sleep_ms(osr == MS5607_OSR_4096 ? 10 : osr == MS5607_OSR_2048 || osr == MS5607_OSR_1024 ? 5
-                                                       : osr == MS5607_OSR_512                                     ? 2
-                                                       : osr == MS5607_OSR_256                                     ? 1
-                                                                                                                          : 0);
+                                                : osr == MS5607_OSR_512                              ? 2
+                                                : osr == MS5607_OSR_256                              ? 1
+                                                                                                     : 0);
 
     uint8_t newData = ADC_READ;
     uint8_t buffer[3];
 
     hal_spi_cs_select(config->cs);
-    hal_spi_write(config->spi, &newData, 1);    
+    hal_spi_write(config->spi, &newData, 1);
     hal_spi_read(config->spi, 0, buffer, sizeof(buffer));
     hal_spi_cs_deselect(config->cs);
 
@@ -140,4 +139,55 @@ static void _ms5607_convert_raw_values(const ms5607_prom_data_t *coeffs, uint32_
 
     *temperature = (float)temp / 100.0f;
     *pressure = p;
+}
+
+/**
+ * REF: https://github.com/PX4/PX4-Autopilot/blob/8f5f564c05b5a0e12989d6e56642cc0b453ec45d/src/drivers/barometer/ms5611/ms5611.cpp#L352
+ */
+bool _ms5607_validate_crc(uint16_t *n_prom)
+{
+    int16_t cnt;
+    uint16_t n_rem;
+    uint16_t crc_read;
+    uint8_t n_bit;
+
+    n_rem = 0x00;
+
+    /* save the read crc */
+    crc_read = n_prom[7];
+
+    /* remove CRC byte */
+    n_prom[7] = (0xFF00 & (n_prom[7]));
+
+    for (cnt = 0; cnt < 16; cnt++)
+    {
+        /* uneven bytes */
+        if (cnt & 1)
+        {
+            n_rem ^= (uint8_t)((n_prom[cnt >> 1]) & 0x00FF);
+        }
+        else
+        {
+            n_rem ^= (uint8_t)(n_prom[cnt >> 1] >> 8);
+        }
+
+        for (n_bit = 8; n_bit > 0; n_bit--)
+        {
+            if (n_rem & 0x8000)
+            {
+                n_rem = (n_rem << 1) ^ 0x3000;
+            }
+            else
+            {
+                n_rem = (n_rem << 1);
+            }
+        }
+    }
+
+    /* final 4 bit remainder is CRC value */
+    n_rem = (0x000F & (n_rem >> 12));
+    n_prom[7] = crc_read;
+
+    /* return true if CRCs match */
+    return (0x000F & crc_read) == (n_rem ^ 0x00);
 }

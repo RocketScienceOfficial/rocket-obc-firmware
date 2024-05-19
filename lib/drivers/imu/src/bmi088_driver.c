@@ -75,7 +75,7 @@ static void _bmi088_gyro_soft_reset(bmi088_gyro_config_t *config);
 
 void bmi088_accel_init_spi(bmi088_accel_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
 {
-    config->gpioConfig = (hal_gpio_communication_config_t){
+    config->gpioConfig = (gpio_utils_communication_config_t){
         .protocol = GPIO_PROTOCOL_SPI,
         .spi = spi,
         .cs = cs,
@@ -92,7 +92,7 @@ void bmi088_accel_init_spi(bmi088_accel_config_t *config, hal_spi_instance_t spi
 
 void bmi088_accel_init_i2c(bmi088_accel_config_t *config, hal_i2c_instance_t i2c, bool sdo1Grounded)
 {
-    config->gpioConfig = (hal_gpio_communication_config_t){
+    config->gpioConfig = (gpio_utils_communication_config_t){
         .protocol = GPIO_PROTOCOL_I2C,
         .i2c = i2c,
         .i2cAddress = sdo1Grounded ? ACC_GND_I2C_ADDRESS : ACC_VDD_I2C_ADDRESS,
@@ -138,7 +138,7 @@ void bmi088_accel_read(bmi088_accel_config_t *config, vec3_t *accel)
 
 void bmi088_gyro_init_spi(bmi088_gyro_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
 {
-    config->gpioConfig = (hal_gpio_communication_config_t){
+    config->gpioConfig = (gpio_utils_communication_config_t){
         .protocol = GPIO_PROTOCOL_SPI,
         .spi = spi,
         .cs = cs,
@@ -153,7 +153,7 @@ void bmi088_gyro_init_spi(bmi088_gyro_config_t *config, hal_spi_instance_t spi, 
 
 void bmi088_gyro_init_i2c(bmi088_gyro_config_t *config, hal_i2c_instance_t i2c, bool sdo1Grounded)
 {
-    config->gpioConfig = (hal_gpio_communication_config_t){
+    config->gpioConfig = (gpio_utils_communication_config_t){
         .protocol = GPIO_PROTOCOL_I2C,
         .i2c = i2c,
         .i2cAddress = sdo1Grounded ? GYRO_GND_I2C_ADDRESS : GYRO_VDD_I2C_ADDRESS,
@@ -166,7 +166,7 @@ void bmi088_gyro_init_i2c(bmi088_gyro_config_t *config, hal_i2c_instance_t i2c, 
 
 void bmi088_gyro_set_bandwidth(bmi088_gyro_config_t *config, bmi088_gyro_bandwidth_t bw)
 {
-    hal_gpio_write_reg(&config->gpioConfig, GYRO_BANDWIDTH, (uint8_t)bw | 0x80);
+    gpio_utils_write_reg(&config->gpioConfig, GYRO_BANDWIDTH, (uint8_t)bw | 0x80);
 
     hal_time_sleep_ms(5);
 }
@@ -188,7 +188,7 @@ void bmi088_gyro_set_range(bmi088_gyro_config_t *config, bmi088_gyro_range_t ran
 
     config->rangeConstant = DEG_2_RAD(val);
 
-    hal_gpio_write_reg(&config->gpioConfig, GYRO_RANGE, (uint8_t)range);
+    gpio_utils_write_reg(&config->gpioConfig, GYRO_RANGE, (uint8_t)range);
 
     hal_time_sleep_ms(5);
 }
@@ -197,7 +197,7 @@ void bmi088_gyro_read(bmi088_gyro_config_t *config, vec3_t *gyro)
 {
     uint8_t buff[6];
 
-    hal_gpio_read_regs(&config->gpioConfig, GYRO_RATE, buff, 6);
+    gpio_utils_read_regs(&config->gpioConfig, GYRO_RATE, buff, 6);
 
     int16_t gyroX = (int16_t)((buff[1] << 8) | buff[0]);
     int16_t gyroY = (int16_t)((buff[3] << 8) | buff[2]);
@@ -243,7 +243,7 @@ static uint8_t _bmi088_accel_read_reg(bmi088_accel_config_t *config, uint8_t add
 {
     uint8_t data[2];
 
-    hal_gpio_read_regs(&config->gpioConfig, address, data, 2);
+    gpio_utils_read_regs(&config->gpioConfig, address, data, 2);
 
     return data[1];
 }
@@ -252,19 +252,19 @@ static void _bmi088_accel_read_regs(bmi088_accel_config_t *config, uint8_t addre
 {
     uint8_t tmp_buffer[16];
 
-    hal_gpio_read_regs(&config->gpioConfig, address, tmp_buffer, count + 1);
+    gpio_utils_read_regs(&config->gpioConfig, address, tmp_buffer, count + 1);
 
     memcpy(buffer, tmp_buffer + 1, count);
 }
 
 static void _bmi088_accel_write_reg(bmi088_accel_config_t *config, uint8_t address, uint8_t data)
 {
-    hal_gpio_write_reg(&config->gpioConfig, address, data);
+    gpio_utils_write_reg(&config->gpioConfig, address, data);
 }
 
 static void _bmi088_gyro_soft_reset(bmi088_gyro_config_t *config)
 {
-    hal_gpio_write_reg(&config->gpioConfig, GYRO_SOFTRESET, GYRO_SOFTRESET_CMD);
+    gpio_utils_write_reg(&config->gpioConfig, GYRO_SOFTRESET, GYRO_SOFTRESET_CMD);
 
     hal_time_sleep_ms(50);
 }

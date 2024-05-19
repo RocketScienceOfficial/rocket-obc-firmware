@@ -22,8 +22,8 @@ typedef struct gps_nmea_sentence
  */
 typedef struct gps_config
 {
-    hal_gpio_communication_config_t gpioConfig; /** GPIO Config */
-    gps_nmea_sentence_t sentence;               /** Sentence data */
+    gpio_utils_communication_config_t gpioConfig; /** GPIO Config */
+    gps_nmea_sentence_t sentence;                 /** Sentence data */
 } gps_config_t;
 
 /**

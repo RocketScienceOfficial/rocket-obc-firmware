@@ -22,7 +22,7 @@
 
 void lsm6dso32_init_spi(lsm6dso32_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
 {
-    config->gpioConfig = (hal_gpio_communication_config_t){
+    config->gpioConfig = (gpio_utils_communication_config_t){
         .protocol = GPIO_PROTOCOL_SPI,
         .spi = spi,
         .cs = cs,
@@ -36,7 +36,7 @@ void lsm6dso32_init_spi(lsm6dso32_config_t *config, hal_spi_instance_t spi, hal_
 
 void lsm6dso32_init_i2c(lsm6dso32_config_t *config, hal_i2c_instance_t i2c)
 {
-    config->gpioConfig = (hal_gpio_communication_config_t){
+    config->gpioConfig = (gpio_utils_communication_config_t){
         .protocol = GPIO_PROTOCOL_I2C,
         .i2c = i2c,
         .i2cAddress = I2C_ADDRESS,
@@ -48,13 +48,13 @@ void lsm6dso32_init_i2c(lsm6dso32_config_t *config, hal_i2c_instance_t i2c)
 
 void lsm6dso32_validate_id(lsm6dso32_config_t *config, bool *valid)
 {
-    *valid = hal_gpio_read_reg(&config->gpioConfig, WHO_AM_I) == WHO_AM_I_VALUE;
+    *valid = gpio_utils_read_reg(&config->gpioConfig, WHO_AM_I) == WHO_AM_I_VALUE;
 }
 
 void lsm6dso32_set_odr(lsm6dso32_config_t *config, lsm6dso32_odr_t accelODR, lsm6dso32_odr_t gyroODR)
 {
-    hal_gpio_write_reg_field(&config->gpioConfig, CTRL1_XL, 4, 4, (uint8_t)accelODR);
-    hal_gpio_write_reg_field(&config->gpioConfig, CTRL2_G, 4, 4, (uint8_t)gyroODR);
+    gpio_utils_write_reg_field(&config->gpioConfig, CTRL1_XL, 4, 4, (uint8_t)accelODR);
+    gpio_utils_write_reg_field(&config->gpioConfig, CTRL2_G, 4, 4, (uint8_t)gyroODR);
 }
 
 void lsm6dso32_set_range(lsm6dso32_config_t *config, lsm6dso32_accel_range_t accelRange, lsm6dso32_gyro_range_t gyroRange)
@@ -85,16 +85,16 @@ void lsm6dso32_set_range(lsm6dso32_config_t *config, lsm6dso32_accel_range_t acc
     config->accelRangeConstant = acc * (-EARTH_GRAVITY);
     config->gyroRangeConstant = DEG_2_RAD(gyr);
 
-    hal_gpio_write_reg_field(&config->gpioConfig, CTRL1_XL, 2, 2, (uint8_t)accelRange);
+    gpio_utils_write_reg_field(&config->gpioConfig, CTRL1_XL, 2, 2, (uint8_t)accelRange);
 
     if (gyroRange != LSM6DSO32_RANGE_125DPS)
     {
-        hal_gpio_write_reg_field(&config->gpioConfig, CTRL7_G, 1, 1, 0x00);
-        hal_gpio_write_reg_field(&config->gpioConfig, CTRL2_G, 2, 2, (uint8_t)gyroRange);
+        gpio_utils_write_reg_field(&config->gpioConfig, CTRL7_G, 1, 1, 0x00);
+        gpio_utils_write_reg_field(&config->gpioConfig, CTRL2_G, 2, 2, (uint8_t)gyroRange);
     }
     else
     {
-        hal_gpio_write_reg_field(&config->gpioConfig, CTRL7_G, 1, 1, 0x01);
+        gpio_utils_write_reg_field(&config->gpioConfig, CTRL7_G, 1, 1, 0x01);
     }
 }
 
@@ -102,7 +102,7 @@ void lsm6dso32_read(lsm6dso32_config_t *config, vec3_t *pAcceleration, vec3_t *p
 {
     uint8_t buffer[14];
 
-    hal_gpio_read_regs(&config->gpioConfig, OUT_TEMP_L, buffer, 14);
+    gpio_utils_read_regs(&config->gpioConfig, OUT_TEMP_L, buffer, 14);
 
     int16_t rawTemperature = (int16_t)(buffer[1] << 8) | buffer[0];
     int16_t rawAngularRateX = (int16_t)(buffer[3] << 8) | buffer[2];

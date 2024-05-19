@@ -1,8 +1,8 @@
 #include "lib/drivers/utils/gpio_utils.h"
 
-bool hal_gpio_write_reg_field(hal_gpio_communication_config_t *config, uint8_t address, uint8_t length, uint8_t offset, uint8_t value)
+bool gpio_utils_write_reg_field(gpio_utils_communication_config_t *config, uint8_t address, uint8_t length, uint8_t offset, uint8_t value)
 {
-    uint8_t data = hal_gpio_read_reg(config, address);
+    uint8_t data = gpio_utils_read_reg(config, address);
     uint8_t mask = 0xFF;
     mask >>= offset;
     mask <<= offset;
@@ -12,10 +12,10 @@ bool hal_gpio_write_reg_field(hal_gpio_communication_config_t *config, uint8_t a
     data &= ~mask;
     data |= (value << offset);
 
-    hal_gpio_write_reg(config, address, data);
+    gpio_utils_write_reg(config, address, data);
 
 #ifndef NDEBUG
-    uint8_t read = hal_gpio_read_reg(config, address);
+    uint8_t read = gpio_utils_read_reg(config, address);
 
     if (read != data)
     {
@@ -26,7 +26,7 @@ bool hal_gpio_write_reg_field(hal_gpio_communication_config_t *config, uint8_t a
     return true;
 }
 
-uint8_t hal_gpio_read_reg(hal_gpio_communication_config_t *config, uint8_t address)
+uint8_t gpio_utils_read_reg(gpio_utils_communication_config_t *config, uint8_t address)
 {
     uint8_t data;
 
@@ -54,7 +54,7 @@ uint8_t hal_gpio_read_reg(hal_gpio_communication_config_t *config, uint8_t addre
     return data;
 }
 
-void hal_gpio_read_regs(hal_gpio_communication_config_t *config, uint8_t address, uint8_t *buffer, size_t count)
+void gpio_utils_read_regs(gpio_utils_communication_config_t *config, uint8_t address, uint8_t *buffer, size_t count)
 {
     address |= config->multipleReadMask;
 
@@ -74,7 +74,7 @@ void hal_gpio_read_regs(hal_gpio_communication_config_t *config, uint8_t address
     }
 }
 
-void hal_gpio_write_reg(hal_gpio_communication_config_t *config, uint8_t address, uint8_t value)
+void gpio_utils_write_reg(gpio_utils_communication_config_t *config, uint8_t address, uint8_t value)
 {
     address &= config->writeMask;
 
@@ -94,7 +94,7 @@ void hal_gpio_write_reg(hal_gpio_communication_config_t *config, uint8_t address
     }
 }
 
-uint8_t hal_gpio_single_read(hal_gpio_communication_config_t *config)
+uint8_t gpio_utils_single_read(gpio_utils_communication_config_t *config)
 {
     uint8_t data;
 

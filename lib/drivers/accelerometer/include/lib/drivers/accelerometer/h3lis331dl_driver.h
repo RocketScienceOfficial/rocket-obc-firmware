@@ -10,8 +10,8 @@
  */
 typedef struct h3lis331dl_config
 {
-    hal_gpio_communication_config_t gpioConfig; /** GPIO communication configuration */
-    float rangeFactor;                          /** Range factor */
+    gpio_utils_communication_config_t gpioConfig; /** GPIO communication configuration */
+    float rangeFactor;                            /** Range factor */
 } h3lis331dl_config_t;
 
 /**

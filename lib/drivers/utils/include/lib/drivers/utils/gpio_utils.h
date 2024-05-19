@@ -11,7 +11,7 @@
 /**
  * @brief The basic configuration for a GPIO device. Set only necessary fields. 'protocol' field is required.
  */
-typedef struct gpio_communication_config
+typedef struct gpio_utils_communication_config
 {
     gpio_protocol_t protocol; /** Protocol to use */
     hal_spi_instance_t spi;   /** SPI */
@@ -21,7 +21,7 @@ typedef struct gpio_communication_config
     uint8_t readMask;         /** Mask to apply to read values */
     uint8_t multipleReadMask; /** Mask to apply to multiple read values */
     uint8_t writeMask;        /** Mask to apply to write values */
-} hal_gpio_communication_config_t;
+} gpio_utils_communication_config_t;
 
 /**
  * @brief Writes register field
@@ -33,7 +33,7 @@ typedef struct gpio_communication_config
  * @param value Field value
  * @return True if success
  */
-bool hal_gpio_write_reg_field(hal_gpio_communication_config_t *config, uint8_t address, uint8_t length, uint8_t offset, uint8_t value);
+bool gpio_utils_write_reg_field(gpio_utils_communication_config_t *config, uint8_t address, uint8_t length, uint8_t offset, uint8_t value);
 
 /**
  * @brief Reads single register
@@ -42,7 +42,7 @@ bool hal_gpio_write_reg_field(hal_gpio_communication_config_t *config, uint8_t a
  * @param address Register address
  * @return Register value
  */
-uint8_t hal_gpio_read_reg(hal_gpio_communication_config_t *config, uint8_t address);
+uint8_t gpio_utils_read_reg(gpio_utils_communication_config_t *config, uint8_t address);
 
 /**
  * @brief Reads multiple registers
@@ -52,7 +52,7 @@ uint8_t hal_gpio_read_reg(hal_gpio_communication_config_t *config, uint8_t addre
  * @param buffer Buffer to store data
  * @param count Count of registers to read
  */
-void hal_gpio_read_regs(hal_gpio_communication_config_t *config, uint8_t address, uint8_t *buffer, size_t count);
+void gpio_utils_read_regs(gpio_utils_communication_config_t *config, uint8_t address, uint8_t *buffer, size_t count);
 
 /**
  * @brief Writes single register
@@ -61,7 +61,7 @@ void hal_gpio_read_regs(hal_gpio_communication_config_t *config, uint8_t address
  * @param address Register address
  * @param data Data to write
  */
-void hal_gpio_write_reg(hal_gpio_communication_config_t *config, uint8_t address, uint8_t value);
+void gpio_utils_write_reg(gpio_utils_communication_config_t *config, uint8_t address, uint8_t value);
 
 /**
  * @brief Performs a single read operation
@@ -69,6 +69,6 @@ void hal_gpio_write_reg(hal_gpio_communication_config_t *config, uint8_t address
  * @param config Device configuration
  * @return Read value
  */
-uint8_t hal_gpio_single_read(hal_gpio_communication_config_t *config);
+uint8_t gpio_utils_single_read(gpio_utils_communication_config_t *config);
 
 #endif
