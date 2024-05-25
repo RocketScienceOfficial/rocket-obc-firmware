@@ -231,7 +231,7 @@ int main()
     {
         ws2812_init(PIN_LED, false);
 
-        WS2812COLOR colors[] = {
+        ws2812_color_t colors[] = {
             ws2812_get_color(0, 255, 0),
             ws2812_get_color(255, 255, 0),
             ws2812_get_color(0, 255, 255),
@@ -241,7 +241,7 @@ int main()
             ws2812_get_color(128, 255, 128),
         };
 
-        ws2812_set_colors(colors, sizeof(colors) / sizeof(WS2812COLOR));
+        ws2812_set_colors(colors, sizeof(colors) / sizeof(ws2812_color_t));
     }
     else if (strcmp(cmd, "lora") == 0)
     {

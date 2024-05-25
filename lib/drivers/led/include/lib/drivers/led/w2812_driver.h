@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-typedef unsigned int WS2812COLOR; /** WS2812 color */
+typedef unsigned int ws2812_color_t; /** WS2812 color */
 
 /**
  * @brief Initializes WS2812 LED strip
@@ -27,7 +27,7 @@ void ws2812_init(hal_pin_number_t pin, bool rgbw);
  * @param colors Array of colors
  * @param count Number of colors
  */
-void ws2812_set_colors(WS2812COLOR *colors, size_t count);
+void ws2812_set_colors(ws2812_color_t *colors, size_t count);
 
 /**
  * @brief Get Color from RGB values. Disabled color is 0. To control brightness adjust each component.
@@ -37,6 +37,6 @@ void ws2812_set_colors(WS2812COLOR *colors, size_t count);
  * @param b Blue value
  * @return Color
  */
-WS2812COLOR ws2812_get_color(uint8_t r, uint8_t g, uint8_t b);
+ws2812_color_t ws2812_get_color(uint8_t r, uint8_t g, uint8_t b);
 
 #endif

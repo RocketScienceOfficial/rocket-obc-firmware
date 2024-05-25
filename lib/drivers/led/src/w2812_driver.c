@@ -11,7 +11,7 @@
 #define WS2812_SM 0
 #endif
 
-static void _ws2812_send_color(WS2812COLOR color);
+static void _ws2812_send_color(ws2812_color_t color);
 
 void ws2812_init(hal_pin_number_t pin, bool rgbw)
 {
@@ -22,7 +22,7 @@ void ws2812_init(hal_pin_number_t pin, bool rgbw)
 #endif
 }
 
-void ws2812_set_colors(WS2812COLOR *colors, size_t count)
+void ws2812_set_colors(ws2812_color_t *colors, size_t count)
 {
     for (size_t i = 0; i < count; i++)
     {
@@ -30,12 +30,12 @@ void ws2812_set_colors(WS2812COLOR *colors, size_t count)
     }
 }
 
-WS2812COLOR ws2812_get_color(uint8_t r, uint8_t g, uint8_t b)
+ws2812_color_t ws2812_get_color(uint8_t r, uint8_t g, uint8_t b)
 {
     return ((unsigned int)r << 8) | ((unsigned int)g << 16) | (unsigned int)b;
 }
 
-static void _ws2812_send_color(WS2812COLOR color)
+static void _ws2812_send_color(ws2812_color_t color)
 {
 #ifdef OBC_PLATFORM_RP2040
     pio_sm_put_blocking(WS2812_PIO, WS2812_SM, color << 8u);

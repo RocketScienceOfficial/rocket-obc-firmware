@@ -20,5 +20,6 @@ set(CMAKE_CXX_STANDARD 17)
 obc_init_sdk()
 
 add_subdirectory(lib)
-add_subdirectory(core)
+add_subdirectory(obc)
+add_subdirectory(prototyping)
 add_subdirectory(tests)

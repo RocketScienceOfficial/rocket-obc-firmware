@@ -4,8 +4,8 @@
 #include "ign.h"
 #include "lib/drivers/led/w2812_driver.h"
 
-static WS2812COLOR _get_ign_diode_color(hal_voltage_level_t v);
-static WS2812COLOR _get_bat_diode_color(uint8_t percent);
+static ws2812_color_t _get_ign_diode_color(hal_voltage_level_t v);
+static ws2812_color_t _get_bat_diode_color(uint8_t percent);
 
 void status_init(void)
 {
@@ -16,7 +16,7 @@ void status_update(void)
 {
     if (sensors_get_info()->adc)
     {
-        WS2812COLOR colors[] = {
+        ws2812_color_t colors[] = {
             _get_ign_diode_color(sensors_get_frame()->ignDet1),
             _get_ign_diode_color(sensors_get_frame()->ignDet2),
             _get_ign_diode_color(sensors_get_frame()->ignDet3),
@@ -26,11 +26,11 @@ void status_update(void)
             ws2812_get_color(0, 255, 0),
         };
 
-        ws2812_set_colors(colors, sizeof(colors) / sizeof(WS2812COLOR));
+        ws2812_set_colors(colors, sizeof(colors) / sizeof(ws2812_color_t));
     }
 }
 
-static WS2812COLOR _get_ign_diode_color(hal_voltage_level_t v)
+static ws2812_color_t _get_ign_diode_color(hal_voltage_level_t v)
 {
     ign_pin_state_t state = ign_check_pin(v);
 
@@ -39,7 +39,7 @@ static WS2812COLOR _get_ign_diode_color(hal_voltage_level_t v)
                                                                                                                          : ws2812_get_color(0, 0, 0);
 }
 
-static WS2812COLOR _get_bat_diode_color(uint8_t percent)
+static ws2812_color_t _get_bat_diode_color(uint8_t percent)
 {
     if (percent < 50)
     {
