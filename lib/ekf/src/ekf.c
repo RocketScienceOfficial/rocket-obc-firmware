@@ -1,4 +1,4 @@
-#include "modules/ekf/ekf.h"
+#include "lib/ekf/ekf.h"
 #include "lib/geo/physical_constants.h"
 #include <stdint.h>
 #include <math.h>

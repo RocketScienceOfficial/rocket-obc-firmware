@@ -5,25 +5,8 @@
 #define ADC_BITS 12
 #define ADC_CONVERSION_FACTOR (ADC_VOLTAGE / (1 << ADC_BITS))
 
-#define ADC_TEMP_SENSOR_INPUT 4
-
-bool hal_adc_check_pin(hal_pin_number_t pin)
+static int _convert_pin_to_input(hal_pin_number_t pin)
 {
-    return pin == 26 || pin == 27 || pin == 28 || pin == 29;
-}
-
-bool hal_adc_check_input(hal_adc_input_t input)
-{
-    return input >= 0 && input <= 4;
-}
-
-hal_adc_input_t hal_adc_convert_pin_to_input(hal_pin_number_t pin)
-{
-    if (!hal_adc_check_pin(pin))
-    {
-        return ADC_INPUT_INVALID;
-    }
-
     switch (pin)
     {
     case 26:
@@ -35,30 +18,13 @@ hal_adc_input_t hal_adc_convert_pin_to_input(hal_pin_number_t pin)
     case 29:
         return 3;
     default:
-        return ADC_INPUT_INVALID;
+        return -1;
     }
 }
 
-hal_pin_number_t hal_adc_convert_input_to_pin(hal_adc_input_t input)
+bool hal_adc_check_pin(hal_pin_number_t pin)
 {
-    if (!hal_adc_check_input(input))
-    {
-        return PIN_NUMBER_INVALID;
-    }
-
-    switch (input)
-    {
-    case 0:
-        return 26;
-    case 1:
-        return 27;
-    case 2:
-        return 28;
-    case 3:
-        return 29;
-    default:
-        return PIN_NUMBER_INVALID;
-    }
+    return pin >= 26 && pin <= 29;
 }
 
 void hal_adc_init_all(void)
@@ -66,34 +32,29 @@ void hal_adc_init_all(void)
     adc_init();
 }
 
-void hal_adc_init_pin(hal_adc_input_t input)
+void hal_adc_init_pin(hal_pin_number_t pin)
 {
-    if (!hal_adc_check_input(input))
+    if (!hal_adc_check_pin(pin))
     {
         return;
     }
 
-    if (input != ADC_TEMP_SENSOR_INPUT)
-    {
-        adc_gpio_init(hal_adc_convert_input_to_pin(input));
-    }
-    else
-    {
-        adc_set_temp_sensor_enabled(1);
-    }
+    adc_gpio_init(pin);
 }
 
-hal_voltage_level_t hal_adc_read_voltage(hal_adc_input_t input)
+hal_voltage_level_t hal_adc_read_voltage(hal_pin_number_t pin)
 {
-    if (!hal_adc_check_input(input))
+    if (!hal_adc_check_pin(pin))
     {
         return 0;
     }
+
+    int input = _convert_pin_to_input(pin);
 
     if (adc_get_selected_input() != input)
     {
         adc_select_input(input);
     }
 
-    return (float)adc_read() * ADC_CONVERSION_FACTOR;
+    return (hal_voltage_level_t)adc_read() * ADC_CONVERSION_FACTOR;
 }

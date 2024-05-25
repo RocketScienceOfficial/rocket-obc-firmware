@@ -1,1 +1,0 @@
-obc_add_test(sm_test module_sm)

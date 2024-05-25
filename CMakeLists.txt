@@ -8,7 +8,6 @@ message("OBC_BOARD is ${OBC_BOARD}")
 
 include(cmake/obc_import_sdk.cmake)
 include(cmake/obc_lib.cmake)
-include(cmake/obc_modules.cmake)
 include(cmake/obc_outputs.cmake)
 
 obc_include_sdk()
@@ -21,6 +20,5 @@ set(CMAKE_CXX_STANDARD 17)
 obc_init_sdk()
 
 add_subdirectory(lib)
-add_subdirectory(modules)
 add_subdirectory(core)
 add_subdirectory(tests)

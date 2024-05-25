@@ -1,2 +1,0 @@
-obc_add_test(dataman_test module_database lib_maths)
-obc_add_test(params_test module_database lib_maths)

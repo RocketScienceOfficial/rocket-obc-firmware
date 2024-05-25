@@ -14,12 +14,13 @@
 #include "lib/drivers/adc/ads7038_driver.h"
 #include "lib/drivers/led/w2812_driver.h"
 #include "lib/battery/battery_utils.h"
+#include "lib/geo/geo.h"
 #include <string.h>
 #include "board_config.h"
 
 int main()
 {
-    hal_board_init(2000);
+    hal_board_init(5000);
 
     hal_serial_printf("Initialized board!\n");
     hal_serial_printf("Hardware version: 1.0\n");
@@ -28,20 +29,6 @@ int main()
     hal_spi_init_all(OBC_SPI, OBC_SPI_MISO_PIN, OBC_SPI_MOSI_PIN, OBC_SPI_SCK_PIN, OBC_SPI_FREQ);
     hal_uart_init_all(OBC_UART, OBC_UART_RX, OBC_UART_TX, OBC_UART_FREQ);
     hal_adc_init_all();
-
-    // uint8_t data[32];
-    // const char *str = "Hello World!";
-    // size_t len = strlen(str) + 1;
-    // memcpy(data, str, len);
-
-    // while (true)
-    // {
-    //     hal_uart_write(OBC_UART, data, len);
-
-    //     hal_serial_printf("Sent %d bytes\n", len);
-
-    //     hal_time_sleep_ms(1000);
-    // }
 
     hal_serial_printf("Enter command: \n");
 
@@ -57,7 +44,7 @@ int main()
                 cmd[currentSize] = '\0';
                 hal_serial_printf("\n");
 
-                hal_serial_printf("Submitting command: %s", cmd);
+                hal_serial_printf("Submitting command: %s\n", cmd);
 
                 break;
             }
@@ -179,21 +166,23 @@ int main()
         gps_config_t gpsConfig = {0};
         geo_position_wgs84_t gpsPosition = {0};
 
-        hal_spi_init_cs(PIN_CS_NEO);
+        gps_init_spi(&gpsConfig, OBC_SPI, PIN_CS_NEO);
+
+        msec_t s = 0;
 
         while (true)
         {
-            uint8_t data;
-            hal_spi_cs_select(PIN_CS_NEO);
-            hal_spi_read(OBC_SPI, 0, &data, 1);
-            hal_spi_cs_deselect(PIN_CS_NEO);
-
-            if (data != 0xFF)
+            if (!gps_read(&gpsConfig))
             {
-                hal_serial_printf("%c", (char)data);
+                hal_time_sleep_ms(10);
             }
 
-            hal_time_sleep_ms(1);
+            gps_get_pos(&gpsConfig, &gpsPosition);
+
+            if (hal_time_run_every_ms(1000, &s))
+            {
+                hal_serial_printf("Lat: %f\nLon: %f\nAlt: %f\n", gpsPosition.lat, gpsPosition.lon, gpsPosition.alt);
+            }
         }
     }
     else if (strcmp(cmd, "ads") == 0)
@@ -215,21 +204,27 @@ int main()
     {
         battery_config_t batteryConfig = {0};
         battery_interval_t intervals[] = {
-            {0.5454f, 0.7636f, 0, 100},
+            {3.0f, 4.2f, 0, 100},
         };
         battery_init(&batteryConfig, intervals, sizeof(intervals) / sizeof(battery_interval_t));
 
-        hal_adc_input_t inp = hal_adc_convert_pin_to_input(PIN_BATTERY);
-        hal_adc_init_pin(inp);
+        const hal_voltage_level_t VOLTAGE_DIVIDER = 11.001f;
+
+        hal_adc_init_pin(PIN_BATTERY);
 
         while (true)
         {
-            hal_voltage_level_t batVolts = hal_adc_read_voltage(inp);
-            uint8_t batPercent = battery_convert(&batteryConfig, batVolts);
+            hal_voltage_level_t batVolts = hal_adc_read_voltage(PIN_BATTERY) * VOLTAGE_DIVIDER;
+            uint8_t nCells = batVolts >= 9 ? 3 : batVolts >= 6 ? 2
+                                                               : 1;
+            hal_voltage_level_t tmpVolts = batVolts / nCells;
+            uint8_t batPercent = battery_convert(&batteryConfig, tmpVolts);
 
-            batVolts *= 6.0f / 0.5454f;
+            // TODO: Voltage filtered
 
-            hal_serial_printf("%d%%   %fV\n", batPercent, batVolts);
+            hal_serial_printf("%d%%   %fV   %d cells\n", batPercent, batVolts, nCells);
+
+            hal_time_sleep_ms(1000);
         }
     }
     else if (strcmp(cmd, "ws") == 0)
@@ -250,10 +245,13 @@ int main()
     }
     else if (strcmp(cmd, "lora") == 0)
     {
-        uint8_t data[32];
-        const char *str = "Hello World!";
-        size_t len = strlen(str) + 1;
-        memcpy(data, str, len);
+        uint8_t data[200];
+        size_t len = sizeof(data);
+
+        for (size_t i = 0; i < len; i++)
+        {
+            data[i] = i;
+        }
 
         while (true)
         {
@@ -261,8 +259,16 @@ int main()
 
             hal_serial_printf("Sent %d bytes\n", len);
 
-            hal_time_sleep_ms(1000);
+            hal_time_sleep_ms(5000);
         }
+
+        // while (true)
+        // {
+        //     uint8_t buff[256];
+        //     hal_uart_read(OBC_UART, buff, 1);
+
+        //     hal_serial_printf("%c\n", buff[0]);
+        // }
     }
 
     while (true)

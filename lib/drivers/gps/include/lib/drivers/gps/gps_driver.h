@@ -39,8 +39,9 @@ void gps_init_spi(gps_config_t *config, hal_spi_instance_t spi, hal_pin_number_t
  * @brief Reads a NMEA sentence from the GPS module
  *
  * @param config The configuration of the GPS module
+ * @return True if next read is available
  */
-void gps_read(gps_config_t *config);
+bool gps_read(gps_config_t *config);
 
 /**
  * @brief Reads position from cached NMEA sentence and overwrites provied position

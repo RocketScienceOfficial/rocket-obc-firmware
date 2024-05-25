@@ -22,9 +22,6 @@ target_link_libraries(prototyping
    lib_maths
    lib_geo
    lib_crypto
-   module_database
-   module_sm
-   module_ign
 )
 
 obc_add_outputs(prototyping)

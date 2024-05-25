@@ -1,5 +1,10 @@
 add_executable(obc
     main.c
+    dataman.c
+    ign.c
+    sensors.c
+    sm.c
+    status.c
 )
 
 target_link_libraries(obc
@@ -22,10 +27,6 @@ target_link_libraries(obc
     lib_maths
     lib_geo
     lib_crypto
-    module_database
-    module_sm
-    module_ign
-    module_ekf
 )
 
 obc_add_outputs(obc)
