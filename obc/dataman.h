@@ -25,6 +25,7 @@ typedef struct dataman_frame
     int press;
     float temp;
     geo_position_wgs84_t pos;
+    uint16_t crc;
 } dataman_frame_t;
 
 /**

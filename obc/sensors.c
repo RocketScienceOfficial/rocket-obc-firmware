@@ -35,6 +35,9 @@ static battery_config_t s_BatteryConfig;
 
 void sensors_init(void)
 {
+    hal_spi_init_all(OBC_SPI, OBC_SPI_MISO_PIN, OBC_SPI_MOSI_PIN, OBC_SPI_SCK_PIN, OBC_SPI_FREQ);
+    hal_adc_init_all();
+
     bmi088_accel_init_spi(&s_BMI088AccelConfig, OBC_SPI, PIN_CS_BMI_ACC);
     bmi088_accel_set_conf(&s_BMI088AccelConfig, BMI088_ACCEL_ODR_800HZ, BMI088_ACCEL_OSR_NORMAL);
     bmi088_accel_set_range(&s_BMI088AccelConfig, BMI088_ACCEL_RANGE_6G);
@@ -63,7 +66,7 @@ void sensors_init(void)
     ads7038_init(&s_ADS7038Config, OBC_SPI, PIN_CS_ADC, 1 << ADC_IGN_1_DET_CH | 1 << ADC_IGN_2_DET_CH | 1 << ADC_IGN_3_DET_CH | 1 << ADC_IGN_4_DET_CH, ADC_VREF);
 
     hal_adc_init_pin(PIN_BATTERY);
-    battery_init(&s_BatteryConfig, s_BatteryIntervals, sizeof(s_BatteryIntervals) / sizeof(battery_interval_t));
+    battery_init(&s_BatteryConfig, s_BatteryIntervals, sizeof(s_BatteryIntervals) / sizeof(battery_interval_t), 11.001f);
 }
 
 void sensors_update(void)
@@ -107,19 +110,17 @@ void sensors_update(void)
         hal_voltage_level_t channels[4];
         ads7038_read_channels(&s_ADS7038Config, channels, sizeof(channels) / sizeof(hal_voltage_level_t));
 
-        hal_voltage_level_t batVolts = hal_adc_read_voltage(PIN_BATTERY) * 11.001f;
-        uint8_t nCells = batVolts >= 9 ? 3 : batVolts >= 6 ? 2
-                                                           : 1;
-        hal_voltage_level_t tmpVolts = batVolts / nCells;
-        uint8_t batPercent = battery_convert(&s_BatteryConfig, tmpVolts);
+        hal_voltage_level_t batVolts = hal_adc_read_voltage(PIN_BATTERY);
+        battery_data_t data = {};
+        battery_convert(&s_BatteryConfig, batVolts, &data);
 
         s_Frame.ignDet1 = channels[0];
         s_Frame.ignDet2 = channels[1];
         s_Frame.ignDet3 = channels[2];
         s_Frame.ignDet4 = channels[3];
-        s_Frame.batVolts = batVolts;
-        s_Frame.batPercent = batPercent;
-        s_Frame.batNCells = nCells;
+        s_Frame.batVolts = data.voltage;
+        s_Frame.batPercent = data.percentage;
+        s_Frame.batNCells = data.nCells;
 
         s_Info.adc = true;
     }

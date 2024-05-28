@@ -52,7 +52,7 @@ int main()
             {
                 if ((c >= (int)'0' && c <= (int)'9') || (c >= (int)'A' && c <= (int)'Z') || (c >= (int)'a' && c <= (int)'z'))
                 {
-                    if (currentSize >= sizeof(cmd) - 1)
+                    if (currentSize >= sizeof(cmd))
                     {
                         hal_serial_printf("Buffer overflow\n");
 
@@ -206,23 +206,17 @@ int main()
         battery_interval_t intervals[] = {
             {3.0f, 4.2f, 0, 100},
         };
-        battery_init(&batteryConfig, intervals, sizeof(intervals) / sizeof(battery_interval_t));
-
-        const hal_voltage_level_t VOLTAGE_DIVIDER = 11.001f;
+        battery_init(&batteryConfig, intervals, sizeof(intervals) / sizeof(battery_interval_t), 11.001f);
 
         hal_adc_init_pin(PIN_BATTERY);
 
         while (true)
         {
-            hal_voltage_level_t batVolts = hal_adc_read_voltage(PIN_BATTERY) * VOLTAGE_DIVIDER;
-            uint8_t nCells = batVolts >= 9 ? 3 : batVolts >= 6 ? 2
-                                                               : 1;
-            hal_voltage_level_t tmpVolts = batVolts / nCells;
-            uint8_t batPercent = battery_convert(&batteryConfig, tmpVolts);
+            hal_voltage_level_t batVolts = hal_adc_read_voltage(PIN_BATTERY);
+            battery_data_t data = {};
+            battery_convert(&batteryConfig, batVolts, &data);
 
-            // TODO: Voltage filtered
-
-            hal_serial_printf("%d%%   %fV   %d cells\n", batPercent, batVolts, nCells);
+            hal_serial_printf("%d%%   %fV   %d cells\n", data.percentage, data.voltage, data.nCells);
 
             hal_time_sleep_ms(1000);
         }

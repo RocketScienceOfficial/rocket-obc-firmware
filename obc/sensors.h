@@ -51,11 +51,15 @@ void sensors_update(void);
 
 /**
  * @brief Get current frame
+ * 
+ * @return Sensors frame
  */
 const sensors_frame_t *sensors_get_frame(void);
 
 /**
  * @brief Check what was updated in this frame
+ * 
+ * @return Sensors update info
  */
 const sensors_update_info_t *sensors_get_info(void);
 

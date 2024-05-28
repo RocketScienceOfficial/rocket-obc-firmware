@@ -16,9 +16,7 @@ target_link_libraries(prototyping
    lib_drivers_servo
    lib_drivers_storage
    lib_nmea
-   lib_ahrs
    lib_battery
-   lib_radiolink
    lib_maths
    lib_geo
    lib_crypto

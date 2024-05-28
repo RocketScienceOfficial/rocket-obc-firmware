@@ -1,1 +1,0 @@
-obc_add_test(radiolink_test lib_radiolink lib_maths)

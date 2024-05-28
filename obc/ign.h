@@ -42,6 +42,7 @@ void ign_update(void);
  * @brief Check provided pin state
  *
  * @param checkPinVoltage Voltage of check pin
+ * @return Pin state
  */
 ign_pin_state_t ign_check_pin(hal_voltage_level_t checkPinVoltage);
 
