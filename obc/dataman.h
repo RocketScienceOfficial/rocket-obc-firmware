@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define DATAMAN_MAGIC_BYTE 0x2E /** Dataman magic byte */
+#define DATAMAN_MAGIC 0x2E /** Dataman magic byte */
 
 /**
  * @brief Dataman frame which is saved

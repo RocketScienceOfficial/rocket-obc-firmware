@@ -28,6 +28,6 @@ void ahrs_update(void);
  *
  * @return AHRS data
  */
-ahrs_data_t ahrs_get_data(void);
+const ahrs_data_t* ahrs_get_data(void);
 
 #endif

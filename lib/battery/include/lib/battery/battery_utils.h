@@ -5,23 +5,21 @@
 #include <stdint.h>
 
 /**
- * @brief Battery interval data structure
+ * @brief Battery entry data structure
  */
-typedef struct battery_interval
+typedef struct battery_table_entry
 {
-    hal_voltage_level_t minVolts; /** Minimum voltage */
-    hal_voltage_level_t maxVolts; /** Maximum voltage */
-    uint8_t minPercent;           /** Minimum percent*/
-    uint8_t maxPercent;           /** Maximum percent*/
-} battery_interval_t;
+    hal_voltage_level_t voltage; /** Voltage */
+    uint8_t percentage;          /** Percentage */
+} battery_table_entry_t;
 
 /**
  * @brief Battery config data
  */
 typedef struct battery_config
 {
-    battery_interval_t *intervals;         /** Battery intervals */
-    uint8_t intervalsCount;                /** Battery intervals count */
+    battery_table_entry_t *entries;        /** Battery entries */
+    uint8_t entriesCount;                  /** Battery entries count */
     hal_voltage_level_t voltageDivider;    /** Raw voltage multiplier */
     hal_voltage_level_t oneCellMaxVoltage; /** One cell max votage */
 } battery_config_t;
@@ -40,17 +38,17 @@ typedef struct battery_data
  * @brief Initialize battery
  *
  * @param config Battery config
- * @param intervals Intervals
- * @param intervalsCount Count of intervals
+ * @param entries Entries in decreasing order for a single cell
+ * @param entriesCount Count of entries. Must be at least 2!
  * @param voltageDivider Voltage divider
  */
-void battery_init(battery_config_t *config, battery_interval_t *intervals, uint8_t intervalsCount, hal_voltage_level_t voltageDivider);
+void battery_init(battery_config_t *config, battery_table_entry_t *entries, uint8_t entriesCount, hal_voltage_level_t voltageDivider);
 
 /**
  * @brief Convert voltage to percent
  *
- * @param intervals Intervals
- * @param intervalsCount Count of intervals
+ * @param entries Entries
+ * @param entriesCount Count of entries
  * @param voltage Voltage
  * @param data Data to set
  * @return Percent

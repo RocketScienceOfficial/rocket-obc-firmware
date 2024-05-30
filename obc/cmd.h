@@ -25,6 +25,6 @@ void cmd_update(void);
  * 
  * @return Type of command
  */
-cmd_type_t get_current_cmd(void);
+cmd_type_t cmd_get_current(void);
 
 #endif

@@ -24,6 +24,7 @@ typedef struct sensors_frame
     hal_voltage_level_t ignDet2;
     hal_voltage_level_t ignDet3;
     hal_voltage_level_t ignDet4;
+    hal_voltage_level_t batRawVolts;
     hal_voltage_level_t batVolts;
     uint8_t batPercent;
     uint8_t batNCells;

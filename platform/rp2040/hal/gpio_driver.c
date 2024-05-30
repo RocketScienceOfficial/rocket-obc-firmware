@@ -3,7 +3,7 @@
 
 bool hal_gpio_is_pin_valid(hal_pin_number_t pin)
 {
-    return pin >= 0 && pin <= 28;
+    return pin >= 0 && pin <= 29;
 }
 
 void hal_gpio_init_pin(hal_pin_number_t pin, gpio_direction_t dir)

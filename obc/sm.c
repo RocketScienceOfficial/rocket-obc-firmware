@@ -1,6 +1,7 @@
 #include "sm.h"
 #include "sensors.h"
 #include "lib/maths/math_utils.h"
+#include "hal/serial_driver.h"
 #include <stddef.h>
 
 #define ACCEL_EPS 0.2f
@@ -27,14 +28,20 @@ void sm_update(void)
     if (acc >= FLIGHT_SM_ACCEL_THRESHOLD)
     {
         s_State = FLIGHT_STATE_ACCELERATING;
+
+        hal_serial_printf("State: Accelerating\n");
     }
     else if (accel.z < FLIGHT_SM_FREE_FLIGHT_THRESHOLD)
     {
         s_State = FLIGHT_STATE_FREE_FLIGHT;
+
+        hal_serial_printf("State: Free Flight\n");
     }
     else if (value_approx_eql(acc, 0.0f, ACCEL_EPS))
     {
         s_State = FLIGHT_STATE_LANDED;
+
+        hal_serial_printf("State: Landed\n");
     }
 
     if (alt <= s_LastAlt)
@@ -50,6 +57,8 @@ void sm_update(void)
         {
             s_State = FLIGHT_STATE_FREE_FALL;
             s_ApogeeReached = true;
+
+            hal_serial_printf("State: Free Fall\n");
         }
     }
     else

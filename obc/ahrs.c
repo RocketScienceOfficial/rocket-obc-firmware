@@ -1,5 +1,7 @@
 #include "ahrs.h"
 
+static ahrs_data_t s_CurrentData;
+
 void ahrs_init(void)
 {
 }
@@ -8,7 +10,7 @@ void ahrs_update(void)
 {
 }
 
-ahrs_data_t ahrs_get_data(void)
+const ahrs_data_t *ahrs_get_data(void)
 {
-    return (ahrs_data_t){};
+    return &s_CurrentData;
 }

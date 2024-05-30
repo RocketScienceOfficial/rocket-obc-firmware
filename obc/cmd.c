@@ -61,7 +61,7 @@ void cmd_update(void)
     }
 }
 
-cmd_type_t get_current_cmd(void)
+cmd_type_t cmd_get_current(void)
 {
     return s_CurrentCMD;
 }
@@ -77,6 +77,8 @@ static void _reset(void)
 
 static void _submit_cmd(void)
 {
+    hal_serial_printf("Submiting command: %s\n", s_CMD);
+    
     MAP_CMD("data-read", CMD_DATA_READ);
 
     s_CurrentCMD = CMD_UNKNOWN;

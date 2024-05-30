@@ -203,10 +203,11 @@ int main()
     else if (strcmp(cmd, "bat") == 0)
     {
         battery_config_t batteryConfig = {0};
-        battery_interval_t intervals[] = {
-            {3.0f, 4.2f, 0, 100},
+        battery_table_entry_t entries[] = {
+            {4.2f, 100},
+            {3.0f, 0},
         };
-        battery_init(&batteryConfig, intervals, sizeof(intervals) / sizeof(battery_interval_t), 11.001f);
+        battery_init(&batteryConfig, entries, sizeof(entries) / sizeof(battery_table_entry_t), 11.001f);
 
         hal_adc_init_pin(PIN_BATTERY);
 

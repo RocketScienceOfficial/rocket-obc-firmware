@@ -1,40 +1,36 @@
 #include "lib/battery/battery_utils.h"
 #include <math.h>
 
-void battery_init(battery_config_t *config, battery_interval_t *intervals, uint8_t intervalsCount, hal_voltage_level_t voltageDivider)
+void battery_init(battery_config_t *config, battery_table_entry_t *entries, uint8_t entriesCount, hal_voltage_level_t voltageDivider)
 {
-    config->intervals = intervals;
-    config->intervalsCount = intervalsCount;
-    config->voltageDivider = voltageDivider;
-    config->oneCellMaxVoltage = 0;
-
-    for (uint8_t i = 0; i < intervalsCount; i++)
+    if (entriesCount >= 2)
     {
-        if (intervals[i].maxVolts > config->oneCellMaxVoltage)
-        {
-            config->oneCellMaxVoltage = intervals[i].maxVolts;
-        }
+        config->entries = entries;
+        config->entriesCount = entriesCount;
+        config->voltageDivider = voltageDivider;
+        config->oneCellMaxVoltage = entries[0].voltage;
     }
 }
 
 void battery_convert(const battery_config_t *config, hal_voltage_level_t rawVoltage, battery_data_t *data)
 {
-    data->voltage = rawVoltage * config->voltageDivider;
-    data->nCells = (uint8_t)ceil(data->voltage / config->oneCellMaxVoltage);
-
-    hal_voltage_level_t oneCellVoltage = data->voltage / data->nCells;
-
-    for (uint8_t i = 0; i < config->intervalsCount; i++)
+    if (config->entries)
     {
-        battery_interval_t *interval = &config->intervals[i];
+        data->voltage = rawVoltage * config->voltageDivider;
+        data->nCells = (uint8_t)ceilf(data->voltage / config->oneCellMaxVoltage);
 
-        if (oneCellVoltage >= interval->minVolts && oneCellVoltage <= interval->maxVolts)
+        hal_voltage_level_t oneCellVoltage = data->voltage / data->nCells;
+
+        for (uint8_t i = 1; i < config->entriesCount; i++)
         {
-            data->percentage = (uint8_t)(interval->maxPercent - interval->minPercent) / (interval->maxVolts - interval->minVolts) * (oneCellVoltage - interval->minVolts) + interval->minPercent;
-        }
-        else if (i == config->intervalsCount - 1)
-        {
-            data->percentage = 0;
+            if (oneCellVoltage >= config->entries[i].voltage && oneCellVoltage <= config->entries[i - 1].voltage)
+            {
+                data->percentage = (uint8_t)(config->entries[i - 1].percentage - config->entries[i].percentage) / (config->entries[i - 1].voltage - config->entries[i].voltage) * (oneCellVoltage - config->entries[i].voltage) + config->entries[i].percentage;
+            }
+            else if (i == config->entriesCount - 1)
+            {
+                data->percentage = 0;
+            }
         }
     }
 }
