@@ -7,7 +7,7 @@
 static uint8_t _readReg(const ads7038_config_t *config, uint8_t addr);
 static void _writeReg(const ads7038_config_t *config, uint8_t addr, uint8_t val, uint8_t len, uint8_t offset);
 
-void ads7038_init(ads7038_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs, uint8_t channelsMask, hal_voltage_level_t vRef)
+void ads7038_init(ads7038_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs, uint8_t channelsMask, float vRef)
 {
     config->spi = spi;
     config->cs = cs;
@@ -19,7 +19,7 @@ void ads7038_init(ads7038_config_t *config, hal_spi_instance_t spi, hal_pin_numb
     _writeReg(config, AUTO_SEQ_CH_SEL, channelsMask, 8, 0);
 }
 
-void ads7038_read_channels(const ads7038_config_t *config, hal_voltage_level_t *values, size_t len)
+void ads7038_read_channels(const ads7038_config_t *config, float *values, size_t len)
 {
     _writeReg(config, SEQUENCE_CFG, 1, 1, 4);
 

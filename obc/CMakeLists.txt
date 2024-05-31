@@ -1,13 +1,14 @@
 add_executable(obc
     main.c
-    dataman.c
-    ign.c
-    sensors.c
-    sm.c
-    status.c
-    cmd.c
-    ahrs.c
-    radio.c
+    middleware/events.c
+    systems/ahrs.c
+    systems/dataman.c
+    systems/ign.c
+    systems/radio.c
+    systems/sensors.c
+    systems/serial.c
+    systems/sm.c
+    systems/status.c
 )
 
 target_link_libraries(obc

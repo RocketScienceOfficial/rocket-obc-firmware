@@ -9,7 +9,7 @@
  */
 typedef struct battery_table_entry
 {
-    hal_voltage_level_t voltage; /** Voltage */
+    float voltage; /** Voltage */
     uint8_t percentage;          /** Percentage */
 } battery_table_entry_t;
 
@@ -20,8 +20,8 @@ typedef struct battery_config
 {
     battery_table_entry_t *entries;        /** Battery entries */
     uint8_t entriesCount;                  /** Battery entries count */
-    hal_voltage_level_t voltageDivider;    /** Raw voltage multiplier */
-    hal_voltage_level_t oneCellMaxVoltage; /** One cell max votage */
+    float voltageDivider;    /** Raw voltage multiplier */
+    float oneCellMaxVoltage; /** One cell max votage */
 } battery_config_t;
 
 /**
@@ -29,7 +29,7 @@ typedef struct battery_config
  */
 typedef struct battery_data
 {
-    hal_voltage_level_t voltage; /** Total voltage */
+    float voltage; /** Total voltage */
     uint8_t percentage;          /** Charge state */
     uint8_t nCells;              /** Number of cells */
 } battery_data_t;
@@ -42,7 +42,7 @@ typedef struct battery_data
  * @param entriesCount Count of entries. Must be at least 2!
  * @param voltageDivider Voltage divider
  */
-void battery_init(battery_config_t *config, battery_table_entry_t *entries, uint8_t entriesCount, hal_voltage_level_t voltageDivider);
+void battery_init(battery_config_t *config, battery_table_entry_t *entries, uint8_t entriesCount, float voltageDivider);
 
 /**
  * @brief Convert voltage to percent
@@ -53,6 +53,6 @@ void battery_init(battery_config_t *config, battery_table_entry_t *entries, uint
  * @param data Data to set
  * @return Percent
  */
-void battery_convert(const battery_config_t *config, hal_voltage_level_t rawVoltage, battery_data_t *data);
+void battery_convert(const battery_config_t *config, float rawVoltage, battery_data_t *data);
 
 #endif

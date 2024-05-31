@@ -1,7 +1,7 @@
 #include "lib/battery/battery_utils.h"
 #include <math.h>
 
-void battery_init(battery_config_t *config, battery_table_entry_t *entries, uint8_t entriesCount, hal_voltage_level_t voltageDivider)
+void battery_init(battery_config_t *config, battery_table_entry_t *entries, uint8_t entriesCount, float voltageDivider)
 {
     if (entriesCount >= 2)
     {
@@ -12,14 +12,14 @@ void battery_init(battery_config_t *config, battery_table_entry_t *entries, uint
     }
 }
 
-void battery_convert(const battery_config_t *config, hal_voltage_level_t rawVoltage, battery_data_t *data)
+void battery_convert(const battery_config_t *config, float rawVoltage, battery_data_t *data)
 {
     if (config->entries)
     {
         data->voltage = rawVoltage * config->voltageDivider;
         data->nCells = (uint8_t)ceilf(data->voltage / config->oneCellMaxVoltage);
 
-        hal_voltage_level_t oneCellVoltage = data->voltage / data->nCells;
+        float oneCellVoltage = data->voltage / data->nCells;
 
         for (uint8_t i = 1; i < config->entriesCount; i++)
         {

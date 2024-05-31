@@ -26,7 +26,7 @@ typedef struct ads7038_config
 {
     hal_spi_instance_t spi;
     hal_pin_number_t cs;
-    hal_voltage_level_t vRef;
+    float vRef;
 } ads7038_config_t;
 
 /**
@@ -38,7 +38,7 @@ typedef struct ads7038_config
  * @param channelsMask Channels combined in one byte (ads7038_channel_type_t)
  * @param vRef Reference voltage
  */
-void ads7038_init(ads7038_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs, uint8_t channelsMask, hal_voltage_level_t vRef);
+void ads7038_init(ads7038_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs, uint8_t channelsMask, float vRef);
 
 /**
  * @brief Read selected channels from ADS7038 device
@@ -47,6 +47,6 @@ void ads7038_init(ads7038_config_t *config, hal_spi_instance_t spi, hal_pin_numb
  * @param values Voltage levels for each channel
  * @param len Length of values (channels)
  */
-void ads7038_read_channels(const ads7038_config_t *config, hal_voltage_level_t *values, size_t len);
+void ads7038_read_channels(const ads7038_config_t *config, float *values, size_t len);
 
 #endif

@@ -3,8 +3,8 @@
 
 #include "lib/maths/vector.h"
 #include "lib/geo/geo.h"
-#include "hal/gpio_driver.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /**
  * @brief Sensors frame structure
@@ -20,25 +20,16 @@ typedef struct sensors_frame
     int press;
     float temp;
     geo_position_wgs84_t pos;
-    hal_voltage_level_t ignDet1;
-    hal_voltage_level_t ignDet2;
-    hal_voltage_level_t ignDet3;
-    hal_voltage_level_t ignDet4;
-    hal_voltage_level_t batRawVolts;
-    hal_voltage_level_t batVolts;
+    bool gpsFix;
+    float ignDet1Volts;
+    float ignDet2Volts;
+    float ignDet3Volts;
+    float ignDet4Volts;
+    float batRawVolts;
+    float batVolts;
     uint8_t batPercent;
     uint8_t batNCells;
 } sensors_frame_t;
-
-/**
- * @brief Sensors update info structure
- */
-typedef struct sensors_update_info
-{
-    bool normal;
-    bool gps;
-    bool adc;
-} sensors_update_info_t;
 
 /**
  * @brief Initialize sensors
@@ -52,16 +43,9 @@ void sensors_update(void);
 
 /**
  * @brief Get current frame
- * 
+ *
  * @return Sensors frame
  */
 const sensors_frame_t *sensors_get_frame(void);
-
-/**
- * @brief Check what was updated in this frame
- * 
- * @return Sensors update info
- */
-const sensors_update_info_t *sensors_get_info(void);
 
 #endif

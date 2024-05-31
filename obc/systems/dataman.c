@@ -1,7 +1,8 @@
 #include "dataman.h"
 #include "sensors.h"
 #include "sm.h"
-#include "cmd.h"
+#include "../middleware/events.h"
+#include "../middleware/syslog.h"
 #include "hal/flash_hal_driver.h"
 #include "hal/serial_driver.h"
 #include "lib/drivers/storage/flash_driver.h"
@@ -10,9 +11,11 @@
 #include <stdbool.h>
 #include <string.h>
 
+#define SYSTEM_NAME "dataman"
+
 #define SECTORS_FILE_INFO_OFFSET 95
 #define SECTORS_SAVE_OFFSET 96
-#define SECTORS_COUNT 4000
+#define SECTORS_COUNT 1000
 
 #define MAX_FRAMES_COUNT 150000
 
@@ -41,11 +44,11 @@ static void _save_info_file(void);
 
 void dataman_init(void)
 {
-    hal_serial_printf("Clearing database...\n");
+    SYS_LOG("Clearing database...");
 
     flash_erase_sectors(SECTORS_SAVE_OFFSET, SECTORS_COUNT);
 
-    hal_serial_printf("Database cleared!\n");
+    SYS_LOG("Database cleared!");
 }
 
 void dataman_update(void)
@@ -61,14 +64,14 @@ void dataman_update(void)
         }
         else if (sm_get_state() == FLIGHT_STATE_STANDING)
         {
-            if (cmd_get_current() == CMD_DATA_READ)
+            if (events_poll(MSG_CMD_DATA_READ))
             {
                 _read_data();
             }
         }
         else if (sm_get_state() == FLIGHT_STATE_ACCELERATING || sm_get_state() == FLIGHT_STATE_FREE_FALL || sm_get_state() == FLIGHT_STATE_FREE_FLIGHT)
         {
-            if (sensors_get_info()->normal)
+            if (events_poll(MSG_SENSORS_NORMAL_READ))
             {
                 dataman_frame_t frame = _get_frame();
                 uint8_t *data = (uint8_t *)&frame;
@@ -168,7 +171,7 @@ static bool _validate_info(const dataman_file_info_t *info)
 
 static void _read_data(void)
 {
-    hal_serial_printf("Begining of data read...");
+    SYS_LOG("Begining of data read...");
 
     const uint8_t *data;
     flash_read(SECTORS_FILE_INFO_OFFSET * hal_flash_sector_size(), &data);
@@ -220,7 +223,7 @@ static void _read_data(void)
         hal_serial_printf("/*0*/\n");
     }
 
-    hal_serial_printf("Data read finish!");
+    SYS_LOG("Data read finish!");
 }
 
 static void _flush(void)
@@ -232,7 +235,7 @@ static void _flush(void)
         flash_write_pages(SECTORS_SAVE_OFFSET * hal_flash_sector_size() / hal_flash_write_buffer_size() + s_OffsetPages, s_Buffer, sizeof(s_Buffer) / hal_flash_write_buffer_size());
     }
 
-    hal_serial_printf("Flash buffer has been flushed. %d bytes were written\n", s_BufferSize);
+    SYS_LOG("Flash buffer has been flushed. %d bytes were written", s_BufferSize);
 }
 
 static void _save_info_file(void)
@@ -245,5 +248,5 @@ static void _save_info_file(void)
     flash_erase_sectors(SECTORS_FILE_INFO_OFFSET, 1);
     flash_write_page(SECTORS_FILE_INFO_OFFSET * hal_flash_sector_size() / hal_flash_write_buffer_size(), data);
 
-    hal_serial_printf("Dataman file info was saved. Total frame count: %d\n", s_FramesCount);
+    SYS_LOG("Dataman file info was saved. Total frame count: %d", s_FramesCount);
 }

@@ -1,7 +1,6 @@
 #ifndef _SM_H
 #define _SM_H
 
-#include "lib/maths/vector.h"
 #include <stdbool.h>
 
 /**
@@ -32,12 +31,5 @@ void sm_update(void);
  * @return State
  */
 flight_state_type_t sm_get_state(void);
-
-/**
- * @brief Check if apogee was reached
- *
- * @return True if apogee was reached
- */
-bool sm_apogee_reached(void);
 
 #endif

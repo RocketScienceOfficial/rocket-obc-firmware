@@ -42,7 +42,7 @@ void hal_adc_init_pin(hal_pin_number_t pin)
     adc_gpio_init(pin);
 }
 
-hal_voltage_level_t hal_adc_read_voltage(hal_pin_number_t pin)
+float hal_adc_read_voltage(hal_pin_number_t pin)
 {
     if (!hal_adc_check_pin(pin))
     {
@@ -56,5 +56,5 @@ hal_voltage_level_t hal_adc_read_voltage(hal_pin_number_t pin)
         adc_select_input(input);
     }
 
-    return (hal_voltage_level_t)adc_read() * ADC_CONVERSION_FACTOR;
+    return (float)adc_read() * ADC_CONVERSION_FACTOR;
 }

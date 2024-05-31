@@ -31,6 +31,6 @@ void hal_adc_init_pin(hal_pin_number_t pin);
  * @param pin Pin to read from
  * @return Voltage value
  */
-hal_voltage_level_t hal_adc_read_voltage(hal_pin_number_t pin);
+float hal_adc_read_voltage(hal_pin_number_t pin);
 
 #endif

@@ -14,15 +14,6 @@ bool gpio_utils_write_reg_field(gpio_utils_communication_config_t *config, uint8
 
     gpio_utils_write_reg(config, address, data);
 
-#ifndef NDEBUG
-    uint8_t read = gpio_utils_read_reg(config, address);
-
-    if (read != data)
-    {
-        return false;
-    }
-#endif
-
     return true;
 }
 

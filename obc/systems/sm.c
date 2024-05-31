@@ -1,8 +1,12 @@
 #include "sm.h"
 #include "sensors.h"
+#include "../middleware/events.h"
+#include "../middleware/syslog.h"
 #include "lib/maths/math_utils.h"
 #include "hal/serial_driver.h"
 #include <stddef.h>
+
+#define SYSTEM_NAME "sm"
 
 #define ACCEL_EPS 0.2f
 #define FLIGHT_SM_ACCEL_THRESHOLD 80.0f
@@ -29,19 +33,19 @@ void sm_update(void)
     {
         s_State = FLIGHT_STATE_ACCELERATING;
 
-        hal_serial_printf("State: Accelerating\n");
+        SYS_LOG("State: Accelerating");
     }
     else if (accel.z < FLIGHT_SM_FREE_FLIGHT_THRESHOLD)
     {
         s_State = FLIGHT_STATE_FREE_FLIGHT;
 
-        hal_serial_printf("State: Free Flight\n");
+        SYS_LOG("State: Free Flight");
     }
     else if (value_approx_eql(acc, 0.0f, ACCEL_EPS))
     {
         s_State = FLIGHT_STATE_LANDED;
 
-        hal_serial_printf("State: Landed\n");
+        SYS_LOG("State: Landed");
     }
 
     if (alt <= s_LastAlt)
@@ -58,7 +62,7 @@ void sm_update(void)
             s_State = FLIGHT_STATE_FREE_FALL;
             s_ApogeeReached = true;
 
-            hal_serial_printf("State: Free Fall\n");
+            SYS_LOG("State: Free Fall");
         }
     }
     else
@@ -72,9 +76,4 @@ void sm_update(void)
 flight_state_type_t sm_get_state(void)
 {
     return s_State;
-}
-
-bool sm_apogee_reached(void)
-{
-    return s_ApogeeReached;
 }

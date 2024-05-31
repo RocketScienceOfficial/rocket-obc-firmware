@@ -1,5 +1,4 @@
 #include "lib/nmea/nmea_parser.h"
-#include "hal/serial_driver.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
@@ -10,8 +9,6 @@ bool nmea_check_sentence(const char *sentence)
 {
     if (sentence[0] != '$')
     {
-        hal_serial_printf("Invalid sentence starting!\n");
-
         return false;
     }
 
@@ -51,8 +48,6 @@ bool nmea_check_sentence(const char *sentence)
         }
         else
         {
-            hal_serial_printf("Checksum of sentence is not valid!\n");
-
             return false;
         }
 
@@ -66,15 +61,11 @@ bool nmea_check_sentence(const char *sentence)
         }
         else
         {
-            hal_serial_printf("Checksum of sentence is not valid!\n");
-
             return false;
         }
 
         if (checksum != (checksum1 << 4 | checksum2))
         {
-            hal_serial_printf("Checksum of sentence is not valid!\n");
-
             return false;
         }
 

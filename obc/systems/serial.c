@@ -1,31 +1,25 @@
-#include "cmd.h"
+#include "serial.h"
+#include "../middleware/events.h"
+#include "../middleware/syslog.h"
 #include "hal/serial_driver.h"
 #include <stddef.h>
 #include <string.h>
 
+#define SYSTEM_NAME "serial"
+
 static char s_CMD[128];
 static size_t s_CurrentSize;
-static cmd_type_t s_CurrentCMD;
-
-#define MAP_CMD(cmd, type)         \
-    if (strcmp(s_CMD, (cmd)) == 0) \
-    {                              \
-        s_CurrentCMD = (type);     \
-        return;                    \
-    }
 
 static void _reset(void);
 static void _submit_cmd(void);
 
-void cmd_init(void)
+void serial_init(void)
 {
     _reset();
 }
 
-void cmd_update(void)
+void serial_update(void)
 {
-    s_CurrentCMD = CMD_UNKNOWN;
-
     int c = 0;
 
     if (hal_serial_read_char(&c))
@@ -46,7 +40,7 @@ void cmd_update(void)
         }
         else
         {
-            if ((c >= (int)'0' && c <= (int)'9') || (c >= (int)'A' && c <= (int)'Z') || (c >= (int)'a' && c <= (int)'z'))
+            if ((c >= (int)'0' && c <= (int)'9') || (c >= (int)'A' && c <= (int)'Z') || (c >= (int)'a' && c <= (int)'z') || (c == (int)'-') || (c == (int)'_'))
             {
                 if (s_CurrentSize >= sizeof(s_CMD))
                 {
@@ -61,25 +55,19 @@ void cmd_update(void)
     }
 }
 
-cmd_type_t cmd_get_current(void)
-{
-    return s_CurrentCMD;
-}
-
 static void _reset(void)
 {
     memset(s_CMD, 0, sizeof(s_CMD));
 
     s_CurrentSize = 0;
-
-    s_CurrentCMD = CMD_UNKNOWN;
 }
 
 static void _submit_cmd(void)
 {
-    hal_serial_printf("Submiting command: %s\n", s_CMD);
-    
-    MAP_CMD("data-read", CMD_DATA_READ);
+    SYS_LOG("Submiting command: %s", s_CMD);
 
-    s_CurrentCMD = CMD_UNKNOWN;
+    if (strcmp(s_CMD, "data-read") == 0)
+    {
+        events_publish(MSG_CMD_DATA_READ);
+    }
 }

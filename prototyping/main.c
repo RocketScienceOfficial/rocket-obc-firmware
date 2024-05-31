@@ -193,8 +193,8 @@ int main()
 
         while (true)
         {
-            hal_voltage_level_t channels[4];
-            ads7038_read_channels(&ads7038Config, channels, sizeof(channels) / sizeof(hal_voltage_level_t));
+            float channels[4];
+            ads7038_read_channels(&ads7038Config, channels, sizeof(channels) / sizeof(float));
 
             hal_serial_printf("%f %f %f %f\n", channels[0], channels[1], channels[2], channels[3]);
             hal_time_sleep_ms(1000);
@@ -213,7 +213,7 @@ int main()
 
         while (true)
         {
-            hal_voltage_level_t batVolts = hal_adc_read_voltage(PIN_BATTERY);
+            float batVolts = hal_adc_read_voltage(PIN_BATTERY);
             battery_data_t data = {};
             battery_convert(&batteryConfig, batVolts, &data);
 
@@ -264,6 +264,14 @@ int main()
 
         //     hal_serial_printf("%c\n", buff[0]);
         // }
+    }
+    else if (strcmp(cmd, "ign") == 0)
+    {
+        hal_gpio_init_pin(PIN_IGN_1, GPIO_OUTPUT);
+
+        hal_gpio_set_pin_state(PIN_IGN_1, GPIO_HIGH);
+        hal_time_sleep_ms(1000);
+        hal_gpio_set_pin_state(PIN_IGN_1, GPIO_LOW);
     }
 
     while (true)
