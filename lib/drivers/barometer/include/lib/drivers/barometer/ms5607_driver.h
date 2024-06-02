@@ -2,6 +2,7 @@
 #define _MS5607_DRIVER_H
 
 #include "hal/spi_driver.h"
+#include "hal/time_tracker.h"
 #include <stdint.h>
 
 /**
@@ -41,6 +42,8 @@ typedef struct ms5607_config
     ms5607_prom_data_t coeffs;
     ms5607_osr_t pressOSR;
     ms5607_osr_t tempOSR;
+    uint32_t d1;
+    msec_t nextTime;
 } ms5607_config_t;
 
 /**
@@ -67,7 +70,8 @@ void ms5607_set_osr(ms5607_config_t *config, ms5607_osr_t press, ms5607_osr_t te
  * @param config Configuration
  * @param pressure Pointer to pressure
  * @param temperature Pointer to temperature
+ * @return True if values were overwritten
  */
-void ms5607_read(const ms5607_config_t *config, int *pressure, float *temperature);
+bool ms5607_read_non_blocking(ms5607_config_t *config, int *pressure, float *temperature);
 
 #endif

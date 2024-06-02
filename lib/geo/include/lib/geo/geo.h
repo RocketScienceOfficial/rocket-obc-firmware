@@ -19,7 +19,7 @@ typedef struct geo_position_wgs84
 {
     double lat; /** Latitude in degrees */
     double lon; /** Latitude in degrees */
-    float alt;  /** Altitude in meters */
+    double alt;  /** Altitude in meters */
 } geo_position_wgs84_t;
 
 /**

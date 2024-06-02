@@ -12,7 +12,7 @@
 /**
  * @brief Dataman frame which is saved
  */
-typedef struct dataman_frame
+typedef struct __attribute__((__packed__)) dataman_frame
 {
     uint8_t magic;
     usec_t time;
@@ -25,6 +25,7 @@ typedef struct dataman_frame
     int press;
     float temp;
     geo_position_wgs84_t pos;
+    uint8_t smState;
     uint16_t crc;
 } dataman_frame_t;
 

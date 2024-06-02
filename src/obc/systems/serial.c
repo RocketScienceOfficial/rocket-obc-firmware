@@ -1,4 +1,5 @@
 #include "serial.h"
+#include "sm.h"
 #include "../middleware/events.h"
 #include "../middleware/syslog.h"
 #include "hal/serial_driver.h"
@@ -20,27 +21,13 @@ void serial_init(void)
 
 void serial_update(void)
 {
-    int c = 0;
-
-    if (hal_serial_read_char(&c))
+    if (sm_get_state() == FLIGHT_STATE_STANDING || sm_get_state() == FLIGHT_STATE_LANDED)
     {
-        if (c == (int)'\r')
-        {
-            if (s_CurrentSize >= sizeof(s_CMD))
-            {
-                _reset();
-            }
-            else
-            {
-                s_CMD[s_CurrentSize] = '\0';
+        int c = 0;
 
-                _submit_cmd();
-                _reset();
-            }
-        }
-        else
+        if (hal_serial_read_char(&c))
         {
-            if ((c >= (int)'0' && c <= (int)'9') || (c >= (int)'A' && c <= (int)'Z') || (c >= (int)'a' && c <= (int)'z') || (c == (int)'-') || (c == (int)'_'))
+            if (c == (int)'\r')
             {
                 if (s_CurrentSize >= sizeof(s_CMD))
                 {
@@ -48,7 +35,24 @@ void serial_update(void)
                 }
                 else
                 {
-                    s_CMD[s_CurrentSize++] = (char)c;
+                    s_CMD[s_CurrentSize] = '\0';
+
+                    _submit_cmd();
+                    _reset();
+                }
+            }
+            else
+            {
+                if ((c >= (int)'0' && c <= (int)'9') || (c >= (int)'A' && c <= (int)'Z') || (c >= (int)'a' && c <= (int)'z') || (c == (int)'-') || (c == (int)'_'))
+                {
+                    if (s_CurrentSize >= sizeof(s_CMD))
+                    {
+                        _reset();
+                    }
+                    else
+                    {
+                        s_CMD[s_CurrentSize++] = (char)c;
+                    }
                 }
             }
         }

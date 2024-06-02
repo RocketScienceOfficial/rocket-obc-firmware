@@ -10,7 +10,7 @@
 /**
  * @brief Radio frame structure, which is sent
  */
-typedef struct radio_frame
+typedef struct __attribute__((__packed__)) radio_frame
 {
     uint8_t magic;
     uint8_t roll;

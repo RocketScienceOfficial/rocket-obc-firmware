@@ -86,9 +86,9 @@ static vec3_prec_t _geo_to_ecef(geo_position_wgs84_t pos)
     double n = EARTH_SEMI_MAJOR_AXIS / sqrt(1.0 - EARTH_ECCENTRICITY_SQUARED * sin_lat * sin_lat);
 
     return (vec3_prec_t){
-        .x = (n + (double)pos.alt) * cos_lat * cos(pos.lon),
-        .y = (n + (double)pos.alt) * cos_lat * sin(pos.lon),
-        .z = ((1.0 - EARTH_ECCENTRICITY_SQUARED) * n + (double)pos.alt) * sin_lat,
+        .x = (n + pos.alt) * cos_lat * cos(pos.lon),
+        .y = (n + pos.alt) * cos_lat * sin(pos.lon),
+        .z = ((1.0 - EARTH_ECCENTRICITY_SQUARED) * n + pos.alt) * sin_lat,
     };
 }
 

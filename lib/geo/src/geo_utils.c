@@ -2,7 +2,9 @@
 #include "lib/geo/physical_constants.h"
 #include <math.h>
 
-float height_from_baro_formula(float pressure, float temperature)
+#define EXP_CONSTANT 0.1902632
+
+float height_from_baro_formula(int pressure)
 {
-    return (1 - powf(pressure / SEA_LEVEL_PRESSURE, 0.190284f)) * CELSIUS_2_KELVIN(temperature) / STANDARD_LAPSE_RATE;
+    return SEA_LEVEL_TEMPERATURE / STANDARD_LAPSE_RATE * (1 - pow(pressure / (double)SEA_LEVEL_PRESSURE, EXP_CONSTANT));
 }

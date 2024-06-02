@@ -10,7 +10,7 @@ int main()
 
     TEST_START_SECTION("Barometric formula");
     {
-        float val = height_from_baro_formula(98000, 15);
+        float val = height_from_baro_formula(98000);
 
         TEST_ASSERT(value_approx_eql(val, 280.53f, 0.1f));
     }

@@ -26,11 +26,11 @@ void battery_convert(const battery_config_t *config, float rawVoltage, battery_d
             if (oneCellVoltage >= config->entries[i].voltage && oneCellVoltage <= config->entries[i - 1].voltage)
             {
                 data->percentage = (uint8_t)(config->entries[i - 1].percentage - config->entries[i].percentage) / (config->entries[i - 1].voltage - config->entries[i].voltage) * (oneCellVoltage - config->entries[i].voltage) + config->entries[i].percentage;
-            }
-            else if (i == config->entriesCount - 1)
-            {
-                data->percentage = 0;
+
+                return;
             }
         }
+
+        data->percentage = 0;
     }
 }

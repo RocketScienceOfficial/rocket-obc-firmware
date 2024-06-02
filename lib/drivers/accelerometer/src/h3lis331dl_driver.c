@@ -29,10 +29,6 @@
 #define WHO_AM_I_VALUE 0x32
 #define RESOLUTION_DIVIDER 32768.0f
 
-#define X_OFFSET -95
-#define Y_OFFSET -45
-#define Z_OFFSET 420
-
 void h3lis331dl_init_spi(h3lis331dl_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
 {
     config->gpioConfig = (gpio_utils_communication_config_t){
@@ -107,9 +103,9 @@ void h3lis331dl_read(h3lis331dl_config_t *config, vec3_t *accel)
 
     gpio_utils_read_regs(&config->gpioConfig, OUT_X_L, buffer, 6);
 
-    int16_t x = (int16_t)((buffer[1] << 8) | buffer[0]) - X_OFFSET;
-    int16_t y = (int16_t)((buffer[3] << 8) | buffer[2]) - Y_OFFSET;
-    int16_t z = (int16_t)((buffer[5] << 8) | buffer[4]) - Z_OFFSET;
+    int16_t x = (int16_t)((buffer[1] << 8) | buffer[0]);
+    int16_t y = (int16_t)((buffer[3] << 8) | buffer[2]);
+    int16_t z = (int16_t)((buffer[5] << 8) | buffer[4]);
 
     accel->x = (float)x * config->rangeFactor;
     accel->y = (float)y * config->rangeFactor;

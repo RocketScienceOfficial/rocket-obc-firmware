@@ -1,5 +1,4 @@
 #include "lib/drivers/barometer/ms5607_driver.h"
-#include "hal/time_tracker.h"
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -19,7 +18,8 @@
 
 static void _ms5607_reset(const ms5607_config_t *config);
 static void _ms5607_read_coefficents(ms5607_config_t *config);
-static uint32_t _ms5607_read_raw_value(const ms5607_config_t *config, bool pressure);
+static void _ms5607_req_value(ms5607_config_t *config, bool pressure);
+static uint32_t _ms5607_read_raw_value(const ms5607_config_t *config);
 static void _ms5607_convert_raw_values(const ms5607_prom_data_t *coeffs, uint32_t d1, uint32_t d2, int *pressure, float *temperature);
 static bool _ms5607_validate_crc(uint16_t *prom);
 
@@ -27,6 +27,7 @@ void ms5607_init_spi(ms5607_config_t *config, hal_spi_instance_t spi, hal_pin_nu
 {
     config->spi = spi;
     config->cs = cs;
+    config->d1 = 0;
 
     hal_spi_init_cs(cs);
 
@@ -40,12 +41,45 @@ void ms5607_set_osr(ms5607_config_t *config, ms5607_osr_t press, ms5607_osr_t te
     config->tempOSR = temp;
 }
 
-void ms5607_read(const ms5607_config_t *config, int *pressure, float *temperature)
+bool ms5607_read_non_blocking(ms5607_config_t *config, int *pressure, float *temperature)
 {
-    uint32_t d1 = _ms5607_read_raw_value(config, true);
-    uint32_t d2 = _ms5607_read_raw_value(config, false);
+    if (config->nextTime == 0)
+    {
+        _ms5607_req_value(config, true);
+    }
 
-    _ms5607_convert_raw_values(&config->coeffs, d1, d2, pressure, temperature);
+    if (hal_time_get_ms_since_boot() > config->nextTime)
+    {
+        if (config->d1 == 0)
+        {
+            config->d1 = _ms5607_read_raw_value(config);
+
+            _ms5607_req_value(config, false);
+        }
+        else
+        {
+            uint32_t d2 = _ms5607_read_raw_value(config);
+
+            _ms5607_convert_raw_values(&config->coeffs, config->d1, d2, pressure, temperature);
+
+            config->nextTime = 0;
+            config->d1 = 0;
+
+            return true;
+        }
+    }
+
+    return false;
+
+    // _ms5607_req_value(config, true);
+    // hal_time_sleep_ms(1);
+    // uint32_t d1 = _ms5607_read_raw_value(config);
+    // _ms5607_req_value(config, false);
+    // hal_time_sleep_ms(1);
+    // uint32_t d2 = _ms5607_read_raw_value(config);
+    // _ms5607_convert_raw_values(&config->coeffs, d1, d2, pressure, temperature);
+    // printf("%d  %f\n", *pressure, *temperature);
+    // return false;
 }
 
 static void _ms5607_reset(const ms5607_config_t *config)
@@ -81,7 +115,7 @@ void _ms5607_read_coefficents(ms5607_config_t *config)
     config->coeffs = coeffs;
 }
 
-static uint32_t _ms5607_read_raw_value(const ms5607_config_t *config, bool pressure)
+static void _ms5607_req_value(ms5607_config_t *config, bool pressure)
 {
     uint8_t data = pressure ? config->pressOSR : config->tempOSR + CONVERT_D2_OSR_256 - CONVERT_D1_OSR_256;
 
@@ -89,12 +123,17 @@ static uint32_t _ms5607_read_raw_value(const ms5607_config_t *config, bool press
     hal_spi_write(config->spi, &data, 1);
     hal_spi_cs_deselect(config->cs);
 
-    uint8_t osr = pressure ? config->pressOSR : config->tempOSR;
-    hal_time_sleep_ms(osr == MS5607_OSR_4096 ? 10 : osr == MS5607_OSR_2048 || osr == MS5607_OSR_1024 ? 5
-                                                : osr == MS5607_OSR_512                              ? 2
-                                                : osr == MS5607_OSR_256                              ? 1
-                                                                                                     : 0);
+    ms5607_osr_t osr = pressure ? config->pressOSR : config->tempOSR;
+    msec_t timeout = osr == MS5607_OSR_4096 ? 10 : osr == MS5607_OSR_2048 || osr == MS5607_OSR_1024 ? 5
+                                               : osr == MS5607_OSR_512                              ? 2
+                                               : osr == MS5607_OSR_256                              ? 1
+                                                                                                    : 0;
 
+    config->nextTime = hal_time_get_ms_since_boot() + timeout;
+}
+
+static uint32_t _ms5607_read_raw_value(const ms5607_config_t *config)
+{
     uint8_t newData = ADC_READ;
     uint8_t buffer[3];
 

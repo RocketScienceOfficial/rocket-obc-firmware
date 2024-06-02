@@ -155,10 +155,11 @@ int main()
         {
             int press;
             float temp;
-            ms5607_read(&ms5607Config, &press, &temp);
-
-            hal_serial_printf("%d Pa  %f C\n", press, temp);
-            hal_time_sleep_ms(100);
+            
+            if (ms5607_read_non_blocking(&ms5607Config, &press, &temp))
+            {
+                hal_serial_printf("%d Pa  %f C\n", press, temp);
+            }
         }
     }
     else if (strcmp(cmd, "neo") == 0)

@@ -5,6 +5,7 @@
 #include "hal/adc_driver.h"
 #include "hal/time_tracker.h"
 #include "hal/serial_driver.h"
+#include "lib/geo/geo_utils.h"
 #include "lib/drivers/imu/bmi088_driver.h"
 #include "lib/drivers/imu/lsm6dso32_driver.h"
 #include "lib/drivers/accelerometer/h3lis331dl_driver.h"
@@ -111,9 +112,13 @@ void sensors_update(void)
         lsm6dso32_read(&s_LSM6DSO32Config, &s_Frame.acc2, &s_Frame.gyro2, NULL);
         h3lis331dl_read(&s_H3LIS331DLConfig, &s_Frame.acc3);
         mmc5983ma_read(&s_MMC5983MAConfig, &s_Frame.mag1);
-        ms5607_read(&s_MS5607Config, &s_Frame.press, &s_Frame.temp);
 
         events_publish(MSG_SENSORS_NORMAL_READ);
+    }
+
+    if (ms5607_read_non_blocking(&s_MS5607Config, &s_Frame.press, &s_Frame.temp))
+    {
+        events_publish(MSG_SENSORS_BARO_READ);
     }
 
     if (hal_time_get_ms_since_boot() - s_GPSTimeOffset >= 10)
