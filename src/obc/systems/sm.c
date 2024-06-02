@@ -11,7 +11,7 @@
 
 #define SYSTEM_NAME "sm"
 
-#define START_ACC_THRESHOLD 25
+#define START_ACC_THRESHOLD 35
 #define APOGEE_MAX_DELTA 4
 #define LAND_MAX_DELTA 4
 #define LAST_ALT_APOGEE_VERIFICATION_COUNT 400
@@ -75,7 +75,7 @@ void sm_update(void)
                     s_State = FLIGHT_STATE_FREE_FALL;
                     s_ApogeeReached = true;
 
-                    SYS_LOG("Apogee reached: %f\n", s_Apogee);
+                    SYS_LOG("Apogee reached: %f", s_Apogee);
                     SYS_LOG("State: Free Fall");
                 }
             }
