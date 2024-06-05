@@ -18,8 +18,6 @@
 #include <string.h>
 #include "board_config.h"
 
-#include "lib/drivers/storage/flash_driver.h"
-
 int main()
 {
     hal_board_init(5000);
