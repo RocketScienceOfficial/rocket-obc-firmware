@@ -17,7 +17,6 @@
 #define SECTORS_SAVE_OFFSET 96
 #define SECTORS_COUNT 3500
 
-#define MAX_FRAMES_COUNT 150000
 #define STANDING_BUFFER_LENGTH 128
 
 #define DATAMAN_FILE_INFO_MAGIC 0x8F3E
@@ -29,11 +28,10 @@ typedef struct __attribute__((__packed__)) dataman_file_info
     uint16_t crc;
 } dataman_file_info_t;
 
-static uint8_t s_Buffer[256 * 2 * 16];
+static uint8_t s_Buffer[256 * 2];
 static size_t s_BufferSize;
 static dataman_frame_t s_StandingBuffer[STANDING_BUFFER_LENGTH];
 static size_t s_StandingBufferSize;
-static bool s_StandingBufferCleared;
 static size_t s_OffsetPages;
 static size_t s_FramesCount;
 static bool s_Terminated;
@@ -75,7 +73,10 @@ void dataman_update(void)
                 _clear_database();
             }
 
-            _save_standing_buffer_frame();
+            if (events_poll(MSG_SENSORS_NORMAL_READ))
+            {
+                _save_standing_buffer_frame();
+            }
         }
         else if (sm_get_state() == FLIGHT_STATE_ACCELERATING || sm_get_state() == FLIGHT_STATE_FREE_FALL || sm_get_state() == FLIGHT_STATE_FREE_FLIGHT)
         {
@@ -140,11 +141,6 @@ static bool _validate_info(const dataman_file_info_t *info)
         return false;
     }
 
-    if (info->frameCount > MAX_FRAMES_COUNT)
-    {
-        return false;
-    }
-
     uint16_t crc = crc16_mcrf4xx_calculate((const uint8_t *)info, sizeof(dataman_file_info_t) - 2);
 
     return crc == info->crc;
@@ -177,8 +173,6 @@ static void _flush(void)
 
 static void _flush_standing_buffer(void)
 {
-    s_FramesCount += s_StandingBufferSize;
-
     uint8_t *data = (uint8_t *)s_StandingBuffer;
     size_t pages = sizeof(s_StandingBuffer) / hal_flash_write_buffer_size();
 
@@ -195,10 +189,11 @@ static void _read_data(void)
     flash_read(SECTORS_FILE_INFO_OFFSET * hal_flash_sector_size(), &data);
 
     const dataman_file_info_t *info = (const dataman_file_info_t *)data;
+    int currentFrameCount = (int)info->frameCount;
 
     if (_validate_info(info))
     {
-        hal_serial_printf("/*%d*/\n", (int)info->frameCount);
+        hal_serial_printf("/*%d*/\n", currentFrameCount);
 
         flash_read(SECTORS_SAVE_OFFSET * hal_flash_sector_size(), &data);
 
@@ -208,7 +203,7 @@ static void _read_data(void)
 
             if (_validate_frame(frame))
             {
-                hal_serial_printf("/*%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f,%f,%f,%f,%d*/\n",
+                hal_serial_printf("/*%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f,%f,%f,%f,%d*/\n",
                                   frame->time,
                                   frame->acc1.x,
                                   frame->acc1.y,
@@ -234,6 +229,11 @@ static void _read_data(void)
                                   frame->pos.lon,
                                   frame->pos.alt,
                                   frame->smState);
+            }
+            else
+            {
+                currentFrameCount--;
+                hal_serial_printf("/*%d*/\n", currentFrameCount);
             }
         }
     }
@@ -292,6 +292,7 @@ static void _save_standing_buffer_frame(void)
     if (s_StandingBufferSize < STANDING_BUFFER_LENGTH)
     {
         s_StandingBuffer[s_StandingBufferSize++] = frame;
+        s_FramesCount++;
     }
     else
     {

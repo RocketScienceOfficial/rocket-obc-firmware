@@ -1,4 +1,5 @@
 #include "lib/drivers/accelerometer/h3lis331dl_driver.h"
+#include "lib/geo/physical_constants.h"
 #include <stdint.h>
 
 #define WHO_AM_I 0x0F
@@ -84,13 +85,13 @@ void h3lis331dl_set_range(h3lis331dl_config_t *config, h3lis331dl_range_t range)
     switch (range)
     {
     case H3LIS331DL_RANGE_100G:
-        config->rangeFactor = 100.0f / RESOLUTION_DIVIDER;
+        config->rangeFactor = 100.0f * EARTH_GRAVITY / RESOLUTION_DIVIDER;
         break;
     case H3LIS331DL_RANGE_200G:
-        config->rangeFactor = 200.0f / RESOLUTION_DIVIDER;
+        config->rangeFactor = 200.0f * EARTH_GRAVITY / RESOLUTION_DIVIDER;
         break;
     case H3LIS331DL_RANGE_400G:
-        config->rangeFactor = 400.0f / RESOLUTION_DIVIDER;
+        config->rangeFactor = 400.0f * EARTH_GRAVITY / RESOLUTION_DIVIDER;
         break;
     default:
         return;

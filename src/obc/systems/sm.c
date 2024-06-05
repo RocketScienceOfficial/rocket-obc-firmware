@@ -12,12 +12,17 @@
 #define SYSTEM_NAME "sm"
 
 #define START_ACC_THRESHOLD 35
+#define START_ALT_THRESHOLD 10
+#define START_ALT_VERIFICATION_COUNT 100
 #define APOGEE_MAX_DELTA 4
 #define LAND_MAX_DELTA 4
 #define LAST_ALT_APOGEE_VERIFICATION_COUNT 400
 #define LAST_ALT_LAND_VERIFICATION_COUNT 400
 
 static flight_state_type_t s_State;
+static float s_BaseAlt;
+static bool s_VerifingStandingAlt;
+static size_t s_StandingAltVerificationIndex;
 static float s_Apogee;
 static bool s_ApogeeReached;
 static size_t s_LastAltApogeeVertificationIndex;
@@ -32,16 +37,48 @@ void sm_update(void)
 {
     if (s_State == FLIGHT_STATE_STANDING)
     {
-        if (events_poll(MSG_SENSORS_NORMAL_READ))
+        if (events_poll(MSG_SENSORS_NORMAL_READ) && !s_VerifingStandingAlt)
         {
             vec3_t accel = sensors_get_frame()->acc1;
             float acc_mag = vec3_mag(&accel);
 
             if (acc_mag >= START_ACC_THRESHOLD)
             {
-                s_State = FLIGHT_STATE_ACCELERATING;
+                s_VerifingStandingAlt = true;
 
-                SYS_LOG("State: Accelerating");
+                SYS_LOG("Started verifing altitude");
+            }
+        }
+
+        if (events_poll(MSG_SENSORS_BARO_READ) && s_VerifingStandingAlt)
+        {
+            float alt = height_from_baro_formula(sensors_get_frame()->press);
+
+            if (s_BaseAlt == 0)
+            {
+                s_BaseAlt = alt;
+            }
+            else
+            {
+                if (alt - s_BaseAlt >= START_ALT_THRESHOLD)
+                {
+                    s_State = FLIGHT_STATE_ACCELERATING;
+
+                    SYS_LOG("State: Accelerating");
+                }
+                else
+                {
+                    s_StandingAltVerificationIndex++;
+
+                    if (s_StandingAltVerificationIndex == START_ALT_VERIFICATION_COUNT)
+                    {
+                        SYS_LOG("Acceleration state verification unsuccessfull");
+
+                        s_BaseAlt = 0;
+                        s_VerifingStandingAlt = false;
+                        s_StandingAltVerificationIndex = 0;
+                    }
+                }
             }
         }
     }
@@ -52,7 +89,7 @@ void sm_update(void)
             vec3_t accel = sensors_get_frame()->acc1;
             float acc_mag = vec3_mag(&accel);
 
-            if (acc_mag < -EARTH_GRAVITY) // TODO: Change to positive
+            if (acc_mag < EARTH_GRAVITY)
             {
                 s_State = FLIGHT_STATE_FREE_FLIGHT;
 

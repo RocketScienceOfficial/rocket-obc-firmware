@@ -18,6 +18,8 @@
 #include <string.h>
 #include "board_config.h"
 
+#include "lib/drivers/storage/flash_driver.h"
+
 int main()
 {
     hal_board_init(5000);
@@ -155,7 +157,7 @@ int main()
         {
             int press;
             float temp;
-            
+
             if (ms5607_read_non_blocking(&ms5607Config, &press, &temp))
             {
                 hal_serial_printf("%d Pa  %f C\n", press, temp);
@@ -238,33 +240,6 @@ int main()
         };
 
         ws2812_set_colors(colors, sizeof(colors) / sizeof(ws2812_color_t));
-    }
-    else if (strcmp(cmd, "lora") == 0)
-    {
-        uint8_t data[200];
-        size_t len = sizeof(data);
-
-        for (size_t i = 0; i < len; i++)
-        {
-            data[i] = i;
-        }
-
-        while (true)
-        {
-            hal_uart_write(OBC_UART, data, len);
-
-            hal_serial_printf("Sent %d bytes\n", len);
-
-            hal_time_sleep_ms(5000);
-        }
-
-        // while (true)
-        // {
-        //     uint8_t buff[256];
-        //     hal_uart_read(OBC_UART, buff, 1);
-
-        //     hal_serial_printf("%c\n", buff[0]);
-        // }
     }
     else if (strcmp(cmd, "ign") == 0)
     {

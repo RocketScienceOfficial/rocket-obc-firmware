@@ -114,7 +114,7 @@ void bmi088_accel_set_conf(bmi088_accel_config_t *config, bmi088_accel_odr_t odr
 
 void bmi088_accel_set_range(bmi088_accel_config_t *config, bmi088_accel_range_t range)
 {
-    config->rangeConstant = powf(2, range + 1) * 1.5f * (-EARTH_GRAVITY);
+    config->rangeConstant = powf(2, range + 1) * 1.5f * EARTH_GRAVITY;
 
     _bmi088_accel_write_reg(config, ACC_RANGE, range);
 

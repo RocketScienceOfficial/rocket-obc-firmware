@@ -28,7 +28,7 @@ void ekf_predict_state(ekf_data_t *data, const ekf_controls_t *controls)
     vec3_t gyroTruth = vec3_sub(&controls->gyro, &data->state.gyroBias);
     vec3_t accTruth = vec3_sub(&controls->accel, &data->state.accelBias);
     rotate_vec_through_quat(&accTruth, &data->state.orientation);
-    vec3_t gravityVector = {0, 0, EARTH_GRAVITY};
+    vec3_t gravityVector = {0, 0, -EARTH_GRAVITY};
     vec3_t correctedAcc = vec3_add(&accTruth, &gravityVector);
 
     quat_t rotationQuat = {1.0f, gyroTruth.x * dt / 2.0f, gyroTruth.y * dt / 2.0f, gyroTruth.z * dt / 2.0f};

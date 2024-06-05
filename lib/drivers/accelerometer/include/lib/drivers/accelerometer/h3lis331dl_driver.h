@@ -121,7 +121,7 @@ void h3lis331dl_set_range(h3lis331dl_config_t *config, h3lis331dl_range_t range)
  * @brief Reads H3lis331dl
  *
  * @param config H3lis331dl configuration
- * @param accel H3lis331dl acceleration
+ * @param accel H3lis331dl acceleration in meters per second squared
  */
 void h3lis331dl_read(h3lis331dl_config_t *config, vec3_t *accel);
 
