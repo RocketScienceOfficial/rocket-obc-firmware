@@ -28,7 +28,7 @@ typedef struct __attribute__((__packed__)) dataman_file_info
     uint16_t crc;
 } dataman_file_info_t;
 
-static uint8_t s_Buffer[256 * 2];
+static uint8_t s_Buffer[256];
 static size_t s_BufferSize;
 static dataman_frame_t s_StandingBuffer[STANDING_BUFFER_LENGTH];
 static size_t s_StandingBufferSize;

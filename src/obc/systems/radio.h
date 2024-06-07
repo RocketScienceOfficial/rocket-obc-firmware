@@ -20,6 +20,7 @@ typedef struct __attribute__((__packed__)) radio_frame
     uint8_t batteryVoltage10;
     uint8_t batteryPercentage;
     geo_position_wgs84_t pos;
+    uint8_t state;
     uint8_t seq;
     uint16_t crc;
 } radio_frame_t;
