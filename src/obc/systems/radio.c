@@ -6,6 +6,7 @@
 #include "lib/crypto/crc.h"
 #include "hal/uart_driver.h"
 #include "hal/time_tracker.h"
+#include "hal/serial_driver.h"
 #include <math.h>
 
 static msec_t s_Timer;
@@ -20,13 +21,20 @@ void radio_init(void)
 
 void radio_update(void)
 {
-    if (hal_time_run_every_ms(50, &s_Timer))
+    if (hal_time_run_every_ms(200, &s_Timer))
     {
+        hal_serial_printf("Begining of data transfer to radio module...\n");
+
         radio_frame_t frame = _create_packet();
-        uint8_t *buffer = (uint8_t *)&frame;
         const size_t len = sizeof(frame);
 
+        uint8_t lenBuff = (uint8_t)len;
+        hal_uart_write(OBC_UART, &lenBuff, 1);
+
+        uint8_t *buffer = (uint8_t *)&frame;
         hal_uart_write(OBC_UART, buffer, len);
+
+        hal_serial_printf("Transfered %d bytes to be sent!\n", len);
     }
 }
 

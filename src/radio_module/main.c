@@ -5,20 +5,20 @@
 #include "lib/drivers/lora/sx127X_driver.h"
 
 #define SPI 0
-#define CS 0
-#define MISO 0
-#define MOSI 0
-#define SCK 0
-#define RESET 0
-#define SPI_FREQUENCY 0
+#define CS 2
+#define MISO 4
+#define MOSI 3
+#define SCK 6
+#define RESET 7
+#define SPI_FREQUENCY 100000
 
 #define LORA_FREQUENCY 433E6
 #define LORA_BANDWIDTH 125E3
 #define LORA_SF 8
 
-#define UART 0
-#define RX 0
-#define TX 0
+#define UART 1
+#define RX 9
+#define TX 8
 #define UART_BAUDRATE 115200
 
 int main()
@@ -45,12 +45,20 @@ int main()
 
     while (true)
     {
+        hal_serial_printf("Awaiting for packet...\n");
+
         uint8_t size;
         hal_uart_read(UART, &size, 1);
+
+        hal_serial_printf("Received request for %d bytes\n", size);
 
         uint8_t buffer[256];
         hal_uart_read(UART, buffer, size);
 
+        hal_serial_printf("All bytes received!\n");
+
         sx127x_write_buffer(&loraData, buffer, size);
+
+        hal_serial_printf("Packet sent!\n");
     }
 }
