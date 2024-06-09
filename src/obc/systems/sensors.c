@@ -118,6 +118,8 @@ void sensors_update(void)
 
     if (ms5607_read_non_blocking(&s_MS5607Config, &s_Frame.press, &s_Frame.temp))
     {
+        s_Frame.baroHeight = height_from_baro_formula(s_Frame.press);
+
         events_publish(MSG_SENSORS_BARO_READ);
     }
 

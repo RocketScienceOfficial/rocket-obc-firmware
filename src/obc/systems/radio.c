@@ -12,6 +12,7 @@
 static msec_t s_Timer;
 static uint8_t s_Seq;
 
+static uint16_t _get_alt(void);
 static radio_frame_t _create_packet(void);
 
 void radio_init(void)
@@ -38,6 +39,13 @@ void radio_update(void)
     }
 }
 
+static uint16_t _get_alt(void)
+{
+    float tmp = sensors_get_frame()->baroHeight - (sm_get_state() == FLIGHT_STATE_STANDING ? (float)sensors_get_frame()->pos.alt : sm_get_base_alt());
+
+    return tmp > 0 ? (uint16_t)tmp : 0;
+}
+
 static radio_frame_t _create_packet(void)
 {
     radio_frame_t frame = {
@@ -48,7 +56,9 @@ static radio_frame_t _create_packet(void)
         .velocity = sqrtf(ahrs_get_data()->velocity.x * ahrs_get_data()->velocity.x + ahrs_get_data()->velocity.y * ahrs_get_data()->velocity.y + ahrs_get_data()->velocity.z * ahrs_get_data()->velocity.z),
         .batteryVoltage10 = sensors_get_frame()->batVolts * 10,
         .batteryPercentage = sensors_get_frame()->batPercent,
-        .pos = sensors_get_frame()->pos,
+        .lat = sensors_get_frame()->pos.lat,
+        .lon = sensors_get_frame()->pos.lon,
+        .alt = _get_alt(),
         .state = (uint8_t)sm_get_state(),
         .seq = s_Seq,
     };

@@ -1,8 +1,6 @@
 #ifndef _RADIO_H
 #define _RADIO_H
 
-#include "lib/maths/vector.h"
-#include "lib/geo/geo.h"
 #include <stdint.h>
 
 #define RADIO_MAGIC 0x7B /** Radio magic byte */
@@ -19,7 +17,9 @@ typedef struct __attribute__((__packed__)) radio_frame
     uint16_t velocity;
     uint8_t batteryVoltage10;
     uint8_t batteryPercentage;
-    geo_position_wgs84_t pos;
+    double lat;
+    double lon;
+    uint16_t alt;
     uint8_t state;
     uint8_t seq;
     uint16_t crc;

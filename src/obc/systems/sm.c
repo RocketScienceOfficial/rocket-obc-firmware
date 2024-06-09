@@ -3,7 +3,6 @@
 #include "../middleware/events.h"
 #include "../middleware/syslog.h"
 #include "lib/maths/math_utils.h"
-#include "lib/geo/geo_utils.h"
 #include "lib/geo/physical_constants.h"
 #include "hal/serial_driver.h"
 #include <stddef.h>
@@ -52,7 +51,7 @@ void sm_update(void)
 
         if (events_poll(MSG_SENSORS_BARO_READ) && s_VerifingStandingAlt)
         {
-            float alt = height_from_baro_formula(sensors_get_frame()->press);
+            float alt = sensors_get_frame()->baroHeight;
 
             if (s_BaseAlt == 0)
             {
@@ -101,7 +100,7 @@ void sm_update(void)
     {
         if (events_poll(MSG_SENSORS_BARO_READ))
         {
-            float alt = height_from_baro_formula(sensors_get_frame()->press);
+            float alt = sensors_get_frame()->baroHeight;
 
             if (alt <= s_Apogee || alt - s_Apogee <= APOGEE_MAX_DELTA)
             {
@@ -127,7 +126,7 @@ void sm_update(void)
     {
         if (events_poll(MSG_SENSORS_BARO_READ))
         {
-            float alt = height_from_baro_formula(sensors_get_frame()->press);
+            float alt = sensors_get_frame()->baroHeight;
             float delta = fabsf(s_LandingAlt - alt);
 
             if (delta > LAND_MAX_DELTA)
@@ -153,4 +152,9 @@ void sm_update(void)
 flight_state_type_t sm_get_state(void)
 {
     return s_State;
+}
+
+float sm_get_base_alt(void)
+{
+    return s_BaseAlt;
 }

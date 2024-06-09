@@ -19,6 +19,7 @@ typedef struct sensors_frame
     vec3_t mag1;
     int press;
     float temp;
+    float baroHeight;
     geo_position_wgs84_t pos;
     bool gpsFix;
     float ignDet1Volts;
