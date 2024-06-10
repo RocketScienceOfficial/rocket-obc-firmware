@@ -17,7 +17,7 @@
 #define SECTORS_SAVE_OFFSET 96
 #define SECTORS_COUNT 3500
 
-#define STANDING_BUFFER_LENGTH 128
+#define STANDING_BUFFER_LENGTH 256
 
 #define DATAMAN_FILE_INFO_MAGIC 0x8F3E
 
@@ -51,6 +51,8 @@ static void _save_info_file(void);
 void dataman_init(void)
 {
     s_OffsetPages = sizeof(s_StandingBuffer) / hal_flash_write_buffer_size();
+
+    SYS_LOG("READY");
 }
 
 void dataman_update(void)
@@ -178,7 +180,10 @@ static void _flush_standing_buffer(void)
 
     flash_write_pages(SECTORS_SAVE_OFFSET * hal_flash_sector_size() / hal_flash_write_buffer_size(), data, pages);
 
-    SYS_LOG("Standing buffer has been flushed. %d frames were written", s_StandingBufferSize);
+    SYS_LOG("Standing buffer has been flushed. %d bytes were written", s_StandingBufferSize);
+
+    s_FramesCount += s_StandingBufferSize;
+    s_StandingBufferSize = 0;
 }
 
 static void _read_data(void)
@@ -203,7 +208,7 @@ static void _read_data(void)
 
             if (_validate_frame(frame))
             {
-                hal_serial_printf("/*%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f,%f,%f,%f,%d*/\n",
+                hal_serial_printf("/*%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f,%f,%f,%f,%d*/\n",
                                   frame->time,
                                   frame->acc1.x,
                                   frame->acc1.y,
@@ -247,9 +252,14 @@ static void _read_data(void)
 
 static void _save_frame()
 {
-    if (s_OffsetPages >= (SECTORS_SAVE_OFFSET + SECTORS_COUNT) * hal_flash_sector_size() / hal_flash_write_buffer_size())
+    if (s_OffsetPages >= SECTORS_COUNT * hal_flash_sector_size() / hal_flash_write_buffer_size())
     {
         return;
+    }
+
+    if (s_StandingBufferSize < STANDING_BUFFER_LENGTH)
+    {
+        SYS_LOG("WARNING: Standing buffer has not reached its maximum. It will cause errors!");
     }
 
     dataman_frame_t frame = _get_frame();
@@ -292,10 +302,18 @@ static void _save_standing_buffer_frame(void)
     if (s_StandingBufferSize < STANDING_BUFFER_LENGTH)
     {
         s_StandingBuffer[s_StandingBufferSize++] = frame;
-        s_FramesCount++;
     }
     else
     {
+        static bool log = false;
+
+        if (!log)
+        {
+            SYS_LOG("Standing buffer has been filled!");
+
+            log = true;
+        }
+
         for (size_t i = 0; i < STANDING_BUFFER_LENGTH - 1; i++)
         {
             s_StandingBuffer[i] = s_StandingBuffer[i + 1];

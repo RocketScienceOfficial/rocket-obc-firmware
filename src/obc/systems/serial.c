@@ -17,6 +17,8 @@ static void _submit_cmd(void);
 void serial_init(void)
 {
     _reset();
+
+    SYS_LOG("READY");
 }
 
 void serial_update(void)

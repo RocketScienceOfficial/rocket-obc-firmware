@@ -70,16 +70,6 @@ bool ms5607_read_non_blocking(ms5607_config_t *config, int *pressure, float *tem
     }
 
     return false;
-
-    // _ms5607_req_value(config, true);
-    // hal_time_sleep_ms(1);
-    // uint32_t d1 = _ms5607_read_raw_value(config);
-    // _ms5607_req_value(config, false);
-    // hal_time_sleep_ms(1);
-    // uint32_t d2 = _ms5607_read_raw_value(config);
-    // _ms5607_convert_raw_values(&config->coeffs, d1, d2, pressure, temperature);
-    // printf("%d  %f\n", *pressure, *temperature);
-    // return false;
 }
 
 static void _ms5607_reset(const ms5607_config_t *config)

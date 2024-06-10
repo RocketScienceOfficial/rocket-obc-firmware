@@ -101,6 +101,8 @@ void sensors_init(void)
     battery_init(&s_BatteryConfig, s_BatteryTable, sizeof(s_BatteryTable) / sizeof(battery_table_entry_t), BATTERY_VOLTAGE_DIVIDER);
 
     SYS_LOG("Battery: READY");
+
+    SYS_LOG("READY");
 }
 
 void sensors_update(void)

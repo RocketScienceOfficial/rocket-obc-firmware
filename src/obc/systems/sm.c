@@ -12,7 +12,7 @@
 
 #define START_ACC_THRESHOLD 35
 #define START_ALT_THRESHOLD 10
-#define START_ALT_VERIFICATION_COUNT 100
+#define START_ALT_VERIFICATION_COUNT 300
 #define APOGEE_MAX_DELTA 4
 #define LAND_MAX_DELTA 4
 #define LAST_ALT_APOGEE_VERIFICATION_COUNT 400
@@ -30,6 +30,7 @@ static size_t s_LastAltLandVerificationIndex;
 
 void sm_init(void)
 {
+    SYS_LOG("READY");
 }
 
 void sm_update(void)

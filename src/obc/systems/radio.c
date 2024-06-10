@@ -3,11 +3,13 @@
 #include "sensors.h"
 #include "ahrs.h"
 #include "sm.h"
+#include "../middleware/syslog.h"
 #include "lib/crypto/crc.h"
 #include "hal/uart_driver.h"
 #include "hal/time_tracker.h"
-#include "hal/serial_driver.h"
 #include <math.h>
+
+#define SYSTEM_NAME "radio"
 
 static msec_t s_Timer;
 static uint8_t s_Seq;
@@ -18,14 +20,14 @@ static radio_frame_t _create_packet(void);
 void radio_init(void)
 {
     hal_uart_init_all(OBC_UART, OBC_UART_RX, OBC_UART_TX, OBC_UART_FREQ);
+
+    SYS_LOG("READY");
 }
 
 void radio_update(void)
 {
     if (hal_time_run_every_ms(200, &s_Timer))
     {
-        hal_serial_printf("Begining of data transfer to radio module...\n");
-
         radio_frame_t frame = _create_packet();
         const size_t len = sizeof(frame);
 
@@ -34,8 +36,6 @@ void radio_update(void)
 
         uint8_t *buffer = (uint8_t *)&frame;
         hal_uart_write(OBC_UART, buffer, len);
-
-        hal_serial_printf("Transfered %d bytes to be sent!\n", len);
     }
 }
 
