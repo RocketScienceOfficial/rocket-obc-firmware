@@ -23,7 +23,7 @@
 
 int main()
 {
-    hal_board_init(5000);
+    hal_board_init(1000);
 
     hal_serial_printf("Initialized board!\n");
     hal_serial_printf("Firmware version: 1.0\n");

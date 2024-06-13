@@ -13,6 +13,8 @@ typedef enum msg_type
     MSG_SENSORS_GPS_READ,
     MSG_SENSORS_ADC_READ,
     MSG_CMD_DATA_READ,
+    MSG_CMD_DATA_CLEAR,
+    MSG_CMD_DATA_RECOVERY,
 } msg_type_t;
 
 /**

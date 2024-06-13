@@ -18,7 +18,6 @@
 
 #define SYSTEM_NAME "sensors"
 
-#define EXP_FILTER_ALPHA_VALUE 0.75f
 #define BATTERY_VOLTAGE_DIVIDER 11.001f
 
 static battery_table_entry_t s_BatteryTable[] = {
@@ -41,11 +40,6 @@ static ms5607_config_t s_MS5607Config;
 static gps_config_t s_GPSConfig;
 static ads7038_config_t s_ADS7038Config;
 static battery_config_t s_BatteryConfig;
-
-static float _exp_filter_adc(float x1, float x0, float a)
-{
-    return a * x1 + (1 - a) * x0;
-}
 
 void sensors_init(void)
 {
@@ -152,15 +146,13 @@ void sensors_update(void)
         float channels[4];
         ads7038_read_channels(&s_ADS7038Config, channels, sizeof(channels) / sizeof(float));
 
-        s_Frame.ignDet1Volts = _exp_filter_adc(channels[0], s_Frame.ignDet1Volts, EXP_FILTER_ALPHA_VALUE);
-        s_Frame.ignDet2Volts = _exp_filter_adc(channels[1], s_Frame.ignDet2Volts, EXP_FILTER_ALPHA_VALUE);
-        s_Frame.ignDet3Volts = _exp_filter_adc(channels[2], s_Frame.ignDet3Volts, EXP_FILTER_ALPHA_VALUE);
-        s_Frame.ignDet4Volts = _exp_filter_adc(channels[3], s_Frame.ignDet4Volts, EXP_FILTER_ALPHA_VALUE);
-
-        s_Frame.batRawVolts = _exp_filter_adc(hal_adc_read_voltage(PIN_BATTERY), s_Frame.batRawVolts, EXP_FILTER_ALPHA_VALUE);
+        s_Frame.ignDet1Volts = channels[0];
+        s_Frame.ignDet2Volts = channels[1];
+        s_Frame.ignDet3Volts = channels[2];
+        s_Frame.ignDet4Volts = channels[3];
 
         battery_data_t data = {};
-        battery_convert(&s_BatteryConfig, s_Frame.batRawVolts, &data);
+        battery_convert(&s_BatteryConfig, hal_adc_read_voltage(PIN_BATTERY), &data);
 
         s_Frame.batVolts = data.voltage;
         s_Frame.batPercent = data.percentage;

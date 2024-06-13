@@ -26,7 +26,6 @@ typedef struct sensors_frame
     float ignDet2Volts;
     float ignDet3Volts;
     float ignDet4Volts;
-    float batRawVolts;
     float batVolts;
     uint8_t batPercent;
     uint8_t batNCells;

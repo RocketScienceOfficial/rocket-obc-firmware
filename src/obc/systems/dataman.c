@@ -44,6 +44,7 @@ static void _clear_database(void);
 static void _flush(void);
 static void _flush_standing_buffer(void);
 static void _read_data(void);
+static void _recover_data(void);
 static void _save_frame(void);
 static void _save_standing_buffer_frame(void);
 static void _save_info_file(void);
@@ -72,9 +73,15 @@ void dataman_update(void)
             if (events_poll(MSG_CMD_DATA_READ))
             {
                 _read_data();
+            }
+            if (events_poll(MSG_CMD_DATA_CLEAR))
+            {
                 _clear_database();
             }
-
+            if (events_poll(MSG_CMD_DATA_RECOVERY))
+            {
+                _recover_data();
+            }
             if (events_poll(MSG_SENSORS_NORMAL_READ))
             {
                 _save_standing_buffer_frame();
@@ -250,7 +257,11 @@ static void _read_data(void)
     SYS_LOG("Data read finish!");
 }
 
-static void _save_frame()
+static void _recover_data(void)
+{
+}
+
+static void _save_frame(void)
 {
     if (s_OffsetPages >= SECTORS_COUNT * hal_flash_sector_size() / hal_flash_write_buffer_size())
     {

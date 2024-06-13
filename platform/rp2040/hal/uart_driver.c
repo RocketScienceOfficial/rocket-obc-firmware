@@ -20,7 +20,7 @@ bool hal_uart_check_rx(hal_uart_instance_t uart, hal_pin_number_t rx)
 
     if (uart == 0)
     {
-        return rx == 13 || rx == 17;
+        return rx == 1 || rx == 13 || rx == 17;
     }
     else if (uart == 1)
     {
@@ -41,7 +41,7 @@ bool hal_uart_check_tx(hal_uart_instance_t uart, hal_pin_number_t tx)
 
     if (uart == 0)
     {
-        return tx == 12 || tx == 16;
+        return tx == 0 || tx == 12 || tx == 16;
     }
     else if (uart == 1)
     {

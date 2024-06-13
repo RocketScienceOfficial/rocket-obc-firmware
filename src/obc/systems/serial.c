@@ -76,4 +76,12 @@ static void _submit_cmd(void)
     {
         events_publish(MSG_CMD_DATA_READ);
     }
+    else if (strcmp(s_CMD, "data-clear") == 0)
+    {
+        events_publish(MSG_CMD_DATA_CLEAR);
+    }
+    else if (strcmp(s_CMD, "data-recovery") == 0)
+    {
+        events_publish(MSG_CMD_DATA_RECOVERY);
+    }
 }
