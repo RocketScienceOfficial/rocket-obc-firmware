@@ -17,7 +17,6 @@
 #include "lib/battery/battery_utils.h"
 
 #define SYSTEM_NAME "sensors"
-
 #define BATTERY_VOLTAGE_DIVIDER 11.001f
 
 static battery_table_entry_t s_BatteryTable[] = {

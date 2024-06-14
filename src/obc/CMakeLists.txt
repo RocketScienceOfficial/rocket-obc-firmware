@@ -23,7 +23,6 @@ target_link_libraries(obc
     lib_drivers_lora
     lib_drivers_magnetometer
     lib_drivers_servo
-    lib_drivers_storage
     lib_nmea
     lib_battery
     lib_maths

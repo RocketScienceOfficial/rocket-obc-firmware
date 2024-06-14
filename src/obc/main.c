@@ -2,10 +2,12 @@
 #include "hal/serial_driver.h"
 #include "middleware/events.h"
 #include "systems/dataman.h"
+#include "systems/ign.h"
 #include "systems/radio.h"
 #include "systems/sensors.h"
 #include "systems/serial.h"
 #include "systems/sm.h"
+#include "systems/status.h"
 
 static void _init_systems(void)
 {
@@ -14,6 +16,8 @@ static void _init_systems(void)
     sm_init();
     dataman_init();
     radio_init();
+    status_init();
+    ign_init();
 
     hal_serial_printf("All systems initialized!\n");
 }
@@ -25,6 +29,8 @@ static void _update_systems(void)
     sm_update();
     dataman_update();
     radio_update();
+    status_update();
+    ign_update();
 }
 
 int main()

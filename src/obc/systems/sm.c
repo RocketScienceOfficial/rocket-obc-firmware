@@ -9,7 +9,6 @@
 #include <math.h>
 
 #define SYSTEM_NAME "sm"
-
 #define START_ACC_THRESHOLD 35
 #define START_ALT_THRESHOLD 10
 #define START_ALT_VERIFICATION_COUNT 300

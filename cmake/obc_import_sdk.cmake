@@ -16,7 +16,7 @@ macro(obc_init_sdk)
     target_sources(obc_hal INTERFACE
         ${OBC_HAL_SOURCE_DIR}/adc_driver.c
         ${OBC_HAL_SOURCE_DIR}/board_control.c
-        ${OBC_HAL_SOURCE_DIR}/flash_hal_driver.c
+        ${OBC_HAL_SOURCE_DIR}/flash_driver.c
         ${OBC_HAL_SOURCE_DIR}/gpio_driver.c
         ${OBC_HAL_SOURCE_DIR}/i2c_driver.c
         ${OBC_HAL_SOURCE_DIR}/multicore.c

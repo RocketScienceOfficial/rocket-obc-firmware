@@ -1,6 +1,6 @@
 #include "tests/test_framework.h"
 #include "hal/multicore.h"
-#include "lib/drivers/storage/flash_driver.h"
+#include "hal/flash_driver.h"
 #include <stdbool.h>
 
 static void core_func()
@@ -26,7 +26,7 @@ int main()
         hal_core_init_fifo(0, sizeof(int), 1);
         hal_core_start_next(core_func);
 
-        SAFE_FLASH_EXECUTE_MULTICORE(flash_erase_sectors(0, 1));
+        SAFE_FLASH_EXECUTE_MULTICORE(hal_flash_erase_sectors(64, 1));
 
         int data = 10;
         hal_core_send_data(0, &data);

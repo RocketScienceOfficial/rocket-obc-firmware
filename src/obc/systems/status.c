@@ -57,6 +57,11 @@ static ws2812_color_t _get_ign_diode_color(float v)
 {
     float vref = sensors_get_frame()->batVolts;
 
+    if (vref < 1.0f)
+    {
+        return WS_COLOR(0, 0, 0);
+    }
+
     if (v < vref * (IGN_FUSE_WORKING_IGN_PRESENT_FACTOR + IGN_PIN_CHECK_EPS))
     {
         return WS_COLOR(0, 255, 0);

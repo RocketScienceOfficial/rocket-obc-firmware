@@ -218,7 +218,7 @@ int main()
             battery_data_t data = {};
             battery_convert(&batteryConfig, batVolts, &data);
 
-            hal_serial_printf("%d%%   %fV   %d cells\n", data.percentage, data.voltage, data.nCells);
+            hal_serial_printf("%d%%   %fV   %fV   %d cells\n", data.percentage, batVolts, data.voltage, data.nCells);
 
             hal_time_sleep_ms(1000);
         }
