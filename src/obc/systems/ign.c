@@ -1,112 +1,125 @@
 #include "ign.h"
 #include "board_config.h"
-#include "sensors.h"
 #include "sm.h"
+#include "sensors.h"
+#include "../middleware/events.h"
+#include "../middleware/syslog.h"
 #include "hal/gpio_driver.h"
 #include "hal/time_tracker.h"
-#include <string.h>
 
-#define ONLY_MAIN true
-#define TWO_STAGES false
-#define SECOND_DELAY 1000
+#define SYSTEM_NAME "ign"
 #define IGN_UP_TIME_MS 1000
+#define DEST_HEIGHT 50
 
 typedef struct ign_pin_data
 {
     hal_pin_number_t pin;
-    bool setHigh;
     bool fired;
-    msec_t delay;
-    msec_t time;
+    msec_t fireTime;
     bool finished;
 } ign_pin_data_t;
 
 static bool s_Armed;
-static ign_pin_data_t s_MainData;
-static ign_pin_data_t s_DrougeData;
-static ign_pin_data_t s_SepData;
-static ign_pin_data_t s_SecondData;
+static ign_pin_data_t s_IGN1;
+static ign_pin_data_t s_IGN2;
+static ign_pin_data_t s_IGN3;
+static ign_pin_data_t s_IGN4;
 
-static void _ign_try_fire(ign_pin_data_t *data, msec_t delay);
-static void _ign_try_update(ign_pin_data_t *data);
+static void _init_pin(ign_pin_data_t *data, hal_pin_number_t pin);
+static uint8_t _add_flag(const ign_pin_data_t *data, ign_flags_t flag);
+static void _ign_fire(ign_pin_data_t *data);
+static void _ign_update(ign_pin_data_t *data);
 
 void ign_init(void)
 {
     s_Armed = true;
-    s_MainData.pin = PIN_IGN_1;
-    s_DrougeData.pin = PIN_IGN_2;
-    s_SepData.pin = PIN_IGN_3;
-    s_SecondData.pin = PIN_IGN_4;
+
+    _init_pin(&s_IGN1, PIN_IGN_1);
+    _init_pin(&s_IGN2, PIN_IGN_2);
+    _init_pin(&s_IGN3, PIN_IGN_3);
+    _init_pin(&s_IGN4, PIN_IGN_4);
+
+    SYS_LOG("READY");
 }
 
 void ign_update(void)
 {
-    // if (sm_apogee_reached())
-    // {
-    //     if (ONLY_MAIN)
-    //     {
-    //         _ign_try_fire(&s_MainData, 0);
-    //     }
-    //     else
-    //     {
-    //         _ign_try_fire(&s_DrougeData, 0);
-    //     }
-    // }
-
-    // if (sm->lastAlt > data->settings.mainAlt && sm->state == FLIGHT_STATE_FREE_FALL)
-    // {
-    //     if (ONLY_MAIN)
-    //     {
-    //         _ign_try_fire(&s_MainData, 0);
-    //     }
-    // }
-
-    if (sm_get_state() == FLIGHT_STATE_FREE_FLIGHT)
+    if (events_poll(MSG_SM_APOGEE_REACHED))
     {
-        if (TWO_STAGES)
+        _ign_fire(&s_IGN1);
+
+        if (sm_get_apogee() - sm_get_base_alt() <= DEST_HEIGHT)
         {
-            _ign_try_fire(&s_SepData, 0);
-            _ign_try_fire(&s_SecondData, SECOND_DELAY);
+            _ign_fire(&s_IGN2);
+        }
+    }
+    else if (sm_get_state() == FLIGHT_STATE_FREE_FALL)
+    {
+        if (sensors_get_frame()->baroHeight - sm_get_base_alt() <= DEST_HEIGHT)
+        {
+            _ign_fire(&s_IGN2);
         }
     }
 
-    _ign_try_update(&s_MainData);
-    _ign_try_update(&s_DrougeData);
-    _ign_try_update(&s_SepData);
-    _ign_try_update(&s_SecondData);
+    _ign_update(&s_IGN1);
+    _ign_update(&s_IGN2);
+    _ign_update(&s_IGN3);
+    _ign_update(&s_IGN4);
 }
 
-static void _ign_try_fire(ign_pin_data_t *data, msec_t delay)
+bool ign_is_armed(void)
 {
-    if (s_Armed)
+    return s_Armed;
+}
+
+uint8_t ign_get_flags(void)
+{
+    uint8_t flags = 0;
+
+    flags |= _add_flag(&s_IGN1, IGN_FLAG_IGN_1_STATE);
+    flags |= _add_flag(&s_IGN2, IGN_FLAG_IGN_2_STATE);
+    flags |= _add_flag(&s_IGN3, IGN_FLAG_IGN_3_STATE);
+    flags |= _add_flag(&s_IGN4, IGN_FLAG_IGN_4_STATE);
+
+    return flags;
+}
+
+static void _init_pin(ign_pin_data_t *data, hal_pin_number_t pin)
+{
+    data->pin = pin;
+
+    hal_gpio_init_pin(pin, GPIO_OUTPUT);
+}
+
+static uint8_t _add_flag(const ign_pin_data_t *data, ign_flags_t flag)
+{
+    return data->fired && !data->finished ? flag : 0;
+}
+
+static void _ign_fire(ign_pin_data_t *data)
+{
+    if (s_Armed && !data->fired && !data->finished)
     {
-        if (!data->fired)
-        {
-            data->fired = true;
-            data->delay = delay;
-            data->time = hal_time_get_ms_since_boot();
-        }
+        data->fired = true;
+        data->fireTime = hal_time_get_ms_since_boot();
+
+        hal_gpio_set_pin_state(data->pin, GPIO_HIGH);
+
+        SYS_LOG("Firing IGN...");
     }
 }
 
-static void _ign_try_update(ign_pin_data_t *data)
+static void _ign_update(ign_pin_data_t *data)
 {
-    if (s_Armed)
+    if (s_Armed && data->fired && !data->finished)
     {
-        msec_t diff = hal_time_get_ms_since_boot() - data->time;
-
-        if (data->fired && !data->setHigh && diff >= data->delay)
-        {
-            data->setHigh = true;
-
-            hal_gpio_set_pin_state(data->pin, GPIO_HIGH);
-        }
-
-        if (data->fired && !data->finished && diff >= data->delay + IGN_UP_TIME_MS)
+        if (hal_time_get_ms_since_boot() - data->fireTime >= IGN_UP_TIME_MS)
         {
             data->finished = true;
 
             hal_gpio_set_pin_state(data->pin, GPIO_LOW);
+
+            SYS_LOG("IGN has been fired!");
         }
     }
 }

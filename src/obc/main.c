@@ -1,6 +1,7 @@
 #include "hal/board_control.h"
 #include "hal/serial_driver.h"
 #include "middleware/events.h"
+#include "systems/ahrs.h"
 #include "systems/dataman.h"
 #include "systems/ign.h"
 #include "systems/radio.h"
@@ -12,6 +13,7 @@
 static void _init_systems(void)
 {
     sensors_init();
+    ahrs_init();
     serial_init();
     sm_init();
     dataman_init();
@@ -26,6 +28,7 @@ static void _update_systems(void)
 {
     serial_update();
     sensors_update();
+    ahrs_update();
     sm_update();
     dataman_update();
     radio_update();

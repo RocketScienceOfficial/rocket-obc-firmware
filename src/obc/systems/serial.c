@@ -72,15 +72,15 @@ static void _submit_cmd(void)
 {
     SYS_LOG("Submiting command: %s", s_CMD);
 
-    if (strcmp(s_CMD, "data-read") == 0)
+    if (strcmp(s_CMD, "data-read-start") == 0)
     {
         events_publish(MSG_CMD_DATA_READ);
     }
-    else if (strcmp(s_CMD, "data-clear") == 0)
+    else if (strcmp(s_CMD, "data-clear-start") == 0)
     {
         events_publish(MSG_CMD_DATA_CLEAR);
     }
-    else if (strcmp(s_CMD, "data-recovery") == 0)
+    else if (strcmp(s_CMD, "data-recovery-start") == 0)
     {
         events_publish(MSG_CMD_DATA_RECOVERY);
     }

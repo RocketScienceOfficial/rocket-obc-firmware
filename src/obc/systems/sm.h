@@ -1,8 +1,6 @@
 #ifndef _SM_H
 #define _SM_H
 
-#include <stdbool.h>
-
 /**
  * @brief Flight State Machine Type
  */
@@ -38,5 +36,12 @@ flight_state_type_t sm_get_state(void);
  * @return Base Altitude
  */
 float sm_get_base_alt(void);
+
+/**
+ * @brief Gets apogee reached. 0 if hasn't reached yet
+ *
+ * @return Apogee
+ */
+float sm_get_apogee(void);
 
 #endif

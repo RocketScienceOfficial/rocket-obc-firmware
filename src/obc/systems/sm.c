@@ -113,6 +113,8 @@ void sm_update(void)
 
                     SYS_LOG("Apogee reached: %f", s_Apogee);
                     SYS_LOG("State: Free Fall");
+
+                    events_publish(MSG_SM_APOGEE_REACHED);
                 }
             }
             else
@@ -157,4 +159,9 @@ flight_state_type_t sm_get_state(void)
 float sm_get_base_alt(void)
 {
     return s_BaseAlt;
+}
+
+float sm_get_apogee(void)
+{
+    return s_Apogee;
 }

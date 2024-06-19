@@ -9,12 +9,13 @@
 #include "lib/drivers/imu/lsm6dso32_driver.h"
 #include "lib/drivers/accelerometer/h3lis331dl_driver.h"
 #include "lib/drivers/magnetometer/mmc5983ma_driver.h"
-#include "lib/drivers/barometer/ms5607_driver.h"
+#include "lib/drivers/barometer/ms5611_driver.h"
 #include "lib/drivers/gps/gps_driver.h"
 #include "lib/drivers/adc/ads7038_driver.h"
 #include "lib/drivers/led/w2812_driver.h"
 #include "lib/battery/battery_utils.h"
 #include "lib/geo/geo.h"
+#include "lib/geo/geo_utils.h"
 #include <string.h>
 #include "board_config.h"
 
@@ -146,19 +147,19 @@ int main()
     }
     else if (strcmp(cmd, "ms56") == 0)
     {
-        ms5607_config_t ms5607Config = {0};
+        ms5611_config_t ms5611Config = {0};
 
-        ms5607_init_spi(&ms5607Config, OBC_SPI, PIN_CS_MS56);
-        ms5607_set_osr(&ms5607Config, MS5607_OSR_256, MS5607_OSR_256);
+        ms5611_init_spi(&ms5611Config, OBC_SPI, PIN_CS_MS56);
+        ms5611_set_osr(&ms5611Config, MS5611_OSR_256, MS5611_OSR_256);
 
         while (true)
         {
             int press;
             float temp;
 
-            if (ms5607_read_non_blocking(&ms5607Config, &press, &temp))
+            if (ms5611_read_non_blocking(&ms5611Config, &press, &temp))
             {
-                hal_serial_printf("%d Pa  %f C\n", press, temp);
+                hal_serial_printf("%d Pa  %f C  %f m\n", press, temp, height_from_baro_formula(press));
             }
         }
     }
@@ -189,7 +190,6 @@ int main()
     else if (strcmp(cmd, "ads") == 0)
     {
         ads7038_config_t ads7038Config = {0};
-
         ads7038_init(&ads7038Config, OBC_SPI, PIN_CS_ADC, 1 << ADC_IGN_1_DET_CH | 1 << ADC_IGN_2_DET_CH | 1 << ADC_IGN_3_DET_CH | 1 << ADC_IGN_4_DET_CH, ADC_VREF);
 
         while (true)
@@ -197,30 +197,58 @@ int main()
             float channels[4];
             ads7038_read_channels(&ads7038Config, channels, sizeof(channels) / sizeof(float));
 
+            channels[0] -= 0.015f;
+            channels[1] -= 0.023f;
+            channels[2] -= 0.048f;
+            channels[3] -= 0.010f;
+
             hal_serial_printf("%f %f %f %f\n", channels[0], channels[1], channels[2], channels[3]);
-            hal_time_sleep_ms(1000);
+            hal_time_sleep_ms(100);
         }
     }
     else if (strcmp(cmd, "bat") == 0)
     {
         battery_config_t batteryConfig = {0};
         battery_table_entry_t entries[] = {
-            {4.2f, 100},
-            {3.0f, 0},
+            {4.20f, 100},
+            {4.15f, 95},
+            {4.11f, 90},
+            {4.08f, 85},
+            {4.02f, 80},
+            {3.98f, 75},
+            {3.95f, 70},
+            {3.91f, 65},
+            {3.87f, 60},
+            {3.85f, 55},
+            {3.84f, 50},
+            {3.82f, 45},
+            {3.80f, 40},
+            {3.79f, 35},
+            {3.77f, 30},
+            {3.75f, 25},
+            {3.73f, 20},
+            {3.71f, 15},
+            {3.69f, 10},
+            {3.61f, 5},
+            {3.27f, 0},
         };
-        battery_init(&batteryConfig, entries, sizeof(entries) / sizeof(battery_table_entry_t), 11.001f);
+        battery_init(&batteryConfig, entries, sizeof(entries) / sizeof(battery_table_entry_t));
 
         hal_adc_init_pin(PIN_BATTERY);
 
         while (true)
         {
-            float batVolts = hal_adc_read_voltage(PIN_BATTERY);
+            float rawVolts = hal_adc_read_voltage(PIN_BATTERY);
+            float batVolts = rawVolts * 11.0f;
+            float offset = -0.08f * batVolts + 0.74f;
+            batVolts -= offset;
+
             battery_data_t data = {};
             battery_convert(&batteryConfig, batVolts, &data);
 
-            hal_serial_printf("%d%%   %fV   %fV   %d cells\n", data.percentage, batVolts, data.voltage, data.nCells);
+            hal_serial_printf("RAW: %fV   BAT: %fV   PERCENT: %d%%   CELLS: %d\n", rawVolts, batVolts, data.percentage, data.nCells);
 
-            hal_time_sleep_ms(1000);
+            hal_time_sleep_ms(100);
         }
     }
     else if (strcmp(cmd, "ws") == 0)
@@ -242,10 +270,13 @@ int main()
     else if (strcmp(cmd, "ign") == 0)
     {
         hal_gpio_init_pin(PIN_IGN_1, GPIO_OUTPUT);
-
+        hal_gpio_init_pin(PIN_IGN_2, GPIO_OUTPUT);
+        hal_gpio_init_pin(PIN_IGN_3, GPIO_OUTPUT);
+        hal_gpio_init_pin(PIN_IGN_4, GPIO_OUTPUT);
         hal_gpio_set_pin_state(PIN_IGN_1, GPIO_HIGH);
-        hal_time_sleep_ms(1000);
-        hal_gpio_set_pin_state(PIN_IGN_1, GPIO_LOW);
+        hal_gpio_set_pin_state(PIN_IGN_2, GPIO_HIGH);
+        hal_gpio_set_pin_state(PIN_IGN_3, GPIO_HIGH);
+        hal_gpio_set_pin_state(PIN_IGN_4, GPIO_HIGH);
     }
 
     while (true)

@@ -43,7 +43,7 @@ typedef struct ms5607_config
     ms5607_osr_t pressOSR;
     ms5607_osr_t tempOSR;
     uint32_t d1;
-    msec_t nextTime;
+    usec_t nextTime;
 } ms5607_config_t;
 
 /**

@@ -1,6 +1,8 @@
 #include "status.h"
 #include "board_config.h"
 #include "sensors.h"
+#include "dataman.h"
+#include "ign.h"
 #include "../middleware/events.h"
 #include "lib/drivers/led/w2812_driver.h"
 
@@ -14,10 +16,13 @@
 #define IGN_PIN_CHECK_EPS 0.005f
 
 static ws2812_color_t s_Diodes[7];
+static msec_t s_OtherDiodesTimer;
 
 static void _update_diodes(void);
 static ws2812_color_t _get_ign_diode_color(float v);
-static ws2812_color_t _get_bat_diode_color(uint8_t percent);
+static ws2812_color_t _get_arm_diode_color(void);
+static ws2812_color_t _get_bat_diode_color(void);
+static ws2812_color_t _get_ready_diode_color(void);
 
 void status_init(void)
 {
@@ -30,6 +35,8 @@ void status_init(void)
     s_Diodes[4] = WS_COLOR(255, 0, 0);
     s_Diodes[5] = WS_COLOR(255, 0, 0);
     s_Diodes[6] = WS_COLOR(255, 0, 0);
+
+    _update_diodes();
 }
 
 void status_update(void)
@@ -40,9 +47,15 @@ void status_update(void)
         s_Diodes[1] = _get_ign_diode_color(sensors_get_frame()->ignDet2Volts);
         s_Diodes[2] = _get_ign_diode_color(sensors_get_frame()->ignDet3Volts);
         s_Diodes[3] = _get_ign_diode_color(sensors_get_frame()->ignDet4Volts);
-        s_Diodes[4] = WS_COLOR(0, 255, 0);
-        s_Diodes[5] = _get_bat_diode_color(sensors_get_frame()->batPercent);
-        s_Diodes[6] = WS_COLOR(0, 255, 0);
+        s_Diodes[5] = _get_bat_diode_color();
+
+        _update_diodes();
+    }
+
+    if (hal_time_run_every_ms(500, &s_OtherDiodesTimer))
+    {
+        s_Diodes[4] = _get_ready_diode_color();
+        s_Diodes[6] = _get_arm_diode_color();
 
         _update_diodes();
     }
@@ -55,12 +68,12 @@ static void _update_diodes(void)
 
 static ws2812_color_t _get_ign_diode_color(float v)
 {
-    float vref = sensors_get_frame()->batVolts;
-
-    if (vref < 1.0f)
+    if (sensors_get_frame()->batPercent == 0)
     {
         return WS_COLOR(0, 0, 0);
     }
+
+    float vref = sensors_get_frame()->batVolts;
 
     if (v < vref * (IGN_FUSE_WORKING_IGN_PRESENT_FACTOR + IGN_PIN_CHECK_EPS))
     {
@@ -68,15 +81,15 @@ static ws2812_color_t _get_ign_diode_color(float v)
     }
     else if (v < vref * (IGN_FUSE_WORKING_IGN_NOT_PRESENT_FACTOR + IGN_PIN_CHECK_EPS))
     {
-        return WS_COLOR(255, 255, 0);
+        return WS_COLOR(255, 0, 0);
     }
     else if (v < vref * (IGN_FUSE_NOT_WORKING_IGN_PRESENT_FACTOR + IGN_PIN_CHECK_EPS))
     {
-        return WS_COLOR(255, 255, 0);
+        return WS_COLOR(255, 165, 0);
     }
     else if (v < (vref * IGN_FUSE_NOT_WORKING_IGN_NOT_PRESENT_FACTOR + IGN_PIN_CHECK_EPS))
     {
-        return WS_COLOR(255, 0, 0);
+        return WS_COLOR(255, 165, 0);
     }
     else
     {
@@ -84,8 +97,20 @@ static ws2812_color_t _get_ign_diode_color(float v)
     }
 }
 
-static ws2812_color_t _get_bat_diode_color(uint8_t percent)
+static ws2812_color_t _get_arm_diode_color(void)
 {
+    return ign_is_armed() ? WS_COLOR(0, 255, 0) : WS_COLOR(255, 0, 0);
+}
+
+static ws2812_color_t _get_bat_diode_color(void)
+{
+    uint8_t percent = sensors_get_frame()->batPercent;
+
+    if (percent == 0)
+    {
+        return WS_COLOR(0, 0, 0);
+    }
+
     if (percent < 50)
     {
         return WS_COLOR(255, 255 * percent / 50, 0);
@@ -94,4 +119,9 @@ static ws2812_color_t _get_bat_diode_color(uint8_t percent)
     {
         return WS_COLOR(255 - 255 * (percent - 50) / 50, 255, 0);
     }
+}
+
+static ws2812_color_t _get_ready_diode_color(void)
+{
+    return dataman_is_ready() ? WS_COLOR(0, 255, 0) : WS_COLOR(255, 0, 0);
 }

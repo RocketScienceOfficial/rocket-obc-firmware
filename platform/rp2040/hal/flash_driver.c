@@ -26,8 +26,8 @@ void hal_flash_write_pages(size_t offsetPages, const uint8_t *buffer, size_t pag
 
 void hal_flash_erase_sectors(size_t sectorsOffset, size_t sectorsCount)
 {
-    size_t offset = sectorsOffset * FLASH_BLOCK_SIZE;
-    size_t size = sectorsCount * FLASH_BLOCK_SIZE;
+    size_t offset = sectorsOffset * FLASH_SECTOR_SIZE;
+    size_t size = sectorsCount * FLASH_SECTOR_SIZE;
 
     FLASH_SAFE_CALL(flash_range_erase(offset, size));
 }

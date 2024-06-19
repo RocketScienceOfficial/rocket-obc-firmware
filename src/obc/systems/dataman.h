@@ -6,6 +6,7 @@
 #include "lib/geo/geo.h"
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 #define DATAMAN_MAGIC 0x2E /** Dataman magic byte */
 
@@ -26,6 +27,7 @@ typedef struct __attribute__((__packed__)) dataman_frame
     float temp;
     geo_position_wgs84_t pos;
     uint8_t smState;
+    uint8_t ignFlags;
     uint16_t crc;
 } dataman_frame_t;
 
@@ -38,5 +40,12 @@ void dataman_init(void);
  * @brief Updates dataman
  */
 void dataman_update(void);
+
+/**
+ * @brief Checks if dataman is ready (is cleared)
+ *
+ * @param True if database is clear
+ */
+bool dataman_is_ready(void);
 
 #endif

@@ -1,13 +1,13 @@
 #include "dataman.h"
 #include "sensors.h"
 #include "sm.h"
+#include "ign.h"
 #include "board_config.h"
 #include "../middleware/events.h"
 #include "../middleware/syslog.h"
 #include "hal/flash_driver.h"
 #include "hal/serial_driver.h"
 #include "lib/crypto/crc.h"
-#include <stdbool.h>
 #include <string.h>
 
 #define SYSTEM_NAME "dataman"
@@ -19,6 +19,8 @@
 #define STANDING_BUFFER_LENGTH (FLASH_PAGE_SIZE)
 #define DATA_RECOVERY_MAX_FRAMES 150000
 #define DATAMAN_FILE_INFO_MAGIC 0x8F3E
+#define SEND_DATA(fmt, ...) hal_serial_printf("/*" fmt "*/\n", ##__VA_ARGS__)
+#define SEND_CMD(cmd) hal_serial_printf("\\" cmd "\n")
 
 typedef struct __attribute__((__packed__)) dataman_file_info
 {
@@ -35,6 +37,7 @@ static size_t s_SaveFlashOffsetPages;
 static size_t s_SavedFramesCount;
 static dataman_frame_t s_StandingBuffer[STANDING_BUFFER_LENGTH];
 static size_t s_StandingBufferLength;
+static bool s_ReadyTest;
 
 static dataman_frame_t _get_frame(void);
 static bool _validate_frame(const dataman_frame_t *frame);
@@ -43,6 +46,7 @@ static bool _can_save_data(void);
 static void _clear_database(void);
 static void _flush_data(void);
 static void _flush_standing_buffer(void);
+static const dataman_file_info_t *_read_info(void);
 static bool _print_saved_frame(const dataman_frame_t *frame);
 static void _read_data_raw(size_t maxFrames, size_t *currentFrameCount, const uint8_t *data);
 static void _read_data(void);
@@ -98,6 +102,24 @@ void dataman_update(void)
     }
 }
 
+bool dataman_is_ready(void)
+{
+    static bool ready = false;
+
+    if (!s_ReadyTest)
+    {
+        s_ReadyTest = true;
+
+        const dataman_file_info_t *info = _read_info();
+
+        SYS_LOG("Info file exists: %d", info != NULL);
+
+        ready = info ? info->savedFramesCount + info->standingFramesCount == 0 : true;
+    }
+
+    return ready;
+}
+
 static dataman_frame_t _get_frame(void)
 {
     dataman_frame_t frame = {
@@ -113,6 +135,7 @@ static dataman_frame_t _get_frame(void)
         .temp = sensors_get_frame()->temp,
         .pos = sensors_get_frame()->pos,
         .smState = (uint8_t)sm_get_state(),
+        .ignFlags = ign_get_flags(),
     };
 
     frame.crc = crc16_mcrf4xx_calculate((const uint8_t *)&frame, sizeof(frame) - 2);
@@ -146,7 +169,7 @@ static bool _validate_info(const dataman_file_info_t *info)
 
 static bool _can_save_data(void)
 {
-    return s_SaveFlashOffsetPages + s_SaveBufferSize / FLASH_PAGE_SIZE > SECTORS_COUNT_DATA * FLASH_SECTOR_SIZE / FLASH_PAGE_SIZE;
+    return s_SaveFlashOffsetPages + sizeof(s_SaveBuffer) / FLASH_PAGE_SIZE <= SECTORS_COUNT_DATA * FLASH_SECTOR_SIZE / FLASH_PAGE_SIZE;
 }
 
 static void _clear_database(void)
@@ -158,6 +181,8 @@ static void _clear_database(void)
     SYS_LOG("Database cleared!");
 
     _save_info_file(0, 0);
+
+    SEND_CMD("data-clear-finish");
 }
 
 static void _flush_data(void)
@@ -185,40 +210,49 @@ static void _flush_standing_buffer(void)
     hal_flash_write_pages(SECTORS_OFFSET_STANDING_BUFFER * FLASH_SECTOR_SIZE / FLASH_PAGE_SIZE, data, pages);
 
     SYS_LOG("Standing buffer has been flushed. %d frames (%d bytes) were written", s_StandingBufferLength, s_StandingBufferLength * sizeof(dataman_frame_t));
+}
 
-    s_StandingBufferLength = 0;
+static const dataman_file_info_t *_read_info(void)
+{
+    const uint8_t *data;
+    hal_flash_read(SECTORS_OFFSET_FILE_INFO * FLASH_SECTOR_SIZE, &data);
+
+    const dataman_file_info_t *info = (const dataman_file_info_t *)data;
+
+    return _validate_info(info) ? info : NULL;
 }
 
 static bool _print_saved_frame(const dataman_frame_t *frame)
 {
     if (_validate_frame(frame))
     {
-        hal_serial_printf("/*%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f,%f,%f,%f,%d*/\n",
-                          frame->time,
-                          frame->acc1.x,
-                          frame->acc1.y,
-                          frame->acc1.z,
-                          frame->acc2.x,
-                          frame->acc2.y,
-                          frame->acc2.z,
-                          frame->acc3.x,
-                          frame->acc3.y,
-                          frame->acc3.z,
-                          frame->gyro1.x,
-                          frame->gyro1.y,
-                          frame->gyro1.z,
-                          frame->gyro2.x,
-                          frame->gyro2.y,
-                          frame->gyro2.z,
-                          frame->mag1.x,
-                          frame->mag1.y,
-                          frame->mag1.z,
-                          frame->press,
-                          frame->temp,
-                          frame->pos.lat,
-                          frame->pos.lon,
-                          frame->pos.alt,
-                          frame->smState);
+        SEND_DATA("%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f,%f,%f,%f,%d,%d",
+                  frame->time,
+                  frame->acc1.x,
+                  frame->acc1.y,
+                  frame->acc1.z,
+                  frame->acc2.x,
+                  frame->acc2.y,
+                  frame->acc2.z,
+                  frame->acc3.x,
+                  frame->acc3.y,
+                  frame->acc3.z,
+                  frame->gyro1.x,
+                  frame->gyro1.y,
+                  frame->gyro1.z,
+                  frame->gyro2.x,
+                  frame->gyro2.y,
+                  frame->gyro2.z,
+                  frame->mag1.x,
+                  frame->mag1.y,
+                  frame->mag1.z,
+                  frame->press,
+                  frame->temp,
+                  frame->pos.lat,
+                  frame->pos.lon,
+                  frame->pos.alt,
+                  frame->smState,
+                  frame->ignFlags);
 
         return true;
     }
@@ -237,7 +271,7 @@ static void _read_data_raw(size_t maxFrames, size_t *currentFrameCount, const ui
         if (!_print_saved_frame(frame))
         {
             (*currentFrameCount)--;
-            hal_serial_printf("/*%d*/\n", *currentFrameCount);
+            SEND_DATA("%d", *currentFrameCount);
         }
     }
 }
@@ -246,14 +280,14 @@ static void _read_data(void)
 {
     SYS_LOG("Begining of data read...");
 
-    const uint8_t *data;
-    hal_flash_read(SECTORS_OFFSET_FILE_INFO * FLASH_SECTOR_SIZE, &data);
-    const dataman_file_info_t *info = (const dataman_file_info_t *)data;
+    const dataman_file_info_t *info = _read_info();
 
-    if (_validate_info(info))
+    if (info)
     {
         size_t currentFrameCount = info->savedFramesCount + info->standingFramesCount;
-        hal_serial_printf("/*%d*/\n", currentFrameCount);
+        SEND_DATA("%d", currentFrameCount);
+
+        const uint8_t *data;
 
         hal_flash_read(SECTORS_OFFSET_STANDING_BUFFER * FLASH_SECTOR_SIZE, &data);
         _read_data_raw(info->standingFramesCount, &currentFrameCount, data);
@@ -263,7 +297,7 @@ static void _read_data(void)
     }
     else
     {
-        hal_serial_printf("/*0*/\n");
+        SEND_DATA("%d", 0);
     }
 
     SYS_LOG("Data read finish!");
@@ -291,6 +325,8 @@ static void _recover_data(void)
 
     hal_flash_read(SECTORS_OFFSET_DATA * FLASH_SECTOR_SIZE, &data);
     _recover_data_read(data);
+
+    SEND_CMD("data-recovery-finish");
 }
 
 static void _save_frame(void)
@@ -367,6 +403,8 @@ static void _save_info_file(size_t savedFramesCount, size_t standingFramesCount)
 
     hal_flash_erase_sectors(SECTORS_OFFSET_FILE_INFO, 1);
     hal_flash_write_pages(SECTORS_OFFSET_FILE_INFO * FLASH_SECTOR_SIZE / FLASH_PAGE_SIZE, data, 1);
+
+    s_ReadyTest = false;
 
     SYS_LOG("Dataman file info was saved. Total frame count: %d", info.savedFramesCount + info.standingFramesCount);
 }

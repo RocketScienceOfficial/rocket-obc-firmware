@@ -1,4 +1,4 @@
-#include "lib/drivers/barometer/ms5607_driver.h"
+#include "lib/drivers/barometer/ms5611_driver.h"
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -16,14 +16,14 @@
 #define ADC_READ 0x00
 #define PROM_READ 0xA0
 
-static void _ms5607_reset(const ms5607_config_t *config);
-static void _ms5607_read_coefficents(ms5607_config_t *config);
-static void _ms5607_req_value(ms5607_config_t *config, bool pressure);
-static uint32_t _ms5607_read_raw_value(const ms5607_config_t *config);
-static void _ms5607_convert_raw_values(const ms5607_prom_data_t *coeffs, uint32_t d1, uint32_t d2, int *pressure, float *temperature);
-static bool _ms5607_validate_crc(uint16_t *prom);
+static void _ms5611_reset(const ms5611_config_t *config);
+static void _ms5611_read_coefficents(ms5611_config_t *config);
+static void _ms5611_req_value(ms5611_config_t *config, bool pressure);
+static uint32_t _ms5611_read_raw_value(const ms5611_config_t *config);
+static void _ms5611_convert_raw_values(const ms5611_prom_data_t *coeffs, uint32_t d1, uint32_t d2, int *pressure, float *temperature);
+static bool _ms5611_validate_crc(uint16_t *prom);
 
-void ms5607_init_spi(ms5607_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
+void ms5611_init_spi(ms5611_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
 {
     config->spi = spi;
     config->cs = cs;
@@ -31,36 +31,36 @@ void ms5607_init_spi(ms5607_config_t *config, hal_spi_instance_t spi, hal_pin_nu
 
     hal_spi_init_cs(cs);
 
-    _ms5607_reset(config);
-    _ms5607_read_coefficents(config);
+    _ms5611_reset(config);
+    _ms5611_read_coefficents(config);
 }
 
-void ms5607_set_osr(ms5607_config_t *config, ms5607_osr_t press, ms5607_osr_t temp)
+void ms5611_set_osr(ms5611_config_t *config, ms5611_osr_t press, ms5611_osr_t temp)
 {
     config->pressOSR = press;
     config->tempOSR = temp;
 }
 
-bool ms5607_read_non_blocking(ms5607_config_t *config, int *pressure, float *temperature)
+bool ms5611_read_non_blocking(ms5611_config_t *config, int *pressure, float *temperature)
 {
     if (config->nextTime == 0)
     {
-        _ms5607_req_value(config, true);
+        _ms5611_req_value(config, true);
     }
 
     if (hal_time_get_us_since_boot() >= config->nextTime)
     {
         if (config->d1 == 0)
         {
-            config->d1 = _ms5607_read_raw_value(config);
+            config->d1 = _ms5611_read_raw_value(config);
 
-            _ms5607_req_value(config, false);
+            _ms5611_req_value(config, false);
         }
         else
         {
-            uint32_t d2 = _ms5607_read_raw_value(config);
+            uint32_t d2 = _ms5611_read_raw_value(config);
 
-            _ms5607_convert_raw_values(&config->coeffs, config->d1, d2, pressure, temperature);
+            _ms5611_convert_raw_values(&config->coeffs, config->d1, d2, pressure, temperature);
 
             config->nextTime = 0;
             config->d1 = 0;
@@ -72,7 +72,7 @@ bool ms5607_read_non_blocking(ms5607_config_t *config, int *pressure, float *tem
     return false;
 }
 
-static void _ms5607_reset(const ms5607_config_t *config)
+static void _ms5611_reset(const ms5611_config_t *config)
 {
     uint8_t data = RESET;
 
@@ -83,9 +83,9 @@ static void _ms5607_reset(const ms5607_config_t *config)
     hal_time_sleep_ms(5);
 }
 
-void _ms5607_read_coefficents(ms5607_config_t *config)
+void _ms5611_read_coefficents(ms5611_config_t *config)
 {
-    ms5607_prom_data_t coeffs = {0};
+    ms5611_prom_data_t coeffs = {0};
 
     for (size_t i = 0; i < 8; i++)
     {
@@ -100,12 +100,12 @@ void _ms5607_read_coefficents(ms5607_config_t *config)
         ((uint16_t *)&coeffs)[i] = data[0] << 8 | data[1];
     }
 
-    _ms5607_validate_crc((uint16_t *)&coeffs);
+    _ms5611_validate_crc((uint16_t *)&coeffs);
 
     config->coeffs = coeffs;
 }
 
-static void _ms5607_req_value(ms5607_config_t *config, bool pressure)
+static void _ms5611_req_value(ms5611_config_t *config, bool pressure)
 {
     uint8_t data = pressure ? config->pressOSR : config->tempOSR + CONVERT_D2_OSR_256 - CONVERT_D1_OSR_256;
 
@@ -113,16 +113,16 @@ static void _ms5607_req_value(ms5607_config_t *config, bool pressure)
     hal_spi_write(config->spi, &data, 1);
     hal_spi_cs_deselect(config->cs);
 
-    ms5607_osr_t osr = pressure ? config->pressOSR : config->tempOSR;
-    usec_t timeout = osr == MS5607_OSR_4096 ? 10000 : osr == MS5607_OSR_2048 || osr == MS5607_OSR_1024 ? 5000
-                                                  : osr == MS5607_OSR_512                              ? 2000
-                                                  : osr == MS5607_OSR_256                              ? 1000
+    ms5611_osr_t osr = pressure ? config->pressOSR : config->tempOSR;
+    usec_t timeout = osr == MS5611_OSR_4096 ? 10000 : osr == MS5611_OSR_2048 || osr == MS5611_OSR_1024 ? 5000
+                                                  : osr == MS5611_OSR_512                              ? 2000
+                                                  : osr == MS5611_OSR_256                              ? 1000
                                                                                                        : 0;
 
     config->nextTime = hal_time_get_us_since_boot() + timeout;
 }
 
-static uint32_t _ms5607_read_raw_value(const ms5607_config_t *config)
+static uint32_t _ms5611_read_raw_value(const ms5611_config_t *config)
 {
     uint8_t newData = ADC_READ;
     uint8_t buffer[3];
@@ -137,26 +137,26 @@ static uint32_t _ms5607_read_raw_value(const ms5607_config_t *config)
     return d;
 }
 
-static void _ms5607_convert_raw_values(const ms5607_prom_data_t *coeffs, uint32_t d1, uint32_t d2, int *pressure, float *temperature)
+static void _ms5611_convert_raw_values(const ms5611_prom_data_t *coeffs, uint32_t d1, uint32_t d2, int *pressure, float *temperature)
 {
     int32_t dT = (int32_t)d2 - ((int32_t)coeffs->c5 << 8);
     int32_t temp = 2000 + (((int64_t)dT * coeffs->c6) >> 23);
-    int64_t off = ((int64_t)coeffs->c2 << 17) + (((int64_t)coeffs->c4 * dT) >> 6);
-    int64_t sens = ((int64_t)coeffs->c1 << 16) + (((int64_t)coeffs->c3 * dT) >> 7);
+    int64_t off = ((int64_t)coeffs->c2 << 16) + (((int64_t)coeffs->c4 * dT) >> 7);
+    int64_t sens = ((int64_t)coeffs->c1 << 15) + (((int64_t)coeffs->c3 * dT) >> 8);
 
     if (temp < 2000)
     {
         int32_t t2 = ((int64_t)dT * (int64_t)dT) >> 31;
         int32_t temp_2000 = temp - 2000;
-        int64_t off2 = (61 * (int64_t)temp_2000 * (int64_t)temp_2000) >> 4;
-        int64_t sens2 = 2 * (int64_t)temp_2000 * (int64_t)temp_2000;
+        int64_t off2 = (5 * (int64_t)temp_2000 * (int64_t)temp_2000) >> 1;
+        int64_t sens2 = (5 * (int64_t)temp_2000 * (int64_t)temp_2000) >> 2;
 
         if (temp < -1500)
         {
             int32_t temp_1500 = temp + 1500;
 
-            off2 += 15 * (int64_t)temp_1500 * (int64_t)temp_1500;
-            sens2 += 8 * (int64_t)temp_1500 * (int64_t)temp_1500;
+            off2 += 7 * (int64_t)temp_1500 * (int64_t)temp_1500;
+            sens2 += 11 * (int64_t)temp_1500 * (int64_t)temp_1500 / 2;
         }
 
         temp -= t2;
@@ -173,7 +173,7 @@ static void _ms5607_convert_raw_values(const ms5607_prom_data_t *coeffs, uint32_
 /**
  * REF: https://github.com/PX4/PX4-Autopilot/blob/8f5f564c05b5a0e12989d6e56642cc0b453ec45d/src/drivers/barometer/ms5611/ms5611.cpp#L352
  */
-bool _ms5607_validate_crc(uint16_t *n_prom)
+bool _ms5611_validate_crc(uint16_t *n_prom)
 {
     int16_t cnt;
     uint16_t n_rem;

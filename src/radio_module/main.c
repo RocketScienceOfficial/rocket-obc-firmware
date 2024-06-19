@@ -1,5 +1,6 @@
 #include "hal/board_control.h"
 #include "hal/serial_driver.h"
+#include "hal/gpio_driver.h"
 #include "hal/uart_driver.h"
 #include "hal/spi_driver.h"
 #include "lib/drivers/lora/sx127X_driver.h"
@@ -11,6 +12,8 @@
 #define SCK 6
 #define RESET 7
 #define SPI_FREQUENCY 100000
+
+#define LED_PIN 28
 
 #define LORA_FREQUENCY 433E6
 #define LORA_BANDWIDTH 125E3
@@ -32,6 +35,8 @@ int main()
     hal_spi_init_all(SPI, MISO, MOSI, SCK, SPI_FREQUENCY);
     hal_uart_init_all(UART, RX, TX, UART_BAUDRATE);
 
+    hal_gpio_init_pin(LED_PIN, GPIO_OUTPUT);
+
     sx127x_data_t loraData = {0};
     sx127x_pinout_t pinoutData = {
         .spi = SPI,
@@ -50,6 +55,8 @@ int main()
         uint8_t size;
         hal_uart_read(UART, &size, 1);
 
+        hal_gpio_set_pin_state(LED_PIN, GPIO_HIGH);
+
         hal_serial_printf("Received request for %d bytes\n", size);
 
         uint8_t buffer[256];
@@ -60,5 +67,9 @@ int main()
         sx127x_write_buffer(&loraData, buffer, size);
 
         hal_serial_printf("Packet sent!\n");
+
+        hal_time_sleep_ms(20);
+
+        hal_gpio_set_pin_state(LED_PIN, GPIO_LOW);
     }
 }

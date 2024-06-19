@@ -9,8 +9,8 @@
  */
 typedef struct battery_table_entry
 {
-    float voltage; /** Voltage */
-    uint8_t percentage;          /** Percentage */
+    float voltage;      /** Voltage */
+    uint8_t percentage; /** Percentage */
 } battery_table_entry_t;
 
 /**
@@ -18,10 +18,9 @@ typedef struct battery_table_entry
  */
 typedef struct battery_config
 {
-    battery_table_entry_t *entries;        /** Battery entries */
-    uint8_t entriesCount;                  /** Battery entries count */
-    float voltageDivider;    /** Raw voltage multiplier */
-    float oneCellMaxVoltage; /** One cell max votage */
+    battery_table_entry_t *entries; /** Battery entries */
+    uint8_t entriesCount;           /** Battery entries count */
+    float oneCellMinVoltage;        /** One cell min voltage */
 } battery_config_t;
 
 /**
@@ -29,9 +28,8 @@ typedef struct battery_config
  */
 typedef struct battery_data
 {
-    float voltage; /** Total voltage */
-    uint8_t percentage;          /** Charge state */
-    uint8_t nCells;              /** Number of cells */
+    uint8_t percentage; /** Charge state */
+    uint8_t nCells;     /** Number of cells */
 } battery_data_t;
 
 /**
@@ -40,19 +38,17 @@ typedef struct battery_data
  * @param config Battery config
  * @param entries Entries in decreasing order for a single cell
  * @param entriesCount Count of entries. Must be at least 2!
- * @param voltageDivider Voltage divider
  */
-void battery_init(battery_config_t *config, battery_table_entry_t *entries, uint8_t entriesCount, float voltageDivider);
+void battery_init(battery_config_t *config, battery_table_entry_t *entries, uint8_t entriesCount);
 
 /**
  * @brief Convert voltage to percent
  *
- * @param entries Entries
- * @param entriesCount Count of entries
+ * @param config Battery config
  * @param voltage Voltage
  * @param data Data to set
  * @return Percent
  */
-void battery_convert(const battery_config_t *config, float rawVoltage, battery_data_t *data);
+void battery_convert(const battery_config_t *config, float voltage, battery_data_t *data);
 
 #endif
