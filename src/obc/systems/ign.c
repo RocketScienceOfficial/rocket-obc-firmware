@@ -43,11 +43,17 @@ void ign_init(void)
 
 void ign_update(void)
 {
-    if (radio_get_parsed_data()->armed)
+    if (radio_get_parsed_data()->arm_enabled)
     {
         s_Armed = true;
 
         SYS_LOG("Armed igniters!");
+    }
+    else if (radio_get_parsed_data()->arm_disabled)
+    {
+        s_Armed = false;
+
+        SYS_LOG("Igniters were disarmed!");
     }
 
     if (events_poll(MSG_SM_APOGEE_REACHED))

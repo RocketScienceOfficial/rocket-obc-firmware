@@ -84,7 +84,8 @@ void radio_update(void)
                 SYS_LOG("Packet is valid!");
 
                 s_CurrentParsedData = (radio_tlm_parsed_data_t){
-                    .armed = (frame->flags & RADIO_TLM_FLAG_ARMED) > 0,
+                    .arm_enabled = (frame->flags & RADIO_TLM_FLAG_ARM_ENABLE) > 0,
+                    .arm_disabled = (frame->flags & RADIO_TLM_FLAG_ARM_DISABLE) > 0,
                     .v3v3_enabled = (frame->flags & RADIO_TLM_FLAG_3V3_ENABLE) > 0,
                     .v3v3_disabled = (frame->flags & RADIO_TLM_FLAG_3V3_DISABLE) > 0,
                     .v5_enabled = (frame->flags & RADIO_TLM_FLAG_5V_ENABLE) > 0,
@@ -141,7 +142,7 @@ static uint8_t _get_control_flags(void)
     {
         flags |= RADIO_OBC_FRAME_CONTROL_FLAGS_CALIBRATION;
     }
-    if (sensors_get_frame()->gpsFix || true) // ????
+    if (sensors_get_frame()->gpsFix || true) // TODO: Remove true
     {
         flags |= RADIO_OBC_FRAME_CONTROL_FLAGS_GPS;
     }

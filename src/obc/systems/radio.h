@@ -46,13 +46,14 @@ typedef struct __attribute__((__packed__)) radio_obc_frame
  */
 typedef enum radio_tlm_flags
 {
-    RADIO_TLM_FLAG_ARMED = 1 << 0,
-    RADIO_TLM_FLAG_3V3_ENABLE = 1 << 1,
-    RADIO_TLM_FLAG_3V3_DISABLE = 1 << 2,
-    RADIO_TLM_FLAG_5V_ENABLE = 1 << 3,
-    RADIO_TLM_FLAG_5V_DISABLE = 1 << 4,
-    RADIO_TLM_FLAG_VBAT_ENABLE = 1 << 5,
-    RADIO_TLM_FLAG_VBAT_DISABLE = 1 << 6,
+    RADIO_TLM_FLAG_ARM_ENABLE = 1 << 0,
+    RADIO_TLM_FLAG_ARM_DISABLE = 1 << 1,
+    RADIO_TLM_FLAG_3V3_ENABLE = 1 << 2,
+    RADIO_TLM_FLAG_3V3_DISABLE = 1 << 3,
+    RADIO_TLM_FLAG_5V_ENABLE = 1 << 4,
+    RADIO_TLM_FLAG_5V_DISABLE = 1 << 5,
+    RADIO_TLM_FLAG_VBAT_ENABLE = 1 << 6,
+    RADIO_TLM_FLAG_VBAT_DISABLE = 1 << 7,
 } radio_tlm_flags_t;
 
 /**
@@ -70,7 +71,8 @@ typedef struct __attribute__((__packed__)) radio_tlm_frame
  */
 typedef struct radio_tlm_parsed_data
 {
-    bool armed;
+    bool arm_enabled;
+    bool arm_disabled;
     bool v3v3_enabled;
     bool v3v3_disabled;
     bool v5_enabled;
