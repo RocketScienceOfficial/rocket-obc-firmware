@@ -9,6 +9,7 @@ add_executable(obc
     systems/serial.c
     systems/sm.c
     systems/status.c
+    systems/voltage.c
 )
 
 target_link_libraries(obc

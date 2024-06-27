@@ -27,14 +27,14 @@ void hal_gpio_set_pin_state(hal_pin_number_t pin, gpio_state_t state)
     gpio_put(pin, state == GPIO_HIGH ? 1 : 0);
 }
 
-void hal_gpio_get_pin_state(hal_pin_number_t pin, gpio_state_t *state)
+gpio_state_t hal_gpio_get_pin_state(hal_pin_number_t pin)
 {
     if (!hal_gpio_is_pin_valid(pin))
     {
         return;
     }
 
-    gpio_get(pin) ? (*state = GPIO_HIGH) : (*state = GPIO_LOW);
+    return gpio_get(pin) ? GPIO_HIGH : GPIO_LOW;
 }
 
 void hal_gpio_set_pin_function(hal_pin_number_t pin, gpio_function_t function)

@@ -16,7 +16,7 @@
 #define SECTORS_OFFSET_DATA 75
 #define SECTORS_COUNT_STANDING_BUFFER ((SECTORS_OFFSET_DATA) - (SECTORS_OFFSET_STANDING_BUFFER))
 #define SECTORS_COUNT_DATA 3500
-#define STANDING_BUFFER_LENGTH (FLASH_PAGE_SIZE)
+#define STANDING_BUFFER_LENGTH (FLASH_PAGE_SIZE * 2)
 #define DATA_RECOVERY_MAX_FRAMES 150000
 #define DATAMAN_FILE_INFO_MAGIC 0x8F3E
 #define SEND_DATA(fmt, ...) hal_serial_printf("/*" fmt "*/\n", ##__VA_ARGS__)
@@ -176,7 +176,16 @@ static void _clear_database(void)
 {
     SYS_LOG("Clearing database...");
 
-    hal_flash_erase_sectors(SECTORS_OFFSET_STANDING_BUFFER, SECTORS_COUNT_STANDING_BUFFER + SECTORS_COUNT_DATA);
+    size_t totalCount = SECTORS_COUNT_STANDING_BUFFER + SECTORS_COUNT_DATA;
+
+    for (size_t i = 0; i < totalCount; i++)
+    {
+        hal_flash_erase_sectors(SECTORS_OFFSET_STANDING_BUFFER + i, 1);
+
+        float progress = (i + 1) * 100 / (float)totalCount;
+
+        SEND_DATA("%f", progress);
+    }
 
     SYS_LOG("Database cleared!");
 

@@ -4,7 +4,10 @@
 #include "dataman.h"
 #include "ign.h"
 #include "../middleware/events.h"
+#include "../middleware/syslog.h"
 #include "lib/drivers/led/w2812_driver.h"
+
+#define SYSTEM_NAME "status"
 
 #define WS_BRIGHTNESS 0.05f
 #define WS_COLOR(r, g, b) ws2812_get_color((uint8_t)((r) * WS_BRIGHTNESS), (uint8_t)((g) * WS_BRIGHTNESS), (uint8_t)((b) * WS_BRIGHTNESS))
@@ -37,6 +40,8 @@ void status_init(void)
     s_Diodes[6] = WS_COLOR(255, 0, 0);
 
     _update_diodes();
+
+    SYS_LOG("READY!");
 }
 
 void status_update(void)

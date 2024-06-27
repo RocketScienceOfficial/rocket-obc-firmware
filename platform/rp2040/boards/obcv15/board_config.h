@@ -23,6 +23,9 @@
 #define PIN_CS_MS56 8
 #define PIN_CS_NEO 7
 #define PIN_CS_ADC 10
+#define PIN_VBAT 29
+#define PIN_5V 28
+#define PIN_3V3 27
 
 // --- SPI ---
 #define OBC_SPI 0

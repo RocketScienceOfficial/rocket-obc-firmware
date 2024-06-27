@@ -80,9 +80,9 @@ void hal_gpio_set_pin_state(hal_pin_number_t pin, gpio_state_t state);
  * @brief Gety state of GPIO pin
  *
  * @param pin Pin to get state of
- * @param state State to get
+ * @return State
  */
-void hal_gpio_get_pin_state(hal_pin_number_t pin, gpio_state_t *state);
+gpio_state_t hal_gpio_get_pin_state(hal_pin_number_t pin);
 
 /**
  * @brief Set function of GPIO pin

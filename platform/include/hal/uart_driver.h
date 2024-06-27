@@ -66,4 +66,12 @@ bool hal_uart_write(hal_uart_instance_t uart, const uint8_t *data, size_t size);
  */
 bool hal_uart_read(hal_uart_instance_t uart, uint8_t *destination, size_t size);
 
+/**
+ * @brief Check if UART data in FIFO is available
+ *
+ * @param UART Instance
+ * @return True if available
+ */
+bool hal_uart_is_readable(hal_uart_instance_t uart);
+
 #endif

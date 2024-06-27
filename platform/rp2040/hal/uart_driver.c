@@ -89,3 +89,13 @@ bool hal_uart_read(hal_uart_instance_t uart, uint8_t *destination, size_t size)
 
     return true;
 }
+
+bool hal_uart_is_readable(hal_uart_instance_t uart)
+{
+    if (!hal_uart_check_instance(uart))
+    {
+        return false;
+    }
+
+    return uart_is_readable(_get_uart(uart));
+}

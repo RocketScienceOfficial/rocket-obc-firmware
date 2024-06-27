@@ -63,42 +63,39 @@
 
 static void _sx127x_explicit_header_mode(sx127x_data_t *data);
 static void _sx127x_implicit_header_mode(sx127x_data_t *data);
-static bool _sx127x_is_transmitting(sx127x_data_t *data);
-static int _sx127X_get_spreading_factor(sx127x_data_t *data);
-static long _sx127XGetSignalBandwidth(sx127x_data_t *data);
-static void _sx127x_set_ldo_flag(sx127x_data_t *data);
-static uint8_t _sx127x_read_register(sx127x_data_t *data, uint8_t address);
-static void _sx127x_write_register(sx127x_data_t *data, uint8_t address, uint8_t value);
-static uint8_t _sx127x_single_transfer(sx127x_data_t *data, uint8_t address, uint8_t value);
+static bool _sx127x_is_transmitting(const sx127x_data_t *data);
+static int _sx127X_get_spreading_factor(const sx127x_data_t *data);
+static long _sx127XGetSignalBandwidth(const sx127x_data_t *data);
+static void _sx127x_set_ldo_flag(const sx127x_data_t *data);
+static uint8_t _sx127x_read_register(const sx127x_data_t *data, uint8_t address);
+static void _sx127x_write_register(const sx127x_data_t *data, uint8_t address, uint8_t value);
+static uint8_t _sx127x_single_transfer(const sx127x_data_t *data, uint8_t address, uint8_t value);
 
-void sx127x_init(sx127x_data_t *data, sx127x_pinout_t *pinout, unsigned long long frequency)
+void sx127x_init(sx127x_data_t *data, hal_spi_instance_t spi, hal_pin_number_t cs, hal_pin_number_t reset, unsigned long long frequency)
 {
-    if (!data || !pinout)
-    {
-        return;
-    }
-
-    data->pinout = *pinout;
+    data->spi = spi;
+    data->cs = cs;
+    data->reset = reset;
     data->txPower = LORA_DEFAULT_TX_POWER;
     data->frequency = frequency;
     data->packetIndex = 0;
     data->implicitHeaderMode = false;
 
-    hal_gpio_init_pin(data->pinout.cs, GPIO_OUTPUT);
-    hal_gpio_set_pin_state(data->pinout.cs, GPIO_HIGH);
+    hal_gpio_init_pin(cs, GPIO_OUTPUT);
+    hal_gpio_set_pin_state(cs, GPIO_HIGH);
 
-    if (data->pinout.reset != -1)
+    if (reset != -1)
     {
-        hal_gpio_init_pin(data->pinout.reset, GPIO_OUTPUT);
+        hal_gpio_init_pin(reset, GPIO_OUTPUT);
 
-        hal_gpio_set_pin_state(data->pinout.reset, GPIO_LOW);
+        hal_gpio_set_pin_state(reset, GPIO_LOW);
         hal_time_sleep_ms(10);
 
-        hal_gpio_set_pin_state(data->pinout.reset, GPIO_HIGH);
+        hal_gpio_set_pin_state(reset, GPIO_HIGH);
         hal_time_sleep_ms(10);
     }
 
-    hal_spi_init_cs(data->pinout.cs);
+    hal_spi_init_cs(cs);
 
     uint8_t version = _sx127x_read_register(data, REG_VERSION);
 
@@ -154,12 +151,12 @@ void sx127x_write_buffer(sx127x_data_t *data, const uint8_t *buffer, size_t size
     _sx127x_write_register(data, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
 }
 
-void sx127x_available(sx127x_data_t *data, bool *available)
+bool sx127x_available(const sx127x_data_t *data)
 {
-    *available = (_sx127x_read_register(data, REG_RX_NB_uint8_tS) - data->packetIndex);
+    return _sx127x_read_register(data, REG_RX_NB_uint8_tS) - data->packetIndex;
 }
 
-void sx127x_parse_packet(sx127x_data_t *data, size_t size, size_t *packetLengthOut)
+size_t sx127x_parse_packet(sx127x_data_t *data, size_t size)
 {
     size_t packetLength = 0;
     int irqFlags = _sx127x_read_register(data, REG_IRQ_FLAGS);
@@ -200,64 +197,57 @@ void sx127x_parse_packet(sx127x_data_t *data, size_t size, size_t *packetLengthO
         _sx127x_write_register(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_RX_SINGLE);
     }
 
-    *packetLengthOut = packetLength;
+    return packetLength;
 }
 
-void sx127x_read(sx127x_data_t *data, uint8_t *dataOut)
+uint8_t sx127x_read(sx127x_data_t *data)
 {
-    bool available = false;
-
-    sx127x_available(data, &available);
-
-    if (!available)
+    if (!sx127x_available(data))
     {
-        return;
+        return 0;
     }
 
     data->packetIndex++;
 
-    *dataOut = _sx127x_read_register(data, REG_FIFO);
+    return _sx127x_read_register(data, REG_FIFO);
 }
 
-void sx127x_peek(sx127x_data_t *data, uint8_t *dataOut)
+uint8_t sx127x_peek(const sx127x_data_t *data)
 {
-    bool available = false;
-
-    sx127x_available(data, &available);
-
-    if (!available)
+    if (!sx127x_available(data))
     {
-        return;
+        return 0;
     }
 
     uint8_t currentAddress = _sx127x_read_register(data, REG_FIFO_ADDR_PTR);
-
-    *dataOut = _sx127x_read_register(data, REG_FIFO);
+    uint8_t d = _sx127x_read_register(data, REG_FIFO);
 
     _sx127x_write_register(data, REG_FIFO_ADDR_PTR, currentAddress);
+
+    return d;
 }
 
-void sx127x_idle(sx127x_data_t *data)
+void sx127x_idle(const sx127x_data_t *data)
 {
     _sx127x_write_register(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
 }
 
-void sx127x_sleep(sx127x_data_t *data)
+void sx127x_sleep(const sx127x_data_t *data)
 {
     _sx127x_write_register(data, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
 }
 
-void sx127x_packet_rssi(sx127x_data_t *data, int *rssi)
+int sx127x_packet_rssi(const sx127x_data_t *data)
 {
-    *rssi = (_sx127x_read_register(data, REG_PKT_RSSI_VALUE) - (data->frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
+    return _sx127x_read_register(data, REG_PKT_RSSI_VALUE) - (data->frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT);
 }
 
-void sx127x_packet_snr(sx127x_data_t *data, float *snr)
+float sx127x_packet_snr(const sx127x_data_t *data)
 {
-    *snr = ((uint8_t)_sx127x_read_register(data, REG_PKT_SNR_VALUE)) * 0.25;
+    return ((uint8_t)_sx127x_read_register(data, REG_PKT_SNR_VALUE)) * 0.25f;
 }
 
-void sx127x_packet_frequency_error(sx127x_data_t *data, long *error)
+long sx127x_packet_frequency_error(const sx127x_data_t *data)
 {
     int freqError = 0;
     freqError = (int)(_sx127x_read_register(data, REG_FREQ_ERROR_MSB) & 0x111);
@@ -274,12 +264,12 @@ void sx127x_packet_frequency_error(sx127x_data_t *data, long *error)
     const float fXtal = 32E6;
     const float fError = (((float)(freqError) * (1L << 24)) / fXtal) * (_sx127XGetSignalBandwidth(data) / 500000.0f);
 
-    *error = (long)(fError);
+    return (long)fError;
 }
 
-void sx127x_rssi(sx127x_data_t *data, int *rssi)
+int sx127x_rssi(const sx127x_data_t *data)
 {
-    *rssi = (_sx127x_read_register(data, REG_RSSI_VALUE) - (data->frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
+    return _sx127x_read_register(data, REG_RSSI_VALUE) - (data->frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT);
 }
 
 void sx127x_set_tx_power(sx127x_data_t *data, int level)
@@ -341,7 +331,7 @@ void sx127x_set_frequency(sx127x_data_t *data, unsigned long long frequency)
     _sx127x_write_register(data, REG_FRF_LSB, (uint8_t)(frf >> 0));
 }
 
-void sx127x_set_spreading_factor(sx127x_data_t *data, int sf)
+void sx127x_set_spreading_factor(const sx127x_data_t *data, int sf)
 {
     if (sf < 6)
     {
@@ -367,7 +357,7 @@ void sx127x_set_spreading_factor(sx127x_data_t *data, int sf)
     _sx127x_set_ldo_flag(data);
 }
 
-void sx127x_set_signal_bandwidth(sx127x_data_t *data, long sbw)
+void sx127x_set_signal_bandwidth(const sx127x_data_t *data, long sbw)
 {
     int bw;
 
@@ -416,7 +406,7 @@ void sx127x_set_signal_bandwidth(sx127x_data_t *data, long sbw)
     _sx127x_set_ldo_flag(data);
 }
 
-void sx127x_set_coding_rate4(sx127x_data_t *data, int denominator)
+void sx127x_set_coding_rate4(const sx127x_data_t *data, int denominator)
 {
     if (denominator < 5)
     {
@@ -432,40 +422,40 @@ void sx127x_set_coding_rate4(sx127x_data_t *data, int denominator)
     _sx127x_write_register(data, REG_MODEM_CONFIG_1, (_sx127x_read_register(data, REG_MODEM_CONFIG_1) & 0xf1) | (cr << 1));
 }
 
-void sx127x_set_preamble_length(sx127x_data_t *data, long length)
+void sx127x_set_preamble_length(const sx127x_data_t *data, long length)
 {
     _sx127x_write_register(data, REG_PREAMBLE_MSB, (uint8_t)(length >> 8));
     _sx127x_write_register(data, REG_PREAMBLE_LSB, (uint8_t)(length >> 0));
 }
 
-void sx127x_set_sync_word(sx127x_data_t *data, int sw)
+void sx127x_set_sync_word(const sx127x_data_t *data, int sw)
 {
     _sx127x_write_register(data, REG_SYNC_WORD, sw);
 }
 
-void sx127x_enable_crc(sx127x_data_t *data)
+void sx127x_enable_crc(const sx127x_data_t *data)
 {
     _sx127x_write_register(data, REG_MODEM_CONFIG_2, _sx127x_read_register(data, REG_MODEM_CONFIG_2) | 0x04);
 }
 
-void sx127x_disable_crc(sx127x_data_t *data)
+void sx127x_disable_crc(const sx127x_data_t *data)
 {
     _sx127x_write_register(data, REG_MODEM_CONFIG_2, _sx127x_read_register(data, REG_MODEM_CONFIG_2) & 0xfb);
 }
 
-void sx127x_enable_invert_iq(sx127x_data_t *data)
+void sx127x_enable_invert_iq(const sx127x_data_t *data)
 {
     _sx127x_write_register(data, REG_INVERTIQ, 0x66);
     _sx127x_write_register(data, REG_INVERTIQ2, 0x19);
 }
 
-void sx127x_disable_invert_iq(sx127x_data_t *data)
+void sx127x_disable_invert_iq(const sx127x_data_t *data)
 {
     _sx127x_write_register(data, REG_INVERTIQ, 0x27);
     _sx127x_write_register(data, REG_INVERTIQ2, 0x1d);
 }
 
-void sx127x_set_ocp(sx127x_data_t *data, uint8_t mA)
+void sx127x_set_ocp(const sx127x_data_t *data, uint8_t mA)
 {
     uint8_t ocpTrim = 27;
 
@@ -481,7 +471,7 @@ void sx127x_set_ocp(sx127x_data_t *data, uint8_t mA)
     _sx127x_write_register(data, REG_OCP, 0x20 | (0x1F & ocpTrim));
 }
 
-void sx127x_set_gain(sx127x_data_t *data, uint8_t gain)
+void sx127x_set_gain(const sx127x_data_t *data, uint8_t gain)
 {
     if (gain > 6)
     {
@@ -516,7 +506,7 @@ static void _sx127x_implicit_header_mode(sx127x_data_t *data)
     _sx127x_write_register(data, REG_MODEM_CONFIG_1, _sx127x_read_register(data, REG_MODEM_CONFIG_1) | 0x01);
 }
 
-static bool _sx127x_is_transmitting(sx127x_data_t *data)
+static bool _sx127x_is_transmitting(const sx127x_data_t *data)
 {
     if ((_sx127x_read_register(data, REG_OP_MODE) & MODE_TX) == MODE_TX)
     {
@@ -531,12 +521,12 @@ static bool _sx127x_is_transmitting(sx127x_data_t *data)
     return false;
 }
 
-static int _sx127X_get_spreading_factor(sx127x_data_t *data)
+static int _sx127X_get_spreading_factor(const sx127x_data_t *data)
 {
     return _sx127x_read_register(data, REG_MODEM_CONFIG_2) >> 4;
 }
 
-static long _sx127XGetSignalBandwidth(sx127x_data_t *data)
+static long _sx127XGetSignalBandwidth(const sx127x_data_t *data)
 {
     uint8_t bw = (_sx127x_read_register(data, REG_MODEM_CONFIG_1) >> 4);
 
@@ -567,7 +557,7 @@ static long _sx127XGetSignalBandwidth(sx127x_data_t *data)
     return -1;
 }
 
-static void _sx127x_set_ldo_flag(sx127x_data_t *data)
+static void _sx127x_set_ldo_flag(const sx127x_data_t *data)
 {
     long symbolDuration = 1000 / (_sx127XGetSignalBandwidth(data) / (1L << _sx127X_get_spreading_factor(data)));
     bool ldoOn = symbolDuration > 16;
@@ -578,26 +568,26 @@ static void _sx127x_set_ldo_flag(sx127x_data_t *data)
     _sx127x_write_register(data, REG_MODEM_CONFIG_3, config3);
 }
 
-static uint8_t _sx127x_read_register(sx127x_data_t *data, uint8_t address)
+static uint8_t _sx127x_read_register(const sx127x_data_t *data, uint8_t address)
 {
     return _sx127x_single_transfer(data, address & 0x7f, 0x00);
 }
 
-static void _sx127x_write_register(sx127x_data_t *data, uint8_t address, uint8_t value)
+static void _sx127x_write_register(const sx127x_data_t *data, uint8_t address, uint8_t value)
 {
     _sx127x_single_transfer(data, address | 0x80, value);
 }
 
-static uint8_t _sx127x_single_transfer(sx127x_data_t *data, uint8_t address, uint8_t value)
+static uint8_t _sx127x_single_transfer(const sx127x_data_t *data, uint8_t address, uint8_t value)
 {
     uint8_t response;
 
-    hal_gpio_set_pin_state(data->pinout.cs, GPIO_LOW);
+    hal_gpio_set_pin_state(data->cs, GPIO_LOW);
 
-    hal_spi_write(data->pinout.spi, &address, 1);
-    hal_spi_write_read(data->pinout.spi, &value, &response, 1);
+    hal_spi_write(data->spi, &address, 1);
+    hal_spi_write_read(data->spi, &value, &response, 1);
 
-    hal_gpio_set_pin_state(data->pinout.cs, GPIO_HIGH);
+    hal_gpio_set_pin_state(data->cs, GPIO_HIGH);
 
     return response;
 }

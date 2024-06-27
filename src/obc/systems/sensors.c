@@ -1,5 +1,4 @@
 #include "sensors.h"
-#include "sm.h"
 #include "board_config.h"
 #include "../middleware/events.h"
 #include "../middleware/syslog.h"

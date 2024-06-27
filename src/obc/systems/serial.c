@@ -45,7 +45,7 @@ void serial_update(void)
             }
             else
             {
-                if ((c >= (int)'0' && c <= (int)'9') || (c >= (int)'A' && c <= (int)'Z') || (c >= (int)'a' && c <= (int)'z') || (c == (int)'-') || (c == (int)'_'))
+                if ((c >= (int)'0' && c <= (int)'9') || (c >= (int)'A' && c <= (int)'Z') || (c >= (int)'a' && c <= (int)'z') || (c == (int)'-') || (c == (int)'_') || (c == (int)'\\'))
                 {
                     if (s_CurrentSize >= sizeof(s_CMD))
                     {
@@ -72,15 +72,15 @@ static void _submit_cmd(void)
 {
     SYS_LOG("Submiting command: %s", s_CMD);
 
-    if (strcmp(s_CMD, "data-read-start") == 0)
+    if (strcmp(s_CMD, "\\data-read-start") == 0)
     {
         events_publish(MSG_CMD_DATA_READ);
     }
-    else if (strcmp(s_CMD, "data-clear-start") == 0)
+    else if (strcmp(s_CMD, "\\data-clear-start") == 0)
     {
         events_publish(MSG_CMD_DATA_CLEAR);
     }
-    else if (strcmp(s_CMD, "data-recovery-start") == 0)
+    else if (strcmp(s_CMD, "\\data-recovery-start") == 0)
     {
         events_publish(MSG_CMD_DATA_RECOVERY);
     }

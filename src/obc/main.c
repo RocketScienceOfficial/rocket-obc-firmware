@@ -9,6 +9,7 @@
 #include "systems/serial.h"
 #include "systems/sm.h"
 #include "systems/status.h"
+#include "systems/voltage.h"
 
 static void _init_systems(void)
 {
@@ -20,6 +21,7 @@ static void _init_systems(void)
     radio_init();
     status_init();
     ign_init();
+    voltage_init();
 
     hal_serial_printf("All systems initialized!\n");
 }
@@ -32,13 +34,14 @@ static void _update_systems(void)
     sm_update();
     dataman_update();
     radio_update();
-    status_update();
     ign_update();
+    status_update();
+    voltage_update();
 }
 
 int main()
 {
-    hal_board_init(5000);
+    hal_board_init(2000);
 
     hal_serial_printf("Initialized board!\n");
     hal_serial_printf("Firmware version: 1.0\n");

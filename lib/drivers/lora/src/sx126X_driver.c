@@ -605,10 +605,7 @@ void sx126x_clear_device_errors(sx126x_config_t *data)
 
 void sx126x_is_busy(sx126x_config_t *data, bool *pStatus)
 {
-    gpio_state_t state;
-    hal_gpio_get_pin_state(data->pinout.busy, &state);
-
-    *pStatus = state == GPIO_HIGH;
+    *pStatus = hal_gpio_get_pin_state(data->pinout.busy) == GPIO_HIGH;
 }
 
 void sx126x_check_busy(sx126x_config_t *data)

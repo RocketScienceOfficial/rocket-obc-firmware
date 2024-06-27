@@ -2,6 +2,7 @@
 #include "board_config.h"
 #include "sm.h"
 #include "sensors.h"
+#include "radio.h"
 #include "../middleware/events.h"
 #include "../middleware/syslog.h"
 #include "hal/gpio_driver.h"
@@ -9,7 +10,7 @@
 
 #define SYSTEM_NAME "ign"
 #define IGN_UP_TIME_MS 1000
-#define DEST_HEIGHT 50
+#define DEST_HEIGHT 30
 
 typedef struct ign_pin_data
 {
@@ -32,8 +33,6 @@ static void _ign_update(ign_pin_data_t *data);
 
 void ign_init(void)
 {
-    s_Armed = true;
-
     _init_pin(&s_IGN1, PIN_IGN_1);
     _init_pin(&s_IGN2, PIN_IGN_2);
     _init_pin(&s_IGN3, PIN_IGN_3);
@@ -44,6 +43,13 @@ void ign_init(void)
 
 void ign_update(void)
 {
+    if (radio_get_parsed_data()->armed)
+    {
+        s_Armed = true;
+
+        SYS_LOG("Armed igniters!");
+    }
+
     if (events_poll(MSG_SM_APOGEE_REACHED))
     {
         _ign_fire(&s_IGN1);
