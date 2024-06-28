@@ -1,6 +1,7 @@
 #include "dataman.h"
 #include "sensors.h"
 #include "sm.h"
+#include "serial.h"
 #include "ign.h"
 #include "board_config.h"
 #include "../middleware/events.h"
@@ -27,6 +28,7 @@ typedef struct __attribute__((__packed__)) dataman_file_info
     uint16_t magic;
     size_t savedFramesCount;
     size_t standingFramesCount;
+    dataman_config_t config;
     uint16_t crc;
 } dataman_file_info_t;
 
@@ -37,6 +39,7 @@ static size_t s_SaveFlashOffsetPages;
 static size_t s_SavedFramesCount;
 static dataman_frame_t s_StandingBuffer[STANDING_BUFFER_LENGTH];
 static size_t s_StandingBufferLength;
+static dataman_file_info_t s_CurrentInfoFile;
 static bool s_ReadyTest;
 
 static dataman_frame_t _get_frame(void);
@@ -54,10 +57,27 @@ static void _recover_data_read(const uint8_t *data);
 static void _recover_data(void);
 static void _save_frame(void);
 static void _save_standing_buffer_frame(void);
-static void _save_info_file(size_t savedFramesCount, size_t standingFramesCount);
+static void _save_info_file(void);
+static void _get_config(void);
+static void _set_config(void);
 
 void dataman_init(void)
 {
+    const dataman_file_info_t *tmpInfo = _read_info();
+
+    if (tmpInfo)
+    {
+        s_CurrentInfoFile = *tmpInfo;
+    }
+    else
+    {
+        s_CurrentInfoFile = (dataman_file_info_t){
+            .magic = DATAMAN_FILE_INFO_MAGIC,
+        };
+
+        _save_info_file();
+    }
+
     SYS_LOG("READY");
 }
 
@@ -69,7 +89,11 @@ void dataman_update(void)
         {
             _flush_data();
             _flush_standing_buffer();
-            _save_info_file(s_SavedFramesCount, s_StandingBufferLength);
+
+            s_CurrentInfoFile.savedFramesCount = s_SavedFramesCount;
+            s_CurrentInfoFile.standingFramesCount = s_StandingBufferLength;
+
+            _save_info_file();
 
             s_Terminated = true;
         }
@@ -86,6 +110,14 @@ void dataman_update(void)
             if (events_poll(MSG_CMD_DATA_RECOVERY))
             {
                 _recover_data();
+            }
+            if (events_poll(MSG_CMD_CONFIG_GET))
+            {
+                _get_config();
+            }
+            if (events_poll(MSG_CMD_CONFIG_SET))
+            {
+                _set_config();
             }
             if (events_poll(MSG_SENSORS_NORMAL_READ))
             {
@@ -114,10 +146,15 @@ bool dataman_is_ready(void)
 
         SYS_LOG("Info file exists: %d", info != NULL);
 
-        ready = info ? info->savedFramesCount + info->standingFramesCount == 0 : true;
+        ready = info ? info->savedFramesCount + info->standingFramesCount == 0 : false;
     }
 
     return ready;
+}
+
+const dataman_config_t* dataman_get_config(void)
+{
+    return &s_CurrentInfoFile.config;
 }
 
 static dataman_frame_t _get_frame(void)
@@ -189,7 +226,10 @@ static void _clear_database(void)
 
     SYS_LOG("Database cleared!");
 
-    _save_info_file(0, 0);
+    s_CurrentInfoFile.savedFramesCount = 0;
+    s_CurrentInfoFile.standingFramesCount = 0;
+
+    _save_info_file();
 
     SEND_CMD("data-clear-finish");
 }
@@ -397,23 +437,43 @@ static void _save_standing_buffer_frame(void)
     }
 }
 
-static void _save_info_file(size_t savedFramesCount, size_t standingFramesCount)
+static void _save_info_file(void)
 {
-    dataman_file_info_t info = {
-        .magic = DATAMAN_FILE_INFO_MAGIC,
-        .savedFramesCount = savedFramesCount,
-        .standingFramesCount = standingFramesCount,
-    };
-
-    info.crc = crc16_mcrf4xx_calculate((const uint8_t *)&info, sizeof(info) - 2);
+    s_CurrentInfoFile.crc = crc16_mcrf4xx_calculate((const uint8_t *)&s_CurrentInfoFile, sizeof(s_CurrentInfoFile) - 2);
 
     uint8_t data[256];
-    memcpy(data, &info, sizeof(dataman_file_info_t));
+    memcpy(data, &s_CurrentInfoFile, sizeof(dataman_file_info_t));
 
     hal_flash_erase_sectors(SECTORS_OFFSET_FILE_INFO, 1);
     hal_flash_write_pages(SECTORS_OFFSET_FILE_INFO * FLASH_SECTOR_SIZE / FLASH_PAGE_SIZE, data, 1);
 
     s_ReadyTest = false;
 
-    SYS_LOG("Dataman file info was saved. Total frame count: %d", info.savedFramesCount + info.standingFramesCount);
+    SYS_LOG("Dataman file info was saved. Total frame count: %d", s_CurrentInfoFile.savedFramesCount + s_CurrentInfoFile.standingFramesCount);
+}
+
+static void _get_config(void)
+{
+    SEND_DATA("%d", s_CurrentInfoFile.config.mainHeight);
+}
+
+static void _set_config(void)
+{
+    const char *data = serial_get_param_at_index(0);
+
+    if (data)
+    {
+        uint16_t n = 0;
+
+        for (size_t i = 0; i < strlen(data); i++)
+        {
+            n = n * 10 + (int)(data[i] - '0');
+        }
+
+        s_CurrentInfoFile.config.mainHeight = n;
+
+        _save_info_file();
+    }
+
+    SEND_CMD("config-set-finish");
 }

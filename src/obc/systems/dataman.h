@@ -32,6 +32,14 @@ typedef struct __attribute__((__packed__)) dataman_frame
 } dataman_frame_t;
 
 /**
+ * @brief Params structure
+ */
+typedef struct __attribute__((__packed__)) dataman_config
+{
+    uint16_t mainHeight;
+} dataman_config_t;
+
+/**
  * @brief Initializes dataman
  */
 void dataman_init(void);
@@ -47,5 +55,12 @@ void dataman_update(void);
  * @param True if database is clear
  */
 bool dataman_is_ready(void);
+
+/**
+ * @brief Get config
+ *
+ * @return Config
+ */
+const dataman_config_t* dataman_get_config(void);
 
 #endif

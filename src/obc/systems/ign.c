@@ -2,6 +2,8 @@
 #include "board_config.h"
 #include "sm.h"
 #include "sensors.h"
+#include "serial.h"
+#include "dataman.h"
 #include "radio.h"
 #include "../middleware/events.h"
 #include "../middleware/syslog.h"
@@ -10,7 +12,6 @@
 
 #define SYSTEM_NAME "ign"
 #define IGN_UP_TIME_MS 1000
-#define DEST_HEIGHT 30
 
 typedef struct ign_pin_data
 {
@@ -56,18 +57,36 @@ void ign_update(void)
         SYS_LOG("Igniters were disarmed!");
     }
 
+    if (events_poll(MSG_CMD_IGN_TEST) && sm_get_state() == FLIGHT_STATE_STANDING)
+    {
+        const char *data = serial_get_param_at_index(0);
+
+        if (data)
+        {
+            int n = (int)(data[0] - '0');
+
+            SYS_LOG("Testing igniter %d...", n);
+
+            hal_gpio_set_pin_state(PIN_IGN_1 - n, GPIO_HIGH);
+            hal_time_sleep_ms(1000);
+            hal_gpio_set_pin_state(PIN_IGN_1 - n, GPIO_LOW);
+        }
+        
+        hal_serial_printf("\\ign-test-finish\n");
+    }
+
     if (events_poll(MSG_SM_APOGEE_REACHED))
     {
         _ign_fire(&s_IGN1);
 
-        if (sm_get_apogee() - sm_get_base_alt() <= DEST_HEIGHT)
+        if (sm_get_apogee() - sm_get_base_alt() <= dataman_get_config()->mainHeight)
         {
             _ign_fire(&s_IGN2);
         }
     }
     else if (sm_get_state() == FLIGHT_STATE_FREE_FALL)
     {
-        if (sensors_get_frame()->baroHeight - sm_get_base_alt() <= DEST_HEIGHT)
+        if (sensors_get_frame()->baroHeight - sm_get_base_alt() <= dataman_get_config()->mainHeight)
         {
             _ign_fire(&s_IGN2);
         }
@@ -101,6 +120,7 @@ static void _init_pin(ign_pin_data_t *data, hal_pin_number_t pin)
     data->pin = pin;
 
     hal_gpio_init_pin(pin, GPIO_OUTPUT);
+    hal_gpio_set_pin_state(pin, GPIO_LOW);
 }
 
 static uint8_t _add_flag(const ign_pin_data_t *data, ign_flags_t flag)

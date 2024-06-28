@@ -16,6 +16,9 @@ typedef enum msg_type
     MSG_CMD_DATA_READ,
     MSG_CMD_DATA_CLEAR,
     MSG_CMD_DATA_RECOVERY,
+    MSG_CMD_IGN_TEST,
+    MSG_CMD_CONFIG_GET,
+    MSG_CMD_CONFIG_SET,
     MSG_RADIO_PACKET_RECEIVED,
 } msg_type_t;
 

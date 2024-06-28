@@ -142,7 +142,7 @@ static uint8_t _get_control_flags(void)
     {
         flags |= RADIO_OBC_FRAME_CONTROL_FLAGS_CALIBRATION;
     }
-    if (sensors_get_frame()->gpsFix || true) // TODO: Remove true
+    if (sensors_get_frame()->gpsFix)
     {
         flags |= RADIO_OBC_FRAME_CONTROL_FLAGS_GPS;
     }
