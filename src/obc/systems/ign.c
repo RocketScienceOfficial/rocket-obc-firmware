@@ -39,7 +39,7 @@ static void _run_logic(void);
 static void _update_flags(void);
 static void _init_pin(ign_pin_data_t *data, hal_pin_number_t pin);
 static uint8_t _get_ign_flag(const ign_pin_data_t *data, ign_flags_t contFlag, ign_flags_t stateFlag);
-static uint8_t _set_cont_flags(ign_pin_data_t *data, float v);
+static void _set_cont_flags(ign_pin_data_t *data, float v);
 static void _ign_fire(ign_pin_data_t *data);
 static void _ign_update(ign_pin_data_t *data);
 
@@ -181,11 +181,13 @@ static uint8_t _get_ign_flag(const ign_pin_data_t *data, ign_flags_t contFlag, i
     return cont | state;
 }
 
-static uint8_t _set_cont_flags(ign_pin_data_t *data, float v)
+static void _set_cont_flags(ign_pin_data_t *data, float v)
 {
     if (sensors_get_frame()->batPercent == 0 || (data->fired && !data->finished))
     {
         data->contFlags = 0;
+
+        return;
     }
 
     float vref = sensors_get_frame()->batVolts;
