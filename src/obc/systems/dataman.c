@@ -39,6 +39,7 @@ static size_t s_SaveFlashOffsetPages;
 static size_t s_SavedFramesCount;
 static dataman_frame_t s_StandingBuffer[STANDING_BUFFER_LENGTH];
 static size_t s_StandingBufferLength;
+static size_t s_StandingBufferIndex;
 static dataman_file_info_t s_CurrentInfoFile;
 static bool s_ReadyTest;
 
@@ -251,8 +252,25 @@ static void _flush_data(void)
     }
 }
 
+static void _reverse_buff(dataman_frame_t *buffer, size_t start, size_t end)
+{
+    while (start < end)
+    {
+        dataman_frame_t tmp = buffer[start];
+        buffer[start] = buffer[end];
+        buffer[end] = tmp;
+
+        start++;
+        end--;
+    }
+}
+
 static void _flush_standing_buffer(void)
 {
+    _reverse_buff(s_StandingBuffer, 0, s_StandingBufferIndex - 1);
+    _reverse_buff(s_StandingBuffer, s_StandingBufferIndex, STANDING_BUFFER_LENGTH - 1);
+    _reverse_buff(s_StandingBuffer, 0, STANDING_BUFFER_LENGTH - 1);
+
     uint8_t *data = (uint8_t *)s_StandingBuffer;
     size_t pages = sizeof(s_StandingBuffer) / FLASH_PAGE_SIZE;
 
@@ -422,18 +440,16 @@ static void _save_standing_buffer_frame(void)
 {
     dataman_frame_t frame = _get_frame();
 
+    s_StandingBuffer[s_StandingBufferIndex++] = frame;
+
+    if (s_StandingBufferIndex >= STANDING_BUFFER_LENGTH)
+    {
+        s_StandingBufferIndex = 0;
+    }
+
     if (s_StandingBufferLength < STANDING_BUFFER_LENGTH)
     {
-        s_StandingBuffer[s_StandingBufferLength++] = frame;
-    }
-    else
-    {
-        for (size_t i = 0; i < STANDING_BUFFER_LENGTH - 1; i++)
-        {
-            s_StandingBuffer[i] = s_StandingBuffer[i + 1];
-        }
-
-        s_StandingBuffer[STANDING_BUFFER_LENGTH - 1] = frame;
+        s_StandingBufferLength++;
     }
 }
 

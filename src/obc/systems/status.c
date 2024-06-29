@@ -25,13 +25,13 @@ void status_init(void)
 {
     ws2812_init(PIN_LED, false);
 
-    s_Diodes[0] = WS_COLOR(255, 0, 0);
-    s_Diodes[1] = WS_COLOR(255, 0, 0);
-    s_Diodes[2] = WS_COLOR(255, 0, 0);
-    s_Diodes[3] = WS_COLOR(255, 0, 0);
-    s_Diodes[4] = WS_COLOR(255, 0, 0);
-    s_Diodes[5] = WS_COLOR(255, 0, 0);
-    s_Diodes[6] = WS_COLOR(255, 0, 0);
+    s_Diodes[0] = WS_COLOR(0, 0, 0);
+    s_Diodes[1] = WS_COLOR(0, 0, 0);
+    s_Diodes[2] = WS_COLOR(0, 0, 0);
+    s_Diodes[3] = WS_COLOR(0, 0, 0);
+    s_Diodes[4] = WS_COLOR(0, 0, 0);
+    s_Diodes[5] = WS_COLOR(0, 0, 0);
+    s_Diodes[6] = WS_COLOR(0, 0, 0);
 
     _update_diodes();
 
