@@ -14,7 +14,7 @@
 #define SYSTEM_NAME "dataman"
 #define SECTORS_OFFSET_FILE_INFO 64
 #define SECTORS_OFFSET_STANDING_BUFFER 65
-#define SECTORS_OFFSET_DATA 75
+#define SECTORS_OFFSET_DATA 80
 #define SECTORS_COUNT_STANDING_BUFFER ((SECTORS_OFFSET_DATA) - (SECTORS_OFFSET_STANDING_BUFFER))
 #define SECTORS_COUNT_DATA 3500
 #define STANDING_BUFFER_LENGTH (FLASH_PAGE_SIZE * 2)
@@ -152,7 +152,7 @@ bool dataman_is_ready(void)
     return ready;
 }
 
-const dataman_config_t* dataman_get_config(void)
+const dataman_config_t *dataman_get_config(void)
 {
     return &s_CurrentInfoFile.config;
 }

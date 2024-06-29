@@ -12,17 +12,11 @@
 #define WS_BRIGHTNESS 0.05f
 #define WS_COLOR(r, g, b) ws2812_get_color((uint8_t)((r) * WS_BRIGHTNESS), (uint8_t)((g) * WS_BRIGHTNESS), (uint8_t)((b) * WS_BRIGHTNESS))
 
-#define IGN_FUSE_WORKING_IGN_PRESENT_FACTOR 0
-#define IGN_FUSE_WORKING_IGN_NOT_PRESENT_FACTOR 0.0189607f
-#define IGN_FUSE_NOT_WORKING_IGN_PRESENT_FACTOR 0.0297897f
-#define IGN_FUSE_NOT_WORKING_IGN_NOT_PRESENT_FACTOR 0.0383104f
-#define IGN_PIN_CHECK_EPS 0.005f
-
 static ws2812_color_t s_Diodes[7];
 static msec_t s_OtherDiodesTimer;
 
 static void _update_diodes(void);
-static ws2812_color_t _get_ign_diode_color(float v);
+static ws2812_color_t _get_ign_diode_color(uint8_t ignNumber);
 static ws2812_color_t _get_arm_diode_color(void);
 static ws2812_color_t _get_bat_diode_color(void);
 static ws2812_color_t _get_ready_diode_color(void);
@@ -48,10 +42,10 @@ void status_update(void)
 {
     if (events_poll(MSG_SENSORS_ADC_READ))
     {
-        s_Diodes[0] = _get_ign_diode_color(sensors_get_frame()->ignDet1Volts);
-        s_Diodes[1] = _get_ign_diode_color(sensors_get_frame()->ignDet2Volts);
-        s_Diodes[2] = _get_ign_diode_color(sensors_get_frame()->ignDet3Volts);
-        s_Diodes[3] = _get_ign_diode_color(sensors_get_frame()->ignDet4Volts);
+        s_Diodes[0] = _get_ign_diode_color(1);
+        s_Diodes[1] = _get_ign_diode_color(2);
+        s_Diodes[2] = _get_ign_diode_color(3);
+        s_Diodes[3] = _get_ign_diode_color(4);
         s_Diodes[5] = _get_bat_diode_color();
 
         _update_diodes();
@@ -71,30 +65,27 @@ static void _update_diodes(void)
     ws2812_set_colors(s_Diodes, sizeof(s_Diodes) / sizeof(ws2812_color_t));
 }
 
-static ws2812_color_t _get_ign_diode_color(float v)
+static ws2812_color_t _get_ign_diode_color(uint8_t ignNumber)
 {
-    if (sensors_get_frame()->batPercent == 0)
-    {
-        return WS_COLOR(0, 0, 0);
-    }
+    uint8_t flags = ign_get_cont_flags(ignNumber);
 
-    float vref = sensors_get_frame()->batVolts;
-
-    if (v < vref * (IGN_FUSE_WORKING_IGN_PRESENT_FACTOR + IGN_PIN_CHECK_EPS))
+    if (flags & IGN_CONT_FLAG_ENABLED)
     {
-        return WS_COLOR(0, 255, 0);
-    }
-    else if (v < vref * (IGN_FUSE_WORKING_IGN_NOT_PRESENT_FACTOR + IGN_PIN_CHECK_EPS))
-    {
-        return WS_COLOR(255, 0, 0);
-    }
-    else if (v < vref * (IGN_FUSE_NOT_WORKING_IGN_PRESENT_FACTOR + IGN_PIN_CHECK_EPS))
-    {
-        return WS_COLOR(255, 165, 0);
-    }
-    else if (v < (vref * IGN_FUSE_NOT_WORKING_IGN_NOT_PRESENT_FACTOR + IGN_PIN_CHECK_EPS))
-    {
-        return WS_COLOR(255, 165, 0);
+        if (flags & IGN_CONT_FLAG_FUSE_WORKING)
+        {
+            if (flags & IGN_CONT_FLAG_IGN_PRESENT)
+            {
+                return WS_COLOR(0, 255, 0);
+            }
+            else
+            {
+                return WS_COLOR(255, 0, 0);
+            }
+        }
+        else
+        {
+            return WS_COLOR(255, 165, 0);
+        }
     }
     else
     {
