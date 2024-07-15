@@ -19,17 +19,6 @@ typedef struct mmc5983ma_config
 } mmc5983ma_config_t;
 
 /**
- * @brief MMC5983MA Magnetometer bandwidth
- */
-typedef enum mmc5983ma_bandwidth
-{
-    MMC5983MA_BW_100HZ = 0x00,
-    MMC5983MA_BW_200HZ = 0x01,
-    MMC5983MA_BW_400HZ = 0x02,
-    MMC5983MA_BW_800HZ = 0x03,
-} mmc5983ma_bandwidth_t;
-
-/**
  * @brief MMC5983MA Magnetometer ODR
  */
 typedef enum mmc5983_odr
@@ -42,6 +31,21 @@ typedef enum mmc5983_odr
     MMC5983MA_ODR_200HZ = 0x06,
     MMC5983MA_ODR_1000HZ = 0x07,
 } mmc5983_odr_t;
+
+/**
+ * @brief MMC5983MA How many times the chip will do a set operation
+ */
+typedef enum mmc5983ma_prd_set
+{
+    MMC5983MA_PRD_SET_1 = 0x00,
+    MMC5983MA_PRD_SET_25 = 0x01,
+    MMC5983MA_PRD_SET_75 = 0x02,
+    MMC5983MA_PRD_SET_100 = 0x03,
+    MMC5983MA_PRD_SET_250 = 0x04,
+    MMC5983MA_PRD_SET_500 = 0x05,
+    MMC5983MA_PRD_SET_1000 = 0x06,
+    MMC5983MA_PRD_SET_2000 = 0x07,
+} mmc5983ma_prd_set_t;
 
 /**
  * @brief MMC5983MA Magnetometer initialization using SPI
@@ -66,38 +70,16 @@ void mmc5983ma_init_i2c(mmc5983ma_config_t *config, hal_i2c_instance_t i2c);
  * @param config MMC5983MA configuration
  * @param valid Validity
  */
-void mmc5983_validate_id(mmc5983ma_config_t *config, bool *valid);
-
-/**
- * @brief Set bandwidth of magnetometer
- *
- * @param config MMC5983MA configuration
- * @param bandwidth Bandwidth
- */
-void mmc5983ma_set_bandwidth(mmc5983ma_config_t *config, mmc5983ma_bandwidth_t bandwidth);
+void mmc5983ma_validate_id(mmc5983ma_config_t *config, bool *valid);
 
 /**
  * @brief Set ODR of magnetometer
  *
  * @param config MMC5983MA configuration
  * @param odr ODR
+ * @param prd PRD
  */
-void mmc5983ma_set_continuous_mode_odr(mmc5983ma_config_t *config, mmc5983_odr_t odr);
-
-/**
- * @brief MMC5983MA Magnetometer reset
- *
- * @param config MMC5983MA configuration
- */
-void mmc5983ma_reset(mmc5983ma_config_t *config);
-
-/**
- * @brief Calculate offsets of magnetometer
- *
- * @param config MMC5983MA configuration
- * @param offset Offset vector
- */
-void mmc5983ma_calculate_offset(mmc5983ma_config_t *config, vec3_t *offset);
+void mmc5983ma_set_continuous_mode_odr(mmc5983ma_config_t *config, mmc5983_odr_t odr, mmc5983ma_prd_set_t prd);
 
 /**
  * @brief Read data from magnetometer

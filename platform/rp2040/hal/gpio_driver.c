@@ -31,7 +31,7 @@ gpio_state_t hal_gpio_get_pin_state(hal_pin_number_t pin)
 {
     if (!hal_gpio_is_pin_valid(pin))
     {
-        return;
+        return GPIO_LOW;
     }
 
     return gpio_get(pin) ? GPIO_HIGH : GPIO_LOW;

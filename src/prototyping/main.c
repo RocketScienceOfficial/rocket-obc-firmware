@@ -130,10 +130,10 @@ int main()
         mmc5983ma_config_t mmc5983maConfig = {0};
 
         mmc5983ma_init_spi(&mmc5983maConfig, OBC_SPI, PIN_CS_MMC);
-        mmc5983ma_set_continuous_mode_odr(&mmc5983maConfig, MMC5983MA_ODR_1000HZ);
+        mmc5983ma_set_continuous_mode_odr(&mmc5983maConfig, MMC5983MA_ODR_1000HZ, MMC5983MA_PRD_SET_250);
 
         bool valid = false;
-        mmc5983_validate_id(&mmc5983maConfig, &valid);
+        mmc5983ma_validate_id(&mmc5983maConfig, &valid);
         hal_serial_printf("%d\n\n\n\n", (int)valid);
 
         while (true)

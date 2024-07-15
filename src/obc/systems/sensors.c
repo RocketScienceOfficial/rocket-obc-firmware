@@ -92,13 +92,13 @@ void sensors_init(void)
 
     h3lis331dl_init_spi(&s_H3LIS331DLConfig, OBC_SPI, PIN_CS_H3LIS);
     h3lis331dl_set_power_mode(&s_H3LIS331DLConfig, H3LIS331DL_POWER_NORMAL);
-    h3lis331dl_set_range(&s_H3LIS331DLConfig, H3LIS331DL_RANGE_100G);
+    h3lis331dl_set_range(&s_H3LIS331DLConfig, H3LIS331DL_RANGE_200G);
     h3lis331dl_set_odr(&s_H3LIS331DLConfig, H3LIS331DL_ODR_400HZ);
 
     SYS_LOG("H3LIS: READY");
 
     mmc5983ma_init_spi(&s_MMC5983MAConfig, OBC_SPI, PIN_CS_MMC);
-    mmc5983ma_set_continuous_mode_odr(&s_MMC5983MAConfig, MMC5983MA_ODR_1000HZ);
+    mmc5983ma_set_continuous_mode_odr(&s_MMC5983MAConfig, MMC5983MA_ODR_1000HZ, MMC5983MA_PRD_SET_250);
 
     SYS_LOG("MMC5983MA: READY");
 

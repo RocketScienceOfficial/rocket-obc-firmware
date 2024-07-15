@@ -1,4 +1,4 @@
-obc_add_sublib(led drivers simple_led_driver.c w2812_driver.c)
+obc_add_lib(drivers_led simple_led_driver.c w2812_driver.c)
 
 if(OBC_PLATFORM STREQUAL rp2040)
     file(MAKE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/generated)

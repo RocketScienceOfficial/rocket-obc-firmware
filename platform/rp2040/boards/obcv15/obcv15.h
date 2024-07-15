@@ -6,8 +6,6 @@
 #ifndef _OBCV15_H
 #define _OBCV15_H
 
-#define OBCV15
-
 // --- UART ---
 #ifndef PICO_DEFAULT_UART
 #define PICO_DEFAULT_UART 0
