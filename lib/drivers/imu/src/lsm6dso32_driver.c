@@ -47,12 +47,12 @@ void lsm6dso32_init_i2c(lsm6dso32_config_t *config, hal_i2c_instance_t i2c)
     };
 }
 
-void lsm6dso32_validate_id(lsm6dso32_config_t *config, bool *valid)
+bool lsm6dso32_validate_id(const lsm6dso32_config_t *config)
 {
-    *valid = gpio_utils_read_reg(&config->gpioConfig, WHO_AM_I) == WHO_AM_I_VALUE;
+    return gpio_utils_read_reg(&config->gpioConfig, WHO_AM_I) == WHO_AM_I_VALUE;
 }
 
-void lsm6dso32_set_odr(lsm6dso32_config_t *config, lsm6dso32_odr_t accelODR, lsm6dso32_odr_t gyroODR)
+void lsm6dso32_set_odr(const lsm6dso32_config_t *config, lsm6dso32_odr_t accelODR, lsm6dso32_odr_t gyroODR)
 {
     gpio_utils_write_reg_field(&config->gpioConfig, CTRL1_XL, 4, 4, (uint8_t)accelODR);
     gpio_utils_write_reg_field(&config->gpioConfig, CTRL2_G, 4, 4, (uint8_t)gyroODR);
@@ -99,7 +99,7 @@ void lsm6dso32_set_range(lsm6dso32_config_t *config, lsm6dso32_accel_range_t acc
     }
 }
 
-void lsm6dso32_read(lsm6dso32_config_t *config, vec3_t *pAcceleration, vec3_t *pGyro, float *pTemperature)
+void lsm6dso32_read(const lsm6dso32_config_t *config, vec3_t *pAcceleration, vec3_t *pGyro, float *pTemperature)
 {
     uint8_t buffer[14];
 

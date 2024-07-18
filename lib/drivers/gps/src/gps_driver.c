@@ -63,7 +63,7 @@ bool gps_read(gps_config_t *config)
     return true;
 }
 
-bool gps_get_pos(gps_config_t *config, geo_position_wgs84_t *pos)
+bool gps_get_pos(const gps_config_t *config, geo_position_wgs84_t *pos)
 {
     if (config->sentence.isFinished && nmea_check_sentence(config->sentence.data))
     {

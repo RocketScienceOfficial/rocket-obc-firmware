@@ -47,6 +47,6 @@ bool hal_pwm_set_frequency(hal_pwm_config_t *config, unsigned long frequency);
  * @param dutyCyclePercent Duty cycle in percent
  * @return true if success
  */
-bool hal_pwm_set_duty(hal_pwm_config_t *config, float dutyCyclePercent);
+bool hal_pwm_set_duty(const hal_pwm_config_t *config, float dutyCyclePercent);
 
 #endif

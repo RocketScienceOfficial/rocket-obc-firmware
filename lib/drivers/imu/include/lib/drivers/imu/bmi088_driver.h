@@ -118,7 +118,7 @@ void bmi088_accel_init_i2c(bmi088_accel_config_t *config, hal_i2c_instance_t i2c
  * @param odr ODR
  * @param osr OSR
  */
-void bmi088_accel_set_conf(bmi088_accel_config_t *config, bmi088_accel_odr_t odr, bmi088_accel_osr_t osr);
+void bmi088_accel_set_conf(const bmi088_accel_config_t *config, bmi088_accel_odr_t odr, bmi088_accel_osr_t osr);
 
 /**
  * @brief Set BMI088 accelerometer range
@@ -134,7 +134,7 @@ void bmi088_accel_set_range(bmi088_accel_config_t *config, bmi088_accel_range_t 
  * @param config Configuration
  * @param accel Acceleration in meters per second squared
  */
-void bmi088_accel_read(bmi088_accel_config_t *config, vec3_t *accel);
+void bmi088_accel_read(const bmi088_accel_config_t *config, vec3_t *accel);
 
 /**
  * @brief Initialize BMI088 gyroscope
@@ -160,7 +160,7 @@ void bmi088_gyro_init_i2c(bmi088_gyro_config_t *config, hal_i2c_instance_t i2c, 
  * @param config Configuration
  * @param bw Bandwidth
  */
-void bmi088_gyro_set_bandwidth(bmi088_gyro_config_t *config, bmi088_gyro_bandwidth_t bw);
+void bmi088_gyro_set_bandwidth(const bmi088_gyro_config_t *config, bmi088_gyro_bandwidth_t bw);
 
 /**
  * @brief Set BMI088 gyroscope range
@@ -176,6 +176,6 @@ void bmi088_gyro_set_range(bmi088_gyro_config_t *config, bmi088_gyro_range_t ran
  * @param config Configuration
  * @param gyro Angular velocity in radians per second
  */
-void bmi088_gyro_read(bmi088_gyro_config_t *config, vec3_t *gyro);
+void bmi088_gyro_read(const bmi088_gyro_config_t *config, vec3_t *gyro);
 
 #endif

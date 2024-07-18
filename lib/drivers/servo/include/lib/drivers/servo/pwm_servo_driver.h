@@ -19,6 +19,6 @@ void pwm_servo_init(hal_pwm_config_t *config, hal_pin_number_t pin);
  * @param config PWM configuration
  * @param angle Angle to rotate to (degrees)
  */
-void pwm_servo_rotate_angle(hal_pwm_config_t *config, float destAngleDegrees);
+void pwm_servo_rotate_angle(const hal_pwm_config_t *config, float destAngleDegrees);
 
 #endif

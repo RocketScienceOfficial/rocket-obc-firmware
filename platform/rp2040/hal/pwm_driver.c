@@ -59,7 +59,7 @@ bool hal_pwm_set_frequency(hal_pwm_config_t *config, unsigned long frequency)
     return true;
 }
 
-bool hal_pwm_set_duty(hal_pwm_config_t *config, float dutyCyclePercent)
+bool hal_pwm_set_duty(const hal_pwm_config_t *config, float dutyCyclePercent)
 {
     if (!config)
     {

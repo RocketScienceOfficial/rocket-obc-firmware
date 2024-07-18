@@ -68,9 +68,9 @@ void mmc5983ma_init_i2c(mmc5983ma_config_t *config, hal_i2c_instance_t i2c);
  * @brief Check if product id is valid
  *
  * @param config MMC5983MA configuration
- * @param valid Validity
+ * @return Validity
  */
-void mmc5983ma_validate_id(mmc5983ma_config_t *config, bool *valid);
+bool mmc5983ma_validate_id(const mmc5983ma_config_t *config);
 
 /**
  * @brief Set ODR of magnetometer
@@ -79,7 +79,7 @@ void mmc5983ma_validate_id(mmc5983ma_config_t *config, bool *valid);
  * @param odr ODR
  * @param prd PRD
  */
-void mmc5983ma_set_continuous_mode_odr(mmc5983ma_config_t *config, mmc5983_odr_t odr, mmc5983ma_prd_set_t prd);
+void mmc5983ma_set_continuous_mode_odr(const mmc5983ma_config_t *config, mmc5983_odr_t odr, mmc5983ma_prd_set_t prd);
 
 /**
  * @brief Read data from magnetometer
@@ -87,7 +87,7 @@ void mmc5983ma_set_continuous_mode_odr(mmc5983ma_config_t *config, mmc5983_odr_t
  * @param config MMC5983MA configuration
  * @param mag Magnetic field in miliGauss
  */
-void mmc5983ma_read(mmc5983ma_config_t *config, vec3_t *mag);
+void mmc5983ma_read(const mmc5983ma_config_t *config, vec3_t *mag);
 
 /**
  * @brief Read temperature from magnetometer
@@ -95,6 +95,6 @@ void mmc5983ma_read(mmc5983ma_config_t *config, vec3_t *mag);
  * @param config MMC5983MA configuration
  * @param temp Temperature
  */
-void mmc5983ma_read_temp(mmc5983ma_config_t *config, float *temp);
+void mmc5983ma_read_temp(const mmc5983ma_config_t *config, float *temp);
 
 #endif

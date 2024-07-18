@@ -66,14 +66,14 @@
 
 #define BMI_RESOLUTION 32768.0f
 
-static void _bmi088_accel_soft_reset(bmi088_accel_config_t *config);
-static void _bmi088_accel_set_mode(bmi088_accel_config_t *config, bool active);
-static void _bmi088_accel_set_power(bmi088_accel_config_t *config, bool on);
+static void _bmi088_accel_soft_reset(const bmi088_accel_config_t *config);
+static void _bmi088_accel_set_mode(const bmi088_accel_config_t *config, bool active);
+static void _bmi088_accel_set_power(const bmi088_accel_config_t *config, bool on);
 static void _bmi088_accel_init_base(bmi088_accel_config_t *config);
-static uint8_t _bmi088_accel_read_reg(bmi088_accel_config_t *config, uint8_t address);
-static void _bmi088_accel_read_regs(bmi088_accel_config_t *config, uint8_t address, uint8_t *buffer, size_t count);
-static void _bmi088_accel_write_reg(bmi088_accel_config_t *config, uint8_t address, uint8_t data);
-static void _bmi088_gyro_soft_reset(bmi088_gyro_config_t *config);
+static uint8_t _bmi088_accel_read_reg(const bmi088_accel_config_t *config, uint8_t address);
+static void _bmi088_accel_read_regs(const bmi088_accel_config_t *config, uint8_t address, uint8_t *buffer, size_t count);
+static void _bmi088_accel_write_reg(const bmi088_accel_config_t *config, uint8_t address, uint8_t data);
+static void _bmi088_gyro_soft_reset(const bmi088_gyro_config_t *config);
 
 void bmi088_accel_init_spi(bmi088_accel_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
 {
@@ -107,7 +107,7 @@ void bmi088_accel_init_i2c(bmi088_accel_config_t *config, hal_i2c_instance_t i2c
     _bmi088_accel_init_base(config);
 }
 
-void bmi088_accel_set_conf(bmi088_accel_config_t *config, bmi088_accel_odr_t odr, bmi088_accel_osr_t osr)
+void bmi088_accel_set_conf(const bmi088_accel_config_t *config, bmi088_accel_odr_t odr, bmi088_accel_osr_t osr)
 {
     _bmi088_accel_write_reg(config, ACC_CONF, odr | (osr << 4));
 
@@ -123,7 +123,7 @@ void bmi088_accel_set_range(bmi088_accel_config_t *config, bmi088_accel_range_t 
     hal_time_sleep_ms(5);
 }
 
-void bmi088_accel_read(bmi088_accel_config_t *config, vec3_t *accel)
+void bmi088_accel_read(const bmi088_accel_config_t *config, vec3_t *accel)
 {
     uint8_t buff[6];
 
@@ -166,7 +166,7 @@ void bmi088_gyro_init_i2c(bmi088_gyro_config_t *config, hal_i2c_instance_t i2c, 
     config->rangeFactor = 0.0f;
 }
 
-void bmi088_gyro_set_bandwidth(bmi088_gyro_config_t *config, bmi088_gyro_bandwidth_t bw)
+void bmi088_gyro_set_bandwidth(const bmi088_gyro_config_t *config, bmi088_gyro_bandwidth_t bw)
 {
     gpio_utils_write_reg(&config->gpioConfig, GYRO_BANDWIDTH, (uint8_t)bw | 0x80);
 
@@ -184,7 +184,7 @@ void bmi088_gyro_set_range(bmi088_gyro_config_t *config, bmi088_gyro_range_t ran
     hal_time_sleep_ms(5);
 }
 
-void bmi088_gyro_read(bmi088_gyro_config_t *config, vec3_t *gyro)
+void bmi088_gyro_read(const bmi088_gyro_config_t *config, vec3_t *gyro)
 {
     uint8_t buff[6];
 
@@ -199,14 +199,14 @@ void bmi088_gyro_read(bmi088_gyro_config_t *config, vec3_t *gyro)
     gyro->z = gyroZ * config->rangeFactor;
 }
 
-static void _bmi088_accel_soft_reset(bmi088_accel_config_t *config)
+static void _bmi088_accel_soft_reset(const bmi088_accel_config_t *config)
 {
     _bmi088_accel_write_reg(config, ACC_SOFTRESET, ACC_SOFTRESET_CMD);
 
     hal_time_sleep_ms(50);
 }
 
-static void _bmi088_accel_set_mode(bmi088_accel_config_t *config, bool active)
+static void _bmi088_accel_set_mode(const bmi088_accel_config_t *config, bool active)
 {
     uint8_t data = active ? ACC_PWR_CONF_ACTIVE_CMD : ACC_PWR_CONF_SUSPEND_CMD;
 
@@ -215,7 +215,7 @@ static void _bmi088_accel_set_mode(bmi088_accel_config_t *config, bool active)
     hal_time_sleep_ms(5);
 }
 
-static void _bmi088_accel_set_power(bmi088_accel_config_t *config, bool on)
+static void _bmi088_accel_set_power(const bmi088_accel_config_t *config, bool on)
 {
     uint8_t data = on ? ACC_PWR_CTRL_ON_CMD : ACC_PWR_CTRL_OFF_CMD;
 
@@ -230,7 +230,7 @@ static void _bmi088_accel_init_base(bmi088_accel_config_t *config)
     _bmi088_accel_set_mode(config, true);
 }
 
-static uint8_t _bmi088_accel_read_reg(bmi088_accel_config_t *config, uint8_t address)
+static uint8_t _bmi088_accel_read_reg(const bmi088_accel_config_t *config, uint8_t address)
 {
     uint8_t data[2];
 
@@ -239,7 +239,7 @@ static uint8_t _bmi088_accel_read_reg(bmi088_accel_config_t *config, uint8_t add
     return data[1];
 }
 
-static void _bmi088_accel_read_regs(bmi088_accel_config_t *config, uint8_t address, uint8_t *buffer, size_t count)
+static void _bmi088_accel_read_regs(const bmi088_accel_config_t *config, uint8_t address, uint8_t *buffer, size_t count)
 {
     uint8_t tmp_buffer[16];
 
@@ -248,12 +248,12 @@ static void _bmi088_accel_read_regs(bmi088_accel_config_t *config, uint8_t addre
     memcpy(buffer, tmp_buffer + 1, count);
 }
 
-static void _bmi088_accel_write_reg(bmi088_accel_config_t *config, uint8_t address, uint8_t data)
+static void _bmi088_accel_write_reg(const bmi088_accel_config_t *config, uint8_t address, uint8_t data)
 {
     gpio_utils_write_reg(&config->gpioConfig, address, data);
 }
 
-static void _bmi088_gyro_soft_reset(bmi088_gyro_config_t *config)
+static void _bmi088_gyro_soft_reset(const bmi088_gyro_config_t *config)
 {
     gpio_utils_write_reg(&config->gpioConfig, GYRO_SOFTRESET, GYRO_SOFTRESET_CMD);
 

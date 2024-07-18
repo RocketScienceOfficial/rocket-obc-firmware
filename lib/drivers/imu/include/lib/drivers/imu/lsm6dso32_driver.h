@@ -76,9 +76,9 @@ void lsm6dso32_init_i2c(lsm6dso32_config_t *config, hal_i2c_instance_t i2c);
  * @brief Validate LSM6DSO32 ID
  *
  * @param config LSM6DSO configuration
- * @param valid Validity of ID
+ * @return Validity of ID
  */
-void lsm6dso32_validate_id(lsm6dso32_config_t *config, bool *valid);
+bool lsm6dso32_validate_id(const lsm6dso32_config_t *config);
 
 /**
  * @brief Set LSM6DSO32 ODR
@@ -87,7 +87,7 @@ void lsm6dso32_validate_id(lsm6dso32_config_t *config, bool *valid);
  * @param accelODR Accelerometer ODR
  * @param gyroODR Gyroscope ODR
  */
-void lsm6dso32_set_odr(lsm6dso32_config_t *config, lsm6dso32_odr_t accelODR, lsm6dso32_odr_t gyroODR);
+void lsm6dso32_set_odr(const lsm6dso32_config_t *config, lsm6dso32_odr_t accelODR, lsm6dso32_odr_t gyroODR);
 
 /**
  * @brief Set LSM6DSO32 range
@@ -106,6 +106,6 @@ void lsm6dso32_set_range(lsm6dso32_config_t *config, lsm6dso32_accel_range_t acc
  * @param pGyro Angular rate in radians per second
  * @param pTemperature Temperature in degrees Celsius
  */
-void lsm6dso32_read(lsm6dso32_config_t *config, vec3_t *pAcceleration, vec3_t *pGyro, float *pTemperature);
+void lsm6dso32_read(const lsm6dso32_config_t *config, vec3_t *pAcceleration, vec3_t *pGyro, float *pTemperature);
 
 #endif
