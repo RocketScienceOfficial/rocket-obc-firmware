@@ -1,6 +1,5 @@
 #include "lib/drivers/accelerometer/h3lis331dl_driver.h"
 #include "lib/geo/physical_constants.h"
-#include "lib/drivers/utils/drivers_errors.h"
 #include <stdint.h>
 
 #define WHO_AM_I 0x0F

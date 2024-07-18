@@ -1,5 +1,4 @@
 #include "lib/drivers/barometer/ms5611_driver.h"
-#include "lib/drivers/utils/drivers_errors.h"
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -18,7 +17,7 @@
 #define PROM_READ 0xA0
 
 static void _ms5611_reset(const ms5611_config_t *config);
-static void _ms5611_read_coefficents(ms5611_config_t *config);
+static bool _ms5611_read_coefficents(ms5611_config_t *config);
 static void _ms5611_req_value(ms5611_config_t *config, bool pressure);
 static uint32_t _ms5611_read_raw_value(const ms5611_config_t *config);
 static void _ms5611_convert_raw_values(const ms5611_prom_data_t *coeffs, uint32_t d1, uint32_t d2, int *pressure, float *temperature);
@@ -84,7 +83,7 @@ static void _ms5611_reset(const ms5611_config_t *config)
     hal_time_sleep_ms(5);
 }
 
-void _ms5611_read_coefficents(ms5611_config_t *config)
+bool _ms5611_read_coefficents(ms5611_config_t *config)
 {
     ms5611_prom_data_t coeffs = {0};
 
@@ -103,10 +102,12 @@ void _ms5611_read_coefficents(ms5611_config_t *config)
 
     if (!_ms5611_validate_crc((uint16_t *)&coeffs))
     {
-        drivers_errors_push(OBC_UNKNOWN_ERROR);
+        return false;
     }
 
     config->coeffs = coeffs;
+
+    return true;
 }
 
 static void _ms5611_req_value(ms5611_config_t *config, bool pressure)
