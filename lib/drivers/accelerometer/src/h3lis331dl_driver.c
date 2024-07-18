@@ -1,5 +1,6 @@
 #include "lib/drivers/accelerometer/h3lis331dl_driver.h"
 #include "lib/geo/physical_constants.h"
+#include "lib/drivers/utils/drivers_errors.h"
 #include <stdint.h>
 
 #define WHO_AM_I 0x0F
@@ -28,12 +29,12 @@
 
 #define I2C_ADDRESS 0x18
 #define WHO_AM_I_VALUE 0x32
-#define RESOLUTION_DIVIDER 32768.0f
+#define H3LIS_RESOLUTION 32768.0f
 
 void h3lis331dl_init_spi(h3lis331dl_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
 {
     config->gpioConfig = (gpio_utils_communication_config_t){
-        .protocol = GPIO_PROTOCOL_SPI,
+        .useSPI = true,
         .spi = spi,
         .cs = cs,
         .readMask = 0x80,
@@ -48,7 +49,7 @@ void h3lis331dl_init_spi(h3lis331dl_config_t *config, hal_spi_instance_t spi, ha
 void h3lis331dl_init_i2c(h3lis331dl_config_t *config, hal_i2c_instance_t i2c)
 {
     config->gpioConfig = (gpio_utils_communication_config_t){
-        .protocol = GPIO_PROTOCOL_I2C,
+        .useSPI = false,
         .i2c = i2c,
         .i2cAddress = I2C_ADDRESS,
         .readMask = 0x80,
@@ -58,22 +59,22 @@ void h3lis331dl_init_i2c(h3lis331dl_config_t *config, hal_i2c_instance_t i2c)
     config->rangeFactor = 0;
 }
 
-void h3lis331dl_validate_id(h3lis331dl_config_t *config, bool *valid)
+bool h3lis331dl_validate(const h3lis331dl_config_t *config)
 {
-    *valid = gpio_utils_read_reg(&config->gpioConfig, WHO_AM_I) == WHO_AM_I_VALUE;
+    return gpio_utils_read_reg(&config->gpioConfig, WHO_AM_I) == WHO_AM_I_VALUE;
 }
 
-void h3lis331dl_set_power_mode(h3lis331dl_config_t *config, h3lis331dl_power_mode_t power)
+void h3lis331dl_set_power_mode(const h3lis331dl_config_t *config, h3lis331dl_power_mode_t power)
 {
     gpio_utils_write_reg_field(&config->gpioConfig, CTRL_REG1, 3, 5, (uint8_t)power);
 }
 
-void h3lis331dl_set_odr(h3lis331dl_config_t *config, h3lis331dl_odr_t odr)
+void h3lis331dl_set_odr(const h3lis331dl_config_t *config, h3lis331dl_odr_t odr)
 {
     gpio_utils_write_reg_field(&config->gpioConfig, CTRL_REG1, 2, 3, (uint8_t)odr);
 }
 
-void h3lis331dl_set_hpfc(h3lis331dl_config_t *config, h3lis331dl_hpfc_t hpcf)
+void h3lis331dl_set_hpfc(const h3lis331dl_config_t *config, h3lis331dl_hpfc_t hpcf)
 {
     gpio_utils_write_reg_field(&config->gpioConfig, CTRL_REG2, 2, 0, (uint8_t)hpcf);
 }
@@ -85,20 +86,20 @@ void h3lis331dl_set_range(h3lis331dl_config_t *config, h3lis331dl_range_t range)
     switch (range)
     {
     case H3LIS331DL_RANGE_100G:
-        config->rangeFactor = 100.0f * EARTH_GRAVITY / RESOLUTION_DIVIDER;
+        config->rangeFactor = 100.0f * EARTH_GRAVITY / H3LIS_RESOLUTION;
         break;
     case H3LIS331DL_RANGE_200G:
-        config->rangeFactor = 200.0f * EARTH_GRAVITY / RESOLUTION_DIVIDER;
+        config->rangeFactor = 200.0f * EARTH_GRAVITY / H3LIS_RESOLUTION;
         break;
     case H3LIS331DL_RANGE_400G:
-        config->rangeFactor = 400.0f * EARTH_GRAVITY / RESOLUTION_DIVIDER;
+        config->rangeFactor = 400.0f * EARTH_GRAVITY / H3LIS_RESOLUTION;
         break;
     default:
         return;
     }
 }
 
-void h3lis331dl_read(h3lis331dl_config_t *config, vec3_t *accel)
+void h3lis331dl_read(const h3lis331dl_config_t *config, vec3_t *accel)
 {
     uint8_t buffer[6];
 

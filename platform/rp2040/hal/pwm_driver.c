@@ -20,11 +20,11 @@ bool hal_pwm_check_pin(hal_pin_number_t pin)
     return pin >= 0 && pin <= 28;
 }
 
-void hal_pwm_init_pin(hal_pwm_config_t *config, hal_pin_number_t pin, unsigned long frequency)
+bool hal_pwm_init_pin(hal_pwm_config_t *config, hal_pin_number_t pin, unsigned long frequency)
 {
     if (!config || !hal_pwm_check_pin(pin))
     {
-        return;
+        return false;
     }
 
     hal_gpio_set_pin_function(pin, GPIO_FUNCTION_PWM);
@@ -36,13 +36,15 @@ void hal_pwm_init_pin(hal_pwm_config_t *config, hal_pin_number_t pin, unsigned l
     unsigned long slice_num = pwm_gpio_to_slice_num(pin);
 
     pwm_set_enabled(slice_num, true);
+
+    return true;
 }
 
-void hal_pwm_set_frequency(hal_pwm_config_t *config, unsigned long frequency)
+bool hal_pwm_set_frequency(hal_pwm_config_t *config, unsigned long frequency)
 {
     if (!config)
     {
-        return;
+        return false;
     }
 
     config->frequency = frequency;
@@ -53,17 +55,21 @@ void hal_pwm_set_frequency(hal_pwm_config_t *config, unsigned long frequency)
 
     pwm_set_clkdiv(slice_num, clockDiv);
     pwm_set_wrap(slice_num, wrap);
+
+    return true;
 }
 
-void hal_pwm_set_duty(hal_pwm_config_t *config, float dutyCyclePercent)
+bool hal_pwm_set_duty(hal_pwm_config_t *config, float dutyCyclePercent)
 {
     if (!config)
     {
-        return;
+        return false;
     }
 
     unsigned long clockDiv = _pwm_get_clk_div(config->frequency);
     unsigned long wrap = _pwm_get_wrap(config->frequency, clockDiv);
 
     pwm_set_gpio_level(config->pin, dutyCyclePercent * wrap);
+
+    return true;
 }

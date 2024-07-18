@@ -22,29 +22,33 @@ static int _convert_pin_to_input(hal_pin_number_t pin)
     }
 }
 
-bool hal_adc_check_pin(hal_pin_number_t pin)
+static bool _adc_check_pin(hal_pin_number_t pin)
 {
     return pin >= 26 && pin <= 29;
 }
 
-void hal_adc_init_all(void)
+bool hal_adc_init_all(void)
 {
     adc_init();
+
+    return true;
 }
 
-void hal_adc_init_pin(hal_pin_number_t pin)
+bool hal_adc_init_pin(hal_pin_number_t pin)
 {
-    if (!hal_adc_check_pin(pin))
+    if (!_adc_check_pin(pin))
     {
-        return;
+        return false;
     }
 
     adc_gpio_init(pin);
+
+    return true;
 }
 
 float hal_adc_read_voltage(hal_pin_number_t pin)
 {
-    if (!hal_adc_check_pin(pin))
+    if (!_adc_check_pin(pin))
     {
         return 0;
     }

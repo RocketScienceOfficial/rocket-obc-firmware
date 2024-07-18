@@ -22,7 +22,7 @@ static float _get_lon_sign(char ew)
 void gps_init_spi(gps_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
 {
     config->gpioConfig = (gpio_utils_communication_config_t){
-        .protocol = GPIO_PROTOCOL_SPI,
+        .useSPI = true,
         .spi = spi,
         .cs = cs,
     };

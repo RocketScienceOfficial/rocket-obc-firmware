@@ -1,7 +1,6 @@
 #ifndef _BATTERY_UTILS_H
 #define _BATTERY_UTILS_H
 
-#include "hal/gpio_driver.h"
 #include <stdint.h>
 
 /**

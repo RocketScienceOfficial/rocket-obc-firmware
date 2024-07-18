@@ -18,7 +18,7 @@
 typedef struct bmi088_accel_config
 {
     gpio_utils_communication_config_t gpioConfig; /** GPIO communication configuration */
-    float rangeConstant;                          /** Range Constant */
+    float rangeFactor;                            /** Range factor */
 } bmi088_accel_config_t;
 
 /**
@@ -63,7 +63,7 @@ typedef enum bmi088_accel_osr
 typedef struct bmi088_gyro_config
 {
     gpio_utils_communication_config_t gpioConfig; /** GPIO communication configuration */
-    float rangeConstant;                          /** Range constant */
+    float rangeFactor;                            /** Range factor */
 } bmi088_gyro_config_t;
 
 /**

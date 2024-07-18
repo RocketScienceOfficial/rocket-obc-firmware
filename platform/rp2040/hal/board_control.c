@@ -1,7 +1,7 @@
 #include "hal/board_control.h"
 #include "pico/stdlib.h"
 
-void hal_board_init(msec_t sleepTimeMs)
+bool hal_board_init(msec_t sleepTimeMs)
 {
     hal_time_sleep_ms(1000);
 
@@ -11,6 +11,8 @@ void hal_board_init(msec_t sleepTimeMs)
     {
         hal_time_sleep_ms(sleepTimeMs);
     }
+
+    return true;
 }
 
 void hal_tight_loop(void)

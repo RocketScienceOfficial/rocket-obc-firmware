@@ -83,7 +83,7 @@ void h3lis331dl_init_i2c(h3lis331dl_config_t *config, hal_i2c_instance_t i2c);
  * @param config H3lis331dl configuration
  * @param valid True if valid
  */
-void h3lis331dl_validate_id(h3lis331dl_config_t *config, bool *valid);
+bool h3lis331dl_validate(const h3lis331dl_config_t *config);
 
 /**
  * @brief Sets power
@@ -91,7 +91,7 @@ void h3lis331dl_validate_id(h3lis331dl_config_t *config, bool *valid);
  * @param config H3lis331dl configuration
  * @param power Power
  */
-void h3lis331dl_set_power_mode(h3lis331dl_config_t *config, h3lis331dl_power_mode_t power);
+void h3lis331dl_set_power_mode(const h3lis331dl_config_t *config, h3lis331dl_power_mode_t power);
 
 /**
  * @brief Sets output data rate
@@ -99,7 +99,7 @@ void h3lis331dl_set_power_mode(h3lis331dl_config_t *config, h3lis331dl_power_mod
  * @param config H3lis331dl configuration
  * @param odr Output data rate
  */
-void h3lis331dl_set_odr(h3lis331dl_config_t *config, h3lis331dl_odr_t odr);
+void h3lis331dl_set_odr(const h3lis331dl_config_t *config, h3lis331dl_odr_t odr);
 
 /**
  * @brief Sets high pass filter cut off frequency coefficient
@@ -107,7 +107,7 @@ void h3lis331dl_set_odr(h3lis331dl_config_t *config, h3lis331dl_odr_t odr);
  * @param config H3lis331dl configuration
  * @param hpcf High pass filter cut off frequency coefficient
  */
-void h3lis331dl_set_hpfc(h3lis331dl_config_t *config, h3lis331dl_hpfc_t hpcf);
+void h3lis331dl_set_hpfc(const h3lis331dl_config_t *config, h3lis331dl_hpfc_t hpcf);
 
 /**
  * @brief Sets range
@@ -123,6 +123,6 @@ void h3lis331dl_set_range(h3lis331dl_config_t *config, h3lis331dl_range_t range)
  * @param config H3lis331dl configuration
  * @param accel H3lis331dl acceleration in meters per second squared
  */
-void h3lis331dl_read(h3lis331dl_config_t *config, vec3_t *accel);
+void h3lis331dl_read(const h3lis331dl_config_t *config, vec3_t *accel);
 
 #endif

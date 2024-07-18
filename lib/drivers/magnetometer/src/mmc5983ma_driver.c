@@ -29,7 +29,7 @@ static void _mmc5983ma_reset(mmc5983ma_config_t *config);
 void mmc5983ma_init_spi(mmc5983ma_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
 {
     config->gpioConfig = (gpio_utils_communication_config_t){
-        .protocol = GPIO_PROTOCOL_SPI,
+        .useSPI = true,
         .spi = spi,
         .cs = cs,
         .readMask = 0x80,
@@ -45,7 +45,7 @@ void mmc5983ma_init_spi(mmc5983ma_config_t *config, hal_spi_instance_t spi, hal_
 void mmc5983ma_init_i2c(mmc5983ma_config_t *config, hal_i2c_instance_t i2c)
 {
     config->gpioConfig = (gpio_utils_communication_config_t){
-        .protocol = GPIO_PROTOCOL_I2C,
+        .useSPI = false,
         .i2c = i2c,
         .i2cAddress = I2C_ADDRESS,
         .readMask = 0x80,

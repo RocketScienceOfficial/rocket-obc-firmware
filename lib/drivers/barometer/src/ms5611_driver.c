@@ -1,4 +1,5 @@
 #include "lib/drivers/barometer/ms5611_driver.h"
+#include "lib/drivers/utils/drivers_errors.h"
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -100,7 +101,10 @@ void _ms5611_read_coefficents(ms5611_config_t *config)
         ((uint16_t *)&coeffs)[i] = data[0] << 8 | data[1];
     }
 
-    _ms5611_validate_crc((uint16_t *)&coeffs);
+    if (!_ms5611_validate_crc((uint16_t *)&coeffs))
+    {
+        drivers_errors_push(OBC_UNKNOWN_ERROR);
+    }
 
     config->coeffs = coeffs;
 }

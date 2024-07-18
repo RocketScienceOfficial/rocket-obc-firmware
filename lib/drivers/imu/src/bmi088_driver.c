@@ -64,6 +64,8 @@
 #define GYRO_GND_I2C_ADDRESS 0x68
 #define GYRO_VDD_I2C_ADDRESS 0x69
 
+#define BMI_RESOLUTION 32768.0f
+
 static void _bmi088_accel_soft_reset(bmi088_accel_config_t *config);
 static void _bmi088_accel_set_mode(bmi088_accel_config_t *config, bool active);
 static void _bmi088_accel_set_power(bmi088_accel_config_t *config, bool on);
@@ -76,14 +78,14 @@ static void _bmi088_gyro_soft_reset(bmi088_gyro_config_t *config);
 void bmi088_accel_init_spi(bmi088_accel_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
 {
     config->gpioConfig = (gpio_utils_communication_config_t){
-        .protocol = GPIO_PROTOCOL_SPI,
+        .useSPI = true,
         .spi = spi,
         .cs = cs,
         .readMask = 0x80,
         .multipleReadMask = 0x80,
         .writeMask = 0x7F,
     };
-    config->rangeConstant = 0.0f;
+    config->rangeFactor = 0.0f;
 
     hal_spi_init_cs(cs);
 
@@ -93,14 +95,14 @@ void bmi088_accel_init_spi(bmi088_accel_config_t *config, hal_spi_instance_t spi
 void bmi088_accel_init_i2c(bmi088_accel_config_t *config, hal_i2c_instance_t i2c, bool sdo1Grounded)
 {
     config->gpioConfig = (gpio_utils_communication_config_t){
-        .protocol = GPIO_PROTOCOL_I2C,
+        .useSPI = false,
         .i2c = i2c,
         .i2cAddress = sdo1Grounded ? ACC_GND_I2C_ADDRESS : ACC_VDD_I2C_ADDRESS,
         .readMask = 0x80,
         .multipleReadMask = 0x80,
         .writeMask = 0x7F,
     };
-    config->rangeConstant = 0.0f;
+    config->rangeFactor = 0.0f;
 
     _bmi088_accel_init_base(config);
 }
@@ -114,7 +116,7 @@ void bmi088_accel_set_conf(bmi088_accel_config_t *config, bmi088_accel_odr_t odr
 
 void bmi088_accel_set_range(bmi088_accel_config_t *config, bmi088_accel_range_t range)
 {
-    config->rangeConstant = powf(2, range + 1) * 1.5f * EARTH_GRAVITY;
+    config->rangeFactor = powf(2, range + 1) * 1.5f * EARTH_GRAVITY / BMI_RESOLUTION;
 
     _bmi088_accel_write_reg(config, ACC_RANGE, range);
 
@@ -131,22 +133,22 @@ void bmi088_accel_read(bmi088_accel_config_t *config, vec3_t *accel)
     int16_t accelY = (int16_t)((buff[3] << 8) | buff[2]);
     int16_t accelZ = (int16_t)((buff[5] << 8) | buff[4]);
 
-    accel->x = accelX / 32768.0f * config->rangeConstant;
-    accel->y = accelY / 32768.0f * config->rangeConstant;
-    accel->z = accelZ / 32768.0f * config->rangeConstant;
+    accel->x = accelX * config->rangeFactor;
+    accel->y = accelY * config->rangeFactor;
+    accel->z = accelZ * config->rangeFactor;
 }
 
 void bmi088_gyro_init_spi(bmi088_gyro_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
 {
     config->gpioConfig = (gpio_utils_communication_config_t){
-        .protocol = GPIO_PROTOCOL_SPI,
+        .useSPI = true,
         .spi = spi,
         .cs = cs,
         .readMask = 0x80,
         .multipleReadMask = 0x80,
         .writeMask = 0x7F,
     };
-    config->rangeConstant = 0.0f;
+    config->rangeFactor = 0.0f;
 
     hal_spi_init_cs(cs);
 }
@@ -154,14 +156,14 @@ void bmi088_gyro_init_spi(bmi088_gyro_config_t *config, hal_spi_instance_t spi, 
 void bmi088_gyro_init_i2c(bmi088_gyro_config_t *config, hal_i2c_instance_t i2c, bool sdo1Grounded)
 {
     config->gpioConfig = (gpio_utils_communication_config_t){
-        .protocol = GPIO_PROTOCOL_I2C,
+        .useSPI = false,
         .i2c = i2c,
         .i2cAddress = sdo1Grounded ? GYRO_GND_I2C_ADDRESS : GYRO_VDD_I2C_ADDRESS,
         .readMask = 0x80,
         .multipleReadMask = 0x80,
         .writeMask = 0x7F,
     };
-    config->rangeConstant = 0.0f;
+    config->rangeFactor = 0.0f;
 }
 
 void bmi088_gyro_set_bandwidth(bmi088_gyro_config_t *config, bmi088_gyro_bandwidth_t bw)
@@ -173,20 +175,9 @@ void bmi088_gyro_set_bandwidth(bmi088_gyro_config_t *config, bmi088_gyro_bandwid
 
 void bmi088_gyro_set_range(bmi088_gyro_config_t *config, bmi088_gyro_range_t range)
 {
-    float val = 0.0f;
+    float val = 2000.0f / powf(2, range);
 
-    if (range == BMI088_GYRO_RANGE_125DPS)
-        val = 125.0f;
-    else if (range == BMI088_GYRO_RANGE_250DPS)
-        val = 250.0f;
-    else if (range == BMI088_GYRO_RANGE_500DPS)
-        val = 500.0f;
-    else if (range == BMI088_GYRO_RANGE_1000DPS)
-        val = 1000.0f;
-    else if (range == BMI088_GYRO_RANGE_2000DPS)
-        val = 2000.0f;
-
-    config->rangeConstant = DEG_2_RAD(val);
+    config->rangeFactor = DEG_2_RAD(val) / BMI_RESOLUTION;
 
     gpio_utils_write_reg(&config->gpioConfig, GYRO_RANGE, (uint8_t)range);
 
@@ -203,9 +194,9 @@ void bmi088_gyro_read(bmi088_gyro_config_t *config, vec3_t *gyro)
     int16_t gyroY = (int16_t)((buff[3] << 8) | buff[2]);
     int16_t gyroZ = (int16_t)((buff[5] << 8) | buff[4]);
 
-    gyro->x = gyroX / 32767.0f * config->rangeConstant;
-    gyro->y = gyroY / 32767.0f * config->rangeConstant;
-    gyro->z = gyroZ / 32767.0f * config->rangeConstant;
+    gyro->x = gyroX * config->rangeFactor;
+    gyro->y = gyroY * config->rangeFactor;
+    gyro->z = gyroZ * config->rangeFactor;
 }
 
 static void _bmi088_accel_soft_reset(bmi088_accel_config_t *config)

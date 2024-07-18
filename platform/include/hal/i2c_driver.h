@@ -9,34 +9,6 @@
 
 typedef uint8_t hal_i2c_instance_t; /** I2C instance */
 
-#define I2C_INSTANCE_INVALID 0xFF /** I2C invalid instance */
-
-/**
- * @brief Checks if I2C is valid
- *
- * @param i2c I2C Instance
- * @return True if instance is valid
- */
-bool hal_i2c_check_instance(hal_i2c_instance_t i2c);
-
-/**
- * @brief Checks if I2C SDA pin is valid
- *
- * @param i2c I2C instance
- * @param sda SDA pin
- * @return True if sda is valid
- */
-bool hal_i2c_check_sda(hal_i2c_instance_t i2c, hal_pin_number_t sda);
-
-/**
- * @brief Checks if I2C SCL pin is valid
- *
- * @param i2c I2C instance
- * @param scl SCL pin
- * @return True if scl is valid
- */
-bool hal_i2c_check_scl(hal_i2c_instance_t i2c, hal_pin_number_t scl);
-
 /**
  * @brief Initialize I2C
  *
@@ -44,8 +16,9 @@ bool hal_i2c_check_scl(hal_i2c_instance_t i2c, hal_pin_number_t scl);
  * @param sda SDA pin
  * @param scl SCL pin
  * @param baudrate Baud rate
+ * @return true if success
  */
-void hal_i2c_init_all(hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl, hal_baud_rate_t baudrate);
+bool hal_i2c_init_all(hal_i2c_instance_t i2c, hal_pin_number_t sda, hal_pin_number_t scl, hal_baud_rate_t baudrate);
 
 /**
  * @brief Write to I2C with blocking

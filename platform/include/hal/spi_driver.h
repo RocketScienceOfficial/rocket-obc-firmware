@@ -8,43 +8,6 @@
 
 typedef uint8_t hal_spi_instance_t; /** SPI instance */
 
-#define SPI_INSTANCE_INVALID 0xFF /** SPI invalid instance */
-
-/**
- * @brief Checks if SPI is valid
- *
- * @param instance SPI Instance
- * @return True if instance is valid
- */
-bool hal_spi_check_instance(hal_spi_instance_t spi);
-
-/**
- * @brief Checks if SPI MISO pin is valid
- *
- * @param spi SPI instance
- * @param miso MISO pin
- * @return True if pin is valid
- */
-bool hal_spi_check_miso(hal_spi_instance_t spi, hal_pin_number_t miso);
-
-/**
- * @brief Checks if SPI MOSI pin is valid
- *
- * @param spi SPI instance
- * @param mosi MOSI pin
- * @return True if pin is valid
- */
-bool hal_spi_check_mosi(hal_spi_instance_t spi, hal_pin_number_t mosi);
-
-/**
- * @brief Checks if SPI SCK pin is valid
- *
- * @param spi SPI instance
- * @param sck SCK pin
- * @return True if pin is valid
- */
-bool hal_spi_check_sck(hal_spi_instance_t spi, hal_pin_number_t sck);
-
 /**
  * @brief Initialize SPI
  *
@@ -53,30 +16,34 @@ bool hal_spi_check_sck(hal_spi_instance_t spi, hal_pin_number_t sck);
  * @param mosi MOSI pin
  * @param sck SCK pin
  * @param baudrate Baud rate
+ * @return true if success
  */
-void hal_spi_init_all(hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t sck, hal_baud_rate_t baudrate);
+bool hal_spi_init_all(hal_spi_instance_t spi, hal_pin_number_t miso, hal_pin_number_t mosi, hal_pin_number_t sck, hal_baud_rate_t baudrate);
 
 /**
  * @brief Initializes CS pin
- * 
+ *
  * @param spi SPI Instance
  * @param cs CS pin
-*/
-void hal_spi_init_cs(hal_pin_number_t cs);
+ * @return true if success
+ */
+bool hal_spi_init_cs(hal_pin_number_t cs);
 
 /**
  * @brief Selects CS pin of SPI
  *
  * @param cs CS Pin
+ * @return true if success
  */
-void hal_spi_cs_select(hal_pin_number_t cs);
+bool hal_spi_cs_select(hal_pin_number_t cs);
 
 /**
  * @brief Deselects CS pin of SPI
  *
  * @param cs CS Pin
+ * @return true if success
  */
-void hal_spi_cs_deselect(hal_pin_number_t cs);
+bool hal_spi_cs_deselect(hal_pin_number_t cs);
 
 /**
  * @brief Write to SPI with blocking

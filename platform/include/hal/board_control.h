@@ -7,8 +7,9 @@
  * @brief Initialize the board
  *
  * @param sleepTimeMs The time to sleep after startup
+ * @return true if success
  */
-void hal_board_init(msec_t sleepTimeMs);
+bool hal_board_init(msec_t sleepTimeMs);
 
 /**
  * @brief Tight loop

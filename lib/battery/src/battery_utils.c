@@ -11,8 +11,6 @@ void battery_init(battery_config_t *config, battery_table_entry_t *entries, uint
     }
 }
 
-#include "hal/serial_driver.h"
-
 void battery_convert(const battery_config_t *config, float voltage, battery_data_t *data)
 {
     if (config->entries)
