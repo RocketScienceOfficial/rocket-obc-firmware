@@ -1,4 +1,4 @@
-#include "lib/nmea/nmea_parser.h"
+#include "lib/drivers/gps/nmea.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>

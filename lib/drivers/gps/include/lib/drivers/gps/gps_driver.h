@@ -1,9 +1,9 @@
 #ifndef _GPS_DRIVER_H
 #define _GPS_DRIVER_H
 
+#include "nmea.h"
 #include "lib/drivers/utils/gpio_utils.h"
 #include "lib/geo/geo.h"
-#include "lib/nmea/nmea_parser.h"
 #include <stdbool.h>
 #include <stddef.h>
 

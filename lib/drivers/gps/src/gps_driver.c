@@ -28,6 +28,18 @@ void gps_init_spi(gps_config_t *config, hal_spi_instance_t spi, hal_pin_number_t
     };
 
     hal_spi_init_cs(cs);
+
+    const uint8_t configBuffer[] = {0xb5, 0x62, 0x06, 0x08, 0x06, 0x00, 0x28, 0x00, 0x01, 0x00, 0x01, 0x00, 0x3e, 0xaa};
+
+    hal_spi_cs_select(cs);
+    hal_spi_write(spi, configBuffer, sizeof(configBuffer));
+    hal_spi_cs_deselect(cs);
+
+    const uint8_t configBuffer2[] = {0xb5, 0x62, 0x06, 0x8a, 0x09, 0x00, 0x00, 0x01, 0x00, 0x00, 0x21, 0x00, 0x11, 0x20, 0x08, 0xf4, 0x51};
+
+    hal_spi_cs_select(cs);
+    hal_spi_write(spi, configBuffer2, sizeof(configBuffer2));
+    hal_spi_cs_deselect(cs);
 }
 
 bool gps_read(gps_config_t *config)

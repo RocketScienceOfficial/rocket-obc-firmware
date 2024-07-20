@@ -47,6 +47,23 @@ typedef struct gpio_utils_communication_config
 void gpio_utils_write_reg_field(const gpio_utils_communication_config_t *config, uint8_t address, uint8_t length, uint8_t offset, uint8_t value);
 
 /**
+ * @brief Writes single register
+ *
+ * @param config Device configuration
+ * @param address Register address
+ * @param data Data to write
+ */
+void gpio_utils_write_reg(const gpio_utils_communication_config_t *config, uint8_t address, uint8_t value);
+
+/**
+ * @brief Performs a single write operation
+ *
+ * @param config Device configuration
+ * @param value Value to be written
+ */
+void gpio_utils_single_write(const gpio_utils_communication_config_t *config, uint8_t value);
+
+/**
  * @brief Reads single register
  *
  * @param config Device configuration
@@ -64,15 +81,6 @@ uint8_t gpio_utils_read_reg(const gpio_utils_communication_config_t *config, uin
  * @param count Count of registers to read
  */
 void gpio_utils_read_regs(const gpio_utils_communication_config_t *config, uint8_t address, uint8_t *buffer, size_t count);
-
-/**
- * @brief Writes single register
- *
- * @param config Device configuration
- * @param address Register address
- * @param data Data to write
- */
-void gpio_utils_write_reg(const gpio_utils_communication_config_t *config, uint8_t address, uint8_t value);
 
 /**
  * @brief Performs a single read operation

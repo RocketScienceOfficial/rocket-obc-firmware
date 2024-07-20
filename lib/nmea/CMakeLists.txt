@@ -1,1 +1,0 @@
-obc_add_lib(nmea nmea_parser.c)

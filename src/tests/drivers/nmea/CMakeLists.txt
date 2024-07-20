@@ -1,0 +1,1 @@
+obc_add_test(nmea_test lib_drivers_gps)
