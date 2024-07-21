@@ -17,24 +17,15 @@
 #include "lib/geo/geo.h"
 #include "lib/geo/geo_utils.h"
 #include <string.h>
+#include <stdlib.h>
 #include "board_config.h"
 
-int main()
+static char *_get_cmd(char *cmd, size_t len, const char *prompt)
 {
-    hal_board_init(5000);
+    hal_serial_printf("%s\n", prompt);
 
-    hal_serial_printf("Initialized board!\n");
-    hal_serial_printf("Hardware version: 1.0\n");
-    hal_serial_printf("Author: Filip Gawlik\n");
-
-    hal_spi_init_all(OBC_SPI, OBC_SPI_MISO_PIN, OBC_SPI_MOSI_PIN, OBC_SPI_SCK_PIN, OBC_SPI_FREQ);
-    hal_uart_init_all(OBC_UART, OBC_UART_RX, OBC_UART_TX, OBC_UART_FREQ);
-    hal_adc_init_all();
-
-    hal_serial_printf("Enter command: \n");
-
-    char cmd[128];
     size_t currentSize = 0;
+
     while (true)
     {
         int c = 0;
@@ -53,7 +44,7 @@ int main()
             {
                 if ((c >= (int)'0' && c <= (int)'9') || (c >= (int)'A' && c <= (int)'Z') || (c >= (int)'a' && c <= (int)'z'))
                 {
-                    if (currentSize >= sizeof(cmd))
+                    if (currentSize >= len)
                     {
                         hal_serial_printf("Buffer overflow\n");
 
@@ -66,6 +57,24 @@ int main()
             }
         }
     }
+
+    return cmd;
+}
+
+int main()
+{
+    hal_board_init(5000);
+
+    hal_serial_printf("Initialized board!\n");
+    hal_serial_printf("Hardware version: 1.0\n");
+    hal_serial_printf("Author: Filip Gawlik\n");
+
+    hal_spi_init_all(OBC_SPI, OBC_SPI_MISO_PIN, OBC_SPI_MOSI_PIN, OBC_SPI_SCK_PIN, OBC_SPI_FREQ);
+    hal_uart_init_all(OBC_UART, OBC_UART_RX, OBC_UART_TX, OBC_UART_FREQ);
+    hal_adc_init_all();
+
+    char cmd[128];
+    _get_cmd(cmd, sizeof(cmd), "Enter command: ");
 
     if (strcmp(cmd, "bmi") == 0)
     {
@@ -276,6 +285,31 @@ int main()
         hal_gpio_set_pin_state(PIN_IGN_2, GPIO_HIGH);
         hal_gpio_set_pin_state(PIN_IGN_3, GPIO_HIGH);
         hal_gpio_set_pin_state(PIN_IGN_4, GPIO_HIGH);
+    }
+    else if (strcmp(cmd, "pin") == 0)
+    {
+        char pin_str[128];
+        _get_cmd(pin_str, sizeof(pin_str), "GPIO: ");
+
+        char delay_str[128];
+        _get_cmd(delay_str, sizeof(delay_str), "Delay [ms]: ");
+
+        int pin = atoi(pin_str);
+        int delay = atoi(delay_str);
+
+        hal_gpio_init_pin(pin, GPIO_OUTPUT);
+        hal_gpio_set_pin_state(pin, GPIO_LOW);
+
+        while (true)
+        {
+            hal_time_sleep_ms(delay);
+            hal_serial_printf("High!\n");
+            hal_gpio_set_pin_state(pin, GPIO_HIGH);
+
+            hal_time_sleep_ms(delay);
+            hal_serial_printf("Low!\n");
+            hal_gpio_set_pin_state(pin, GPIO_LOW);
+        }
     }
 
     while (true)
