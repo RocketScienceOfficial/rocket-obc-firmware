@@ -42,15 +42,6 @@ void quat_normalize(quat_t *q)
     q->z *= normInv;
 }
 
-vec3_t quat_to_euler(const quat_t *q)
-{
-    return (vec3_t){
-        .x = RAD_2_DEG(atan2f(2.0f * (q->w * q->x + q->y * q->z), 1.0f - 2.0f * (q->x * q->x + q->y * q->y))),
-        .y = RAD_2_DEG(asinf(clamp_value(2.0f * (q->w * q->y - q->x * q->z), -1.0f, 1.0f))),
-        .z = RAD_2_DEG(atan2f(2.0f * (q->w * q->z + q->x * q->y), 1.0f - 2.0f * (q->y * q->y + q->z * q->z))),
-    };
-}
-
 void rotate_vec_through_quat(vec3_t *v, const quat_t *q)
 {
     *v = (vec3_t){

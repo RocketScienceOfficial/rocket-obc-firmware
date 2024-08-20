@@ -1,4 +1,5 @@
 #include "hal/uart_driver.h"
+#include "pico/stdlib.h"
 #include "hardware/uart.h"
 
 static uart_inst_t *_get_uart(hal_uart_instance_t uart);
@@ -17,6 +18,8 @@ bool hal_uart_init_all(hal_uart_instance_t uart, hal_pin_number_t rx, hal_pin_nu
     {
         bool v1 = hal_gpio_set_pin_function(rx, GPIO_FUNCTION_UART);
         bool v2 = hal_gpio_set_pin_function(tx, GPIO_FUNCTION_UART);
+
+        uart_set_fifo_enabled(_get_uart(uart), false);
 
         return v1 && v2;
     }

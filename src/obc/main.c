@@ -41,7 +41,7 @@ static void _update_systems(void)
 
 int main()
 {
-    hal_board_init(2000);
+    hal_board_init(3000);
 
     hal_serial_printf("Initialized board!\n");
     hal_serial_printf("Firmware version: 1.0\n");

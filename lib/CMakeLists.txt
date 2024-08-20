@@ -1,6 +1,5 @@
 add_subdirectory(maths)
 add_subdirectory(geo)
 add_subdirectory(crypto)
-add_subdirectory(ekf)
 add_subdirectory(battery)
 add_subdirectory(drivers)

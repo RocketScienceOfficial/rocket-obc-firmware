@@ -112,7 +112,7 @@ const radio_tlm_parsed_data_t *radio_get_parsed_data(void)
 
 static uint16_t _get_alt(void)
 {
-    float tmp = sensors_get_frame()->baroHeight - (sm_get_state() == FLIGHT_STATE_STANDING ? (float)sensors_get_frame()->pos.alt : sm_get_base_alt());
+    float tmp = ahrs_get_data()->position.z;
 
     return tmp > 0 ? (uint16_t)tmp : 0;
 }
@@ -158,9 +158,10 @@ static radio_obc_frame_t _create_packet(void)
 {
     radio_obc_frame_t frame = {
         .magic = RADIO_MAGIC,
-        .roll = ahrs_get_data()->rotation.x,
-        .pitch = ahrs_get_data()->rotation.y,
-        .yaw = ahrs_get_data()->rotation.z,
+        .q0 = ahrs_get_data()->orientation.w * 255,
+        .q1 = ahrs_get_data()->orientation.x * 255,
+        .q2 = ahrs_get_data()->orientation.y * 255,
+        .q3 = ahrs_get_data()->orientation.z * 255,
         .velocity = sqrtf(ahrs_get_data()->velocity.x * ahrs_get_data()->velocity.x + ahrs_get_data()->velocity.y * ahrs_get_data()->velocity.y + ahrs_get_data()->velocity.z * ahrs_get_data()->velocity.z),
         .batteryVoltage10 = sensors_get_frame()->batVolts * 10,
         .batteryPercentage = sensors_get_frame()->batPercent,

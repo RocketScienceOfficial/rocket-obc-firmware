@@ -42,14 +42,6 @@ void quat_inv(quat_t *q);
 void quat_normalize(quat_t *q);
 
 /**
- * @brief Convert quaternion to Euler angles
- *
- * @param q Quaternion
- * @return Euler angles (in degrees) vector
- */
-vec3_t quat_to_euler(const quat_t *q);
-
-/**
  * @brief Rotate vector through quaternion
  *
  * @param v Vector to rotate

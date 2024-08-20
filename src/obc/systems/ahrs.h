@@ -2,13 +2,14 @@
 #define _AHRS_H
 
 #include "lib/maths/vector.h"
+#include "lib/maths/quaternion.h"
 
 /**
  * @brief AHRS data
  */
 typedef struct ahrs_data
 {
-    vec3_t rotation;
+    quat_t orientation;
     vec3_t position;
     vec3_t velocity;
 } ahrs_data_t;
