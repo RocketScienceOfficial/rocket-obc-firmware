@@ -94,20 +94,21 @@ static void _ekf_update(void);
 
 void ahrs_init(void)
 {
-    //_ekf_init();
+    _ekf_init();
     _madgwick_init(&s_FilterData, 2.2f, 0.0025f);
+
+    SYS_LOG("READY");
 }
 
 void ahrs_update(void)
 {
     if (events_poll(MSG_SENSORS_NORMAL_READ))
     {
-        //_ekf_update();
-        //_madgwick_update_marg(&s_FilterData, sensors_get_frame()->gyro1, sensors_get_frame()->acc1, sensors_get_frame()->mag1);
+        _ekf_update();
         _madgwick_update_imu(&s_FilterData, sensors_get_frame()->gyro1, sensors_get_frame()->acc1);
 
         s_CurrentData.orientation = s_FilterData.q;
-        // s_CurrentData.position.z = s_EKF.x.height;
+        s_CurrentData.position.z = s_EKF.x.height;
     }
 }
 
@@ -390,11 +391,8 @@ static void _ekf_update(void)
     };
 
     float innov[EKF_NUM_MEASUREMENTS];
-
-    for (size_t i = 0; i < EKF_NUM_MEASUREMENTS; i++)
-    {
-        innov[i] = meas.data[i] - s_EKF.x.data[0];
-    }
+    innov[0] = meas.data[0] - s_EKF.x.data[0];
+    innov[1] = meas.data[1] - s_EKF.x.data[0];
 
     float *states = s_EKF.x.data;
 

@@ -26,10 +26,10 @@ typedef enum radio_obc_frame_control_flags
 typedef struct __attribute__((__packed__)) radio_obc_frame
 {
     uint8_t magic;
-    uint8_t q0;
-    uint8_t q1;
-    uint8_t q2;
-    uint8_t q3;
+    float qw;
+    float qx;
+    float qy;
+    float qz;
     uint16_t velocity;
     uint8_t batteryVoltage10;
     uint8_t batteryPercentage;

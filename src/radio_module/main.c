@@ -29,7 +29,7 @@
 
 int main()
 {
-    hal_board_init(2000);
+    hal_board_init(1000);
 
     hal_serial_printf("Initialized board!\n");
     hal_serial_printf("Firmware version: 1.0\n");
@@ -38,9 +38,10 @@ int main()
     hal_spi_init_all(SPI, MISO, MOSI, SCK, SPI_FREQUENCY);
     hal_uart_init_all(UART, RX, TX, UART_BAUDRATE);
 
-    msec_t uartLedOffset = 0, radioLedOffset = 0;
     hal_gpio_init_pin(LED_RX_UART_PIN, GPIO_OUTPUT);
     hal_gpio_init_pin(LED_RX_RADIO_PIN, GPIO_OUTPUT);
+    hal_gpio_set_pin_state(LED_RX_UART_PIN, GPIO_LOW);
+    hal_gpio_set_pin_state(LED_RX_RADIO_PIN, GPIO_LOW);
 
     sx127x_data_t loraData = {};
     sx127x_init(&loraData, SPI, CS, RESET, LORA_FREQUENCY);
@@ -53,7 +54,7 @@ int main()
 
     while (true)
     {
-        if (hal_uart_is_readable(UART))
+        while (hal_uart_is_readable(UART))
         {
             uint8_t byte;
             hal_uart_read(UART, &byte, 1);
@@ -65,7 +66,6 @@ int main()
                     curSize = byte;
 
                     hal_gpio_set_pin_state(LED_RX_UART_PIN, GPIO_HIGH);
-                    uartLedOffset = hal_time_get_ms_since_boot();
 
                     hal_serial_printf("Received request for %d bytes\n", curSize);
                 }
@@ -86,6 +86,8 @@ int main()
 
                     hal_serial_printf("Packet sent!\n");
 
+                    hal_gpio_set_pin_state(LED_RX_UART_PIN, GPIO_LOW);
+
                     curSize = 0;
                     bufLen = 0;
                 }
@@ -96,6 +98,8 @@ int main()
 
         if (packetSize > 0)
         {
+            hal_gpio_set_pin_state(LED_RX_RADIO_PIN, GPIO_HIGH);
+
             hal_serial_printf("Received packet with size: %d\n", packetSize);
 
             uint8_t buffer[256];
@@ -125,20 +129,7 @@ int main()
             hal_uart_write(UART, &i, 1);
             hal_uart_write(UART, buffer, i);
 
-            hal_gpio_set_pin_state(LED_RX_RADIO_PIN, GPIO_HIGH);
-            radioLedOffset = hal_time_get_ms_since_boot();
-        }
-
-        if (uartLedOffset != 0 && hal_time_get_ms_since_boot() - uartLedOffset >= LED_UP_TIME_MS)
-        {
-            hal_gpio_set_pin_state(LED_RX_UART_PIN, GPIO_LOW);
-            uartLedOffset = 0;
-        }
-
-        if (radioLedOffset != 0 && hal_time_get_ms_since_boot() - radioLedOffset >= LED_UP_TIME_MS)
-        {
             hal_gpio_set_pin_state(LED_RX_RADIO_PIN, GPIO_LOW);
-            radioLedOffset = 0;
         }
     }
 }

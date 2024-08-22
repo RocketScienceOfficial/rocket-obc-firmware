@@ -52,7 +52,7 @@ void radio_update(void)
         s_RecoveryTimeOffset = hal_time_get_ms_since_boot();
     }
 
-    if (hal_uart_is_readable(OBC_UART))
+    while (hal_uart_is_readable(OBC_UART))
     {
         uint8_t byte;
         hal_uart_read(OBC_UART, &byte, 1);
@@ -158,10 +158,10 @@ static radio_obc_frame_t _create_packet(void)
 {
     radio_obc_frame_t frame = {
         .magic = RADIO_MAGIC,
-        .q0 = ahrs_get_data()->orientation.w * 255,
-        .q1 = ahrs_get_data()->orientation.x * 255,
-        .q2 = ahrs_get_data()->orientation.y * 255,
-        .q3 = ahrs_get_data()->orientation.z * 255,
+        .qw = ahrs_get_data()->orientation.w,
+        .qx = ahrs_get_data()->orientation.x,
+        .qy = ahrs_get_data()->orientation.y,
+        .qz = ahrs_get_data()->orientation.z,
         .velocity = sqrtf(ahrs_get_data()->velocity.x * ahrs_get_data()->velocity.x + ahrs_get_data()->velocity.y * ahrs_get_data()->velocity.y + ahrs_get_data()->velocity.z * ahrs_get_data()->velocity.z),
         .batteryVoltage10 = sensors_get_frame()->batVolts * 10,
         .batteryPercentage = sensors_get_frame()->batPercent,
