@@ -67,7 +67,6 @@ static ads786x_config_t s_ADS786XConfig;
 static battery_config_t s_BatteryConfig;
 
 static float _exp_smoothing(float x1, float x0, float a);
-static float _adc_corrected(float x);
 
 void sensors_init(void)
 {
@@ -186,13 +185,18 @@ void sensors_update(void)
 
     if (hal_time_run_every_ms(100, &s_ADCMeasurementTimeOffset))
     {
-        s_Frame.ignDet1Volts = _adc_corrected(hal_adc_read_voltage(PIN_IGN_DET_1));
-        s_Frame.ignDet2Volts = _adc_corrected(hal_adc_read_voltage(PIN_IGN_DET_2));
-        s_Frame.ignDet3Volts = _adc_corrected(hal_adc_read_voltage(PIN_IGN_DET_3));
-        s_Frame.ignDet4Volts = _adc_corrected(hal_adc_read_voltage(PIN_IGN_DET_4));
+        s_Frame.ignDet1Volts = 1.035f * (hal_adc_read_voltage(PIN_IGN_DET_1) - 0.036f);
+        s_Frame.ignDet2Volts = 1.035f * (hal_adc_read_voltage(PIN_IGN_DET_2) - 0.036f);
+        s_Frame.ignDet3Volts = 1.035f * (hal_adc_read_voltage(PIN_IGN_DET_3) - 0.036f);
+        s_Frame.ignDet4Volts = 1.035f * (hal_adc_read_voltage(PIN_IGN_DET_4) - 0.036f);
 
-        float rawBatVolts = ads786x_read(&s_ADS786XConfig) * BATTERY_VOLTAGE_DIVIDER;
-        s_Frame.batVolts = _exp_smoothing(rawBatVolts, s_Frame.batVolts, EXP_FILTER_BAT_COEFF);
+        float totalBat = 0;
+        for (size_t i = 0; i < 100; i++)
+        {
+            totalBat += 1.138f * (ads786x_read(&s_ADS786XConfig) * BATTERY_VOLTAGE_DIVIDER) - 1.7f;
+        }
+        totalBat /= 100;
+        s_Frame.batVolts = _exp_smoothing(totalBat, s_Frame.batVolts, EXP_FILTER_BAT_COEFF);
 
         battery_data_t data = {};
         battery_convert(&s_BatteryConfig, s_Frame.batVolts, &data);
@@ -210,7 +214,7 @@ void sensors_update(void)
         // s_Frame.ignDet3Volts = _exp_smoothing(channels[2] - 0.048f, s_Frame.ignDet3Volts, EXP_FILTER_IGN_COEFF);
         // s_Frame.ignDet4Volts = _exp_smoothing(channels[3] - 0.010f, s_Frame.ignDet4Volts, EXP_FILTER_IGN_COEFF);
 
-        // float rawBatVolts = _adc_corrected(hal_adc_read_voltage(PIN_BATTERY) * BATTERY_VOLTAGE_DIVIDER);
+        // float rawBatVolts = 1.08f * hal_adc_read_voltage(PIN_BATTERY) * BATTERY_VOLTAGE_DIVIDER - 0.74f; // ?
         // s_Frame.batVolts = _exp_smoothing(rawBatVolts, s_Frame.batVolts, EXP_FILTER_BAT_COEFF);
 
         // battery_data_t data = {};
@@ -231,11 +235,4 @@ const sensors_frame_t *sensors_get_frame(void)
 static float _exp_smoothing(float x1, float x0, float a)
 {
     return x0 == 0 ? x1 : a * x1 + (1 - a) * x0;
-}
-
-static float _adc_corrected(float x)
-{
-    float offset = -0.08f * x + 0.74f;
-
-    return x - offset;
 }

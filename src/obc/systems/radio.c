@@ -74,6 +74,9 @@ void radio_update(void)
             {
                 SYS_LOG("All bytes received!");
 
+                s_CurSize = 0;
+                s_BufLen = 0;
+
                 radio_tlm_frame_t *frame = (radio_tlm_frame_t *)s_RecvBuffer;
 
                 if (frame->magic != RADIO_MAGIC || frame->crc != crc16_mcrf4xx_calculate((const uint8_t *)frame, sizeof(radio_tlm_frame_t) - 2))
@@ -94,12 +97,9 @@ void radio_update(void)
                     .vbat_disabled = (frame->flags & RADIO_TLM_FLAG_VBAT_DISABLE) > 0,
                 };
 
-                events_publish(MSG_RADIO_PACKET_RECEIVED);
-
                 s_TimeOffset = hal_time_get_ms_since_boot();
 
-                s_CurSize = 0;
-                s_BufLen = 0;
+                events_publish(MSG_RADIO_PACKET_RECEIVED);
             }
         }
     }
