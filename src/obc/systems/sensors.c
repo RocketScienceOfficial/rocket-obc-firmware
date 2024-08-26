@@ -13,6 +13,7 @@
 #include "lib/drivers/barometer/ms5611_driver.h"
 #include "lib/drivers/gps/gps_driver.h"
 #include "lib/drivers/adc/ads7038_driver.h"
+#include "lib/drivers/adc/ads786x_driver.h"
 #include "lib/drivers/led/w2812_driver.h"
 #include "lib/battery/battery_utils.h"
 #include <stdlib.h>
@@ -61,7 +62,8 @@ static h3lis331dl_config_t s_H3LIS331DLConfig;
 static mmc5983ma_config_t s_MMC5983MAConfig;
 static ms5611_config_t s_MS5611Config;
 static gps_config_t s_GPSConfig;
-static ads7038_config_t s_ADS7038Config;
+// static ads7038_config_t s_ADS7038Config;
+static ads786x_config_t s_ADS786XConfig;
 static battery_config_t s_BatteryConfig;
 
 static float _exp_smoothing(float x1, float x0, float a);
@@ -113,11 +115,19 @@ void sensors_init(void)
 
     SYS_LOG("GPS: READY");
 
-    ads7038_init(&s_ADS7038Config, OBC_SPI, PIN_CS_ADC, 1 << ADC_IGN_1_DET_CH | 1 << ADC_IGN_2_DET_CH | 1 << ADC_IGN_3_DET_CH | 1 << ADC_IGN_4_DET_CH, ADC_VREF);
+    // ads7038_init(&s_ADS7038Config, OBC_SPI, PIN_CS_ADS, 1 << ADC_IGN_1_DET_CH | 1 << ADC_IGN_2_DET_CH | 1 << ADC_IGN_3_DET_CH | 1 << ADC_IGN_4_DET_CH, ADC_VREF);
+    ads786x_init(&s_ADS786XConfig, OBC_SPI, PIN_CS_ADS, ADS786X_TYPE_6, ADC_VREF);
 
-    SYS_LOG("ADS7038: READY");
+    // SYS_LOG("ADS7038: READY");
+    SYS_LOG("ADS786X: READY");
 
-    hal_adc_init_pin(PIN_BATTERY);
+    hal_adc_init_pin(PIN_IGN_DET_1);
+    hal_adc_init_pin(PIN_IGN_DET_2);
+    hal_adc_init_pin(PIN_IGN_DET_3);
+    hal_adc_init_pin(PIN_IGN_DET_4);
+
+    SYS_LOG("ADC: READY");
+
     battery_init(&s_BatteryConfig, s_BatteryTable, sizeof(s_BatteryTable) / sizeof(battery_table_entry_t));
 
     SYS_LOG("Battery: READY");
@@ -176,15 +186,12 @@ void sensors_update(void)
 
     if (hal_time_run_every_ms(100, &s_ADCMeasurementTimeOffset))
     {
-        float channels[4];
-        ads7038_read_channels(&s_ADS7038Config, channels, sizeof(channels) / sizeof(float));
+        s_Frame.ignDet1Volts = _adc_corrected(hal_adc_read_voltage(PIN_IGN_DET_1));
+        s_Frame.ignDet2Volts = _adc_corrected(hal_adc_read_voltage(PIN_IGN_DET_2));
+        s_Frame.ignDet3Volts = _adc_corrected(hal_adc_read_voltage(PIN_IGN_DET_3));
+        s_Frame.ignDet4Volts = _adc_corrected(hal_adc_read_voltage(PIN_IGN_DET_4));
 
-        s_Frame.ignDet1Volts = _exp_smoothing(channels[0] - 0.015f, s_Frame.ignDet1Volts, EXP_FILTER_IGN_COEFF);
-        s_Frame.ignDet2Volts = _exp_smoothing(channels[1] - 0.023f, s_Frame.ignDet2Volts, EXP_FILTER_IGN_COEFF);
-        s_Frame.ignDet3Volts = _exp_smoothing(channels[2] - 0.048f, s_Frame.ignDet3Volts, EXP_FILTER_IGN_COEFF);
-        s_Frame.ignDet4Volts = _exp_smoothing(channels[3] - 0.010f, s_Frame.ignDet4Volts, EXP_FILTER_IGN_COEFF);
-
-        float rawBatVolts = _adc_corrected(hal_adc_read_voltage(PIN_BATTERY) * BATTERY_VOLTAGE_DIVIDER);
+        float rawBatVolts = ads786x_read(&s_ADS786XConfig) * BATTERY_VOLTAGE_DIVIDER;
         s_Frame.batVolts = _exp_smoothing(rawBatVolts, s_Frame.batVolts, EXP_FILTER_BAT_COEFF);
 
         battery_data_t data = {};
@@ -194,6 +201,25 @@ void sensors_update(void)
         s_Frame.batNCells = data.nCells;
 
         events_publish(MSG_SENSORS_ADC_READ);
+
+        // float channels[4];
+        // ads7038_read_channels(&s_ADS7038Config, channels, sizeof(channels) / sizeof(float));
+
+        // s_Frame.ignDet1Volts = _exp_smoothing(channels[0] - 0.015f, s_Frame.ignDet1Volts, EXP_FILTER_IGN_COEFF);
+        // s_Frame.ignDet2Volts = _exp_smoothing(channels[1] - 0.023f, s_Frame.ignDet2Volts, EXP_FILTER_IGN_COEFF);
+        // s_Frame.ignDet3Volts = _exp_smoothing(channels[2] - 0.048f, s_Frame.ignDet3Volts, EXP_FILTER_IGN_COEFF);
+        // s_Frame.ignDet4Volts = _exp_smoothing(channels[3] - 0.010f, s_Frame.ignDet4Volts, EXP_FILTER_IGN_COEFF);
+
+        // float rawBatVolts = _adc_corrected(hal_adc_read_voltage(PIN_BATTERY) * BATTERY_VOLTAGE_DIVIDER);
+        // s_Frame.batVolts = _exp_smoothing(rawBatVolts, s_Frame.batVolts, EXP_FILTER_BAT_COEFF);
+
+        // battery_data_t data = {};
+        // battery_convert(&s_BatteryConfig, s_Frame.batVolts, &data);
+
+        // s_Frame.batPercent = data.percentage;
+        // s_Frame.batNCells = data.nCells;
+
+        // events_publish(MSG_SENSORS_ADC_READ);
     }
 }
 

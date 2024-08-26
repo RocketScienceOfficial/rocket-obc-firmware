@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.12)
 set(OBC_PLATFORM rp2040 CACHE STRING "OBC Platform")
 message("OBC_PLATFORM is ${OBC_PLATFORM}")
 
-set(OBC_BOARD obcv15 CACHE STRING "OBC Board")
+set(OBC_BOARD obcv16 CACHE STRING "OBC Board")
 message("OBC_BOARD is ${OBC_BOARD}")
 
 include(cmake/obc_import_sdk.cmake)

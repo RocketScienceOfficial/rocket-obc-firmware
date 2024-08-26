@@ -45,10 +45,10 @@ static void _ign_update(ign_pin_data_t *data);
 
 void ign_init(void)
 {
-    _init_pin(&s_IGN1, PIN_IGN_1);
-    _init_pin(&s_IGN2, PIN_IGN_2);
-    _init_pin(&s_IGN3, PIN_IGN_3);
-    _init_pin(&s_IGN4, PIN_IGN_4);
+    _init_pin(&s_IGN1, PIN_IGN_EN_1);
+    _init_pin(&s_IGN2, PIN_IGN_EN_2);
+    _init_pin(&s_IGN3, PIN_IGN_EN_3);
+    _init_pin(&s_IGN4, PIN_IGN_EN_4);
 
     SYS_LOG("READY");
 }
@@ -112,7 +112,7 @@ static void _run_control(void)
 
                 SYS_LOG("Testing igniter %d...", n);
 
-                hal_pin_number_t pin = PIN_IGN_1 - n;
+                hal_pin_number_t pin = PIN_IGN_EN_1 - n;
 
                 hal_gpio_set_pin_state(pin, GPIO_HIGH);
                 hal_time_sleep_ms(1000);

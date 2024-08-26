@@ -12,31 +12,31 @@ typedef unsigned int hal_baud_rate_t; /** Type for baud rate */
 /**
  * @brief Type for GPIO pin mode
  */
-typedef enum gpio_direction
+typedef enum hal_gpio_direction
 {
     GPIO_INPUT = 0,
     GPIO_OUTPUT = 1
-} gpio_direction_t;
+} hal_gpio_direction_t;
 
 /**
  * @brief Type for GPIO pin state
  */
-typedef enum gpio_state
+typedef enum hal_gpio_state
 {
     GPIO_LOW = 0,
     GPIO_HIGH = 1
-} gpio_state_t;
+} hal_gpio_state_t;
 
 /**
  * @brief Type for GPIO pin function
  */
-typedef enum gpio_func
+typedef enum hal_gpio_function
 {
     GPIO_FUNCTION_I2C = 0,
     GPIO_FUNCTION_SPI = 1,
     GPIO_FUNCTION_UART = 2,
     GPIO_FUNCTION_PWM = 3,
-} gpio_function_t;
+} hal_gpio_function_t;
 
 /**
  * @brief Checks if pin is valid
@@ -53,7 +53,7 @@ bool hal_gpio_is_pin_valid(hal_pin_number_t pin);
  * @param dir Direction of pin
  * @return true if success
  */
-bool hal_gpio_init_pin(hal_pin_number_t pin, gpio_direction_t dir);
+bool hal_gpio_init_pin(hal_pin_number_t pin, hal_gpio_direction_t dir);
 
 /**
  * @brief Set state of GPIO pin
@@ -62,7 +62,7 @@ bool hal_gpio_init_pin(hal_pin_number_t pin, gpio_direction_t dir);
  * @param state State to set
  * @return true if success
  */
-bool hal_gpio_set_pin_state(hal_pin_number_t pin, gpio_state_t state);
+bool hal_gpio_set_pin_state(hal_pin_number_t pin, hal_gpio_state_t state);
 
 /**
  * @brief Gety state of GPIO pin
@@ -70,7 +70,7 @@ bool hal_gpio_set_pin_state(hal_pin_number_t pin, gpio_state_t state);
  * @param pin Pin to get state of
  * @return State
  */
-gpio_state_t hal_gpio_get_pin_state(hal_pin_number_t pin);
+hal_gpio_state_t hal_gpio_get_pin_state(hal_pin_number_t pin);
 
 /**
  * @brief Set function of GPIO pin
@@ -79,7 +79,7 @@ gpio_state_t hal_gpio_get_pin_state(hal_pin_number_t pin);
  * @param function Function to set
  * @return true if success
  */
-bool hal_gpio_set_pin_function(hal_pin_number_t pin, gpio_function_t function);
+bool hal_gpio_set_pin_function(hal_pin_number_t pin, hal_gpio_function_t function);
 
 /**
  * @brief Pull GPIO pin up

@@ -5,26 +5,24 @@
 #include "hal/uart_driver.h"
 #include "hal/spi_driver.h"
 #include "lib/drivers/lora/sx127X_driver.h"
+#include "lib/drivers/lora/sx126X_driver.h"
 
 #define SPI 0
-#define CS 2
+#define CS 5
 #define MISO 4
 #define MOSI 3
-#define SCK 6
-#define RESET 7
+#define SCK 2
+#define RESET 1
+#define BUSY 0
+#define RXEN 27
+#define TXEN 28
 #define SPI_FREQUENCY 100000
 
-#define LED_UP_TIME_MS 20
-#define LED_RX_UART_PIN 28
-#define LED_RX_RADIO_PIN 5
-
 #define LORA_FREQUENCY 433E6
-#define LORA_BANDWIDTH 125E3
-#define LORA_SF 8
 
-#define UART 1
-#define RX 9
-#define TX 8
+#define UART 0
+#define RX 13
+#define TX 12
 #define UART_BAUDRATE 115200
 
 int main()
@@ -38,15 +36,35 @@ int main()
     hal_spi_init_all(SPI, MISO, MOSI, SCK, SPI_FREQUENCY);
     hal_uart_init_all(UART, RX, TX, UART_BAUDRATE);
 
-    hal_gpio_init_pin(LED_RX_UART_PIN, GPIO_OUTPUT);
-    hal_gpio_init_pin(LED_RX_RADIO_PIN, GPIO_OUTPUT);
-    hal_gpio_set_pin_state(LED_RX_UART_PIN, GPIO_LOW);
-    hal_gpio_set_pin_state(LED_RX_RADIO_PIN, GPIO_LOW);
+    hal_gpio_init_pin(RXEN, GPIO_OUTPUT);
+    hal_gpio_init_pin(TXEN, GPIO_OUTPUT);
+    hal_gpio_set_pin_state(RXEN, GPIO_LOW);
+    hal_gpio_set_pin_state(TXEN, GPIO_LOW);
 
-    sx127x_data_t loraData = {};
-    sx127x_init(&loraData, SPI, CS, RESET, LORA_FREQUENCY);
-    sx127x_set_signal_bandwidth(&loraData, LORA_BANDWIDTH);
-    sx127x_set_spreading_factor(&loraData, LORA_SF);
+    sx126x_config_t loraConfig = {};
+    sx126x_init(&loraConfig, SPI, CS, RESET, BUSY);
+    sx126x_clear_irq_status(&loraConfig, SX126X_IRQ_RADIO_ALL_MASK);
+    sx126x_set_standby(&loraConfig, SX126X_STANDBY_RC);
+    sx126x_set_regulator_mode(&loraConfig, SX126X_REGULATOR_DC_DC);
+    sx126x_set_pa_config(&loraConfig, 0x04, 0x07);
+    sx126x_set_dio3_as_tcxo_ctrl(&loraConfig, SX126X_TCXO_CTRL_3_3V, 100);
+    sx126x_calibrate(&loraConfig, SX126X_CALIBRATE_ALL_MASK);
+    sx126x_calibrate_image(&loraConfig, LORA_FREQUENCY);
+    sx126x_set_dio2_as_rf_switch_ctrl(&loraConfig, true);
+    sx126x_set_packet_type(&loraConfig, SX126X_PACKET_TYPE_LORA);
+    sx126x_set_rf_frequency(&loraConfig, LORA_FREQUENCY);
+    sx126x_set_lora_modulation_params(&loraConfig, SX126X_LORA_SF_8, SX126X_LORA_BW_125, SX126X_LORA_CR_4_5, 0x01);
+    sx126x_set_buffer_base_address(&loraConfig, 0, 0);
+    sx126x_set_packet_lora_params(&loraConfig, 8, SX126X_LORA_HEADER_EXPLICIT, 255, true, false);
+    sx126x_set_dio_irq_params(&loraConfig, SX126X_IRQ_RADIO_ALL_MASK, SX126X_IRQ_TX_DONE_MASK | SX126X_IRQ_RX_TX_TIMEOUT_MASK | SX126X_IRQ_RX_DONE_MASK, SX126X_IRQ_NONE, SX126X_IRQ_NONE);
+    sx126x_set_tx_params(&loraConfig, 22, SX126X_RAMP_10U);
+
+    // sx127x_config_t loraData = {};
+    // sx127x_init(&loraData, SPI, CS, RESET, LORA_FREQUENCY);
+    // sx127x_set_signal_bandwidth(&loraData, LORA_BANDWIDTH);
+    // sx127x_set_spreading_factor(&loraData, LORA_SF);
+
+    bool rx = false;
 
     uint8_t curSize = 0;
     uint8_t recvBuffer[64];
@@ -65,7 +83,10 @@ int main()
                 {
                     curSize = byte;
 
-                    hal_gpio_set_pin_state(LED_RX_UART_PIN, GPIO_HIGH);
+                    hal_gpio_set_pin_state(TXEN, GPIO_HIGH);
+                    hal_gpio_set_pin_state(RXEN, GPIO_LOW);
+
+                    rx = false;
 
                     hal_serial_printf("Received request for %d bytes\n", curSize);
                 }
@@ -82,11 +103,20 @@ int main()
                 {
                     hal_serial_printf("All bytes received!\n");
 
-                    sx127x_write_buffer(&loraData, recvBuffer, bufLen);
+                    // sx127x_write_buffer(&loraData, recvBuffer, bufLen);
+
+                    sx126x_set_standby(&loraConfig, SX126X_STANDBY_RC);
+                    sx126x_set_buffer_base_address(&loraConfig, 0, 0);
+                    sx126x_write_buffer(&loraConfig, 0, recvBuffer, bufLen);
+                    sx126x_set_packet_lora_params(&loraConfig, 8, SX126X_LORA_HEADER_EXPLICIT, bufLen, true, false);
+                    sx126x_set_tx(&loraConfig, 0);
 
                     hal_serial_printf("Packet sent!\n");
 
-                    hal_gpio_set_pin_state(LED_RX_UART_PIN, GPIO_LOW);
+                    hal_gpio_set_pin_state(TXEN, GPIO_LOW);
+                    hal_gpio_set_pin_state(RXEN, GPIO_HIGH);
+
+                    rx = true;
 
                     curSize = 0;
                     bufLen = 0;
@@ -94,42 +124,41 @@ int main()
             }
         }
 
-        size_t packetSize = sx127x_parse_packet(&loraData, 0);
-
-        if (packetSize > 0)
+        if (rx)
         {
-            hal_gpio_set_pin_state(LED_RX_RADIO_PIN, GPIO_HIGH);
+            // size_t packetSize = sx127x_parse_packet(&loraData, 0);
 
-            hal_serial_printf("Received packet with size: %d\n", packetSize);
+            // if (packetSize > 0)
+            // {
+            //     hal_serial_printf("Received packet with size: %d\n", packetSize);
 
-            uint8_t buffer[256];
-            uint8_t i = 0;
+            //     uint8_t buffer[256];
+            //     uint8_t i = 0;
 
-            while (sx127x_available(&loraData))
-            {
-                if (i == packetSize)
-                {
-                    hal_serial_printf("Something went wrong while parsing packet!");
+            //     while (sx127x_available(&loraData))
+            //     {
+            //         if (i == packetSize)
+            //         {
+            //             hal_serial_printf("Something went wrong while parsing packet!");
 
-                    break;
-                }
+            //             break;
+            //         }
 
-                if (i < sizeof(buffer))
-                {
-                    buffer[i++] = sx127x_read(&loraData);
-                }
-                else
-                {
-                    hal_serial_printf("Buffer overflow while parsing packet!");
+            //         if (i < sizeof(buffer))
+            //         {
+            //             buffer[i++] = sx127x_read(&loraData);
+            //         }
+            //         else
+            //         {
+            //             hal_serial_printf("Buffer overflow while parsing packet!");
 
-                    break;
-                }
-            }
+            //             break;
+            //         }
+            //     }
 
-            hal_uart_write(UART, &i, 1);
-            hal_uart_write(UART, buffer, i);
-
-            hal_gpio_set_pin_state(LED_RX_RADIO_PIN, GPIO_LOW);
+            //     hal_uart_write(UART, &i, 1);
+            //     hal_uart_write(UART, buffer, i);
+            // }
         }
     }
 }

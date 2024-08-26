@@ -18,11 +18,11 @@ float ads786x_read(const ads786x_config_t *config)
 
     uint8_t buffer[2];
     hal_spi_read(config->spi, 0, buffer, sizeof(buffer));
-
-    uint16_t data = (buffer[0] << 4) | (buffer[1] >> (12 - config->adcBits));
-    float result = config->vRef * (float)data / (1 << config->adcBits);
-
+    
     hal_spi_cs_deselect(config->cs);
+
+    uint16_t data = ((buffer[0] << 8) | buffer[1]) >> (12 - config->adcBits);
+    float result = config->vRef * (float)data / (1 << config->adcBits);
 
     return result;
 }

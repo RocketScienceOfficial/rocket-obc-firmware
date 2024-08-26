@@ -3,29 +3,29 @@
 
 // --- ADC ---
 #define ADC_VREF 2.5f
-#define ADC_IGN_1_DET_CH 2
-#define ADC_IGN_2_DET_CH 3
-#define ADC_IGN_3_DET_CH 4
-#define ADC_IGN_4_DET_CH 5
 
 // --- PINS ---
-#define PIN_BATTERY 26
-#define PIN_LED 21
-#define PIN_IGN_EN_1 14
-#define PIN_IGN_EN_2 13
-#define PIN_IGN_EN_3 12
-#define PIN_IGN_EN_4 11
+#define PIN_LED 15
+#define PIN_BUZZER 22
+#define PIN_IGN_EN_1 21
+#define PIN_IGN_EN_2 18
+#define PIN_IGN_EN_3 20
+#define PIN_IGN_EN_4 19
+#define PIN_IGN_DET_1 29
+#define PIN_IGN_DET_2 28
+#define PIN_IGN_DET_3 27
+#define PIN_IGN_DET_4 26
 #define PIN_CS_H3LIS 0
 #define PIN_CS_LSM 1
 #define PIN_CS_MMC 9
 #define PIN_CS_BMI_ACC 6
 #define PIN_CS_BMI_GYRO 5
-#define PIN_CS_MS56 8
-#define PIN_CS_NEO 7
-#define PIN_CS_ADS 10
-#define PIN_VBAT 29
-#define PIN_5V 28
-#define PIN_3V3 27
+#define PIN_CS_MS56 7
+#define PIN_CS_NEO 12
+#define PIN_CS_ADS 13
+#define PIN_VBAT 25
+#define PIN_5V 23
+#define PIN_3V3 24
 
 // --- SPI ---
 #define OBC_SPI 0

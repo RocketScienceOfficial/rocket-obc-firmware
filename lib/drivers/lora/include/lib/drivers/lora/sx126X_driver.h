@@ -8,22 +8,14 @@
 #include <stddef.h>
 
 /**
- * @brief Pinout data to use in the radio
+ * @brief LoRa radio configuration. All changes are done internally, so keep it just for reference!
  */
-typedef struct sx126x_pinout
+typedef struct sx126x_config
 {
     hal_spi_instance_t spi; /** SPI */
     hal_pin_number_t cs;    /** CS */
     hal_pin_number_t reset; /** RESET */
     hal_pin_number_t busy;  /** BUSY */
-} sx126x_pinout_t;
-
-/**
- * @brief LoRa radio configuration. All changes are done internally, so keep it just for reference!
- */
-typedef struct sx126x_config
-{
-    sx126x_pinout_t pinout; /** Pinout */
 } sx126x_config_t;
 
 /**
@@ -74,6 +66,7 @@ typedef enum sx126x_fallback_mode
  */
 typedef enum sx126x_irq_mask
 {
+    SX126X_IRQ_NONE = 0,
     SX126X_IRQ_TX_DONE_MASK = (1 << 0),
     SX126X_IRQ_RX_DONE_MASK = (1 << 1),
     SX126X_IRQ_PREAMBLE_DETECTED_MASK = (1 << 2),
@@ -328,251 +321,254 @@ typedef enum sx126x_command_status
 /**
  * @brief Initializes the radio
  *
- * @param data The radio configuration
- * @param pinout The radio pinout
+ * @param config The radio configuration
+ * @param spi SPI
+ * @param cs CS pin
+ * @param reset Reset pin
+ * @param busy Busy pin
  */
-void sx126x_init(sx126x_config_t *data, sx126x_pinout_t *pinout);
+void sx126x_init(sx126x_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs, hal_pin_number_t reset, hal_pin_number_t busy);
 
 /**
  * @brief Puts radio to sleep
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  */
-void sx126x_set_sleep(sx126x_config_t *data, bool coldStart);
+void sx126x_set_sleep(const sx126x_config_t *config, bool coldStart);
 
 /**
  * @brief Puts radio to standby
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param mode The standby mode
  */
-void sx126x_set_standby(sx126x_config_t *data, sx126x_standby_mode_t mode);
+void sx126x_set_standby(const sx126x_config_t *config, sx126x_standby_mode_t mode);
 
 /**
  * @brief Sets radio to FS mode
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  */
-void sx126x_set_fs(sx126x_config_t *data);
+void sx126x_set_fs(const sx126x_config_t *config);
 
 /**
  * @brief Sets radio to TX mode
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param timeout_ms The timeout in milliseconds
  */
-void sx126x_set_tx(sx126x_config_t *data, unsigned int timeout_ms);
+void sx126x_set_tx(const sx126x_config_t *config, unsigned int timeout_ms);
 
 /**
  * @brief Sets radio to RX mode
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param timeout_ms The timeout in milliseconds
  */
-void sx126x_set_rx(sx126x_config_t *data, unsigned int timeout_ms);
+void sx126x_set_rx(const sx126x_config_t *config, unsigned int timeout_ms);
 
 /**
  * @brief Stops radio timer on preamble
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param enable Enable or disable
  */
-void sx126x_stop_timer_on_preamble(sx126x_config_t *data, bool enable);
+void sx126x_stop_timer_on_preamble(const sx126x_config_t *config, bool enable);
 
 /**
  * @brief Set RX duty cycle
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param rxPeriod_ms The RX period in milliseconds
  * @param sleepPeriod_ms The sleep period in milliseconds
  */
-void sx126x_set_rx_duty_cycle(sx126x_config_t *data, unsigned int rxPeriod_ms, unsigned int sleepPeriod_ms);
+void sx126x_set_rx_duty_cycle(const sx126x_config_t *config, unsigned int rxPeriod_ms, unsigned int sleepPeriod_ms);
 
 /**
  * @brief Sets radio to CAD mode
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  */
-void sx126x_set_cad(sx126x_config_t *data);
+void sx126x_set_cad(const sx126x_config_t *config);
 
 /**
  * @brief Sets radio to TX continuous wave mode
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  */
-void sx126x_set_tx_continuous_wave(sx126x_config_t *data);
+void sx126x_set_tx_continuous_wave(const sx126x_config_t *config);
 
 /**
  * @brief Sets radio to TX infinite preamble mode
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  */
-void sx126x_set_tx_infinite_preamble(sx126x_config_t *data);
+void sx126x_set_tx_infinite_preamble(const sx126x_config_t *config);
 
 /**
  * @brief Sets radio to RX infinite mode
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param mode The regulator mode
  */
-void sx126x_set_regulator_mode(sx126x_config_t *data, sx126x_regulator_mode_t mode);
+void sx126x_set_regulator_mode(const sx126x_config_t *config, sx126x_regulator_mode_t mode);
 
 /**
  * @brief Calibrates the radio
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param calibParam The calibration parameter
  */
-void sx126x_calibrate(sx126x_config_t *data, uint8_t calibParam);
+void sx126x_calibrate(const sx126x_config_t *config, uint8_t calibParam);
 
 /**
  * @brief Calibrates the radio image
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param freq_hz The frequency in hertz
  */
-void sx126x_calibrate_image(sx126x_config_t *data, unsigned int freq_hz);
+void sx126x_calibrate_image(const sx126x_config_t *config, unsigned int freq_hz);
 
 /**
  * @brief Sets the PA config
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param paDutyCycle The PA duty cycle
  * @param hpMax The HP max
  */
-void sx126x_set_pa_config(sx126x_config_t *data, uint8_t paDutyCycle, uint8_t hpMax);
+void sx126x_set_pa_config(const sx126x_config_t *config, uint8_t paDutyCycle, uint8_t hpMax);
 
 /**
  * @brief Sets the RX TX fallback mode
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param fallbackMode The fallback mode
  */
-void sx126x_set_rx_tx_fallback_mode(sx126x_config_t *data, sx126x_fallback_mode_t fallbackMode);
+void sx126x_set_rx_tx_fallback_mode(const sx126x_config_t *config, sx126x_fallback_mode_t fallbackMode);
 
 /**
- * @brief Writes data to the radio buffer
+ * @brief Writes config to the radio buffer
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param offset The offset
  * @param buffer The buffer
  * @param szBuffer The buffer size
  */
-void sx126x_write_buffer(sx126x_config_t *data, uint8_t offset, uint8_t *buffer, size_t szBuffer);
+void sx126x_write_buffer(const sx126x_config_t *config, uint8_t offset, uint8_t *buffer, size_t szBuffer);
 
 /**
- * @brief Reads data from the radio buffer
+ * @brief Reads config from the radio buffer
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param offset The offset
  * @param buffer The buffer
  * @param szBuffer The buffer size
  */
-void sx126x_read_buffer(sx126x_config_t *data, uint8_t offset, uint8_t *buffer, size_t szBuffer);
+void sx126x_read_buffer(const sx126x_config_t *config, uint8_t offset, uint8_t *buffer, size_t szBuffer);
 
 /**
  * @brief Sets the DIO IRQ params
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param irqMask The IRQ mask
  * @param dio1Mask The DIO1 mask
  * @param dio2Mask The DIO2 mask
  * @param dio3Mask The DIO3 mask
  */
-void sx126x_set_dio_irq_params(sx126x_config_t *data, uint16_t irqMask, uint16_t dio1Mask, uint16_t dio2Mask, uint16_t dio3Mask);
+void sx126x_set_dio_irq_params(const sx126x_config_t *config, uint16_t irqMask, uint16_t dio1Mask, uint16_t dio2Mask, uint16_t dio3Mask);
 
 /**
  * @brief Gets the IRQ status
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param irqStatus The IRQ status
  */
-void sx126x_get_irq_status(sx126x_config_t *data, uint16_t *irqStatus);
+void sx126x_get_irq_status(const sx126x_config_t *config, uint16_t *irqStatus);
 
 /**
  * @brief Clears the IRQ status
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param clearIrqParam The IRQ param
  */
-void sx126x_clear_irq_status(sx126x_config_t *data, uint16_t clearIrqParam);
+void sx126x_clear_irq_status(const sx126x_config_t *config, uint16_t clearIrqParam);
 
 /**
  * @brief Sets the DIO2 as RF switch control
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param enable Enable or disable
  */
-void sx126x_set_dio2_as_rf_switch_ctrl(sx126x_config_t *data, bool enable);
+void sx126x_set_dio2_as_rf_switch_ctrl(const sx126x_config_t *config, bool enable);
 
 /**
  * @brief Sets the DIO3 as TCXO control
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param voltage The TCXO voltage
  * @param timeout_ms The timeout in milliseconds
  */
-void sx126x_set_dio3_as_tcxo_ctrl(sx126x_config_t *data, sx126x_tcxo_voltage_t voltage, unsigned int timeout_ms);
+void sx126x_set_dio3_as_tcxo_ctrl(const sx126x_config_t *config, sx126x_tcxo_voltage_t voltage, unsigned int timeout_ms);
 
 /**
  * @brief Sets the RF frequency
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param frequency The frequency in hertz
  */
-void sx126x_set_rf_frequency(sx126x_config_t *data, unsigned int frequency);
+void sx126x_set_rf_frequency(const sx126x_config_t *config, unsigned int frequency);
 
 /**
  * @brief Sets the packet type
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param packetType The packet type
  */
-void sx126x_set_packet_type(sx126x_config_t *data, sx126x_packet_type_t packetType);
+void sx126x_set_packet_type(const sx126x_config_t *config, sx126x_packet_type_t packetType);
 
 /**
  * @brief Gets current packet type
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param packetType The packet type
  */
-void sx126x_get_packet_type(sx126x_config_t *data, sx126x_packet_type_t *packetType);
+void sx126x_get_packet_type(const sx126x_config_t *config, sx126x_packet_type_t *packetType);
 
 /**
  * @brief Sets the TX params
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param power The power
  * @param rampTime The ramp time
  */
-void sx126x_set_tx_params(sx126x_config_t *data, int8_t power, sx126x_ramp_time_t rampTime);
+void sx126x_set_tx_params(const sx126x_config_t *config, int8_t power, sx126x_ramp_time_t rampTime);
 
 /**
  * @brief Sets the modulation params for GFSK
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param bitrate The bitrate
  * @param pulseShape The pulse shape
  * @param bandwidth The bandwidth
  * @param freq_dev_hz The frequency deviation in hertz
  */
-void sx126x_set_gfsk_modulation_params(sx126x_config_t *data, unsigned int bitrate, sx126x_gfsk_pulse_shape_t pulseShape, sx126x_gfsk_bandwidth_t bandwidth, unsigned int freq_dev_hz);
+void sx126x_set_gfsk_modulation_params(const sx126x_config_t *config, unsigned int bitrate, sx126x_gfsk_pulse_shape_t pulseShape, sx126x_gfsk_bandwidth_t bandwidth, unsigned int freq_dev_hz);
 
 /**
  * @brief Sets the modulation params for LoRa
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param sf The spreading factor
  * @param bw The bandwidth
  * @param cr The coding rate
- * @param lowDataRateOptimize Enable or disable low data rate optimization
+ * @param lowDataRateOptimize Enable or disable low config rate optimization
  */
-void sx126x_set_lora_modulation_params(sx126x_config_t *data, sx126x_lora_sf_t sf, sx126x_lora_bw_t bw, sx126x_lora_cr_t cr, bool lowDataRateOptimize);
+void sx126x_set_lora_modulation_params(const sx126x_config_t *config, sx126x_lora_sf_t sf, sx126x_lora_bw_t bw, sx126x_lora_cr_t cr, bool lowDataRateOptimize);
 
 /**
  * @brief Sets the packet params for GFSK
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param preambleLength The preamble length
  * @param detectorLength The preamble detector length
  * @param syncWordLength The sync word length
@@ -582,178 +578,178 @@ void sx126x_set_lora_modulation_params(sx126x_config_t *data, sx126x_lora_sf_t s
  * @param crcType The CRC type
  * @param whitening Enable or disable whitening
  */
-void sx126x_set_packet_gfsk_params(sx126x_config_t *data, uint16_t preambleLength, sx126x_gfsk_preamble_detector_length_t detectorLength, uint8_t syncWordLength, sx126x_gfsk_address_filtering_t addressFiltering, sx126x_gfsk_packet_type_t packetType, uint8_t payloadLength, sx126x_gfsk_crc_type_t crcType, bool whitening);
+void sx126x_set_packet_gfsk_params(const sx126x_config_t *config, uint16_t preambleLength, sx126x_gfsk_preamble_detector_length_t detectorLength, uint8_t syncWordLength, sx126x_gfsk_address_filtering_t addressFiltering, sx126x_gfsk_packet_type_t packetType, uint8_t payloadLength, sx126x_gfsk_crc_type_t crcType, bool whitening);
 
 /**
  * @brief Sets the packet params for LoRa
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param preambleLength The preamble length
  * @param headerType The header type
  * @param payloadLength The payload length
  * @param crc Enable or disable CRC
  * @param invertIQ Enable or disable IQ inversion
  */
-void sx126x_set_packet_lora_params(sx126x_config_t *data, uint16_t preambleLength, sx126x_lora_header_type_t headerType, uint8_t payloadLength, bool crc, bool invertIQ);
+void sx126x_set_packet_lora_params(const sx126x_config_t *config, uint16_t preambleLength, sx126x_lora_header_type_t headerType, uint8_t payloadLength, bool crc, bool invertIQ);
 
 /**
  * @brief Sets the CAD params
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param cadSymbolNum The CAD symbol number
  * @param cadDetPeak The CAD detection peak
  * @param cadDetMin The CAD detection minimum
  * @param cadExitMode The CAD exit mode
  * @param timeout_ms The timeout in milliseconds
  */
-void sx126x_set_cad_params(sx126x_config_t *data, sx126x_cad_symbol_t cadSymbolNum, uint8_t cadDetPeak, uint8_t cadDetMin, sx126x_lora_cad_exit_mode_t cadExitMode, unsigned int timeout_ms);
+void sx126x_set_cad_params(const sx126x_config_t *config, sx126x_cad_symbol_t cadSymbolNum, uint8_t cadDetPeak, uint8_t cadDetMin, sx126x_lora_cad_exit_mode_t cadExitMode, unsigned int timeout_ms);
 
 /**
  * @brief Sets the buffer base address
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param txBaseAddress The TX base address
  * @param rxBaseAddress The RX base address
  */
-void sx126x_set_buffer_base_address(sx126x_config_t *data, uint8_t txBaseAddress, uint8_t rxBaseAddress);
+void sx126x_set_buffer_base_address(const sx126x_config_t *config, uint8_t txBaseAddress, uint8_t rxBaseAddress);
 
 /**
  * @brief Sets the LoRa symbols number timeout
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param symbNum The symbols number
  */
-void sx126x_set_lora_symb_num_timeout(sx126x_config_t *data, uint8_t symbNum);
+void sx126x_set_lora_symb_num_timeout(const sx126x_config_t *config, uint8_t symbNum);
 
 /**
  * @brief Gets the status of the radio
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param pChipMode The chip mode
  * @param pCmdStatus The command status
  */
-void sx126x_get_status(sx126x_config_t *data, sx126x_chip_mode_t *pChipMode, sx126x_command_status_t *pCmdStatus);
+void sx126x_get_status(const sx126x_config_t *config, sx126x_chip_mode_t *pChipMode, sx126x_command_status_t *pCmdStatus);
 
 /**
  * @brief Gets the RX buffer status
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param pPayloadLength The payload length
  * @param pRXStartBufferPtr The RX start buffer pointer
  */
-void sx126x_get_rx_buffer_status(sx126x_config_t *data, uint8_t *pPayloadLength, uint8_t *pRXStartBufferPtr);
+void sx126x_get_rx_buffer_status(const sx126x_config_t *config, uint8_t *pPayloadLength, uint8_t *pRXStartBufferPtr);
 
 /**
  * @brief Gets the GFSK packet status
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param pRXStatus The RX status
  * @param pRssiSync The RSSI sync
  * @param pRssiAvg The RSSI average
  */
-void sx126x_get_gfsk_packet_status(sx126x_config_t *data, sx126x_gfsk_packet_rx_status_t *pRXStatus, int8_t *pRssiSync, int8_t *pRssiAvg);
+void sx126x_get_gfsk_packet_status(const sx126x_config_t *config, sx126x_gfsk_packet_rx_status_t *pRXStatus, int8_t *pRssiSync, int8_t *pRssiAvg);
 
 /**
  * @brief Gets the LoRa packet status
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param pRssiPacket The RSSI packet
  * @param pSnrPkt The SNR packet
  * @param pSignalRssiPkt The signal RSSI packet
  */
-void sx126x_get_lora_packet_status(sx126x_config_t *data, int8_t *pRssiPacket, int8_t *pSnrPkt, int8_t *pSignalRssiPkt);
+void sx126x_get_lora_packet_status(const sx126x_config_t *config, int8_t *pRssiPacket, int8_t *pSnrPkt, int8_t *pSignalRssiPkt);
 
 /**
  * @brief Gets the RSSI inst
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param pRssiInst The RSSI inst
  */
-void sx126x_get_rssi_inst(sx126x_config_t *data, int8_t *pRssiInst);
+void sx126x_get_rssi_inst(const sx126x_config_t *config, int8_t *pRssiInst);
 
 /**
  * @brief Gets the stats for GFSK
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param pNbPktReceived The number of packets received
  * @param pNbPktCrcErr The number of packets with CRC error
  * @param pNbPktLenErr The number of packets with length error
  */
-void sx126x_get_gfsk_stats(sx126x_config_t *data, uint16_t *pNbPktReceived, uint16_t *pNbPktCrcErr, uint16_t *pNbPktLenErr);
+void sx126x_get_gfsk_stats(const sx126x_config_t *config, uint16_t *pNbPktReceived, uint16_t *pNbPktCrcErr, uint16_t *pNbPktLenErr);
 
 /**
  * @brief Gets the stats for LoRa
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param pNbPktReceived The number of packets received
  * @param pNbPktCrcErr The number of packets with CRC error
  * @param pNbPktHeaderErr The number of packets with header error
  */
-void sx126x_get_lora_stats(sx126x_config_t *data, uint16_t *pNbPktReceived, uint16_t *pNbPktCrcErr, uint16_t *pNbPktHeaderErr);
+void sx126x_get_lora_stats(const sx126x_config_t *config, uint16_t *pNbPktReceived, uint16_t *pNbPktCrcErr, uint16_t *pNbPktHeaderErr);
 
 /**
  * @brief Resets the stats
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  */
-void sx126x_reset_stats(sx126x_config_t *data);
+void sx126x_reset_stats(const sx126x_config_t *config);
 
 /**
  * @brief Gets the device errors
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param pErrors The errors
  */
-void sx126x_get_device_errors(sx126x_config_t *data, uint16_t *pErrors);
+void sx126x_get_device_errors(const sx126x_config_t *config, uint16_t *pErrors);
 
 /**
  * @brief Clears the device errors
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  */
-void sx126x_clear_device_errors(sx126x_config_t *data);
+void sx126x_clear_device_errors(const sx126x_config_t *config);
 
 /**
  * @brief Checks if the radio is busy
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  * @param pStatus The status
  */
-void sx126x_is_busy(sx126x_config_t *data, bool *pStatus);
+void sx126x_is_busy(const sx126x_config_t *config, bool *pStatus);
 
 /**
  * @brief Checks if the radio is busy and waits
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  */
-void sx126x_check_busy(sx126x_config_t *data);
+void sx126x_check_busy(const sx126x_config_t *config);
 
 /**
  * @brief Resets the radio
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  */
-void sx126x_reset(sx126x_config_t *data);
+void sx126x_reset(const sx126x_config_t *config);
 
 /**
  * @brief Wakes up the radio
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  */
-void sx126x_wakeup(sx126x_config_t *data);
+void sx126x_wakeup(const sx126x_config_t *config);
 
 /**
  * @brief Clamps the TX power
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  */
-void sx126x_clamp_tx(sx126x_config_t *data);
+void sx126x_clamp_tx(const sx126x_config_t *config);
 
 /**
  * @brief Stops the RTC
  *
- * @param data The radio configuration
+ * @param config The radio configuration
  */
-void sx126x_stop_rtc(sx126x_config_t *data);
+void sx126x_stop_rtc(const sx126x_config_t *config);
 
 #endif

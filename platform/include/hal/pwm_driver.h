@@ -7,7 +7,7 @@
 /**
  * @brief PWM protocol configuration
  */
-typedef struct pwm_config
+typedef struct hal_pwm_config
 {
     hal_pin_number_t pin;    /** Pin  */
     unsigned long frequency; /** Frequency  */
