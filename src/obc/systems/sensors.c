@@ -12,7 +12,6 @@
 #include "lib/drivers/magnetometer/mmc5983ma_driver.h"
 #include "lib/drivers/barometer/ms5611_driver.h"
 #include "lib/drivers/gps/gps_driver.h"
-#include "lib/drivers/adc/ads7038_driver.h"
 #include "lib/drivers/adc/ads786x_driver.h"
 #include "lib/drivers/led/w2812_driver.h"
 #include "lib/battery/battery_utils.h"
@@ -21,8 +20,8 @@
 #define SYSTEM_NAME "sensors"
 #define BATTERY_VOLTAGE_DIVIDER 11.0f
 #define BARO_PRESS_STEP_THRESHOLD 50
-#define EXP_FILTER_IGN_COEFF 0.2f
-#define EXP_FILTER_BAT_COEFF 0.3f
+#define EXP_FILTER_IGN_COEFF 0.6f
+#define EXP_FILTER_BAT_COEFF 0.4f
 
 // REF: https://blog.ampow.com/lipo-voltage-chart/
 static battery_table_entry_t s_BatteryTable[] = {
@@ -62,7 +61,6 @@ static h3lis331dl_config_t s_H3LIS331DLConfig;
 static mmc5983ma_config_t s_MMC5983MAConfig;
 static ms5611_config_t s_MS5611Config;
 static gps_config_t s_GPSConfig;
-// static ads7038_config_t s_ADS7038Config;
 static ads786x_config_t s_ADS786XConfig;
 static battery_config_t s_BatteryConfig;
 
@@ -114,10 +112,8 @@ void sensors_init(void)
 
     SYS_LOG("GPS: READY");
 
-    // ads7038_init(&s_ADS7038Config, OBC_SPI, PIN_CS_ADS, 1 << ADC_IGN_1_DET_CH | 1 << ADC_IGN_2_DET_CH | 1 << ADC_IGN_3_DET_CH | 1 << ADC_IGN_4_DET_CH, ADC_VREF);
     ads786x_init(&s_ADS786XConfig, OBC_SPI, PIN_CS_ADS, ADS786X_TYPE_6, ADC_VREF);
 
-    // SYS_LOG("ADS7038: READY");
     SYS_LOG("ADS786X: READY");
 
     hal_adc_init_pin(PIN_IGN_DET_1);
@@ -185,10 +181,10 @@ void sensors_update(void)
 
     if (hal_time_run_every_ms(100, &s_ADCMeasurementTimeOffset))
     {
-        s_Frame.ignDet1Volts = 1.035f * (hal_adc_read_voltage(PIN_IGN_DET_1) - 0.036f);
-        s_Frame.ignDet2Volts = 1.035f * (hal_adc_read_voltage(PIN_IGN_DET_2) - 0.036f);
-        s_Frame.ignDet3Volts = 1.035f * (hal_adc_read_voltage(PIN_IGN_DET_3) - 0.036f);
-        s_Frame.ignDet4Volts = 1.035f * (hal_adc_read_voltage(PIN_IGN_DET_4) - 0.036f);
+        s_Frame.ignDet1Volts = _exp_smoothing(1.035f * (hal_adc_read_voltage(PIN_IGN_DET_1) - 0.036f), s_Frame.ignDet1Volts, EXP_FILTER_IGN_COEFF);
+        s_Frame.ignDet2Volts = _exp_smoothing(1.035f * (hal_adc_read_voltage(PIN_IGN_DET_2) - 0.036f), s_Frame.ignDet2Volts, EXP_FILTER_IGN_COEFF);
+        s_Frame.ignDet3Volts = _exp_smoothing(1.035f * (hal_adc_read_voltage(PIN_IGN_DET_3) - 0.036f), s_Frame.ignDet3Volts, EXP_FILTER_IGN_COEFF);
+        s_Frame.ignDet4Volts = _exp_smoothing(1.035f * (hal_adc_read_voltage(PIN_IGN_DET_4) - 0.036f), s_Frame.ignDet4Volts, EXP_FILTER_IGN_COEFF);
 
         float totalBat = 0;
         for (size_t i = 0; i < 100; i++)
@@ -205,25 +201,6 @@ void sensors_update(void)
         s_Frame.batNCells = data.nCells;
 
         events_publish(MSG_SENSORS_ADC_READ);
-
-        // float channels[4];
-        // ads7038_read_channels(&s_ADS7038Config, channels, sizeof(channels) / sizeof(float));
-
-        // s_Frame.ignDet1Volts = _exp_smoothing(channels[0] - 0.015f, s_Frame.ignDet1Volts, EXP_FILTER_IGN_COEFF);
-        // s_Frame.ignDet2Volts = _exp_smoothing(channels[1] - 0.023f, s_Frame.ignDet2Volts, EXP_FILTER_IGN_COEFF);
-        // s_Frame.ignDet3Volts = _exp_smoothing(channels[2] - 0.048f, s_Frame.ignDet3Volts, EXP_FILTER_IGN_COEFF);
-        // s_Frame.ignDet4Volts = _exp_smoothing(channels[3] - 0.010f, s_Frame.ignDet4Volts, EXP_FILTER_IGN_COEFF);
-
-        // float rawBatVolts = 1.08f * hal_adc_read_voltage(PIN_BATTERY) * BATTERY_VOLTAGE_DIVIDER - 0.74f; // ?
-        // s_Frame.batVolts = _exp_smoothing(rawBatVolts, s_Frame.batVolts, EXP_FILTER_BAT_COEFF);
-
-        // battery_data_t data = {};
-        // battery_convert(&s_BatteryConfig, s_Frame.batVolts, &data);
-
-        // s_Frame.batPercent = data.percentage;
-        // s_Frame.batNCells = data.nCells;
-
-        // events_publish(MSG_SENSORS_ADC_READ);
     }
 }
 

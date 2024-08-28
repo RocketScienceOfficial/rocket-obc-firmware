@@ -254,10 +254,10 @@ typedef enum sx126x_gfsk_packet_type
 typedef enum sx126x_gfsk_crc_type
 {
     SX126X_GFSK_CRC_OFF = 0x01,
-    SX126X_GFSK_CRC_1_uint8_t = 0x00,
-    SX126X_GFSK_CRC_2_uint8_t = 0x02,
-    SX126X_GFSK_CRC_1_uint8_t_INV = 0x04,
-    SX126X_GFSK_CRC_2_uint8_t_INV = 0x06,
+    SX126X_GFSK_CRC_1_BYTE = 0x00,
+    SX126X_GFSK_CRC_2_BYTE = 0x02,
+    SX126X_GFSK_CRC_1_BYTE_INV = 0x04,
+    SX126X_GFSK_CRC_2_BYTE_INV = 0x06,
 } sx126x_gfsk_crc_type_t;
 
 /**

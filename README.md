@@ -38,5 +38,5 @@ Project is done in CMake, so create build directory and run: ```cmake ..``` in i
 
 Here is a list of supported CMake variables:
  - OBC_PLATFORM: only 'rp2040'
- - OBC_BOARD: 'obcv15' or 'obcv16'
+ - OBC_BOARD: 'obcv16'
  - CMAKE_BUILD_TYPE: Debug / Release

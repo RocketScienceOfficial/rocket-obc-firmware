@@ -143,7 +143,7 @@ void sx127x_write_buffer(sx127x_config_t *config, const uint8_t *buffer, size_t 
 
     while ((_sx127x_read_register(config, REG_IRQ_FLAGS) & IRQ_TX_DONE_MASK) == 0)
     {
-        hal_time_sleep_ms(0);
+        hal_time_sleep_ms(1);
     }
 
     _sx127x_write_register(config, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);

@@ -269,7 +269,7 @@ void sx126x_set_rx_tx_fallback_mode(const sx126x_config_t *config, sx126x_fallba
 
 void sx126x_write_buffer(const sx126x_config_t *config, uint8_t offset, uint8_t *buffer, size_t szBuffer)
 {
-    uint8_t buff[16];
+    uint8_t buff[64];
 
     buff[0] = (uint8_t)offset;
 
@@ -721,7 +721,7 @@ static void _sx126x_cmd(const sx126x_config_t *config, uint8_t command, uint8_t 
 {
     sx126x_check_busy(config);
 
-    uint8_t buff[16];
+    uint8_t buff[64];
 
     buff[0] = command;
 
@@ -739,5 +739,5 @@ static void _sx126x_cmd(const sx126x_config_t *config, uint8_t command, uint8_t 
         hal_spi_read(config->spi, 0, resultBuffer, szBuffer);
     }
 
-    hal_spi_cs_select(config->cs);
+    hal_spi_cs_deselect(config->cs);
 }

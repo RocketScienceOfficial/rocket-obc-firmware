@@ -27,7 +27,7 @@
 
 int main()
 {
-    hal_board_init(1000);
+    hal_board_init(5000);
 
     hal_serial_printf("Initialized board!\n");
     hal_serial_printf("Firmware version: 1.0\n");
@@ -57,12 +57,7 @@ int main()
     sx126x_set_buffer_base_address(&loraConfig, 0, 0);
     sx126x_set_packet_lora_params(&loraConfig, 8, SX126X_LORA_HEADER_EXPLICIT, 255, true, false);
     sx126x_set_dio_irq_params(&loraConfig, SX126X_IRQ_RADIO_ALL_MASK, SX126X_IRQ_TX_DONE_MASK | SX126X_IRQ_RX_TX_TIMEOUT_MASK | SX126X_IRQ_RX_DONE_MASK, SX126X_IRQ_NONE, SX126X_IRQ_NONE);
-    sx126x_set_tx_params(&loraConfig, 22, SX126X_RAMP_10U);
-
-    // sx127x_config_t loraData = {};
-    // sx127x_init(&loraData, SPI, CS, RESET, LORA_FREQUENCY);
-    // sx127x_set_signal_bandwidth(&loraData, LORA_BANDWIDTH);
-    // sx127x_set_spreading_factor(&loraData, LORA_SF);
+    sx126x_set_tx_params(&loraConfig, 17, SX126X_RAMP_10U);
 
     bool rx = false;
 
@@ -83,9 +78,6 @@ int main()
                 {
                     curSize = byte;
 
-                    hal_gpio_set_pin_state(TXEN, GPIO_HIGH);
-                    hal_gpio_set_pin_state(RXEN, GPIO_LOW);
-
                     rx = false;
 
                     hal_serial_printf("Received request for %d bytes\n", curSize);
@@ -103,8 +95,6 @@ int main()
                 {
                     hal_serial_printf("All bytes received!\n");
 
-                    // sx127x_write_buffer(&loraData, recvBuffer, bufLen);
-
                     sx126x_set_standby(&loraConfig, SX126X_STANDBY_RC);
                     sx126x_set_buffer_base_address(&loraConfig, 0, 0);
                     sx126x_write_buffer(&loraConfig, 0, recvBuffer, bufLen);
@@ -112,9 +102,6 @@ int main()
                     sx126x_set_tx(&loraConfig, 0);
 
                     hal_serial_printf("Packet sent!\n");
-
-                    hal_gpio_set_pin_state(TXEN, GPIO_LOW);
-                    hal_gpio_set_pin_state(RXEN, GPIO_HIGH);
 
                     rx = true;
 

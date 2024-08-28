@@ -298,14 +298,6 @@ int main()
 
         while (true)
         {
-            float total = 0;
-            for (size_t i = 0; i < 10; i++)
-            {
-                total += hal_adc_read_voltage(PIN_IGN_DET_1);
-            }
-            total /= 10;
-            hal_serial_printf("%f\n", total);
-
             hal_serial_printf("%f  %f  %f  %f\n", 1.035f * (hal_adc_read_voltage(PIN_IGN_DET_1) - 0.036f), 1.035f * (hal_adc_read_voltage(PIN_IGN_DET_2) - 0.036f), 1.035f * (hal_adc_read_voltage(PIN_IGN_DET_3) - 0.036f), 1.035f * (hal_adc_read_voltage(PIN_IGN_DET_4) - 0.036f));
 
             hal_time_sleep_ms(100);
