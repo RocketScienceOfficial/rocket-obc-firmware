@@ -18,6 +18,7 @@
 #define SECTORS_COUNT_STANDING_BUFFER ((SECTORS_OFFSET_DATA) - (SECTORS_OFFSET_STANDING_BUFFER))
 #define SECTORS_COUNT_DATA 3500
 #define STANDING_BUFFER_LENGTH (FLASH_PAGE_SIZE * 2)
+#define LANDING_BUFFER_LENGTH (FLASH_PAGE_SIZE * 2)
 #define DATA_RECOVERY_MAX_FRAMES 150000
 #define DATAMAN_FILE_INFO_MAGIC 0x8F3E
 #define SEND_DATA(fmt, ...) hal_serial_printf("/*" fmt "*/\n", ##__VA_ARGS__)
@@ -40,6 +41,7 @@ static size_t s_SavedFramesCount;
 static dataman_frame_t s_StandingBuffer[STANDING_BUFFER_LENGTH];
 static size_t s_StandingBufferLength;
 static size_t s_StandingBufferIndex;
+static size_t s_LandingBufferIndex;
 static dataman_file_info_t s_CurrentInfoFile;
 static bool s_ReadyTest;
 
@@ -86,19 +88,7 @@ void dataman_update(void)
 {
     if (!s_Terminated)
     {
-        if (sm_get_state() == FLIGHT_STATE_LANDED)
-        {
-            _flush_data();
-            _flush_standing_buffer();
-
-            s_CurrentInfoFile.savedFramesCount = s_SavedFramesCount;
-            s_CurrentInfoFile.standingFramesCount = s_StandingBufferLength;
-
-            _save_info_file();
-
-            s_Terminated = true;
-        }
-        else if (sm_get_state() == FLIGHT_STATE_STANDING)
+        if (sm_get_state() == FLIGHT_STATE_STANDING)
         {
             if (events_poll(MSG_CMD_DATA_READ))
             {
@@ -125,11 +115,29 @@ void dataman_update(void)
                 _save_standing_buffer_frame();
             }
         }
-        else if (sm_get_state() == FLIGHT_STATE_ACCELERATING || sm_get_state() == FLIGHT_STATE_FREE_FALL || sm_get_state() == FLIGHT_STATE_FREE_FLIGHT)
+        else if (sm_get_state() == FLIGHT_STATE_ACCELERATING || sm_get_state() == FLIGHT_STATE_FREE_FALL || sm_get_state() == FLIGHT_STATE_FREE_FLIGHT || sm_get_state() == FLIGHT_STATE_LANDED)
         {
             if (events_poll(MSG_SENSORS_NORMAL_READ))
             {
                 _save_frame();
+
+                if (sm_get_state() == FLIGHT_STATE_LANDED)
+                {
+                    s_LandingBufferIndex++;
+
+                    if (s_LandingBufferIndex == LANDING_BUFFER_LENGTH)
+                    {
+                        _flush_data();
+                        _flush_standing_buffer();
+
+                        s_CurrentInfoFile.savedFramesCount = s_SavedFramesCount;
+                        s_CurrentInfoFile.standingFramesCount = s_StandingBufferLength;
+
+                        _save_info_file();
+
+                        s_Terminated = true;
+                    }
+                }
             }
         }
     }

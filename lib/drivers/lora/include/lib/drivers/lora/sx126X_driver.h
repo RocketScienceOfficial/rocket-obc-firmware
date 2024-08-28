@@ -195,15 +195,15 @@ typedef enum sx126x_lora_sf
 typedef enum sx126x_lora_bw
 {
     SX126X_LORA_BW_7_8 = 0x00,
-    SX126X_LORA_BW_10_4 = 0x01,
-    SX126X_LORA_BW_15_6 = 0x02,
-    SX126X_LORA_BW_20_8 = 0x03,
-    SX126X_LORA_BW_31_25 = 0x04,
-    SX126X_LORA_BW_41_7 = 0x05,
-    SX126X_LORA_BW_62_5 = 0x06,
-    SX126X_LORA_BW_125 = 0x07,
-    SX126X_LORA_BW_250 = 0x08,
-    SX126X_LORA_BW_500 = 0x09,
+    SX126X_LORA_BW_10_4 = 0x08,
+    SX126X_LORA_BW_15_6 = 0x01,
+    SX126X_LORA_BW_20_8 = 0x09,
+    SX126X_LORA_BW_31_25 = 0x02,
+    SX126X_LORA_BW_41_7 = 0x0A,
+    SX126X_LORA_BW_62_5 = 0x03,
+    SX126X_LORA_BW_125 = 0x04,
+    SX126X_LORA_BW_250 = 0x05,
+    SX126X_LORA_BW_500 = 0x06,
 } sx126x_lora_bw_t;
 
 /**
@@ -265,8 +265,8 @@ typedef enum sx126x_gfsk_crc_type
  */
 typedef enum sx126x_lora_header_type
 {
-    SX126X_LORA_HEADER_IMPLICIT = 0x00,
-    SX126X_LORA_HEADER_EXPLICIT = 0x01,
+    SX126X_LORA_HEADER_EXPLICIT = 0x00,
+    SX126X_LORA_HEADER_IMPLICIT = 0x01,
 } sx126x_lora_header_type_t;
 
 /**

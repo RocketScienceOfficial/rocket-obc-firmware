@@ -187,11 +187,11 @@ void sensors_update(void)
         s_Frame.ignDet4Volts = _exp_smoothing(1.035f * (hal_adc_read_voltage(PIN_IGN_DET_4) - 0.036f), s_Frame.ignDet4Volts, EXP_FILTER_IGN_COEFF);
 
         float totalBat = 0;
-        for (size_t i = 0; i < 100; i++)
+        for (size_t i = 0; i < 20; i++)
         {
             totalBat += 1.138f * (ads786x_read(&s_ADS786XConfig) * BATTERY_VOLTAGE_DIVIDER) - 1.7f;
         }
-        totalBat /= 100;
+        totalBat /= 20;
         s_Frame.batVolts = _exp_smoothing(totalBat, s_Frame.batVolts, EXP_FILTER_BAT_COEFF);
 
         battery_data_t data = {};

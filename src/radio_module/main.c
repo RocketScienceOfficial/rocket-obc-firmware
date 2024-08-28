@@ -27,7 +27,7 @@
 
 int main()
 {
-    hal_board_init(5000);
+    hal_board_init(1000);
 
     hal_serial_printf("Initialized board!\n");
     hal_serial_printf("Firmware version: 1.0\n");
@@ -39,25 +39,25 @@ int main()
     hal_gpio_init_pin(RXEN, GPIO_OUTPUT);
     hal_gpio_init_pin(TXEN, GPIO_OUTPUT);
     hal_gpio_set_pin_state(RXEN, GPIO_LOW);
-    hal_gpio_set_pin_state(TXEN, GPIO_LOW);
+    hal_gpio_set_pin_state(TXEN, GPIO_HIGH);
 
     sx126x_config_t loraConfig = {};
     sx126x_init(&loraConfig, SPI, CS, RESET, BUSY);
-    sx126x_clear_irq_status(&loraConfig, SX126X_IRQ_RADIO_ALL_MASK);
     sx126x_set_standby(&loraConfig, SX126X_STANDBY_RC);
+    sx126x_clear_irq_status(&loraConfig, SX126X_IRQ_RADIO_ALL_MASK);
+    sx126x_set_dio_irq_params(&loraConfig, SX126X_IRQ_RADIO_ALL_MASK, SX126X_IRQ_TX_DONE_MASK | SX126X_IRQ_RX_TX_TIMEOUT_MASK | SX126X_IRQ_RX_DONE_MASK, SX126X_IRQ_NONE, SX126X_IRQ_NONE);
+    sx126x_set_dio2_as_rf_switch_ctrl(&loraConfig, true);
+    sx126x_set_dio3_as_tcxo_ctrl(&loraConfig, SX126X_TCXO_CTRL_3_3V, 100);
     sx126x_set_regulator_mode(&loraConfig, SX126X_REGULATOR_DC_DC);
     sx126x_set_pa_config(&loraConfig, 0x04, 0x07);
-    sx126x_set_dio3_as_tcxo_ctrl(&loraConfig, SX126X_TCXO_CTRL_3_3V, 100);
     sx126x_calibrate(&loraConfig, SX126X_CALIBRATE_ALL_MASK);
     sx126x_calibrate_image(&loraConfig, LORA_FREQUENCY);
-    sx126x_set_dio2_as_rf_switch_ctrl(&loraConfig, true);
-    sx126x_set_packet_type(&loraConfig, SX126X_PACKET_TYPE_LORA);
     sx126x_set_rf_frequency(&loraConfig, LORA_FREQUENCY);
-    sx126x_set_lora_modulation_params(&loraConfig, SX126X_LORA_SF_8, SX126X_LORA_BW_125, SX126X_LORA_CR_4_5, 0x01);
+    sx126x_set_packet_type(&loraConfig, SX126X_PACKET_TYPE_LORA);
+    sx126x_set_lora_modulation_params(&loraConfig, SX126X_LORA_SF_8, SX126X_LORA_BW_125, SX126X_LORA_CR_4_5, 0x00);
+    sx126x_set_packet_lora_params(&loraConfig, 16, SX126X_LORA_HEADER_EXPLICIT, 255, true, false);
     sx126x_set_buffer_base_address(&loraConfig, 0, 0);
-    sx126x_set_packet_lora_params(&loraConfig, 8, SX126X_LORA_HEADER_EXPLICIT, 255, true, false);
-    sx126x_set_dio_irq_params(&loraConfig, SX126X_IRQ_RADIO_ALL_MASK, SX126X_IRQ_TX_DONE_MASK | SX126X_IRQ_RX_TX_TIMEOUT_MASK | SX126X_IRQ_RX_DONE_MASK, SX126X_IRQ_NONE, SX126X_IRQ_NONE);
-    sx126x_set_tx_params(&loraConfig, 17, SX126X_RAMP_10U);
+    sx126x_set_tx_params(&loraConfig, 22, SX126X_RAMP_10U);
 
     bool rx = false;
 
@@ -98,7 +98,7 @@ int main()
                     sx126x_set_standby(&loraConfig, SX126X_STANDBY_RC);
                     sx126x_set_buffer_base_address(&loraConfig, 0, 0);
                     sx126x_write_buffer(&loraConfig, 0, recvBuffer, bufLen);
-                    sx126x_set_packet_lora_params(&loraConfig, 8, SX126X_LORA_HEADER_EXPLICIT, bufLen, true, false);
+                    sx126x_set_packet_lora_params(&loraConfig, 16, SX126X_LORA_HEADER_EXPLICIT, bufLen, true, false);
                     sx126x_set_tx(&loraConfig, 0);
 
                     hal_serial_printf("Packet sent!\n");
