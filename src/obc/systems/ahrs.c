@@ -343,7 +343,7 @@ static void _ekf_init(void)
     s_EKF.cfg = (ekf_config_t){
         .dt = 0.0025,
         .hVar = 1.0f,
-        .gpsVar = 2.2f,
+        .gpsVar = 1.6f,
         .barVar = 0.9f,
     };
 

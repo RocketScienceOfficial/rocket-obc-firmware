@@ -20,7 +20,8 @@
 #define SYSTEM_NAME "sensors"
 #define BATTERY_VOLTAGE_DIVIDER 11.0f
 #define BARO_PRESS_STEP_THRESHOLD 50
-#define EXP_FILTER_IGN_COEFF 0.6f
+#define EXP_FILTER_BARO_COEFF 0.05f
+#define EXP_FILTER_IGN_COEFF 0.3f
 #define EXP_FILTER_BAT_COEFF 0.4f
 
 // REF: https://blog.ampow.com/lipo-voltage-chart/
@@ -147,12 +148,10 @@ void sensors_update(void)
 
     if (ms5611_read_non_blocking(&s_MS5611Config, &s_Frame.press, &s_Frame.temp))
     {
-        if (abs(s_Frame.press - lastPress) <= BARO_PRESS_STEP_THRESHOLD || lastPress == 0)
-        {
-            lastPress = s_Frame.press;
+        s_Frame.press = _exp_smoothing(s_Frame.press, lastPress, EXP_FILTER_BARO_COEFF);
+        s_Frame.baroHeight = height_from_baro_formula(s_Frame.press);
 
-            s_Frame.baroHeight = height_from_baro_formula(s_Frame.press);
-        }
+        lastPress = s_Frame.press;
 
         events_publish(MSG_SENSORS_BARO_READ);
     }
@@ -187,11 +186,11 @@ void sensors_update(void)
         s_Frame.ignDet4Volts = _exp_smoothing(1.035f * (hal_adc_read_voltage(PIN_IGN_DET_4) - 0.036f), s_Frame.ignDet4Volts, EXP_FILTER_IGN_COEFF);
 
         float totalBat = 0;
-        for (size_t i = 0; i < 20; i++)
+        for (size_t i = 0; i < 10; i++)
         {
             totalBat += 1.138f * (ads786x_read(&s_ADS786XConfig) * BATTERY_VOLTAGE_DIVIDER) - 1.7f;
         }
-        totalBat /= 20;
+        totalBat /= 10;
         s_Frame.batVolts = _exp_smoothing(totalBat, s_Frame.batVolts, EXP_FILTER_BAT_COEFF);
 
         battery_data_t data = {};

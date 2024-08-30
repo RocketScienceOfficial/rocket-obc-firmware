@@ -2,6 +2,7 @@
 #include "board_config.h"
 #include "sm.h"
 #include "sensors.h"
+#include "ahrs.h"
 #include "serial.h"
 #include "dataman.h"
 #include "radio.h"
@@ -132,14 +133,14 @@ static void _run_logic(void)
         {
             _ign_fire(&s_IGN1);
 
-            if (sm_get_apogee() - sm_get_base_alt() <= dataman_get_config()->mainHeight)
+            if (sm_get_apogee() <= dataman_get_config()->mainHeight)
             {
                 _ign_fire(&s_IGN2);
             }
         }
         else if (sm_get_state() == FLIGHT_STATE_FREE_FALL)
         {
-            if (sensors_get_frame()->baroHeight - sm_get_base_alt() <= dataman_get_config()->mainHeight)
+            if (ahrs_get_data()->position.z - sm_get_base_alt() <= dataman_get_config()->mainHeight)
             {
                 _ign_fire(&s_IGN2);
             }

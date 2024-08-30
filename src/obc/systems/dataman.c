@@ -1,5 +1,6 @@
 #include "dataman.h"
 #include "sensors.h"
+#include "ahrs.h"
 #include "sm.h"
 #include "serial.h"
 #include "ign.h"
@@ -179,6 +180,7 @@ static dataman_frame_t _get_frame(void)
         .mag1 = sensors_get_frame()->mag1,
         .press = sensors_get_frame()->press,
         .temp = sensors_get_frame()->temp,
+        .kalmanHeight = ahrs_get_data()->position.z,
         .pos = sensors_get_frame()->pos,
         .smState = (uint8_t)sm_get_state(),
         .ignFlags = ign_get_flags(),
@@ -301,7 +303,7 @@ static bool _print_saved_frame(const dataman_frame_t *frame)
 {
     if (_validate_frame(frame))
     {
-        SEND_DATA("%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f,%f,%f,%f,%d,%d",
+        SEND_DATA("%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f,%f,%f,%f,%f,%d,%d",
                   frame->time,
                   frame->acc1.x,
                   frame->acc1.y,
@@ -323,6 +325,7 @@ static bool _print_saved_frame(const dataman_frame_t *frame)
                   frame->mag1.z,
                   frame->press,
                   frame->temp,
+                  frame->kalmanHeight,
                   frame->pos.lat,
                   frame->pos.lon,
                   frame->pos.alt,

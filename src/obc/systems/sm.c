@@ -1,5 +1,6 @@
 #include "sm.h"
 #include "sensors.h"
+#include "ahrs.h"
 #include "../middleware/events.h"
 #include "../middleware/syslog.h"
 #include "lib/maths/math_utils.h"
@@ -10,12 +11,12 @@
 
 #define SYSTEM_NAME "sm"
 #define START_ACC_THRESHOLD 35
-#define START_ALT_THRESHOLD 7
+#define START_ALT_THRESHOLD 3
 #define START_ALT_VERIFICATION_COUNT 300
-#define APOGEE_MAX_DELTA 4
-#define LAND_MAX_DELTA 4
-#define LAST_ALT_APOGEE_VERIFICATION_COUNT 400
-#define LAST_ALT_LAND_VERIFICATION_COUNT 400
+#define APOGEE_MAX_DELTA 2
+#define LAND_MAX_DELTA 1
+#define LAST_ALT_APOGEE_VERIFICATION_COUNT 200
+#define LAST_ALT_LAND_VERIFICATION_COUNT 300
 
 static flight_state_type_t s_State;
 static float s_BaseAlt;
@@ -49,9 +50,9 @@ void sm_update(void)
             }
         }
 
-        if (events_poll(MSG_SENSORS_BARO_READ) && s_VerifingStandingAlt)
+        if (events_poll(MSG_SENSORS_NORMAL_READ) && s_VerifingStandingAlt)
         {
-            float alt = sensors_get_frame()->baroHeight;
+            float alt = ahrs_get_data()->position.z;
 
             if (s_BaseAlt == 0)
             {
@@ -98,9 +99,9 @@ void sm_update(void)
     }
     else if (s_State == FLIGHT_STATE_FREE_FLIGHT)
     {
-        if (events_poll(MSG_SENSORS_BARO_READ))
+        if (events_poll(MSG_SENSORS_NORMAL_READ))
         {
-            float alt = sensors_get_frame()->baroHeight;
+            float alt = ahrs_get_data()->position.z;
 
             if (alt <= s_Apogee || alt - s_Apogee <= APOGEE_MAX_DELTA)
             {
@@ -110,6 +111,7 @@ void sm_update(void)
                 {
                     s_State = FLIGHT_STATE_FREE_FALL;
                     s_ApogeeReached = true;
+                    s_Apogee -= s_BaseAlt;
 
                     SYS_LOG("Apogee reached: %f", s_Apogee);
                     SYS_LOG("State: Free Fall");
@@ -126,9 +128,9 @@ void sm_update(void)
     }
     else if (s_State == FLIGHT_STATE_FREE_FALL)
     {
-        if (events_poll(MSG_SENSORS_BARO_READ))
+        if (events_poll(MSG_SENSORS_NORMAL_READ))
         {
-            float alt = sensors_get_frame()->baroHeight;
+            float alt = ahrs_get_data()->position.z;
             float delta = fabsf(s_LandingAlt - alt);
 
             if (delta > LAND_MAX_DELTA)
@@ -163,5 +165,5 @@ float sm_get_base_alt(void)
 
 float sm_get_apogee(void)
 {
-    return s_Apogee;
+    return s_ApogeeReached ? s_Apogee : 0;
 }

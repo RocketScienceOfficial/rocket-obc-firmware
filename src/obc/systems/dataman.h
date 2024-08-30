@@ -25,6 +25,7 @@ typedef struct __attribute__((__packed__)) dataman_frame
     vec3_t mag1;
     int press;
     float temp;
+    float kalmanHeight;
     geo_position_wgs84_t pos;
     uint8_t smState;
     uint8_t ignFlags;
