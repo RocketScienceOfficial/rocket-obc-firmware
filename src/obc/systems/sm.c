@@ -101,7 +101,7 @@ void sm_update(void)
     {
         if (events_poll(MSG_SENSORS_NORMAL_READ))
         {
-            float alt = ahrs_get_data()->position.z;
+            float alt = ahrs_get_data()->position.z - s_BaseAlt;
 
             if (alt <= s_Apogee || alt - s_Apogee <= APOGEE_MAX_DELTA)
             {
@@ -111,7 +111,6 @@ void sm_update(void)
                 {
                     s_State = FLIGHT_STATE_FREE_FALL;
                     s_ApogeeReached = true;
-                    s_Apogee -= s_BaseAlt;
 
                     SYS_LOG("Apogee reached: %f", s_Apogee);
                     SYS_LOG("State: Free Fall");
@@ -130,7 +129,7 @@ void sm_update(void)
     {
         if (events_poll(MSG_SENSORS_NORMAL_READ))
         {
-            float alt = ahrs_get_data()->position.z;
+            float alt = ahrs_get_data()->position.z - s_BaseAlt;
             float delta = fabsf(s_LandingAlt - alt);
 
             if (delta > LAND_MAX_DELTA)

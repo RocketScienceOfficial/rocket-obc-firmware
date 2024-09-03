@@ -388,7 +388,7 @@ static void _ekf_update(void)
     ekf_measurements_t meas = (ekf_measurements_t){
         .gpsAlt = sensors_get_frame()->pos.alt - s_GPSAltOffset,
         .baroHeight = sensors_get_frame()->baroHeight - s_BaroHeightOffset,
-    };
+    };    
 
     float innov[EKF_NUM_MEASUREMENTS];
     innov[0] = meas.data[0] - s_EKF.x.data[0];
