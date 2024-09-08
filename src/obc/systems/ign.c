@@ -113,7 +113,7 @@ static void _run_control(void)
 
                 SYS_LOG("Testing igniter %d...", n);
 
-                hal_pin_number_t pin = PIN_IGN_EN_1 - n;
+                hal_pin_number_t pin = n == 0 ? PIN_IGN_EN_1 : n == 1 ? PIN_IGN_EN_2 : n == 2 ? PIN_IGN_EN_3 : PIN_IGN_EN_4;
 
                 hal_gpio_set_pin_state(pin, GPIO_HIGH);
                 hal_time_sleep_ms(1000);

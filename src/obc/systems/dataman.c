@@ -303,7 +303,7 @@ static bool _print_saved_frame(const dataman_frame_t *frame)
 {
     if (_validate_frame(frame))
     {
-        SEND_DATA("%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f,%f,%f,%f,%f,%d,%d",
+        SEND_DATA("%lu,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f,%f,%f,%f,%f,%d,%d",
                   frame->time,
                   frame->acc1.x,
                   frame->acc1.y,
