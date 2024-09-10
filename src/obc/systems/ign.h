@@ -2,7 +2,6 @@
 #define _IGN_H
 
 #include <stdint.h>
-#include <stdbool.h>
 
 /**
  * @brief Possible flags of igniters
@@ -38,13 +37,6 @@ void ign_init(void);
  * @brief Update igniters
  */
 void ign_update(void);
-
-/**
- * @brief Check if igniters are armed
- *
- * @return True if igniters are armed
- */
-bool ign_is_armed(void);
 
 /**
  * @brief Gets current flags (status) of igniters

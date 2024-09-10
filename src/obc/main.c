@@ -14,11 +14,11 @@
 static void _init_systems(void)
 {
     sensors_init();
+    radio_init();
     ahrs_init();
     serial_init();
     sm_init();
     dataman_init();
-    radio_init();
     status_init();
     ign_init();
     voltage_init();
@@ -29,11 +29,11 @@ static void _init_systems(void)
 static void _update_systems(void)
 {
     serial_update();
+    radio_update();
     sensors_update();
     ahrs_update();
     sm_update();
     dataman_update();
-    radio_update();
     ign_update();
     status_update();
     voltage_update();

@@ -5,7 +5,6 @@
 #include "ahrs.h"
 #include "serial.h"
 #include "dataman.h"
-#include "radio.h"
 #include "../middleware/events.h"
 #include "../middleware/syslog.h"
 #include "hal/gpio_driver.h"
@@ -29,7 +28,6 @@ typedef struct ign_pin_data
     bool finished;
 } ign_pin_data_t;
 
-static bool s_Armed;
 static ign_pin_data_t s_IGN1;
 static ign_pin_data_t s_IGN2;
 static ign_pin_data_t s_IGN3;
@@ -61,11 +59,6 @@ void ign_update(void)
     _update_flags();
 }
 
-bool ign_is_armed(void)
-{
-    return s_Armed;
-}
-
 uint8_t ign_get_flags(void)
 {
     uint8_t flags = 0;
@@ -90,19 +83,6 @@ static void _run_control(void)
 {
     if (sm_get_state() == FLIGHT_STATE_STANDING)
     {
-        if (radio_get_parsed_data()->arm_enabled)
-        {
-            s_Armed = true;
-
-            SYS_LOG("Armed igniters!");
-        }
-        else if (radio_get_parsed_data()->arm_disabled)
-        {
-            s_Armed = false;
-
-            SYS_LOG("Igniters were disarmed!");
-        }
-
         if (events_poll(MSG_CMD_IGN_TEST))
         {
             const char *data = serial_get_param_at_index(0);
@@ -113,7 +93,9 @@ static void _run_control(void)
 
                 SYS_LOG("Testing igniter %d...", n);
 
-                hal_pin_number_t pin = n == 0 ? PIN_IGN_EN_1 : n == 1 ? PIN_IGN_EN_2 : n == 2 ? PIN_IGN_EN_3 : PIN_IGN_EN_4;
+                hal_pin_number_t pin = n == 0 ? PIN_IGN_EN_1 : n == 1 ? PIN_IGN_EN_2
+                                                           : n == 2   ? PIN_IGN_EN_3
+                                                                      : PIN_IGN_EN_4;
 
                 hal_gpio_set_pin_state(pin, GPIO_HIGH);
                 hal_time_sleep_ms(1000);
@@ -127,30 +109,27 @@ static void _run_control(void)
 
 static void _run_logic(void)
 {
-    if (s_Armed)
+    if (events_poll(MSG_SM_APOGEE_REACHED))
     {
-        if (events_poll(MSG_SM_APOGEE_REACHED))
-        {
-            _ign_fire(&s_IGN1);
+        _ign_fire(&s_IGN1);
 
-            if (sm_get_apogee() <= dataman_get_config()->mainHeight)
-            {
-                _ign_fire(&s_IGN2);
-            }
-        }
-        else if (sm_get_state() == FLIGHT_STATE_FREE_FALL)
+        if (sm_get_apogee() <= dataman_get_config()->mainHeight)
         {
-            if (ahrs_get_data()->position.z - sm_get_base_alt() <= dataman_get_config()->mainHeight)
-            {
-                _ign_fire(&s_IGN2);
-            }
+            _ign_fire(&s_IGN2);
         }
-
-        _ign_update(&s_IGN1);
-        _ign_update(&s_IGN2);
-        _ign_update(&s_IGN3);
-        _ign_update(&s_IGN4);
     }
+    else if (sm_get_state() == FLIGHT_STATE_FREE_FALL)
+    {
+        if (ahrs_get_data()->position.z - sm_get_base_alt() <= dataman_get_config()->mainHeight)
+        {
+            _ign_fire(&s_IGN2);
+        }
+    }
+
+    _ign_update(&s_IGN1);
+    _ign_update(&s_IGN2);
+    _ign_update(&s_IGN3);
+    _ign_update(&s_IGN4);
 }
 
 static void _update_flags(void)
@@ -217,7 +196,7 @@ static void _set_cont_flags(ign_pin_data_t *data, float v)
 
 static void _ign_fire(ign_pin_data_t *data)
 {
-    if (s_Armed && !data->fired && !data->finished)
+    if (!data->fired && !data->finished)
     {
         hal_gpio_set_pin_state(data->pin, GPIO_HIGH);
 
@@ -230,7 +209,7 @@ static void _ign_fire(ign_pin_data_t *data)
 
 static void _ign_update(ign_pin_data_t *data)
 {
-    if (s_Armed && data->fired && !data->finished)
+    if (data->fired && !data->finished)
     {
         if (hal_time_get_ms_since_boot() - data->fireTime >= IGN_UP_TIME_MS)
         {

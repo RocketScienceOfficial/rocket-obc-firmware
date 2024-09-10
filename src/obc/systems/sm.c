@@ -1,6 +1,7 @@
 #include "sm.h"
 #include "sensors.h"
 #include "ahrs.h"
+#include "radio.h"
 #include "../middleware/events.h"
 #include "../middleware/syslog.h"
 #include "lib/maths/math_utils.h"
@@ -18,6 +19,7 @@
 #define LAST_ALT_APOGEE_VERIFICATION_COUNT 200
 #define LAST_ALT_LAND_VERIFICATION_COUNT 300
 
+static bool s_Armed;
 static flight_state_type_t s_State;
 static float s_BaseAlt;
 static bool s_VerifingStandingAlt;
@@ -35,6 +37,24 @@ void sm_init(void)
 
 void sm_update(void)
 {
+    if (radio_get_parsed_data()->arm_enabled)
+    {
+        s_Armed = true;
+
+        SYS_LOG("Armed igniters!");
+    }
+    else if (radio_get_parsed_data()->arm_disabled)
+    {
+        s_Armed = false;
+
+        SYS_LOG("Igniters were disarmed!");
+    }
+
+    if (!s_Armed)
+    {
+        return;
+    }
+
     if (s_State == FLIGHT_STATE_STANDING)
     {
         if (events_poll(MSG_SENSORS_NORMAL_READ) && !s_VerifingStandingAlt)
@@ -165,4 +185,9 @@ float sm_get_base_alt(void)
 float sm_get_apogee(void)
 {
     return s_ApogeeReached ? s_Apogee : 0;
+}
+
+bool sm_is_armed(void)
+{
+    return s_Armed;
 }

@@ -2,7 +2,6 @@
 #include "board_config.h"
 #include "sensors.h"
 #include "voltage.h"
-#include "ign.h"
 #include "ahrs.h"
 #include "sm.h"
 #include "../middleware/syslog.h"
@@ -122,7 +121,7 @@ static uint8_t _get_control_flags(void)
     uint8_t flags = 0;
     uint8_t voltageFlags = voltage_get_flags();
 
-    if (ign_is_armed())
+    if (sm_is_armed())
     {
         flags |= RADIO_OBC_FRAME_CONTROL_FLAGS_ARMED;
     }
@@ -138,17 +137,9 @@ static uint8_t _get_control_flags(void)
     {
         flags |= RADIO_OBC_FRAME_CONTROL_FLAGS_VBAT;
     }
-    if (true)
-    {
-        flags |= RADIO_OBC_FRAME_CONTROL_FLAGS_CALIBRATION;
-    }
     if (sensors_get_frame()->gpsFix)
     {
         flags |= RADIO_OBC_FRAME_CONTROL_FLAGS_GPS;
-    }
-    if (true)
-    {
-        flags |= RADIO_OBC_FRAME_CONTROL_FLAGS_SELF_TEST;
     }
 
     return flags;

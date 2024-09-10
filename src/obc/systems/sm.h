@@ -1,6 +1,8 @@
 #ifndef _SM_H
 #define _SM_H
 
+#include <stdbool.h>
+
 /**
  * @brief Flight State Machine Type
  */
@@ -43,5 +45,12 @@ float sm_get_base_alt(void);
  * @return Apogee
  */
 float sm_get_apogee(void);
+
+/**
+ * @brief Check if state machine is armed
+ *
+ * @return True if state machine is armed
+ */
+bool sm_is_armed(void);
 
 #endif

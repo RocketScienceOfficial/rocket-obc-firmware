@@ -15,9 +15,7 @@ typedef enum radio_obc_frame_control_flags
     RADIO_OBC_FRAME_CONTROL_FLAGS_VBAT = 1 << 1,
     RADIO_OBC_FRAME_CONTROL_FLAGS_5V = 1 << 2,
     RADIO_OBC_FRAME_CONTROL_FLAGS_3V3 = 1 << 3,
-    RADIO_OBC_FRAME_CONTROL_FLAGS_CALIBRATION = 1 << 4,
-    RADIO_OBC_FRAME_CONTROL_FLAGS_GPS = 1 << 5,
-    RADIO_OBC_FRAME_CONTROL_FLAGS_SELF_TEST = 1 << 6,
+    RADIO_OBC_FRAME_CONTROL_FLAGS_GPS = 1 << 4,
 } radio_obc_frame_control_flags_t;
 
 /**

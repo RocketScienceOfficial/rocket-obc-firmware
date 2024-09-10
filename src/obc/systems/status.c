@@ -13,11 +13,13 @@
 #define WS_BRIGHTNESS 0.05f
 #define WS_COLOR(r, g, b) ws2812_get_color((uint8_t)((r) * WS_BRIGHTNESS), (uint8_t)((g) * WS_BRIGHTNESS), (uint8_t)((b) * WS_BRIGHTNESS))
 #define BUZZER_FREQ 2730
+#define BUZZER_DELAY_MS 1000
 
 static ws2812_color_t s_Diodes[7];
 static hal_pwm_config_t s_BuzzerConfig;
-static bool s_BuzzerActivated;
 static msec_t s_OtherDiodesTimer;
+static bool s_BuzzerActive;
+static msec_t s_BuzzerTimeOffset;
 
 static void _update_diodes(void);
 static ws2812_color_t _get_ign_diode_color(uint8_t ignNumber);
@@ -67,13 +69,12 @@ void status_update(void)
 
     if (sm_get_state() == FLIGHT_STATE_LANDED)
     {
-        if (!s_BuzzerActivated)
+        if (hal_time_get_ms_since_boot() - s_BuzzerTimeOffset >= BUZZER_DELAY_MS)
         {
-            passive_buzzer_set_active(&s_BuzzerConfig, true);
+            s_BuzzerActive = !s_BuzzerActive;
+            s_BuzzerTimeOffset = hal_time_get_ms_since_boot();
 
-            s_BuzzerActivated = true;
-
-            SYS_LOG("Buzzer active");
+            passive_buzzer_set_active(&s_BuzzerConfig, s_BuzzerActive);
         }
     }
 }
@@ -113,7 +114,7 @@ static ws2812_color_t _get_ign_diode_color(uint8_t ignNumber)
 
 static ws2812_color_t _get_arm_diode_color(void)
 {
-    return ign_is_armed() ? WS_COLOR(0, 255, 0) : WS_COLOR(255, 0, 0);
+    return sm_is_armed() ? WS_COLOR(0, 255, 0) : WS_COLOR(255, 0, 0);
 }
 
 static ws2812_color_t _get_bat_diode_color(void)
