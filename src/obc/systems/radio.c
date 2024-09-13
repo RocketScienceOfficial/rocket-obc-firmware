@@ -4,6 +4,7 @@
 #include "voltage.h"
 #include "ahrs.h"
 #include "sm.h"
+#include "ign.h"
 #include "../middleware/syslog.h"
 #include "../middleware/events.h"
 #include "lib/crypto/crc.h"
@@ -21,6 +22,7 @@ static msec_t s_RecoveryTimeOffset;
 static uint8_t s_Seq;
 static radio_tlm_parsed_data_t s_CurrentParsedData;
 
+static bool _check_ign_cont(uint8_t ign);
 static uint16_t _get_alt(void);
 static uint8_t _get_control_flags(void);
 static radio_obc_frame_t _create_packet(void);
@@ -109,6 +111,13 @@ const radio_tlm_parsed_data_t *radio_get_parsed_data(void)
     return &s_CurrentParsedData;
 }
 
+static bool _check_ign_cont(uint8_t ign)
+{
+    uint8_t flags = ign_get_cont_flags(ign);
+
+    return (flags & IGN_CONT_FLAG_IGN_PRESENT) && (flags & IGN_CONT_FLAG_FUSE_WORKING);
+}
+
 static uint16_t _get_alt(void)
 {
     float tmp = ahrs_get_data()->position.z;
@@ -137,9 +146,21 @@ static uint8_t _get_control_flags(void)
     {
         flags |= RADIO_OBC_FRAME_CONTROL_FLAGS_VBAT;
     }
-    if (sensors_get_frame()->gpsFix)
+    if (_check_ign_cont(1))
     {
-        flags |= RADIO_OBC_FRAME_CONTROL_FLAGS_GPS;
+        flags |= RADIO_OBC_FRAME_CONTROL_FLAGS_IGN_1;
+    }
+    if (_check_ign_cont(2))
+    {
+        flags |= RADIO_OBC_FRAME_CONTROL_FLAGS_IGN_2;
+    }
+    if (_check_ign_cont(3))
+    {
+        flags |= RADIO_OBC_FRAME_CONTROL_FLAGS_IGN_3;
+    }
+    if (_check_ign_cont(4))
+    {
+        flags |= RADIO_OBC_FRAME_CONTROL_FLAGS_IGN_4;
     }
 
     return flags;

@@ -23,9 +23,8 @@ typedef enum ign_flags
  */
 typedef enum ign_cont_flags
 {
-    IGN_CONT_FLAG_ENABLED = 1 << 0,
-    IGN_CONT_FLAG_IGN_PRESENT = 1 << 1,
-    IGN_CONT_FLAG_FUSE_WORKING = 1 << 2,
+    IGN_CONT_FLAG_IGN_PRESENT = 1 << 0,
+    IGN_CONT_FLAG_FUSE_WORKING = 1 << 1,
 } ign_cont_flags_t;
 
 /**

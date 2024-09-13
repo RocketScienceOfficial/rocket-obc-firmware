@@ -26,6 +26,7 @@
 
 // REF: https://blog.ampow.com/lipo-voltage-chart/
 static battery_table_entry_t s_BatteryTable[] = {
+    {4.50f, 100},
     {4.20f, 100},
     {4.15f, 95},
     {4.11f, 90},
@@ -188,7 +189,7 @@ void sensors_update(void)
         float totalBat = 0;
         for (size_t i = 0; i < 10; i++)
         {
-            totalBat += 1.138f * (ads786x_read(&s_ADS786XConfig) * BATTERY_VOLTAGE_DIVIDER) - 1.7f;
+            totalBat += 1.160f * (ads786x_read(&s_ADS786XConfig) * BATTERY_VOLTAGE_DIVIDER) - 2.0f;
         }
         totalBat /= 10;
         s_Frame.batVolts = _exp_smoothing(totalBat, s_Frame.batVolts, EXP_FILTER_BAT_COEFF);

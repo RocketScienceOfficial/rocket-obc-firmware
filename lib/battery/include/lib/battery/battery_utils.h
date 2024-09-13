@@ -19,7 +19,7 @@ typedef struct battery_config
 {
     battery_table_entry_t *entries; /** Battery entries */
     uint8_t entriesCount;           /** Battery entries count */
-    float oneCellMinVoltage;        /** One cell min voltage */
+    float oneCellMaxVoltage;        /** One cell max voltage */
 } battery_config_t;
 
 /**

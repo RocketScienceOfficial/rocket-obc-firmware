@@ -155,8 +155,8 @@ static void _init_pin(ign_pin_data_t *data, hal_pin_number_t pin)
 
 static uint8_t _get_ign_flag(const ign_pin_data_t *data, ign_flags_t contFlag, ign_flags_t stateFlag)
 {
-    uint8_t cont = data->contFlags & IGN_CONT_FLAG_ENABLED ? contFlag : 0;
-    uint8_t state = data->fired && !data->finished ? stateFlag : 0;
+    uint8_t cont = (data->contFlags & IGN_CONT_FLAG_IGN_PRESENT) && (data->contFlags & IGN_CONT_FLAG_FUSE_WORKING) ? (uint8_t)contFlag : 0;
+    uint8_t state = data->fired && !data->finished ? (uint8_t)stateFlag : 0;
 
     return cont | state;
 }
@@ -174,19 +174,19 @@ static void _set_cont_flags(ign_pin_data_t *data, float v)
 
     if (v < vref * (IGN_FUSE_WORKING_IGN_PRESENT_FACTOR + IGN_PIN_CHECK_EPS))
     {
-        data->contFlags = IGN_CONT_FLAG_ENABLED | IGN_CONT_FLAG_IGN_PRESENT | IGN_CONT_FLAG_FUSE_WORKING;
+        data->contFlags = IGN_CONT_FLAG_IGN_PRESENT | IGN_CONT_FLAG_FUSE_WORKING;
     }
     else if (v < vref * (IGN_FUSE_WORKING_IGN_NOT_PRESENT_FACTOR + IGN_PIN_CHECK_EPS))
     {
-        data->contFlags = IGN_CONT_FLAG_ENABLED | IGN_CONT_FLAG_FUSE_WORKING;
+        data->contFlags = IGN_CONT_FLAG_FUSE_WORKING;
     }
     else if (v < vref * (IGN_FUSE_NOT_WORKING_IGN_PRESENT_FACTOR + IGN_PIN_CHECK_EPS))
     {
-        data->contFlags = IGN_CONT_FLAG_ENABLED | IGN_CONT_FLAG_IGN_PRESENT;
+        data->contFlags = IGN_CONT_FLAG_IGN_PRESENT;
     }
     else if (v < (vref * IGN_FUSE_NOT_WORKING_IGN_NOT_PRESENT_FACTOR + IGN_PIN_CHECK_EPS))
     {
-        data->contFlags = IGN_CONT_FLAG_ENABLED;
+        data->contFlags = 0;
     }
     else
     {

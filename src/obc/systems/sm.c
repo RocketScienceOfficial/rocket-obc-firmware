@@ -12,7 +12,7 @@
 
 #define SYSTEM_NAME "sm"
 #define START_ACC_THRESHOLD 35
-#define START_ALT_THRESHOLD 5
+#define START_ALT_THRESHOLD 3
 #define START_ALT_VERIFICATION_COUNT 300
 #define APOGEE_MAX_DELTA 2
 #define LAND_MAX_DELTA 1
@@ -37,17 +37,20 @@ void sm_init(void)
 
 void sm_update(void)
 {
-    if (radio_get_parsed_data()->arm_enabled)
+    if (events_poll(MSG_RADIO_PACKET_RECEIVED))
     {
-        s_Armed = true;
+        if (radio_get_parsed_data()->arm_enabled)
+        {
+            s_Armed = true;
 
-        SYS_LOG("Armed igniters!");
-    }
-    else if (radio_get_parsed_data()->arm_disabled)
-    {
-        s_Armed = false;
+            SYS_LOG("Armed igniters!");
+        }
+        else if (radio_get_parsed_data()->arm_disabled)
+        {
+            s_Armed = false;
 
-        SYS_LOG("Igniters were disarmed!");
+            SYS_LOG("Igniters were disarmed!");
+        }
     }
 
     if (!s_Armed)
@@ -80,6 +83,8 @@ void sm_update(void)
             }
             else
             {
+                SYS_LOG("TEST: %f", alt - s_BaseAlt);
+
                 if (alt - s_BaseAlt >= START_ALT_THRESHOLD)
                 {
                     s_State = FLIGHT_STATE_ACCELERATING;

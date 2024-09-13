@@ -224,7 +224,8 @@ int main()
             float total = 0;
             for (int i = 0; i < 100; i++)
             {
-                total += 1.138f * (ads786x_read(&ads786xConfig) * 11) - 1.7f;
+                //total += 1.138f * (ads786x_read(&ads786xConfig) * 11) - 1.7f;
+                total += 1.160f * (ads786x_read(&ads786xConfig) * 11) - 2.0f;
             }
             total /= 100;
             hal_serial_printf("%f\n", total);

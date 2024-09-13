@@ -88,7 +88,7 @@ static ws2812_color_t _get_ign_diode_color(uint8_t ignNumber)
 {
     uint8_t flags = ign_get_cont_flags(ignNumber);
 
-    if (flags & IGN_CONT_FLAG_ENABLED)
+    if (flags != 0)
     {
         if (flags & IGN_CONT_FLAG_FUSE_WORKING)
         {
