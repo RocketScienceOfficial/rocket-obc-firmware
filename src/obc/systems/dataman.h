@@ -24,10 +24,10 @@ typedef struct __attribute__((__packed__)) dataman_frame
     vec3_t gyro2;
     vec3_t mag1;
     int press;
-    float temp;
     float kalmanHeight;
     geo_position_wgs84_t pos;
     uint8_t smState;
+    float batteryVoltage;
     uint8_t ignFlags;
     uint16_t crc;
 } dataman_frame_t;

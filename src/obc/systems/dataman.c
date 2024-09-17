@@ -179,10 +179,10 @@ static dataman_frame_t _get_frame(void)
         .gyro2 = sensors_get_frame()->gyro2,
         .mag1 = sensors_get_frame()->mag1,
         .press = sensors_get_frame()->press,
-        .temp = sensors_get_frame()->temp,
         .kalmanHeight = ahrs_get_data()->position.z,
         .pos = sensors_get_frame()->pos,
         .smState = (uint8_t)sm_get_state(),
+        .batteryVoltage = sensors_get_frame()->batVolts,
         .ignFlags = ign_get_flags(),
     };
 
@@ -303,7 +303,7 @@ static bool _print_saved_frame(const dataman_frame_t *frame)
 {
     if (_validate_frame(frame))
     {
-        SEND_DATA("%lu,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f,%f,%f,%f,%f,%d,%d",
+        SEND_DATA("%lu,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f,%f,%f,%f,%d,%f,%d",
                   frame->time,
                   frame->acc1.x,
                   frame->acc1.y,
@@ -324,12 +324,12 @@ static bool _print_saved_frame(const dataman_frame_t *frame)
                   frame->mag1.y,
                   frame->mag1.z,
                   frame->press,
-                  frame->temp,
                   frame->kalmanHeight,
                   frame->pos.lat,
                   frame->pos.lon,
                   frame->pos.alt,
                   frame->smState,
+                  frame->batteryVoltage,
                   frame->ignFlags);
 
         return true;
