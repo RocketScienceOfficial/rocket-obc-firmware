@@ -37,7 +37,6 @@ static void _run_control(void);
 static void _run_logic(void);
 static void _update_flags(void);
 static void _init_pin(ign_pin_data_t *data, hal_pin_number_t pin);
-static uint8_t _get_ign_flag(const ign_pin_data_t *data, ign_flags_t contFlag, ign_flags_t stateFlag);
 static void _set_cont_flags(ign_pin_data_t *data, float v);
 static void _ign_fire(ign_pin_data_t *data);
 static void _ign_update(ign_pin_data_t *data);
@@ -59,24 +58,21 @@ void ign_update(void)
     _update_flags();
 }
 
-uint8_t ign_get_flags(void)
-{
-    uint8_t flags = 0;
-
-    flags |= _get_ign_flag(&s_IGN1, IGN_FLAG_IGN_1_CONT, IGN_FLAG_IGN_1_STATE);
-    flags |= _get_ign_flag(&s_IGN2, IGN_FLAG_IGN_2_CONT, IGN_FLAG_IGN_2_STATE);
-    flags |= _get_ign_flag(&s_IGN3, IGN_FLAG_IGN_3_CONT, IGN_FLAG_IGN_3_STATE);
-    flags |= _get_ign_flag(&s_IGN4, IGN_FLAG_IGN_4_CONT, IGN_FLAG_IGN_4_STATE);
-
-    return flags;
-}
-
 uint8_t ign_get_cont_flags(uint8_t ignNumber)
 {
     return ignNumber == 1 ? s_IGN1.contFlags : ignNumber == 2 ? s_IGN2.contFlags
                                            : ignNumber == 3   ? s_IGN3.contFlags
                                            : ignNumber == 4   ? s_IGN4.contFlags
                                                               : 0;
+}
+
+bool ign_get_state(uint8_t ignNumber)
+{
+    const ign_pin_data_t *ign = ignNumber == 1 ? &s_IGN1 : ignNumber == 2 ? &s_IGN2
+                                                       : ignNumber == 3   ? &s_IGN3
+                                                       : ignNumber == 4   ? &s_IGN4
+                                                                          : 0;
+    return ign->fired && !ign->finished;
 }
 
 static void _run_control(void)
@@ -151,14 +147,6 @@ static void _init_pin(ign_pin_data_t *data, hal_pin_number_t pin)
 
     hal_gpio_init_pin(pin, GPIO_OUTPUT);
     hal_gpio_set_pin_state(pin, GPIO_LOW);
-}
-
-static uint8_t _get_ign_flag(const ign_pin_data_t *data, ign_flags_t contFlag, ign_flags_t stateFlag)
-{
-    uint8_t cont = (data->contFlags & IGN_CONT_FLAG_IGN_PRESENT) && (data->contFlags & IGN_CONT_FLAG_FUSE_WORKING) ? (uint8_t)contFlag : 0;
-    uint8_t state = data->fired && !data->finished ? (uint8_t)stateFlag : 0;
-
-    return cont | state;
 }
 
 static void _set_cont_flags(ign_pin_data_t *data, float v)

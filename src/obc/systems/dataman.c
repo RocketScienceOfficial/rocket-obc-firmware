@@ -47,6 +47,8 @@ static dataman_file_info_t s_CurrentInfoFile;
 static bool s_ReadyTest;
 
 static dataman_frame_t _get_frame(void);
+static uint8_t _get_ign_flags(void);
+static uint8_t _get_single_ign_flag(uint8_t ignNumber, dataman_ign_flags_t contFlag, dataman_ign_flags_t stateFlag);
 static bool _validate_frame(const dataman_frame_t *frame);
 static bool _validate_info(const dataman_file_info_t *info);
 static bool _can_save_data(void);
@@ -182,13 +184,33 @@ static dataman_frame_t _get_frame(void)
         .kalmanHeight = ahrs_get_data()->position.z,
         .pos = sensors_get_frame()->pos,
         .smState = (uint8_t)sm_get_state(),
-        .batteryVoltage = sensors_get_frame()->batVolts,
-        .ignFlags = ign_get_flags(),
+        .batteryVoltage = sensors_get_frame()->batVolts * 10,
+        .ignFlags = _get_ign_flags(),
     };
 
     frame.crc = crc16_mcrf4xx_calculate((const uint8_t *)&frame, sizeof(frame) - 2);
 
     return frame;
+}
+
+static uint8_t _get_ign_flags(void)
+{
+    uint8_t flags = 0;
+
+    flags |= _get_single_ign_flag(1, DATAMAN_IGN_FLAG_IGN_1_CONT, DATAMAN_IGN_FLAG_IGN_1_STATE);
+    flags |= _get_single_ign_flag(2, DATAMAN_IGN_FLAG_IGN_2_CONT, DATAMAN_IGN_FLAG_IGN_2_STATE);
+    flags |= _get_single_ign_flag(3, DATAMAN_IGN_FLAG_IGN_3_CONT, DATAMAN_IGN_FLAG_IGN_3_STATE);
+    flags |= _get_single_ign_flag(4, DATAMAN_IGN_FLAG_IGN_4_CONT, DATAMAN_IGN_FLAG_IGN_4_STATE);
+
+    return flags;
+}
+
+static uint8_t _get_single_ign_flag(uint8_t ignNumber, dataman_ign_flags_t contFlag, dataman_ign_flags_t stateFlag)
+{
+    uint8_t contFlags = ign_get_cont_flags(ignNumber);
+    bool state = ign_get_state(ignNumber);
+
+    return ((contFlags & IGN_CONT_FLAG_IGN_PRESENT) && (contFlags & IGN_CONT_FLAG_FUSE_WORKING) ? (uint8_t)contFlag : 0) | (state ? (uint8_t)stateFlag : 0);
 }
 
 static bool _validate_frame(const dataman_frame_t *frame)
@@ -303,7 +325,7 @@ static bool _print_saved_frame(const dataman_frame_t *frame)
 {
     if (_validate_frame(frame))
     {
-        SEND_DATA("%lu,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f,%f,%f,%f,%d,%f,%d",
+        SEND_DATA("%lu,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f,%f,%f,%f,%d,%d,%d",
                   frame->time,
                   frame->acc1.x,
                   frame->acc1.y,

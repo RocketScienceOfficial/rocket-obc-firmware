@@ -1,4 +1,4 @@
- #ifndef _DATAMAN_H
+#ifndef _DATAMAN_H
 #define _DATAMAN_H
 
 #include "hal/time_tracker.h"
@@ -27,7 +27,7 @@ typedef struct __attribute__((__packed__)) dataman_frame
     float kalmanHeight;
     geo_position_wgs84_t pos;
     uint8_t smState;
-    float batteryVoltage;
+    uint8_t batteryVoltage;
     uint8_t ignFlags;
     uint16_t crc;
 } dataman_frame_t;
@@ -39,6 +39,21 @@ typedef struct __attribute__((__packed__)) dataman_config
 {
     uint16_t mainHeight;
 } dataman_config_t;
+
+/**
+ * @brief Possible flags of igniters
+ */
+typedef enum dataman_ign_flags
+{
+    DATAMAN_IGN_FLAG_IGN_1_CONT = 1 << 0,
+    DATAMAN_IGN_FLAG_IGN_2_CONT = 1 << 1,
+    DATAMAN_IGN_FLAG_IGN_3_CONT = 1 << 2,
+    DATAMAN_IGN_FLAG_IGN_4_CONT = 1 << 3,
+    DATAMAN_IGN_FLAG_IGN_1_STATE = 1 << 4,
+    DATAMAN_IGN_FLAG_IGN_2_STATE = 1 << 5,
+    DATAMAN_IGN_FLAG_IGN_3_STATE = 1 << 6,
+    DATAMAN_IGN_FLAG_IGN_4_STATE = 1 << 7,
+} dataman_ign_flags_t;
 
 /**
  * @brief Initializes dataman
@@ -62,6 +77,6 @@ bool dataman_is_ready(void);
  *
  * @return Config
  */
-const dataman_config_t* dataman_get_config(void);
+const dataman_config_t *dataman_get_config(void);
 
 #endif
