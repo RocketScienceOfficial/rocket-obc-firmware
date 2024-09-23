@@ -28,7 +28,7 @@
 
 #define I2C_ADDRESS 0x18
 #define WHO_AM_I_VALUE 0x32
-#define H3LIS_RESOLUTION 32768.0f
+#define H3LIS_RESOLUTION 2048.0f
 
 void h3lis331dl_init_spi(h3lis331dl_config_t *config, hal_spi_instance_t spi, hal_pin_number_t cs)
 {
@@ -104,9 +104,9 @@ void h3lis331dl_read(const h3lis331dl_config_t *config, vec3_t *accel)
 
     gpio_utils_read_regs(&config->gpioConfig, OUT_X_L, buffer, 6);
 
-    int16_t x = (int16_t)((buffer[1] << 8) | buffer[0]);
-    int16_t y = (int16_t)((buffer[3] << 8) | buffer[2]);
-    int16_t z = (int16_t)((buffer[5] << 8) | buffer[4]);
+    int16_t x = (int16_t)((buffer[1] << 8) | buffer[0]) >> 4;
+    int16_t y = (int16_t)((buffer[3] << 8) | buffer[2]) >> 4;
+    int16_t z = (int16_t)((buffer[5] << 8) | buffer[4]) >> 4;
 
     accel->x = (float)x * config->rangeFactor;
     accel->y = (float)y * config->rangeFactor;

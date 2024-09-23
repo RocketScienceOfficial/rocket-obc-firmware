@@ -134,7 +134,7 @@ void sensors_init(void)
 
 void sensors_update(void)
 {
-    if (hal_time_run_every_us(2500, &s_MeasurementTimeOffset))
+    if (hal_time_run_every_us(25000, &s_MeasurementTimeOffset))
     {
         bmi088_accel_read(&s_BMI088AccelConfig, &s_Frame.acc1);
         bmi088_gyro_read(&s_BMI088GyroConfig, &s_Frame.gyro1);
@@ -142,8 +142,12 @@ void sensors_update(void)
         h3lis331dl_read(&s_H3LIS331DLConfig, &s_Frame.acc3);
         mmc5983ma_read(&s_MMC5983MAConfig, &s_Frame.mag1);
 
-        s_Frame.mag1.x -= 103.27f;
-        s_Frame.mag1.y -= 696.66f;
+        s_Frame.acc3.x -= -10.0f;
+        s_Frame.acc3.y -= -10.0f;
+        s_Frame.acc3.z -= +10.0f;
+
+        s_Frame.mag1.x -= +103.27f;
+        s_Frame.mag1.y -= +696.66f;
         s_Frame.mag1.z -= -195.80f;
 
         events_publish(MSG_SENSORS_NORMAL_READ);
