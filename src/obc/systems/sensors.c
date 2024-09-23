@@ -142,6 +142,10 @@ void sensors_update(void)
         h3lis331dl_read(&s_H3LIS331DLConfig, &s_Frame.acc3);
         mmc5983ma_read(&s_MMC5983MAConfig, &s_Frame.mag1);
 
+        s_Frame.mag1.x -= 103.27f;
+        s_Frame.mag1.y -= 696.66f;
+        s_Frame.mag1.z -= -195.80f;
+
         events_publish(MSG_SENSORS_NORMAL_READ);
     }
 
