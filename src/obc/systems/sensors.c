@@ -134,7 +134,7 @@ void sensors_init(void)
 
 void sensors_update(void)
 {
-    if (hal_time_run_every_us(25000, &s_MeasurementTimeOffset))
+    if (hal_time_run_every_us(2500, &s_MeasurementTimeOffset))
     {
         bmi088_accel_read(&s_BMI088AccelConfig, &s_Frame.acc1);
         bmi088_gyro_read(&s_BMI088GyroConfig, &s_Frame.gyro1);
