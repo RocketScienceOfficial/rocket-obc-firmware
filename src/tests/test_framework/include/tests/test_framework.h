@@ -6,8 +6,8 @@
 #include "hal/time_tracker.h"
 #include "hal/board_control.h"
 
-static msec_t s_TestsStartTime;
-static msec_t s_SectionStartTime;
+static hal_msec_t s_TestsStartTime;
+static hal_msec_t s_SectionStartTime;
 static int s_PassedTests;
 static int s_FailedTests;
 static bool s_IsTestError;

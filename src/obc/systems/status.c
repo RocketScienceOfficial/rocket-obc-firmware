@@ -17,9 +17,9 @@
 
 static ws2812_color_t s_Diodes[7];
 static hal_pwm_config_t s_BuzzerConfig;
-static msec_t s_OtherDiodesTimer;
+static hal_msec_t s_OtherDiodesTimer;
 static bool s_BuzzerActive;
-static msec_t s_BuzzerTimeOffset;
+static hal_msec_t s_BuzzerTimeOffset;
 
 static void _update_diodes(void);
 static ws2812_color_t _get_ign_diode_color(uint8_t ignNumber);

@@ -9,7 +9,7 @@
  * @param sleepTimeMs The time to sleep after startup
  * @return true if success
  */
-bool hal_board_init(msec_t sleepTimeMs);
+bool hal_board_init(hal_msec_t sleepTimeMs);
 
 /**
  * @brief Tight loop

@@ -17,8 +17,8 @@
 static uint8_t s_CurSize = 0;
 static uint8_t s_RecvBuffer[64];
 static uint8_t s_BufLen = 0;
-static msec_t s_TimeOffset;
-static msec_t s_RecoveryTimeOffset;
+static hal_msec_t s_TimeOffset;
+static hal_msec_t s_RecoveryTimeOffset;
 static uint8_t s_Seq;
 static radio_tlm_parsed_data_t s_CurrentParsedData;
 

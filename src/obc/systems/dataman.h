@@ -16,7 +16,7 @@
 typedef struct __attribute__((__packed__)) dataman_frame
 {
     uint8_t magic;
-    usec_t time;
+    hal_usec_t time;
     vec3_t acc1;
     vec3_t acc2;
     vec3_t acc3;

@@ -50,9 +50,9 @@ static battery_table_entry_t s_BatteryTable[] = {
     {3.27f, 0},
 };
 
-static usec_t s_MeasurementTimeOffset;
-static msec_t s_GPSTimeOffset;
-static msec_t s_ADCMeasurementTimeOffset;
+static hal_usec_t s_MeasurementTimeOffset;
+static hal_msec_t s_GPSTimeOffset;
+static hal_msec_t s_ADCMeasurementTimeOffset;
 
 static sensors_frame_t s_Frame;
 
@@ -187,6 +187,11 @@ void sensors_update(void)
         }
     }
 
+    static float batteryReadings[10];
+    static size_t batteryReadingsNextIndex = 0;
+    static float batteryReadinsSum = 0;
+    static size_t batteryReadingsCount = 0;
+
     if (hal_time_run_every_ms(100, &s_ADCMeasurementTimeOffset))
     {
         s_Frame.ignDet1Volts = _exp_smoothing(1.035f * (hal_adc_read_voltage(PIN_IGN_DET_1) - 0.036f), s_Frame.ignDet1Volts, EXP_FILTER_IGN_COEFF);
@@ -194,12 +199,27 @@ void sensors_update(void)
         s_Frame.ignDet3Volts = _exp_smoothing(1.035f * (hal_adc_read_voltage(PIN_IGN_DET_3) - 0.036f), s_Frame.ignDet3Volts, EXP_FILTER_IGN_COEFF);
         s_Frame.ignDet4Volts = _exp_smoothing(1.035f * (hal_adc_read_voltage(PIN_IGN_DET_4) - 0.036f), s_Frame.ignDet4Volts, EXP_FILTER_IGN_COEFF);
 
-        float totalBat = 0;
-        for (size_t i = 0; i < 10; i++)
+        float batteryReading = ads786x_read(&s_ADS786XConfig) * BATTERY_VOLTAGE_DIVIDER;
+
+        if (batteryReadingsCount < 10)
         {
-            totalBat += 1.160f * (ads786x_read(&s_ADS786XConfig) * BATTERY_VOLTAGE_DIVIDER) - 2.0f;
+            batteryReadinsSum += batteryReading;
+            batteryReadingsCount++;
         }
-        totalBat /= 10;
+        else
+        {
+            batteryReadinsSum = batteryReadinsSum + batteryReading - batteryReadings[batteryReadingsNextIndex];
+        }
+
+        batteryReadings[batteryReadingsNextIndex++] = batteryReading;
+
+        if (batteryReadingsNextIndex >= 10)
+        {
+            batteryReadingsNextIndex = 0;
+        }
+
+        float totalBat = batteryReadinsSum / batteryReadingsCount;
+
         s_Frame.batVolts = _exp_smoothing(totalBat, s_Frame.batVolts, EXP_FILTER_BAT_COEFF);
 
         battery_data_t data = {};

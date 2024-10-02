@@ -180,7 +180,7 @@ int main()
 
         gps_init_spi(&gpsConfig, OBC_SPI, PIN_CS_NEO);
 
-        msec_t s = 0;
+        hal_msec_t s = 0;
 
         while (true)
         {
@@ -224,11 +224,12 @@ int main()
             float total = 0;
             for (int i = 0; i < 100; i++)
             {
-                //total += 1.138f * (ads786x_read(&ads786xConfig) * 11) - 1.7f;
-                total += 1.160f * (ads786x_read(&ads786xConfig) * 11) - 2.0f;
+                total += ads786x_read(&ads786xConfig) * 11;
             }
             total /= 100;
+
             hal_serial_printf("%f\n", total);
+            
             hal_time_sleep_ms(10);
         }
     }

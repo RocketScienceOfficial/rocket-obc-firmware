@@ -24,7 +24,7 @@ typedef struct ign_pin_data
     hal_pin_number_t pin;
     uint8_t contFlags;
     bool fired;
-    msec_t fireTime;
+    hal_msec_t fireTime;
     bool finished;
 } ign_pin_data_t;
 

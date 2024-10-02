@@ -119,7 +119,7 @@ static void _ms5611_req_value(ms5611_config_t *config, bool pressure)
     hal_spi_cs_deselect(config->cs);
 
     ms5611_osr_t osr = pressure ? config->pressOSR : config->tempOSR;
-    usec_t timeout = osr == MS5611_OSR_4096 ? 10000 : osr == MS5611_OSR_2048 || osr == MS5611_OSR_1024 ? 5000
+    hal_usec_t timeout = osr == MS5611_OSR_4096 ? 10000 : osr == MS5611_OSR_2048 || osr == MS5611_OSR_1024 ? 5000
                                                   : osr == MS5611_OSR_512                              ? 2000
                                                   : osr == MS5611_OSR_256                              ? 1000
                                                                                                        : 0;
