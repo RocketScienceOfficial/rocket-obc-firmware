@@ -22,6 +22,8 @@ typedef struct sensors_frame
     float baroHeight;
     geo_position_wgs84_t pos;
     bool gpsFix;
+    bool gpsIs3dFix;
+    uint8_t gpsSatellitesCount;
     float ignDet1Volts;
     float ignDet2Volts;
     float ignDet3Volts;

@@ -117,10 +117,9 @@ bool nmea_scan(const char *sentence, const char *format, ...)
             break;
         }
 
-        for (; sentence[index] != ',' && sentence[index] != '*'; index++)
+        while (sentence[index] != ',' && sentence[index] != '*')
         {
-            field[fieldIndex] = sentence[index];
-            fieldIndex++;
+            field[fieldIndex++] = sentence[index++];
         }
 
         if (sentence[index] == '*')
@@ -186,21 +185,10 @@ bool nmea_scan(const char *sentence, const char *format, ...)
 
             if (field != NULL)
             {
-                char d[3] = {
-                    field[0],
-                    field[1],
-                    '\0',
-                };
-                char m[3] = {
-                    field[2],
-                    field[3],
-                    '\0',
-                };
-                char y[3] = {
-                    field[4],
-                    field[5],
-                    '\0',
-                };
+                char d[3] = {field[0], field[1], '\0'};
+                char m[3] = {field[2], field[3], '\0'};
+                char y[3] = {field[4], field[5], '\0'};
+
                 value->day = atoi(d);
                 value->month = atoi(m);
                 value->year = atoi(y);
@@ -219,26 +207,11 @@ bool nmea_scan(const char *sentence, const char *format, ...)
 
             if (field != NULL)
             {
-                char h[3] = {
-                    field[0],
-                    field[1],
-                    '\0',
-                };
-                char m[3] = {
-                    field[2],
-                    field[3],
-                    '\0',
-                };
-                char s[3] = {
-                    field[4],
-                    field[5],
-                    '\0',
-                };
-                char hs[3] = {
-                    field[7],
-                    field[8],
-                    '\0',
-                };
+                char h[3] = {field[0], field[1], '\0'};
+                char m[3] = {field[2], field[3], '\0'};
+                char s[3] = {field[4], field[5], '\0'};
+                char hs[3] = {field[7], field[8], '\0'};
+
                 value->hour = atoi(h);
                 value->minute = atoi(m);
                 value->second = atoi(s);
@@ -278,12 +251,7 @@ nmea_sentence_id_t nmea_get_sentence_id(const char *sentence)
         return NMEA_SENTENCE_UNKNOWN;
     }
 
-    char id[4] = {
-        s[2],
-        s[3],
-        s[4],
-        '\0',
-    };
+    char id[4] = {s[2], s[3], s[4], '\0'};
 
     if (strcmp(id, "GBS") == 0)
     {
@@ -308,6 +276,10 @@ nmea_sentence_id_t nmea_get_sentence_id(const char *sentence)
     else if (strcmp(id, "GST") == 0)
     {
         return NMEA_SENTENCE_GST;
+    }
+    else if (strcmp(id, "GSV") == 0)
+    {
+        return NMEA_SENTENCE_GSV;
     }
     else if (strcmp(id, "RMC") == 0)
     {
@@ -336,11 +308,7 @@ nmea_talker_t nmea_get_talker_id(const char *sentence)
         return NMEA_TALKER_UNKNOWN;
     }
 
-    char id[3] = {
-        s[0],
-        s[1],
-        '\0',
-    };
+    char id[3] = {s[0], s[1], '\0'};
 
     if (strcmp(id, "GP") == 0)
     {
@@ -374,170 +342,240 @@ nmea_talker_t nmea_get_talker_id(const char *sentence)
 
 bool nmea_parse_gbs(const char *sentence, nmea_sentence_gbs_t *frame)
 {
-    if (!nmea_scan(sentence, "_tfffifffii",
-                   &frame->time,
-                   &frame->errLat,
-                   &frame->errLon,
-                   &frame->errAlt,
-                   &frame->svid,
-                   &frame->prob,
-                   &frame->bias,
-                   &frame->stddev,
-                   &frame->systemId,
-                   &frame->signalId))
-    {
-        return false;
-    }
+    return nmea_scan(sentence, "_tfffifffii",
+                     &frame->time,
+                     &frame->errLat,
+                     &frame->errLon,
+                     &frame->errAlt,
+                     &frame->svid,
+                     &frame->prob,
+                     &frame->bias,
+                     &frame->stddev,
+                     &frame->systemId,
+                     &frame->signalId);
 }
 
 bool nmea_parse_gga(const char *sentence, nmea_sentence_gga_t *frame)
 {
-    if (!nmea_scan(sentence, "_tlclciiffcfcii",
-                   &frame->time,
-                   &frame->lat,
-                   &frame->NS,
-                   &frame->lon,
-                   &frame->EW,
-                   &frame->quality,
-                   &frame->numSV,
-                   &frame->HDOP,
-                   &frame->alt,
-                   &frame->altUnit,
-                   &frame->sep,
-                   &frame->sepUnit,
-                   &frame->diffAge,
-                   &frame->diffStation))
-    {
-        return false;
-    }
+    return nmea_scan(sentence, "_tlclciiffcfcii",
+                     &frame->time,
+                     &frame->lat,
+                     &frame->NS,
+                     &frame->lon,
+                     &frame->EW,
+                     &frame->quality,
+                     &frame->numSV,
+                     &frame->HDOP,
+                     &frame->alt,
+                     &frame->altUnit,
+                     &frame->sep,
+                     &frame->sepUnit,
+                     &frame->diffAge,
+                     &frame->diffStation);
 }
 
 bool nmea_parse_gll(const char *sentence, nmea_sentence_gll_t *frame)
 {
-    if (!nmea_scan(sentence, "_lclctcc",
-                   &frame->lat,
-                   &frame->NS,
-                   &frame->lon,
-                   &frame->EW,
-                   &frame->time,
-                   &frame->status,
-                   &frame->posMode))
-    {
-        return false;
-    }
+    return nmea_scan(sentence, "_lclctcc",
+                     &frame->lat,
+                     &frame->NS,
+                     &frame->lon,
+                     &frame->EW,
+                     &frame->time,
+                     &frame->status,
+                     &frame->posMode);
 }
 
 bool nmea_parse_gns(const char *sentence, nmea_sentence_gns_t *frame)
 {
-    if (!nmea_scan(sentence, "_tlclccifffiic",
-                   &frame->time,
-                   &frame->lat,
-                   &frame->NS,
-                   &frame->lon,
-                   &frame->EW,
-                   &frame->posMode,
-                   &frame->numSV,
-                   &frame->HDOP,
-                   &frame->alt,
-                   &frame->sep,
-                   &frame->diffAge,
-                   &frame->diffStation,
-                   &frame->navStatus))
-    {
-        return false;
-    }
+    return nmea_scan(sentence, "_tlclcsifffiic",
+                     &frame->time,
+                     &frame->lat,
+                     &frame->NS,
+                     &frame->lon,
+                     &frame->EW,
+                     &frame->posMode,
+                     &frame->numSV,
+                     &frame->HDOP,
+                     &frame->alt,
+                     &frame->sep,
+                     &frame->diffAge,
+                     &frame->diffStation,
+                     &frame->navStatus);
 }
 
 bool nmea_parse_gsa(const char *sentence, nmea_sentence_gsa_t *frame)
 {
-    if (!nmea_scan(sentence, "_ciiiiiiiiiiiiifffi",
-                   &frame->opMode,
-                   &frame->navMode,
-                   &frame->svid[0],
-                   &frame->svid[1],
-                   &frame->svid[2],
-                   &frame->svid[3],
-                   &frame->svid[4],
-                   &frame->svid[5],
-                   &frame->svid[6],
-                   &frame->svid[7],
-                   &frame->svid[8],
-                   &frame->svid[9],
-                   &frame->svid[10],
-                   &frame->svid[11],
-                   &frame->PDOP,
-                   &frame->HDOP,
-                   &frame->VDOP,
-                   &frame->systemId))
-    {
-        return false;
-    }
+    return nmea_scan(sentence, "_ciiiiiiiiiiiiifffi",
+                     &frame->opMode,
+                     &frame->navMode,
+                     &frame->svid[0],
+                     &frame->svid[1],
+                     &frame->svid[2],
+                     &frame->svid[3],
+                     &frame->svid[4],
+                     &frame->svid[5],
+                     &frame->svid[6],
+                     &frame->svid[7],
+                     &frame->svid[8],
+                     &frame->svid[9],
+                     &frame->svid[10],
+                     &frame->svid[11],
+                     &frame->PDOP,
+                     &frame->HDOP,
+                     &frame->VDOP,
+                     &frame->systemId);
 }
 
 bool nmea_parse_gst(const char *sentence, nmea_sentence_gst_t *frame)
 {
-    if (!nmea_scan(sentence, "_tfffffff",
-                   &frame->time,
-                   &frame->rangeRms,
-                   &frame->stdMajor,
-                   &frame->stdMinor,
-                   &frame->orient,
-                   &frame->stdLat,
-                   &frame->stdLong,
-                   &frame->stdAlt))
+    return nmea_scan(sentence, "_tfffffff",
+                     &frame->time,
+                     &frame->rangeRms,
+                     &frame->stdMajor,
+                     &frame->stdMinor,
+                     &frame->orient,
+                     &frame->stdLat,
+                     &frame->stdLong,
+                     &frame->stdAlt);
+}
+
+bool nmea_parse_gsv(const char *sentence, nmea_sentence_gsv_t *frame)
+{
+    if (!nmea_check_sentence(sentence))
     {
+        return false;
+    }
+
+    memset(frame->sats, 0, sizeof(frame->sats));
+
+    int numberOfFields = 1;
+    for (size_t i = 0; sentence[i] != '\0'; i++)
+    {
+        if (sentence[i] == ',')
+        {
+            numberOfFields += 1;
+        }
+    }
+
+    int numberOfRepetitions = (numberOfFields - 5) / 4;
+
+    switch (numberOfRepetitions)
+    {
+    case 0:
+        return nmea_scan(sentence, "_iiii",
+                         &frame->numMsg,
+                         &frame->msgNum,
+                         &frame->numSV,
+                         &frame->signalId);
+    case 1:
+        return nmea_scan(sentence, "_iiiiiiii",
+                         &frame->numMsg,
+                         &frame->msgNum,
+                         &frame->numSV,
+                         &frame->sats[0].svid,
+                         &frame->sats[0].elv,
+                         &frame->sats[0].az,
+                         &frame->sats[0].cno,
+                         &frame->signalId);
+    case 2:
+        return nmea_scan(sentence, "_iiiiiiiiiiii",
+                         &frame->numMsg,
+                         &frame->msgNum,
+                         &frame->numSV,
+                         &frame->sats[0].svid,
+                         &frame->sats[0].elv,
+                         &frame->sats[0].az,
+                         &frame->sats[0].cno,
+                         &frame->sats[1].svid,
+                         &frame->sats[1].elv,
+                         &frame->sats[1].az,
+                         &frame->sats[1].cno,
+                         &frame->signalId);
+    case 3:
+        return nmea_scan(sentence, "_iiiiiiiiiiiiiiii",
+                         &frame->numMsg,
+                         &frame->msgNum,
+                         &frame->numSV,
+                         &frame->sats[0].svid,
+                         &frame->sats[0].elv,
+                         &frame->sats[0].az,
+                         &frame->sats[0].cno,
+                         &frame->sats[1].svid,
+                         &frame->sats[1].elv,
+                         &frame->sats[1].az,
+                         &frame->sats[1].cno,
+                         &frame->sats[2].svid,
+                         &frame->sats[2].elv,
+                         &frame->sats[2].az,
+                         &frame->sats[2].cno,
+                         &frame->signalId);
+    case 4:
+        return nmea_scan(sentence, "_iiiiiiiiiiiiiiiiiiii",
+                         &frame->numMsg,
+                         &frame->msgNum,
+                         &frame->numSV,
+                         &frame->sats[0].svid,
+                         &frame->sats[0].elv,
+                         &frame->sats[0].az,
+                         &frame->sats[0].cno,
+                         &frame->sats[1].svid,
+                         &frame->sats[1].elv,
+                         &frame->sats[1].az,
+                         &frame->sats[1].cno,
+                         &frame->sats[2].svid,
+                         &frame->sats[2].elv,
+                         &frame->sats[2].az,
+                         &frame->sats[2].cno,
+                         &frame->sats[3].svid,
+                         &frame->sats[3].elv,
+                         &frame->sats[3].az,
+                         &frame->sats[3].cno,
+                         &frame->signalId);
+    default:
         return false;
     }
 }
 
 bool nmea_parse_rmc(const char *sentence, nmea_sentence_rmc_t *frame)
 {
-    if (!nmea_scan(sentence, "_tclclcffdfccc",
-                   &frame->time,
-                   &frame->status,
-                   &frame->lat,
-                   &frame->NS,
-                   &frame->lon,
-                   &frame->EW,
-                   &frame->spd,
-                   &frame->cog,
-                   &frame->date,
-                   &frame->mv,
-                   &frame->mvEW,
-                   &frame->posMode,
-                   &frame->navStatus))
-    {
-        return false;
-    }
+    return nmea_scan(sentence, "_tclclcffdfccc",
+                     &frame->time,
+                     &frame->status,
+                     &frame->lat,
+                     &frame->NS,
+                     &frame->lon,
+                     &frame->EW,
+                     &frame->spd,
+                     &frame->cog,
+                     &frame->date,
+                     &frame->mv,
+                     &frame->mvEW,
+                     &frame->posMode,
+                     &frame->navStatus);
 }
 
 bool nmea_parse_vtg(const char *sentence, nmea_sentence_vtg_t *frame)
 {
-    if (!nmea_scan(sentence, "_fcfcfcfcc",
-                   &frame->cogt,
-                   &frame->cogtUnit,
-                   &frame->cogm,
-                   &frame->cogmUnit,
-                   &frame->sogn,
-                   &frame->sognUnit,
-                   &frame->sogk,
-                   &frame->sogkUnit,
-                   &frame->posMode))
-    {
-        return false;
-    }
+    return nmea_scan(sentence, "_fcfcfcfcc",
+                     &frame->cogt,
+                     &frame->cogtUnit,
+                     &frame->cogm,
+                     &frame->cogmUnit,
+                     &frame->sogn,
+                     &frame->sognUnit,
+                     &frame->sogk,
+                     &frame->sogkUnit,
+                     &frame->posMode);
 }
 
 bool nmea_parse_zda(const char *sentence, nmea_sentence_zda_t *frame)
 {
-    if (!nmea_scan(sentence, "_tiiiii",
-                   &frame->time,
-                   &frame->day,
-                   &frame->month,
-                   &frame->year,
-                   &frame->ltzh,
-                   &frame->ltzn))
-    {
-        return false;
-    }
+    return nmea_scan(sentence, "_tiiiii",
+                     &frame->time,
+                     &frame->day,
+                     &frame->month,
+                     &frame->year,
+                     &frame->ltzh,
+                     &frame->ltzn);
 }

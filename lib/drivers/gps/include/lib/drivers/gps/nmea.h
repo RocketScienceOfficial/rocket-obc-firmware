@@ -23,6 +23,7 @@ typedef enum nmea_sentence_id
     NMEA_SENTENCE_GNS,
     NMEA_SENTENCE_GSA,
     NMEA_SENTENCE_GST,
+    NMEA_SENTENCE_GSV,
     NMEA_SENTENCE_RMC,
     NMEA_SENTENCE_VTG,
     NMEA_SENTENCE_ZDA,
@@ -112,6 +113,9 @@ typedef struct nmea_sentence_gga
     int diffStation;
 } nmea_sentence_gga_t;
 
+/**
+ * @brief NMEA structure for GLL sentence
+ */
 typedef struct nmea_sentence_gll
 {
     double lat;
@@ -123,6 +127,9 @@ typedef struct nmea_sentence_gll
     char posMode;
 } nmea_sentence_gll_t;
 
+/**
+ * @brief NMEA structure for GNS sentence
+ */
 typedef struct nmea_sentence_gns
 {
     nmea_time_t time;
@@ -130,7 +137,7 @@ typedef struct nmea_sentence_gns
     char NS;
     double lon;
     char EW;
-    char posMode;
+    char posMode[4];
     int numSV;
     float HDOP;
     float alt;
@@ -140,6 +147,9 @@ typedef struct nmea_sentence_gns
     char navStatus;
 } nmea_sentence_gns_t;
 
+/**
+ * @brief NMEA structure for GSA sentence
+ */
 typedef struct nmea_sentence_gsa
 {
     char opMode;
@@ -151,6 +161,9 @@ typedef struct nmea_sentence_gsa
     int systemId;
 } nmea_sentence_gsa_t;
 
+/**
+ * @brief NMEA structure for GST sentence
+ */
 typedef struct nmea_sentence_gst
 {
     nmea_time_t time;
@@ -163,6 +176,21 @@ typedef struct nmea_sentence_gst
     float stdAlt;
 } nmea_sentence_gst_t;
 
+/**
+ * @brief NMEA structure for GSV sentence
+ */
+typedef struct nmea_sentence_gsv
+{
+    int numMsg;
+    int msgNum;
+    int numSV;
+    nmea_satellite_t sats[4];
+    int signalId;
+} nmea_sentence_gsv_t;
+
+/**
+ * @brief NMEA structure for RMC sentence
+ */
 typedef struct nmea_sentence_rmc
 {
     nmea_time_t time;
@@ -180,6 +208,9 @@ typedef struct nmea_sentence_rmc
     char navStatus;
 } nmea_sentence_rmc_t;
 
+/**
+ * @brief NMEA structure for VTG sentence
+ */
 typedef struct nmea_sentence_vtg
 {
     float cogt;
@@ -193,6 +224,9 @@ typedef struct nmea_sentence_vtg
     char posMode;
 } nmea_sentence_vtg_t;
 
+/**
+ * @brief NMEA structure for ZDA sentence
+ */
 typedef struct nmea_sentence_zda
 {
     nmea_time_t time;
@@ -298,6 +332,15 @@ bool nmea_parse_gsa(const char *sentence, nmea_sentence_gsa_t *frame);
  * @return True if the sentence was parsed successfully, false otherwise
  */
 bool nmea_parse_gst(const char *sentence, nmea_sentence_gst_t *frame);
+
+/**
+ * @brief Parse the GSV sentence
+ *
+ * @param sentence Sentence to parse
+ * @param frame GSV sentence structure
+ * @return True if the sentence was parsed successfully, false otherwise
+ */
+bool nmea_parse_gsv(const char *sentence, nmea_sentence_gsv_t *frame);
 
 /**
  * @brief Parse the RMC sentence

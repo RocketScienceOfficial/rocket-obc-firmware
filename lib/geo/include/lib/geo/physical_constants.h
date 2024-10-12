@@ -17,4 +17,6 @@
 #define CELSIUS_2_KELVIN(x) ((x) + 273.15)
 #define KELVIN_2_CELSIUS(x) ((x) - 273.15)
 
+#define KNOTS_TO_KMH(x) (1.852 * (x))
+
 #endif

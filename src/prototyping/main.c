@@ -176,24 +176,17 @@ int main()
     else if (strcmp(cmd, "neo") == 0)
     {
         gps_config_t gpsConfig = {0};
-        geo_position_wgs84_t gpsPosition = {0};
-
         gps_init_spi(&gpsConfig, OBC_SPI, PIN_CS_NEO);
 
         hal_msec_t s = 0;
 
         while (true)
         {
-            if (!gps_read(&gpsConfig))
-            {
-                hal_time_sleep_ms(10);
-            }
-
-            gps_get_pos(&gpsConfig, &gpsPosition);
+            gps_read(&gpsConfig);
 
             if (hal_time_run_every_ms(1000, &s))
             {
-                hal_serial_printf("Lat: %f\nLon: %f\nAlt: %f\n", gpsPosition.lat, gpsPosition.lon, gpsPosition.alt);
+                hal_serial_printf("Lat: %f   Lon: %f  Alt: %f  Sats: %d  Datetime: %d-%d-%d %d:%d:%d:%d\n", gpsConfig.data.position.lat, gpsConfig.data.position.lon, gpsConfig.data.position.alt, gpsConfig.data.activeSatellitesCount, gpsConfig.data.day, gpsConfig.data.month, gpsConfig.data.year, gpsConfig.data.hour, gpsConfig.data.minute, gpsConfig.data.second, gpsConfig.data.hundredth);
             }
         }
     }
@@ -229,7 +222,7 @@ int main()
             total /= 100;
 
             hal_serial_printf("%f\n", total);
-            
+
             hal_time_sleep_ms(10);
         }
     }

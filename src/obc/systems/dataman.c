@@ -48,6 +48,7 @@ static bool s_ReadyTest;
 
 static dataman_frame_t _get_frame(void);
 static uint8_t _get_ign_flags(void);
+static uint8_t _get_gps_data(void);
 static uint8_t _get_single_ign_flag(uint8_t ignNumber, dataman_ign_flags_t contFlag, dataman_ign_flags_t stateFlag);
 static bool _validate_frame(const dataman_frame_t *frame);
 static bool _validate_info(const dataman_file_info_t *info);
@@ -186,6 +187,7 @@ static dataman_frame_t _get_frame(void)
         .smState = (uint8_t)sm_get_state(),
         .batteryVoltage = sensors_get_frame()->batVolts * 10,
         .ignFlags = _get_ign_flags(),
+        .gpsData = _get_gps_data(),
     };
 
     frame.crc = crc16_mcrf4xx_calculate((const uint8_t *)&frame, sizeof(frame) - 2);
@@ -203,6 +205,11 @@ static uint8_t _get_ign_flags(void)
     flags |= _get_single_ign_flag(4, DATAMAN_IGN_FLAG_IGN_4_CONT, DATAMAN_IGN_FLAG_IGN_4_STATE);
 
     return flags;
+}
+
+static uint8_t _get_gps_data(void)
+{
+    return (uint8_t)sensors_get_frame()->gpsIs3dFix | (sensors_get_frame()->gpsSatellitesCount << 1);
 }
 
 static uint8_t _get_single_ign_flag(uint8_t ignNumber, dataman_ign_flags_t contFlag, dataman_ign_flags_t stateFlag)
@@ -325,7 +332,7 @@ static bool _print_saved_frame(const dataman_frame_t *frame)
 {
     if (_validate_frame(frame))
     {
-        SEND_DATA("%lu,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f,%f,%f,%f,%d,%d,%d",
+        SEND_DATA("%lu,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f,%f,%f,%f,%d,%d,%d,%d",
                   frame->time,
                   frame->acc1.x,
                   frame->acc1.y,
@@ -352,7 +359,8 @@ static bool _print_saved_frame(const dataman_frame_t *frame)
                   frame->pos.alt,
                   frame->smState,
                   frame->batteryVoltage,
-                  frame->ignFlags);
+                  frame->ignFlags,
+                  frame->gpsData);
 
         return true;
     }

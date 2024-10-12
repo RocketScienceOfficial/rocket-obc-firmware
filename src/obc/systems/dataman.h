@@ -29,6 +29,7 @@ typedef struct __attribute__((__packed__)) dataman_frame
     uint8_t smState;
     uint8_t batteryVoltage;
     uint8_t ignFlags;
+    uint8_t gpsData;
     uint16_t crc;
 } dataman_frame_t;
 

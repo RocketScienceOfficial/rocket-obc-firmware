@@ -51,7 +51,6 @@ static battery_table_entry_t s_BatteryTable[] = {
 };
 
 static hal_usec_t s_MeasurementTimeOffset;
-static hal_msec_t s_GPSTimeOffset;
 static hal_msec_t s_ADCMeasurementTimeOffset;
 
 static sensors_frame_t s_Frame;
@@ -165,23 +164,19 @@ void sensors_update(void)
         events_publish(MSG_SENSORS_BARO_READ);
     }
 
-    if (hal_time_get_ms_since_boot() - s_GPSTimeOffset >= 10)
+    if (gps_read(&s_GPSConfig))
     {
-        bool avail = gps_read(&s_GPSConfig);
-
-        if (!avail)
-        {
-            s_GPSTimeOffset = hal_time_get_ms_since_boot();
-        }
-
-        if (gps_get_pos(&s_GPSConfig, &s_Frame.pos) && s_Frame.pos.lat != 0)
+        if (s_GPSConfig.data.fix)
         {
             if (!s_Frame.gpsFix)
             {
                 SYS_LOG("GPS has fix!");
-
-                s_Frame.gpsFix = true;
             }
+
+            s_Frame.pos = s_GPSConfig.data.position;
+            s_Frame.gpsFix = s_GPSConfig.data.fix;
+            s_Frame.gpsIs3dFix = s_GPSConfig.data.is3dFix;
+            s_Frame.gpsSatellitesCount = s_GPSConfig.data.activeSatellitesCount;
 
             events_publish(MSG_SENSORS_GPS_READ);
         }
