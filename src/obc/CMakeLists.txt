@@ -21,7 +21,6 @@ target_link_libraries(obc
     lib_drivers_gps
     lib_drivers_imu
     lib_drivers_led
-    lib_drivers_lora
     lib_drivers_magnetometer
     lib_drivers_servo
     lib_battery

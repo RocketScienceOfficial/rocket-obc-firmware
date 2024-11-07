@@ -12,7 +12,7 @@ Rocket on-board computer software. Contains a lot of funcionality and can be use
 ## Getting Started
 
 ### Download
-Run the following command to clone repo and initialize all submodules: ```git clone --recursive https://github.com/Filipeak/rocket-obc-firmware```
+Run the following command to clone repo and initialize all submodules: ```git clone --recursive https://github.com/RocketScienceOfficial/rocket-obc-firmware```
 
 If you already downloaded repo without ```--recursive``` flag, run: ```git submodule update --init --recursive```
 
