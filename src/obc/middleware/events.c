@@ -1,5 +1,4 @@
 #include "events.h"
-#include "syslog.h"
 #include <stddef.h>
 
 #define SYSTEM_NAME "info"
@@ -14,16 +13,16 @@ void events_dispatch(void)
     s_MessagesSize = 0;
 }
 
-void events_publish(msg_type_t msg)
+bool events_publish(msg_type_t msg)
 {
     if (s_MessagesSize >= MESSAGES_MAX_LENGTH)
     {
-        SYS_LOG("ERR: Too many messages have been published");
-
-        return;
+        return false;
     }
 
     s_Messages[s_MessagesSize++] = msg;
+
+    return true;
 }
 
 bool events_poll(msg_type_t msg)

@@ -28,6 +28,6 @@ void voltage_update(void);
  *
  * @return Flags
  */
-uint8_t voltage_get_flags(void);
+uint8_t voltage_get_pins_flags(void);
 
 #endif

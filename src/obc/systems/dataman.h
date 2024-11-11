@@ -8,7 +8,16 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#define DATAMAN_MAGIC 0x2E /** Dataman magic byte */
+#define DATAMAN_FRAME_MAGIC 0x2E
+#define DATAMAN_FILE_INFO_MAGIC 0x8F3E
+#define SECTORS_OFFSET_FILE_INFO 64
+#define SECTORS_OFFSET_STANDING_BUFFER 65
+#define SECTORS_OFFSET_DATA 80
+#define SECTORS_COUNT_STANDING_BUFFER ((SECTORS_OFFSET_DATA) - (SECTORS_OFFSET_STANDING_BUFFER))
+#define SECTORS_COUNT_DATA 3500
+#define STANDING_BUFFER_LENGTH (FLASH_PAGE_SIZE * 2)
+#define LANDING_BUFFER_LENGTH (FLASH_PAGE_SIZE * 2)
+#define DATA_RECOVERY_MAX_FRAMES 150000
 
 /**
  * @brief Dataman frame which is saved
@@ -40,6 +49,18 @@ typedef struct __attribute__((__packed__)) dataman_config
 {
     uint16_t mainHeight;
 } dataman_config_t;
+
+/**
+ * @brief Dataman info file structure
+ */
+typedef struct __attribute__((__packed__)) dataman_file_info
+{
+    uint16_t magic;
+    size_t savedFramesCount;
+    size_t standingFramesCount;
+    dataman_config_t config;
+    uint16_t crc;
+} dataman_file_info_t;
 
 /**
  * @brief Possible flags of igniters

@@ -1,7 +1,7 @@
 #include "sensors.h"
+#include "serial.h"
 #include "board_config.h"
 #include "../middleware/events.h"
-#include "../middleware/syslog.h"
 #include "hal/adc_driver.h"
 #include "hal/time_tracker.h"
 #include "hal/serial_driver.h"
@@ -17,7 +17,6 @@
 #include "lib/battery/battery_utils.h"
 #include <stdlib.h>
 
-#define SYSTEM_NAME "sensors"
 #define BATTERY_VOLTAGE_DIVIDER 11.0f
 #define BARO_PRESS_STEP_THRESHOLD 50
 #define EXP_FILTER_BARO_COEFF 0.05f
@@ -72,63 +71,63 @@ void sensors_init(void)
     hal_spi_init_all(OBC_SPI, OBC_SPI_MISO_PIN, OBC_SPI_MOSI_PIN, OBC_SPI_SCK_PIN, OBC_SPI_FREQ);
     hal_adc_init_all();
 
-    SYS_LOG("Protocols: READY");
+    SERIAL_DEBUG_PRINTF("Protocols: READY");
 
     bmi088_accel_init_spi(&s_BMI088AccelConfig, OBC_SPI, PIN_CS_BMI_ACC);
     bmi088_accel_set_conf(&s_BMI088AccelConfig, BMI088_ACCEL_ODR_800HZ, BMI088_ACCEL_OSR_NORMAL);
     bmi088_accel_set_range(&s_BMI088AccelConfig, BMI088_ACCEL_RANGE_6G);
 
-    SYS_LOG("BMI088 Accel: READY");
+    SERIAL_DEBUG_PRINTF("BMI088 Accel: READY");
 
     bmi088_gyro_init_spi(&s_BMI088GyroConfig, OBC_SPI, PIN_CS_BMI_GYRO);
     bmi088_gyro_set_bandwidth(&s_BMI088GyroConfig, BMI088_GYRO_ODR_2000_BW_523HZ);
     bmi088_gyro_set_range(&s_BMI088GyroConfig, BMI088_GYRO_RANGE_500DPS);
 
-    SYS_LOG("BMI088 Gyro: READY");
+    SERIAL_DEBUG_PRINTF("BMI088 Gyro: READY");
 
     lsm6dso32_init_spi(&s_LSM6DSO32Config, OBC_SPI, PIN_CS_LSM);
     lsm6dso32_set_odr(&s_LSM6DSO32Config, LSM6DSO32_ODR_416HZ, LSM6DSO32_ODR_416HZ);
     lsm6dso32_set_range(&s_LSM6DSO32Config, LSM6DSO32_RANGE_32G, LSM6DSO32_RANGE_2000DPS);
 
-    SYS_LOG("LSM: READY");
+    SERIAL_DEBUG_PRINTF("LSM: READY");
 
     h3lis331dl_init_spi(&s_H3LIS331DLConfig, OBC_SPI, PIN_CS_H3LIS);
     h3lis331dl_set_power_mode(&s_H3LIS331DLConfig, H3LIS331DL_POWER_NORMAL);
     h3lis331dl_set_range(&s_H3LIS331DLConfig, H3LIS331DL_RANGE_200G);
     h3lis331dl_set_odr(&s_H3LIS331DLConfig, H3LIS331DL_ODR_400HZ);
 
-    SYS_LOG("H3LIS: READY");
+    SERIAL_DEBUG_PRINTF("H3LIS: READY");
 
     mmc5983ma_init_spi(&s_MMC5983MAConfig, OBC_SPI, PIN_CS_MMC);
     mmc5983ma_set_continuous_mode_odr(&s_MMC5983MAConfig, MMC5983MA_ODR_1000HZ, MMC5983MA_PRD_SET_250);
 
-    SYS_LOG("MMC5983MA: READY");
+    SERIAL_DEBUG_PRINTF("MMC5983MA: READY");
 
     ms5611_init_spi(&s_MS5611Config, OBC_SPI, PIN_CS_MS56);
     ms5611_set_osr(&s_MS5611Config, MS5611_OSR_256, MS5611_OSR_256);
 
-    SYS_LOG("MS5611: READY");
+    SERIAL_DEBUG_PRINTF("MS5611: READY");
 
     gps_init_spi(&s_GPSConfig, OBC_SPI, PIN_CS_NEO);
 
-    SYS_LOG("GPS: READY");
+    SERIAL_DEBUG_PRINTF("GPS: READY");
 
     ads786x_init(&s_ADS786XConfig, OBC_SPI, PIN_CS_ADS, ADS786X_TYPE_6, ADC_VREF);
 
-    SYS_LOG("ADS786X: READY");
+    SERIAL_DEBUG_PRINTF("ADS786X: READY");
 
     hal_adc_init_pin(PIN_IGN_DET_1);
     hal_adc_init_pin(PIN_IGN_DET_2);
     hal_adc_init_pin(PIN_IGN_DET_3);
     hal_adc_init_pin(PIN_IGN_DET_4);
 
-    SYS_LOG("ADC: READY");
+    SERIAL_DEBUG_PRINTF("ADC: READY");
 
     battery_init(&s_BatteryConfig, s_BatteryTable, sizeof(s_BatteryTable) / sizeof(battery_table_entry_t));
 
-    SYS_LOG("Battery: READY");
+    SERIAL_DEBUG_PRINTF("Battery: READY");
 
-    SYS_LOG("READY");
+    SERIAL_DEBUG_PRINTF("READY");
 }
 
 void sensors_update(void)
@@ -170,7 +169,7 @@ void sensors_update(void)
         {
             if (!s_Frame.gpsFix)
             {
-                SYS_LOG("GPS has fix!");
+                SERIAL_DEBUG_PRINTF("GPS has fix!");
             }
 
             s_Frame.pos = s_GPSConfig.data.position;

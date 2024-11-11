@@ -6,33 +6,9 @@
 #include "ign.h"
 #include "board_config.h"
 #include "../middleware/events.h"
-#include "../middleware/syslog.h"
 #include "hal/flash_driver.h"
-#include "hal/serial_driver.h"
 #include "lib/crypto/crc.h"
 #include <string.h>
-
-#define SYSTEM_NAME "dataman"
-#define SECTORS_OFFSET_FILE_INFO 64
-#define SECTORS_OFFSET_STANDING_BUFFER 65
-#define SECTORS_OFFSET_DATA 80
-#define SECTORS_COUNT_STANDING_BUFFER ((SECTORS_OFFSET_DATA) - (SECTORS_OFFSET_STANDING_BUFFER))
-#define SECTORS_COUNT_DATA 3500
-#define STANDING_BUFFER_LENGTH (FLASH_PAGE_SIZE * 2)
-#define LANDING_BUFFER_LENGTH (FLASH_PAGE_SIZE * 2)
-#define DATA_RECOVERY_MAX_FRAMES 150000
-#define DATAMAN_FILE_INFO_MAGIC 0x8F3E
-#define SEND_DATA(fmt, ...) hal_serial_printf("/*" fmt "*/\n", ##__VA_ARGS__)
-#define SEND_CMD(cmd) hal_serial_printf("\\" cmd "\n")
-
-typedef struct __attribute__((__packed__)) dataman_file_info
-{
-    uint16_t magic;
-    size_t savedFramesCount;
-    size_t standingFramesCount;
-    dataman_config_t config;
-    uint16_t crc;
-} dataman_file_info_t;
 
 static bool s_Terminated;
 static uint8_t s_SaveBuffer[FLASH_PAGE_SIZE];
@@ -66,7 +42,7 @@ static void _save_frame(void);
 static void _save_standing_buffer_frame(void);
 static void _save_info_file(void);
 static void _get_config(void);
-static void _set_config(void);
+static void _set_config(const datalink_frame_structure_serial_t *msg);
 
 void dataman_init(void)
 {
@@ -85,7 +61,7 @@ void dataman_init(void)
         _save_info_file();
     }
 
-    SYS_LOG("READY");
+    SERIAL_DEBUG_PRINTF("READY");
 }
 
 void dataman_update(void)
@@ -94,26 +70,35 @@ void dataman_update(void)
     {
         if (sm_get_state() == FLIGHT_STATE_STANDING)
         {
-            if (events_poll(MSG_CMD_DATA_READ))
+            if (events_poll(MSG_SERIAL_MESSAGE_RECEIVED))
             {
-                _read_data();
+                const datalink_frame_structure_serial_t *msg = serial_get_current_message();
+
+                if (msg)
+                {
+                    if (msg->msgId == DATALINK_MESSAGE_DATA_REQUEST_READ)
+                    {
+                        _read_data();
+                    }
+                    else if (msg->msgId == DATALINK_MESSAGE_DATA_REQUEST_CLEAR)
+                    {
+                        _clear_database();
+                    }
+                    else if (msg->msgId == DATALINK_MESSAGE_DATA_REQUEST_RECOVERY)
+                    {
+                        _recover_data();
+                    }
+                    else if (msg->msgId == DATALINK_MESSAGE_CONFIG_GET)
+                    {
+                        _get_config();
+                    }
+                    else if (msg->msgId == DATALINK_MESSAGE_CONFIG_SET)
+                    {
+                        _set_config(msg);
+                    }
+                }
             }
-            if (events_poll(MSG_CMD_DATA_CLEAR))
-            {
-                _clear_database();
-            }
-            if (events_poll(MSG_CMD_DATA_RECOVERY))
-            {
-                _recover_data();
-            }
-            if (events_poll(MSG_CMD_CONFIG_GET))
-            {
-                _get_config();
-            }
-            if (events_poll(MSG_CMD_CONFIG_SET))
-            {
-                _set_config();
-            }
+
             if (events_poll(MSG_SENSORS_NORMAL_READ))
             {
                 _save_standing_buffer_frame();
@@ -157,7 +142,7 @@ bool dataman_is_ready(void)
 
         const dataman_file_info_t *info = _read_info();
 
-        SYS_LOG("Info file exists: %d", info != NULL);
+        SERIAL_DEBUG_PRINTF("Info file exists: %d", info != NULL);
 
         ready = info ? info->savedFramesCount + info->standingFramesCount == 0 : false;
     }
@@ -173,7 +158,7 @@ const dataman_config_t *dataman_get_config(void)
 static dataman_frame_t _get_frame(void)
 {
     dataman_frame_t frame = {
-        .magic = DATAMAN_MAGIC,
+        .magic = DATAMAN_FRAME_MAGIC,
         .time = hal_time_get_us_since_boot(),
         .acc1 = sensors_get_frame()->acc1,
         .acc2 = sensors_get_frame()->acc2,
@@ -222,7 +207,7 @@ static uint8_t _get_single_ign_flag(uint8_t ignNumber, dataman_ign_flags_t contF
 
 static bool _validate_frame(const dataman_frame_t *frame)
 {
-    if (frame->magic != DATAMAN_MAGIC)
+    if (frame->magic != DATAMAN_FRAME_MAGIC)
     {
         return false;
     }
@@ -251,7 +236,7 @@ static bool _can_save_data(void)
 
 static void _clear_database(void)
 {
-    SYS_LOG("Clearing database...");
+    SERIAL_DEBUG_PRINTF("Clearing database...");
 
     size_t totalCount = SECTORS_COUNT_STANDING_BUFFER + SECTORS_COUNT_DATA;
 
@@ -261,17 +246,29 @@ static void _clear_database(void)
 
         float progress = (i + 1) * 100 / (float)totalCount;
 
-        SEND_DATA("%f", progress);
+        datalink_frame_data_progress_clear_t payload = {
+            .percentage = (uint8_t)progress,
+        };
+        datalink_frame_structure_serial_t response = {
+            .msgId = DATALINK_MESSAGE_DATA_PROGRESS_CLEAR,
+            .len = sizeof(payload),
+        };
+        memcpy(response.payload, &payload, sizeof(payload));
+        serial_send_message(&response);
     }
 
-    SYS_LOG("Database cleared!");
+    SERIAL_DEBUG_PRINTF("Database cleared!");
 
     s_CurrentInfoFile.savedFramesCount = 0;
     s_CurrentInfoFile.standingFramesCount = 0;
 
     _save_info_file();
 
-    SEND_CMD("data-clear-finish");
+    datalink_frame_structure_serial_t response = {
+        .msgId = DATALINK_MESSAGE_DATA_FINISH_CLEAR,
+        .len = 0,
+    };
+    serial_send_message(&response);
 }
 
 static void _flush_data(void)
@@ -285,7 +282,7 @@ static void _flush_data(void)
             hal_flash_write_pages(SECTORS_OFFSET_DATA * FLASH_SECTOR_SIZE / FLASH_PAGE_SIZE + s_SaveFlashOffsetPages, s_SaveBuffer, sizeof(s_SaveBuffer) / FLASH_PAGE_SIZE);
         }
 
-        SYS_LOG("Flash save buffer has been flushed. %d bytes were written", s_SaveBufferSize);
+        SERIAL_DEBUG_PRINTF("Flash save buffer has been flushed. %d bytes were written", s_SaveBufferSize);
 
         s_SaveBufferSize = 0;
     }
@@ -315,7 +312,7 @@ static void _flush_standing_buffer(void)
 
     hal_flash_write_pages(SECTORS_OFFSET_STANDING_BUFFER * FLASH_SECTOR_SIZE / FLASH_PAGE_SIZE, data, pages);
 
-    SYS_LOG("Standing buffer has been flushed. %d frames (%d bytes) were written", s_StandingBufferLength, s_StandingBufferLength * sizeof(dataman_frame_t));
+    SERIAL_DEBUG_PRINTF("Standing buffer has been flushed. %d frames (%d bytes) were written", s_StandingBufferLength, s_StandingBufferLength * sizeof(dataman_frame_t));
 }
 
 static const dataman_file_info_t *_read_info(void)
@@ -332,35 +329,42 @@ static bool _print_saved_frame(const dataman_frame_t *frame)
 {
     if (_validate_frame(frame))
     {
-        SEND_DATA("%lu,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f,%f,%f,%f,%d,%d,%d,%d",
-                  frame->time,
-                  frame->acc1.x,
-                  frame->acc1.y,
-                  frame->acc1.z,
-                  frame->acc2.x,
-                  frame->acc2.y,
-                  frame->acc2.z,
-                  frame->acc3.x,
-                  frame->acc3.y,
-                  frame->acc3.z,
-                  frame->gyro1.x,
-                  frame->gyro1.y,
-                  frame->gyro1.z,
-                  frame->gyro2.x,
-                  frame->gyro2.y,
-                  frame->gyro2.z,
-                  frame->mag1.x,
-                  frame->mag1.y,
-                  frame->mag1.z,
-                  frame->press,
-                  frame->kalmanHeight,
-                  frame->pos.lat,
-                  frame->pos.lon,
-                  frame->pos.alt,
-                  frame->smState,
-                  frame->batteryVoltage,
-                  frame->ignFlags,
-                  frame->gpsData);
+        datalink_frame_data_saved_chunk_t payload = {
+            .time = frame->time,
+            .acc1x = frame->acc1.x,
+            .acc1y = frame->acc1.y,
+            .acc1z = frame->acc1.z,
+            .acc2x = frame->acc2.x,
+            .acc2y = frame->acc2.y,
+            .acc2z = frame->acc2.z,
+            .acc3x = frame->acc3.x,
+            .acc3y = frame->acc3.y,
+            .acc3z = frame->acc3.z,
+            .gyro1x = frame->gyro1.x,
+            .gyro1y = frame->gyro1.y,
+            .gyro1z = frame->gyro1.z,
+            .gyro2x = frame->gyro2.x,
+            .gyro2y = frame->gyro2.y,
+            .gyro2z = frame->gyro2.z,
+            .mag1x = frame->mag1.x,
+            .mag1y = frame->mag1.y,
+            .mag1z = frame->mag1.z,
+            .press = frame->press,
+            .kalmanHeight = frame->kalmanHeight,
+            .lat = frame->pos.lat,
+            .lon = frame->pos.lon,
+            .alt = frame->pos.alt,
+            .smState = frame->smState,
+            .batVolts10 = frame->batteryVoltage,
+            .ignFlags = frame->ignFlags,
+            .gpsData = frame->gpsData,
+        };
+        datalink_frame_structure_serial_t response = {
+            .msgId = DATALINK_MESSAGE_DATA_SAVED_CHUNK,
+            .len = sizeof(payload),
+        };
+        memcpy(response.payload, &payload, sizeof(payload));
+        serial_send_message(&response);
 
         return true;
     }
@@ -379,21 +383,39 @@ static void _read_data_raw(size_t maxFrames, size_t *currentFrameCount, const ui
         if (!_print_saved_frame(frame))
         {
             (*currentFrameCount)--;
-            SEND_DATA("%d", *currentFrameCount);
+
+            datalink_frame_data_saved_size_t payload = {
+                .size = *currentFrameCount,
+            };
+            datalink_frame_structure_serial_t response = {
+                .msgId = DATALINK_MESSAGE_DATA_SAVED_SIZE,
+                .len = sizeof(payload),
+            };
+            memcpy(response.payload, &payload, sizeof(payload));
+            serial_send_message(&response);
         }
     }
 }
 
 static void _read_data(void)
 {
-    SYS_LOG("Begining of data read...");
+    SERIAL_DEBUG_PRINTF("Begining of data read...");
 
     const dataman_file_info_t *info = _read_info();
 
     if (info)
     {
         size_t currentFrameCount = info->savedFramesCount + info->standingFramesCount;
-        SEND_DATA("%d", currentFrameCount);
+
+        datalink_frame_data_saved_size_t payload = {
+            .size = currentFrameCount,
+        };
+        datalink_frame_structure_serial_t response = {
+            .msgId = DATALINK_MESSAGE_DATA_SAVED_SIZE,
+            .len = sizeof(payload),
+        };
+        memcpy(response.payload, &payload, sizeof(payload));
+        serial_send_message(&response);
 
         const uint8_t *data;
 
@@ -405,10 +427,24 @@ static void _read_data(void)
     }
     else
     {
-        SEND_DATA("%d", 0);
+        datalink_frame_data_saved_size_t payload = {
+            .size = 0,
+        };
+        datalink_frame_structure_serial_t response = {
+            .msgId = DATALINK_MESSAGE_DATA_SAVED_SIZE,
+            .len = sizeof(payload),
+        };
+        memcpy(response.payload, &payload, sizeof(payload));
+        serial_send_message(&response);
     }
 
-    SYS_LOG("Data read finish!");
+    datalink_frame_structure_serial_t response = {
+        .msgId = DATALINK_MESSAGE_DATA_FINISH_READ,
+        .len = 0,
+    };
+    serial_send_message(&response);
+
+    SERIAL_DEBUG_PRINTF("Data read finish!");
 }
 
 static void _recover_data_read(const uint8_t *data)
@@ -434,7 +470,11 @@ static void _recover_data(void)
     hal_flash_read(SECTORS_OFFSET_DATA * FLASH_SECTOR_SIZE, &data);
     _recover_data_read(data);
 
-    SEND_CMD("data-recovery-finish");
+    datalink_frame_structure_serial_t response = {
+        .msgId = DATALINK_MESSAGE_DATA_FINISH_RECOVERY,
+        .len = 0,
+    };
+    serial_send_message(&response);
 }
 
 static void _save_frame(void)
@@ -506,31 +546,33 @@ static void _save_info_file(void)
 
     s_ReadyTest = false;
 
-    SYS_LOG("Dataman file info was saved. Total frame count: %d", s_CurrentInfoFile.savedFramesCount + s_CurrentInfoFile.standingFramesCount);
+    SERIAL_DEBUG_PRINTF("Dataman file info was saved. Total frame count: %d", s_CurrentInfoFile.savedFramesCount + s_CurrentInfoFile.standingFramesCount);
 }
 
 static void _get_config(void)
 {
-    SEND_DATA("%d", s_CurrentInfoFile.config.mainHeight);
+    datalink_frame_config_get_t payload = {
+        .mainHeight = s_CurrentInfoFile.config.mainHeight,
+    };
+    datalink_frame_structure_serial_t response = {
+        .msgId = DATALINK_MESSAGE_CONFIG_GET,
+        .len = sizeof(payload),
+    };
+    memcpy(response.payload, &payload, sizeof(payload));
+    serial_send_message(&response);
 }
 
-static void _set_config(void)
+static void _set_config(const datalink_frame_structure_serial_t *msg)
 {
-    const char *data = serial_get_param_at_index(0);
+    const datalink_frame_config_set_t *payload = (const datalink_frame_config_set_t *)msg->payload;
 
-    if (data)
-    {
-        uint16_t n = 0;
+    s_CurrentInfoFile.config.mainHeight = payload->mainHeight;
 
-        for (size_t i = 0; i < strlen(data); i++)
-        {
-            n = n * 10 + (int)(data[i] - '0');
-        }
+    _save_info_file();
 
-        s_CurrentInfoFile.config.mainHeight = n;
-
-        _save_info_file();
-    }
-
-    SEND_CMD("config-set-finish");
+    datalink_frame_structure_serial_t response = {
+        .msgId = DATALINK_MESSAGE_CONFIG_SET_ACK,
+        .len = 0,
+    };
+    serial_send_message(&response);
 }

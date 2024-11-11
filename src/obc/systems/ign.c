@@ -1,17 +1,15 @@
 #include "ign.h"
-#include "board_config.h"
 #include "sm.h"
 #include "sensors.h"
 #include "ahrs.h"
 #include "serial.h"
 #include "dataman.h"
+#include "board_config.h"
 #include "../middleware/events.h"
-#include "../middleware/syslog.h"
 #include "hal/gpio_driver.h"
 #include "hal/time_tracker.h"
 #include <string.h>
 
-#define SYSTEM_NAME "ign"
 #define IGN_UP_TIME_MS 1000
 #define IGN_FUSE_WORKING_IGN_PRESENT_FACTOR 0
 #define IGN_FUSE_WORKING_IGN_NOT_PRESENT_FACTOR 0.0189607f
@@ -48,7 +46,7 @@ void ign_init(void)
     _init_pin(&s_IGN3, PIN_IGN_EN_3);
     _init_pin(&s_IGN4, PIN_IGN_EN_4);
 
-    SYS_LOG("READY");
+    SERIAL_DEBUG_PRINTF("READY");
 }
 
 void ign_update(void)
@@ -79,26 +77,30 @@ static void _run_control(void)
 {
     if (sm_get_state() == FLIGHT_STATE_STANDING)
     {
-        if (events_poll(MSG_CMD_IGN_TEST))
+        if (events_poll(MSG_SERIAL_MESSAGE_RECEIVED))
         {
-            const char *data = serial_get_param_at_index(0);
+            const datalink_frame_structure_serial_t *msg = serial_get_current_message();
 
-            if (data)
+            if (msg && msg->msgId == DATALINK_MESSAGE_IGN_REQUEST_TEST)
             {
-                int n = (int)(data[0] - '0');
+                const datalink_frame_ign_request_test_t *payload = (const datalink_frame_ign_request_test_t *)msg->payload;
 
-                SYS_LOG("Testing igniter %d...", n);
+                SERIAL_DEBUG_PRINTF("Testing igniter %d...", payload->ignNum);
 
-                hal_pin_number_t pin = n == 0 ? PIN_IGN_EN_1 : n == 1 ? PIN_IGN_EN_2
-                                                           : n == 2   ? PIN_IGN_EN_3
-                                                                      : PIN_IGN_EN_4;
+                hal_pin_number_t pin = payload->ignNum == 0 ? PIN_IGN_EN_1 : payload->ignNum == 1 ? PIN_IGN_EN_2
+                                                                         : payload->ignNum == 2   ? PIN_IGN_EN_3
+                                                                                                  : PIN_IGN_EN_4;
 
                 hal_gpio_set_pin_state(pin, GPIO_HIGH);
                 hal_time_sleep_ms(1000);
                 hal_gpio_set_pin_state(pin, GPIO_LOW);
-            }
 
-            hal_serial_printf("\\ign-test-finish\n");
+                datalink_frame_structure_serial_t response = {
+                    .msgId = DATALINK_MESSAGE_IGN_FINISH_TEST,
+                    .len = 0,
+                };
+                serial_send_message(&response);
+            }
         }
     }
 }
@@ -191,7 +193,7 @@ static void _ign_fire(ign_pin_data_t *data)
         data->fired = true;
         data->fireTime = hal_time_get_ms_since_boot();
 
-        SYS_LOG("Firing IGN...");
+        SERIAL_DEBUG_PRINTF("Firing IGN...");
     }
 }
 
@@ -205,7 +207,7 @@ static void _ign_update(ign_pin_data_t *data)
 
             data->finished = true;
 
-            SYS_LOG("IGN has been fired!");
+            SERIAL_DEBUG_PRINTF("IGN has been fired!");
         }
     }
 }

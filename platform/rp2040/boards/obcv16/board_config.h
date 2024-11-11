@@ -36,7 +36,7 @@
 
 // --- UART ---
 #define OBC_UART 0
-#define OBC_UART_FREQ 115200
+#define OBC_UART_FREQ 1843200
 #define OBC_UART_TX 16
 #define OBC_UART_RX 17
 

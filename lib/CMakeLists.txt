@@ -1,5 +1,6 @@
 add_subdirectory(maths)
 add_subdirectory(geo)
 add_subdirectory(crypto)
+add_subdirectory(datalink-c)
 add_subdirectory(battery)
 add_subdirectory(drivers)

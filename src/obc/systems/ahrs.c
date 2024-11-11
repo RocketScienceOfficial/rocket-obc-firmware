@@ -1,12 +1,11 @@
 #include "ahrs.h"
 #include "sensors.h"
-#include "../middleware/syslog.h"
+#include "serial.h"
 #include "../middleware/events.h"
 #include "lib/maths/math_constants.h"
 #include <math.h>
 #include <string.h>
 
-#define SYSTEM_NAME "ahrs"
 #define MADGWICK_BETA_CONSTANT 0.8660254f
 
 /**
@@ -97,7 +96,7 @@ void ahrs_init(void)
     _ekf_init();
     _madgwick_init(&s_FilterData, 2.2f, 0.0025f);
 
-    SYS_LOG("READY");
+    SERIAL_DEBUG_PRINTF("READY");
 }
 
 void ahrs_update(void)

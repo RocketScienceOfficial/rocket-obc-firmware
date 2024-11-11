@@ -1,15 +1,14 @@
 #include "status.h"
-#include "board_config.h"
 #include "sensors.h"
 #include "dataman.h"
 #include "ign.h"
 #include "sm.h"
+#include "serial.h"
+#include "board_config.h"
 #include "../middleware/events.h"
-#include "../middleware/syslog.h"
 #include "lib/drivers/led/w2812_driver.h"
 #include "lib/drivers/buzzer/passive_buzzer_driver.h"
 
-#define SYSTEM_NAME "status"
 #define WS_BRIGHTNESS 0.05f
 #define WS_COLOR(r, g, b) ws2812_get_color((uint8_t)((r) * WS_BRIGHTNESS), (uint8_t)((g) * WS_BRIGHTNESS), (uint8_t)((b) * WS_BRIGHTNESS))
 #define BUZZER_FREQ 2730
@@ -43,7 +42,7 @@ void status_init(void)
 
     passive_buzzer_init(&s_BuzzerConfig, PIN_BUZZER, BUZZER_FREQ);
 
-    SYS_LOG("READY!");
+    SERIAL_DEBUG_PRINTF("READY!");
 }
 
 void status_update(void)

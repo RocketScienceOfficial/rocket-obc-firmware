@@ -1,7 +1,14 @@
 #ifndef _SERIAL_H
 #define _SERIAL_H
 
-#include <stddef.h>
+#include "datalink.h"
+#include "hal/serial_driver.h"
+
+#ifndef NDEBUG
+#define SERIAL_DEBUG_PRINTF(fmt, ...) hal_serial_printf(fmt, ##__VA_ARGS__)
+#else
+#define SERIAL_DEBUG_PRINTF(fmt, ...)
+#endif
 
 /**
  * @brief Initialize serial input system
@@ -14,18 +21,17 @@ void serial_init(void);
 void serial_update(void);
 
 /**
- * @brief Get param of current cmd at index. If index is outside of the bounds, result is NULL
+ * @brief Send message to serial port
  *
- * @param index Index of param
- * @return Param
+ * @param message Pointer to messsage
  */
-const char *serial_get_param_at_index(size_t index);
+void serial_send_message(const datalink_frame_structure_serial_t *message);
 
 /**
- * @brief Get current cmd params count
+ * @brief Get current frame received from serial port
  *
- * @return Count
+ * @return Frame or NULL
  */
-size_t serial_get_params_count(void);
+const datalink_frame_structure_serial_t *serial_get_current_message(void);
 
 #endif
