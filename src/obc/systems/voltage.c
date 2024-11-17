@@ -3,7 +3,7 @@
 #include "serial.h"
 #include "board_config.h"
 #include "../middleware/events.h"
-#include "hal/gpio_driver.h"
+#include <hal/gpio_driver.h>
 #include <stdbool.h>
 
 static void _init_pin(hal_pin_number_t pin);

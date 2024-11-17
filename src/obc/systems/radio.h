@@ -1,7 +1,7 @@
 #ifndef _RADIO_H
 #define _RADIO_H
 
-#include "datalink.h"
+#include <datalink.h>
 
 /**
  * @brief Initialize radio

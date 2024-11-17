@@ -5,37 +5,58 @@
 #include "ahrs.h"
 #include "sm.h"
 #include "ign.h"
-#include "../middleware/events.h"
 #include "board_config.h"
-#include "hal/uart_driver.h"
-#include "hal/time_tracker.h"
+#include "../middleware/events.h"
+#include <lib/communication/cobs.h>
+#include <hal/uart_driver.h>
+#include <hal/time_tracker.h>
 #include <math.h>
 #include <string.h>
 #include <stddef.h>
 
+#define RADIO_TX_DONE_RECOVERY_TIME_MS 100
+#define RADIO_PACKET_FREQUNECY_TIME_MS 500
+
 static uint8_t s_RecvBuffer[512];
 static size_t s_BufLen = 0;
-static hal_msec_t s_TimeOffset;
-static hal_msec_t s_RecoveryTimeOffset;
 static datalink_frame_structure_serial_t s_CurrentFrame;
 static bool s_FrameSet;
+static bool s_RadioTXDone;
+static hal_msec_t s_RadioTXDoneRecoveryTimeOffset;
+static hal_msec_t s_PacketTimer;
 
-static void _radio_send_message(const datalink_frame_structure_serial_t *message);
-static uint16_t _get_alt(void);
-static bool _check_ign_cont(uint8_t ign);
-static uint8_t _get_control_flags(void);
-static datalink_frame_telemetry_data_obc_t _create_packet(void);
+static void _handle_protocol(void);
+static void _handle_uart_communication(void);
+static void _process_new_frame(void);
+static void _send_message(const datalink_frame_structure_serial_t *message);
+static uint16_t _packet_get_alt(void);
+static uint8_t _packet_get_control_flags(void);
+static bool _packet_check_ign_cont(uint8_t ign);
 
 void radio_init(void)
 {
     hal_uart_init_all(OBC_UART, OBC_UART_RX, OBC_UART_TX, OBC_UART_FREQ);
+
+    s_PacketTimer = hal_time_get_ms_since_boot();
 
     SERIAL_DEBUG_PRINTF("READY");
 }
 
 void radio_update(void)
 {
-    if ((s_TimeOffset != 0 && hal_time_get_ms_since_boot() - s_TimeOffset >= 250) || (hal_time_get_ms_since_boot() - s_RecoveryTimeOffset >= 2000))
+    _handle_protocol();
+    _handle_uart_communication();
+}
+
+const datalink_frame_structure_serial_t *radio_get_current_message(void)
+{
+    return s_FrameSet ? &s_CurrentFrame : NULL;
+}
+
+static void _handle_protocol(void)
+{
+    if ((s_RadioTXDone && hal_time_get_ms_since_boot() - s_PacketTimer >= RADIO_PACKET_FREQUNECY_TIME_MS) ||
+        (!s_RadioTXDone && hal_time_get_ms_since_boot() - s_RadioTXDoneRecoveryTimeOffset >= RADIO_TX_DONE_RECOVERY_TIME_MS + RADIO_PACKET_FREQUNECY_TIME_MS))
     {
         datalink_frame_telemetry_data_obc_t payload = {
             .qw = ahrs_get_data()->orientation.w,
@@ -47,9 +68,9 @@ void radio_update(void)
             .batteryPercentage = sensors_get_frame()->batPercent,
             .lat = sensors_get_frame()->pos.lat,
             .lon = sensors_get_frame()->pos.lon,
-            .alt = _get_alt(),
+            .alt = _packet_get_alt(),
             .state = (uint8_t)sm_get_state(),
-            .controlFlags = _get_control_flags(),
+            .controlFlags = _packet_get_control_flags(),
         };
         datalink_frame_structure_serial_t frame = {
             .msgId = DATALINK_MESSAGE_TELEMETRY_DATA_OBC,
@@ -57,69 +78,82 @@ void radio_update(void)
         };
         memcpy(frame.payload, &payload, sizeof(payload));
 
-        _radio_send_message(&frame);
+        _send_message(&frame);
 
-        s_TimeOffset = 0;
-        s_RecoveryTimeOffset = hal_time_get_ms_since_boot();
+        s_RadioTXDone = false;
+        s_RadioTXDoneRecoveryTimeOffset = hal_time_get_ms_since_boot();
     }
+}
+
+static void _handle_uart_communication(void)
+{
+    static uint8_t cobsDecodedBuffer[512];
 
     while (hal_uart_is_readable(OBC_UART))
     {
         uint8_t byte;
         hal_uart_read(OBC_UART, &byte, 1);
 
-        if (byte == 0)
+        if (s_BufLen >= sizeof(s_RecvBuffer))
         {
-            s_FrameSet = (bool)datalink_deserialize_frame_serial(&s_CurrentFrame, s_RecvBuffer, s_BufLen);
+            s_BufLen = 0;
+        }
+
+        s_RecvBuffer[s_BufLen++] = byte;
+
+        if (byte == 0x00)
+        {
+            int newLen = cobs_decode(s_RecvBuffer, s_BufLen, cobsDecodedBuffer) - 1;
+
+            s_FrameSet = (bool)datalink_deserialize_frame_serial(&s_CurrentFrame, cobsDecodedBuffer, newLen);
             s_BufLen = 0;
 
             if (s_FrameSet)
             {
-                s_TimeOffset = hal_time_get_ms_since_boot();
-
-                events_publish(MSG_RADIO_PACKET_RECEIVED);
-
-                SERIAL_DEBUG_PRINTF("Packet is valid!");
+                _process_new_frame();
             }
-        }
-        else
-        {
-            s_RecvBuffer[s_BufLen++] = byte;
         }
     }
 }
 
-const datalink_frame_structure_serial_t *radio_get_current_message(void)
+static void _process_new_frame(void)
 {
-    return s_FrameSet ? &s_CurrentFrame : NULL;
+    if (s_CurrentFrame.msgId == DATALINK_MESSAGE_RADIO_MODULE_TX_DONE)
+    {
+        s_FrameSet = false;
+        s_RadioTXDone = true;
+        s_PacketTimer = hal_time_get_ms_since_boot();
+    }
+    else
+    {
+        events_publish(MSG_RADIO_PACKET_RECEIVED);
+    }
 }
 
-static void _radio_send_message(const datalink_frame_structure_serial_t *message)
+static void _send_message(const datalink_frame_structure_serial_t *message)
 {
-    uint8_t buffer[512];
+    static uint8_t buffer[512];
+    static uint8_t cobsEncodedBuffer[512];
+
     int len = sizeof(buffer);
-    datalink_serialize_frame_serial(message, buffer, &len);
 
-    hal_uart_write(OBC_UART, buffer, len);
+    if (datalink_serialize_frame_serial(message, buffer, &len))
+    {
+        int newLen = cobs_encode(buffer, len, cobsEncodedBuffer);
+        cobsEncodedBuffer[newLen++] = 0x00;
 
-    SERIAL_DEBUG_PRINTF("Sent %d bytes", len);
+        hal_uart_write(OBC_UART, cobsEncodedBuffer, newLen);
+    }
 }
 
-static uint16_t _get_alt(void)
+static uint16_t _packet_get_alt(void)
 {
     float tmp = ahrs_get_data()->position.z;
 
     return tmp > 0 ? (uint16_t)tmp : 0;
 }
 
-static bool _check_ign_cont(uint8_t ign)
-{
-    uint8_t flags = ign_get_cont_flags(ign);
-
-    return (flags & IGN_CONT_FLAG_IGN_PRESENT) && (flags & IGN_CONT_FLAG_FUSE_WORKING);
-}
-
-static uint8_t _get_control_flags(void)
+static uint8_t _packet_get_control_flags(void)
 {
     uint8_t flags = 0;
     uint8_t voltageFlags = voltage_get_pins_flags();
@@ -140,22 +174,29 @@ static uint8_t _get_control_flags(void)
     {
         flags |= DATALINK_FLAGS_TELEMETRY_DATA_CONTROL_VBAT_ENABLED;
     }
-    if (_check_ign_cont(1))
+    if (_packet_check_ign_cont(1))
     {
         flags |= DATALINK_FLAGS_TELEMETRY_DATA_CONTROL_IGN_1;
     }
-    if (_check_ign_cont(2))
+    if (_packet_check_ign_cont(2))
     {
         flags |= DATALINK_FLAGS_TELEMETRY_DATA_CONTROL_IGN_2;
     }
-    if (_check_ign_cont(3))
+    if (_packet_check_ign_cont(3))
     {
         flags |= DATALINK_FLAGS_TELEMETRY_DATA_CONTROL_IGN_3;
     }
-    if (_check_ign_cont(4))
+    if (_packet_check_ign_cont(4))
     {
         flags |= DATALINK_FLAGS_TELEMETRY_DATA_CONTROL_IGN_4;
     }
 
     return flags;
+}
+
+static bool _packet_check_ign_cont(uint8_t ign)
+{
+    uint8_t flags = ign_get_cont_flags(ign);
+
+    return (flags & IGN_CONT_FLAG_IGN_PRESENT) && (flags & IGN_CONT_FLAG_FUSE_WORKING);
 }

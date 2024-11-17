@@ -13,9 +13,10 @@ void hal_serial_printf(char *fmt, ...)
     va_end(args);
 }
 
-void hal_serial_send_buffer(uint8_t *buffer, int len)
+void hal_serial_send_buffer(const uint8_t *buffer, int len)
 {
     fwrite(buffer, 1, len, stdout);
+    fflush(stdout);
 }
 
 bool hal_serial_read_char(int *chr)

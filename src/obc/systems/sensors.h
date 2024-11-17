@@ -1,8 +1,8 @@
 #ifndef _SENSORS_H
 #define _SENSORS_H
 
-#include "lib/maths/vector.h"
-#include "lib/geo/geo.h"
+#include <lib/maths/vector.h>
+#include <lib/geo/geo.h>
 #include <stdbool.h>
 #include <stdint.h>
 

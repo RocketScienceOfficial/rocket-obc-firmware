@@ -2,6 +2,7 @@
 #define _BOARD_CONTROL_H
 
 #include "time_tracker.h"
+#include <stdbool.h>
 
 /**
  * @brief Initialize the board
@@ -14,6 +15,13 @@ bool hal_board_init(hal_msec_t sleepTimeMs);
 /**
  * @brief Tight loop
  */
-void hal_tight_loop(void);
+void hal_board_tight_loop(void);
+
+/**
+ * @brief Check if USB is connected to the board
+ *
+ * @return true if connected
+ */
+bool hal_board_is_usb_connected(void);
 
 #endif

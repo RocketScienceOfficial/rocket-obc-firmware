@@ -4,9 +4,8 @@
 #include "radio.h"
 #include "serial.h"
 #include "../middleware/events.h"
-#include "lib/maths/math_utils.h"
-#include "lib/geo/physical_constants.h"
-#include "hal/serial_driver.h"
+#include <lib/maths/math_utils.h>
+#include <lib/geo/physical_constants.h>
 #include <stddef.h>
 #include <math.h>
 

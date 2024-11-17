@@ -2,9 +2,9 @@
 #define _TEST_FRAMEWORK_H
 
 #include <stdbool.h>
-#include "hal/serial_driver.h"
-#include "hal/time_tracker.h"
-#include "hal/board_control.h"
+#include <hal/serial_driver.h>
+#include <hal/time_tracker.h>
+#include <hal/board_control.h>
 
 static hal_msec_t s_TestsStartTime;
 static hal_msec_t s_SectionStartTime;
@@ -28,7 +28,7 @@ static const char *s_CurrentSection;
     hal_serial_printf("\n%d%% tests passed, %d tests failed out of %d   %.3f sec\n", s_PassedTests * 100 / (s_PassedTests + s_FailedTests), s_FailedTests, s_PassedTests + s_FailedTests, (float)(hal_time_get_ms_since_boot() - s_TestsStartTime) / 1000); \
     while (true)                                                                                                                                                                                                                                            \
     {                                                                                                                                                                                                                                                       \
-        hal_tight_loop();                                                                                                                                                                                                                                   \
+        hal_board_tight_loop();                                                                                                                                                                                                                                   \
     };
 
 #define TEST_START_SECTION(name)                       \

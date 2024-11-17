@@ -1,9 +1,9 @@
 #ifndef _DATAMAN_H
 #define _DATAMAN_H
 
-#include "hal/time_tracker.h"
-#include "lib/maths/vector.h"
-#include "lib/geo/geo.h"
+#include <hal/time_tracker.h>
+#include <lib/maths/vector.h>
+#include <lib/geo/geo.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>

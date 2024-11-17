@@ -2,7 +2,7 @@ macro(obc_add_lib NAME)
     set(SOURCES "")
 
     foreach(X ${ARGN})
-        set(SOURCES "${SOURCES};${CMAKE_CURRENT_LIST_DIR}/src/${X}")
+        set(SOURCES "${SOURCES};${CMAKE_CURRENT_SOURCE_DIR}/src/${X}")
     endforeach()
 
     set(LIB_NAME lib_${NAME})
@@ -13,5 +13,5 @@ macro(obc_add_lib NAME)
         ${SOURCES}
     )
 
-    target_include_directories(${LIB_NAME} INTERFACE ${CMAKE_CURRENT_LIST_DIR}/include)
+    target_include_directories(${LIB_NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 endmacro()

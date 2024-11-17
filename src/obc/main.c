@@ -23,7 +23,7 @@ static void _init_systems(void)
     ign_init();
     voltage_init();
 
-    hal_serial_printf("All systems initialized!\n");
+    SERIAL_DEBUG_PRINTF("All systems initialized!\n");
 }
 
 static void _update_systems(void)
@@ -43,9 +43,9 @@ int main()
 {
     hal_board_init(3000);
 
-    hal_serial_printf("Initialized board!\n");
-    hal_serial_printf("Firmware version: 1.0\n");
-    hal_serial_printf("Author: Filip Gawlik\n");
+    SERIAL_DEBUG_PRINTF("Initialized board!\n");
+    SERIAL_DEBUG_PRINTF("Firmware version: 1.0\n");
+    SERIAL_DEBUG_PRINTF("Author: Filip Gawlik\n");
 
     _init_systems();
 

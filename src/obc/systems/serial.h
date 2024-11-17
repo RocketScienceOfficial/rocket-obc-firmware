@@ -1,8 +1,8 @@
 #ifndef _SERIAL_H
 #define _SERIAL_H
 
-#include "datalink.h"
-#include "hal/serial_driver.h"
+#include <datalink.h>
+#include <hal/serial_driver.h>
 
 #ifndef NDEBUG
 #define SERIAL_DEBUG_PRINTF(fmt, ...) hal_serial_printf(fmt, ##__VA_ARGS__)

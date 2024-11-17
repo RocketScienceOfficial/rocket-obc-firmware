@@ -1,26 +1,26 @@
-#include "hal/board_control.h"
-#include "hal/time_tracker.h"
-#include "hal/serial_driver.h"
-#include "hal/spi_driver.h"
-#include "hal/uart_driver.h"
-#include "hal/i2c_driver.h"
-#include "hal/adc_driver.h"
-#include "lib/drivers/imu/bmi088_driver.h"
-#include "lib/drivers/imu/lsm6dso32_driver.h"
-#include "lib/drivers/accelerometer/h3lis331dl_driver.h"
-#include "lib/drivers/magnetometer/mmc5983ma_driver.h"
-#include "lib/drivers/barometer/ms5611_driver.h"
-#include "lib/drivers/gps/gps_driver.h"
-#include "lib/drivers/adc/ads7038_driver.h"
-#include "lib/drivers/adc/ads786x_driver.h"
-#include "lib/drivers/led/w2812_driver.h"
-#include "lib/drivers/buzzer/passive_buzzer_driver.h"
-#include "lib/battery/battery_utils.h"
-#include "lib/geo/geo.h"
-#include "lib/geo/geo_utils.h"
+#include "board_config.h"
+#include <hal/board_control.h>
+#include <hal/time_tracker.h>
+#include <hal/serial_driver.h>
+#include <hal/spi_driver.h>
+#include <hal/uart_driver.h>
+#include <hal/i2c_driver.h>
+#include <hal/adc_driver.h>
+#include <lib/drivers/imu/bmi088_driver.h>
+#include <lib/drivers/imu/lsm6dso32_driver.h>
+#include <lib/drivers/accelerometer/h3lis331dl_driver.h>
+#include <lib/drivers/magnetometer/mmc5983ma_driver.h>
+#include <lib/drivers/barometer/ms5611_driver.h>
+#include <lib/drivers/gps/gps_driver.h>
+#include <lib/drivers/adc/ads7038_driver.h>
+#include <lib/drivers/adc/ads786x_driver.h>
+#include <lib/drivers/led/w2812_driver.h>
+#include <lib/drivers/buzzer/passive_buzzer_driver.h>
+#include <lib/battery/battery_utils.h>
+#include <lib/geo/geo.h>
+#include <lib/geo/geo_utils.h>
 #include <string.h>
 #include <stdlib.h>
-#include "board_config.h"
 
 static char *_get_cmd(char *cmd, size_t len, const char *prompt)
 {
@@ -301,6 +301,6 @@ int main()
 
     while (true)
     {
-        hal_tight_loop();
+        hal_board_tight_loop();
     }
 }

@@ -1,5 +1,5 @@
 #include "tests/test_framework.h"
-#include "lib/crypto/crc.h"
+#include <lib/crypto/crc.h>
 
 int main()
 {

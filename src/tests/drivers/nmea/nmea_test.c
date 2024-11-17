@@ -1,5 +1,5 @@
 #include "tests/test_framework.h"
-#include "lib/drivers/gps/nmea.h"
+#include <lib/drivers/gps/nmea.h>
 
 int main()
 {

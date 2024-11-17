@@ -6,8 +6,8 @@
 #include "dataman.h"
 #include "board_config.h"
 #include "../middleware/events.h"
-#include "hal/gpio_driver.h"
-#include "hal/time_tracker.h"
+#include <hal/gpio_driver.h>
+#include <hal/time_tracker.h>
 #include <string.h>
 
 #define IGN_UP_TIME_MS 1000

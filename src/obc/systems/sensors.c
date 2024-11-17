@@ -2,19 +2,19 @@
 #include "serial.h"
 #include "board_config.h"
 #include "../middleware/events.h"
-#include "hal/adc_driver.h"
-#include "hal/time_tracker.h"
-#include "hal/serial_driver.h"
-#include "lib/geo/geo_utils.h"
-#include "lib/drivers/imu/bmi088_driver.h"
-#include "lib/drivers/imu/lsm6dso32_driver.h"
-#include "lib/drivers/accelerometer/h3lis331dl_driver.h"
-#include "lib/drivers/magnetometer/mmc5983ma_driver.h"
-#include "lib/drivers/barometer/ms5611_driver.h"
-#include "lib/drivers/gps/gps_driver.h"
-#include "lib/drivers/adc/ads786x_driver.h"
-#include "lib/drivers/led/w2812_driver.h"
-#include "lib/battery/battery_utils.h"
+#include <hal/adc_driver.h>
+#include <hal/time_tracker.h>
+#include <hal/serial_driver.h>
+#include <lib/geo/geo_utils.h>
+#include <lib/drivers/imu/bmi088_driver.h>
+#include <lib/drivers/imu/lsm6dso32_driver.h>
+#include <lib/drivers/accelerometer/h3lis331dl_driver.h>
+#include <lib/drivers/magnetometer/mmc5983ma_driver.h>
+#include <lib/drivers/barometer/ms5611_driver.h>
+#include <lib/drivers/gps/gps_driver.h>
+#include <lib/drivers/adc/ads786x_driver.h>
+#include <lib/drivers/led/w2812_driver.h>
+#include <lib/battery/battery_utils.h>
 #include <stdlib.h>
 
 #define BATTERY_VOLTAGE_DIVIDER 11.0f

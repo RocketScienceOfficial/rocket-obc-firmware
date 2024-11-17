@@ -1,6 +1,6 @@
 #include "tests/test_framework.h"
-#include "lib/maths/fast_math.h"
-#include "lib/maths/math_utils.h"
+#include <lib/maths/fast_math.h>
+#include <lib/maths/math_utils.h>
 #include <math.h>
 
 int main()

@@ -27,6 +27,7 @@ target_link_libraries(obc
     lib_maths
     lib_geo
     lib_crypto
+    lib_communication
     datalink
 )
 

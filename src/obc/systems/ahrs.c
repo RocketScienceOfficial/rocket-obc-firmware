@@ -2,7 +2,7 @@
 #include "sensors.h"
 #include "serial.h"
 #include "../middleware/events.h"
-#include "lib/maths/math_constants.h"
+#include <lib/maths/math_constants.h>
 #include <math.h>
 #include <string.h>
 

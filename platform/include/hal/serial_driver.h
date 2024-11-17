@@ -18,7 +18,7 @@ void hal_serial_printf(char *fmt, ...);
  * @param buffer Buffer of bytes to send
  * @param len Length of buffer
  */
-void hal_serial_send_buffer(uint8_t *buffer, int len);
+void hal_serial_send_buffer(const uint8_t *buffer, int len);
 
 /**
  * @brief Read char from serial

@@ -1,8 +1,8 @@
 #ifndef _AHRS_H
 #define _AHRS_H
 
-#include "lib/maths/vector.h"
-#include "lib/maths/quaternion.h"
+#include <lib/maths/vector.h>
+#include <lib/maths/quaternion.h>
 
 /**
  * @brief AHRS data

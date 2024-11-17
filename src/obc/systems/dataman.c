@@ -6,8 +6,8 @@
 #include "ign.h"
 #include "board_config.h"
 #include "../middleware/events.h"
-#include "hal/flash_driver.h"
-#include "lib/crypto/crc.h"
+#include <hal/flash_driver.h>
+#include <lib/crypto/crc.h>
 #include <string.h>
 
 static bool s_Terminated;
@@ -555,7 +555,7 @@ static void _get_config(void)
         .mainHeight = s_CurrentInfoFile.config.mainHeight,
     };
     datalink_frame_structure_serial_t response = {
-        .msgId = DATALINK_MESSAGE_CONFIG_GET,
+        .msgId = DATALINK_MESSAGE_CONFIG_GET_ACK,
         .len = sizeof(payload),
     };
     memcpy(response.payload, &payload, sizeof(payload));

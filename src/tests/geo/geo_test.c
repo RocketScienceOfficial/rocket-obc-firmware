@@ -1,8 +1,8 @@
 #include "tests/test_framework.h"
-#include "lib/geo/geo.h"
-#include "lib/geo/geo_utils.h"
-#include "lib/geo/geo_mag.h"
-#include "lib/maths/math_utils.h"
+#include <lib/geo/geo.h>
+#include <lib/geo/geo_utils.h>
+#include <lib/geo/geo_mag.h>
+#include <lib/maths/math_utils.h>
 
 int main()
 {
