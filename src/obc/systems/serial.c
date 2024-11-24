@@ -91,11 +91,5 @@ static void _check_usb_connection(void)
         {
             continue;
         }
-
-        s_CurrentFrame = (datalink_frame_structure_serial_t){
-            .msgId = DATALINK_MESSAGE_DATA_REQUEST_READ,
-        };
-        s_FrameSet = true;
-        events_publish(MSG_SERIAL_MESSAGE_RECEIVED);
     }
 }

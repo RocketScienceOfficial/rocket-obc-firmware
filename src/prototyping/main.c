@@ -65,7 +65,7 @@ static char *_get_cmd(char *cmd, size_t len, const char *prompt)
 
 int main()
 {
-    hal_board_init(5000);
+    hal_board_init(5000, true);
 
     hal_serial_printf("Initialized board!\n");
     hal_serial_printf("Hardware version: 1.0\n");

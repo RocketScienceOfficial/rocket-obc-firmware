@@ -14,16 +14,20 @@
 #include <string.h>
 #include <stddef.h>
 
+#define PACKETS_WITHOUT_RESPONSE_COUNT 10
 #define RADIO_TX_DONE_RECOVERY_TIME_MS 100
-#define RADIO_PACKET_FREQUNECY_TIME_MS 500
+#define RADIO_RESPONSE_RECOVERY_TIME_MS 2000
+#define RADIO_PACKET_FREQUNECY_TIME_MS 50
 
 static uint8_t s_RecvBuffer[512];
 static size_t s_BufLen = 0;
 static datalink_frame_structure_serial_t s_CurrentFrame;
 static bool s_FrameSet;
-static bool s_RadioTXDone;
 static hal_msec_t s_RadioTXDoneRecoveryTimeOffset;
+static hal_msec_t s_RadioResponseRecoveryTimeOffset;
 static hal_msec_t s_PacketTimer;
+static int s_PacketCounterForResponse;
+static bool s_WaitingForResponse;
 
 static void _handle_protocol(void);
 static void _handle_uart_communication(void);
@@ -55,8 +59,24 @@ const datalink_frame_structure_serial_t *radio_get_current_message(void)
 
 static void _handle_protocol(void)
 {
-    if ((s_RadioTXDone && hal_time_get_ms_since_boot() - s_PacketTimer >= RADIO_PACKET_FREQUNECY_TIME_MS) ||
-        (!s_RadioTXDone && hal_time_get_ms_since_boot() - s_RadioTXDoneRecoveryTimeOffset >= RADIO_TX_DONE_RECOVERY_TIME_MS + RADIO_PACKET_FREQUNECY_TIME_MS))
+    if (!s_WaitingForResponse && s_RadioTXDoneRecoveryTimeOffset != 0 && hal_time_get_ms_since_boot() - s_RadioTXDoneRecoveryTimeOffset >= RADIO_TX_DONE_RECOVERY_TIME_MS)
+    {
+        s_RadioTXDoneRecoveryTimeOffset = 0;
+        s_PacketTimer = hal_time_get_ms_since_boot();
+
+        SERIAL_DEBUG_PRINTF("Didn't receive ack from radio module!\n");
+    }
+
+    if (s_WaitingForResponse && s_RadioResponseRecoveryTimeOffset != 0 && hal_time_get_ms_since_boot() - s_RadioResponseRecoveryTimeOffset >= RADIO_RESPONSE_RECOVERY_TIME_MS)
+    {
+        s_RadioResponseRecoveryTimeOffset = 0;
+        s_WaitingForResponse = false;
+        s_PacketTimer = hal_time_get_ms_since_boot();
+
+        SERIAL_DEBUG_PRINTF("Didn't receive response from GCS!\n");
+    }
+
+    if (s_PacketTimer != 0 && hal_time_get_ms_since_boot() - s_PacketTimer >= RADIO_PACKET_FREQUNECY_TIME_MS)
     {
         datalink_frame_telemetry_data_obc_t payload = {
             .qw = ahrs_get_data()->orientation.w,
@@ -73,15 +93,26 @@ static void _handle_protocol(void)
             .controlFlags = _packet_get_control_flags(),
         };
         datalink_frame_structure_serial_t frame = {
-            .msgId = DATALINK_MESSAGE_TELEMETRY_DATA_OBC,
+            .msgId = s_PacketCounterForResponse == PACKETS_WITHOUT_RESPONSE_COUNT ? DATALINK_MESSAGE_TELEMETRY_DATA_OBC_WITH_RESPONSE : DATALINK_MESSAGE_TELEMETRY_DATA_OBC,
             .len = sizeof(payload),
         };
         memcpy(frame.payload, &payload, sizeof(payload));
 
         _send_message(&frame);
 
-        s_RadioTXDone = false;
+        s_PacketTimer = 0;
         s_RadioTXDoneRecoveryTimeOffset = hal_time_get_ms_since_boot();
+
+        if (s_PacketCounterForResponse == PACKETS_WITHOUT_RESPONSE_COUNT)
+        {
+            s_WaitingForResponse = true;
+            s_RadioResponseRecoveryTimeOffset = hal_time_get_ms_since_boot();
+            s_PacketCounterForResponse = 0;
+        }
+        else
+        {
+            s_PacketCounterForResponse++;
+        }
     }
 }
 
@@ -120,12 +151,20 @@ static void _process_new_frame(void)
 {
     if (s_CurrentFrame.msgId == DATALINK_MESSAGE_RADIO_MODULE_TX_DONE)
     {
+        s_RadioTXDoneRecoveryTimeOffset = 0;
         s_FrameSet = false;
-        s_RadioTXDone = true;
-        s_PacketTimer = hal_time_get_ms_since_boot();
+
+        if (!s_WaitingForResponse)
+        {
+            s_PacketTimer = hal_time_get_ms_since_boot();
+        }
     }
-    else
+    else if (s_CurrentFrame.msgId == DATALINK_MESSAGE_TELEMETRY_RESPONSE)
     {
+        s_RadioResponseRecoveryTimeOffset = 0;
+        s_WaitingForResponse = false;
+        s_PacketTimer = hal_time_get_ms_since_boot();
+
         events_publish(MSG_RADIO_PACKET_RECEIVED);
     }
 }

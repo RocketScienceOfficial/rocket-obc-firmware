@@ -1,12 +1,12 @@
 #include "hal/board_control.h"
 #include "pico/stdlib.h"
 
-bool hal_board_init(hal_msec_t sleepTimeMs)
+bool hal_board_init(hal_msec_t sleepTimeMs, bool enableCRLF)
 {
     hal_time_sleep_ms(1000);
 
     stdio_init_all();
-    stdio_set_translate_crlf(&stdio_usb, false);
+    stdio_set_translate_crlf(&stdio_usb, enableCRLF);
 
     if (sleepTimeMs > 0)
     {

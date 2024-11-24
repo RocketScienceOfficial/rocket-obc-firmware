@@ -8,9 +8,10 @@
  * @brief Initialize the board
  *
  * @param sleepTimeMs The time to sleep after startup
+ * @param enableCRLF Should the automatically translate message sent through serial to CRLF
  * @return true if success
  */
-bool hal_board_init(hal_msec_t sleepTimeMs);
+bool hal_board_init(hal_msec_t sleepTimeMs, bool enableCRLF);
 
 /**
  * @brief Tight loop

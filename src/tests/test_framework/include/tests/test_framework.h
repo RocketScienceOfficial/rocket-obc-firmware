@@ -20,7 +20,7 @@ static const char *s_CurrentSection;
 #define __MACRO_STR(x) #x
 
 #define TEST_START()                                            \
-    hal_board_init(5000);                                       \
+    hal_board_init(5000, true);                                 \
     hal_serial_printf("Starting test: %s\n", TEST_MODULE_NAME); \
     s_TestsStartTime = hal_time_get_ms_since_boot();
 
@@ -28,7 +28,7 @@ static const char *s_CurrentSection;
     hal_serial_printf("\n%d%% tests passed, %d tests failed out of %d   %.3f sec\n", s_PassedTests * 100 / (s_PassedTests + s_FailedTests), s_FailedTests, s_PassedTests + s_FailedTests, (float)(hal_time_get_ms_since_boot() - s_TestsStartTime) / 1000); \
     while (true)                                                                                                                                                                                                                                            \
     {                                                                                                                                                                                                                                                       \
-        hal_board_tight_loop();                                                                                                                                                                                                                                   \
+        hal_board_tight_loop();                                                                                                                                                                                                                             \
     };
 
 #define TEST_START_SECTION(name)                       \

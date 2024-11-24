@@ -78,15 +78,15 @@ void dataman_update(void)
                 {
                     if (msg->msgId == DATALINK_MESSAGE_DATA_REQUEST_READ)
                     {
-                        _read_data();
+                       _read_data();
                     }
                     else if (msg->msgId == DATALINK_MESSAGE_DATA_REQUEST_CLEAR)
                     {
-                        _clear_database();
+                       _clear_database();
                     }
                     else if (msg->msgId == DATALINK_MESSAGE_DATA_REQUEST_RECOVERY)
                     {
-                        _recover_data();
+                       _recover_data();
                     }
                     else if (msg->msgId == DATALINK_MESSAGE_CONFIG_GET)
                     {
