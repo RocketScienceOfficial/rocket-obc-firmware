@@ -1,7 +1,7 @@
 #include "serial.h"
 #include "sm.h"
 #include "../middleware/events.h"
-#include <lib/communication/cobs.h>
+#include <cobs.h>
 #include <hal/serial_driver.h>
 #include <hal/board_control.h>
 #include <stdint.h>
@@ -19,7 +19,7 @@ static void _check_usb_connection(void);
 
 void serial_init(void)
 {
-    SERIAL_DEBUG_PRINTF("READY");
+    SERIAL_DEBUG_LOG("READY");
 }
 
 void serial_update(void)

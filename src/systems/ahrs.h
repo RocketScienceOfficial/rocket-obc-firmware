@@ -12,6 +12,7 @@ typedef struct ahrs_data
     quat_t orientation;
     vec3_t position;
     vec3_t velocity;
+    vec3_t acceleration;
 } ahrs_data_t;
 
 /**

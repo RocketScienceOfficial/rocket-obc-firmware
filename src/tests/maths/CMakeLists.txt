@@ -1,1 +1,0 @@
-obc_add_test(maths_test lib_maths)

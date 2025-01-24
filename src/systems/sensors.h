@@ -31,6 +31,7 @@ typedef struct sensors_frame
     float batVolts;
     uint8_t batPercent;
     uint8_t batNCells;
+    float measurementDt;
 } sensors_frame_t;
 
 /**

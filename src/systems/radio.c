@@ -7,7 +7,7 @@
 #include "ign.h"
 #include "board_config.h"
 #include "../middleware/events.h"
-#include <lib/communication/cobs.h>
+#include <cobs.h>
 #include <hal/uart_driver.h>
 #include <hal/time_tracker.h>
 #include <math.h>
@@ -43,7 +43,7 @@ void radio_init(void)
 
     s_PacketTimer = hal_time_get_ms_since_boot();
 
-    SERIAL_DEBUG_PRINTF("READY");
+    SERIAL_DEBUG_LOG("READY");
 }
 
 void radio_update(void)
@@ -64,7 +64,7 @@ static void _handle_protocol(void)
         s_RadioTXDoneRecoveryTimeOffset = 0;
         s_PacketTimer = hal_time_get_ms_since_boot();
 
-        SERIAL_DEBUG_PRINTF("Didn't receive ack from radio module!\n");
+        SERIAL_DEBUG_LOG("Didn't receive ack from radio module!");
     }
 
     if (s_WaitingForResponse && s_RadioResponseRecoveryTimeOffset != 0 && hal_time_get_ms_since_boot() - s_RadioResponseRecoveryTimeOffset >= RADIO_RESPONSE_RECOVERY_TIME_MS)
@@ -73,7 +73,7 @@ static void _handle_protocol(void)
         s_WaitingForResponse = false;
         s_PacketTimer = hal_time_get_ms_since_boot();
 
-        SERIAL_DEBUG_PRINTF("Didn't receive response from GCS!\n");
+        SERIAL_DEBUG_LOG("Didn't receive response from GCS!");
     }
 
     if (s_PacketTimer != 0 && hal_time_get_ms_since_boot() - s_PacketTimer >= RADIO_PACKET_FREQUNECY_TIME_MS)

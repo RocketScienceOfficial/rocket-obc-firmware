@@ -19,10 +19,10 @@
 
 #define I2C_ADDRESS 0x30
 
-#define PRODUCT_ID_VALID 0x0C
+#define PRODUCT_ID_VALID 0x30
 
 static void _mmc5983ma_soft_reset(const mmc5983ma_config_t *config);
-static void _mmc5983ma_init_base(mmc5983ma_config_t *config);
+static void _mmc5983ma_auto_set_reset(mmc5983ma_config_t *config);
 static void _mmc5983ma_set(const mmc5983ma_config_t *config);
 static void _mmc5983ma_reset(const mmc5983ma_config_t *config);
 
@@ -39,7 +39,7 @@ void mmc5983ma_init_spi(mmc5983ma_config_t *config, hal_spi_instance_t spi, hal_
 
     hal_spi_init_cs(cs);
 
-    _mmc5983ma_init_base(config);
+    _mmc5983ma_auto_set_reset(config);
 }
 
 void mmc5983ma_init_i2c(mmc5983ma_config_t *config, hal_i2c_instance_t i2c)
@@ -53,7 +53,7 @@ void mmc5983ma_init_i2c(mmc5983ma_config_t *config, hal_i2c_instance_t i2c)
         .writeMask = 0x7F,
     };
 
-    _mmc5983ma_init_base(config);
+    _mmc5983ma_auto_set_reset(config);
 }
 
 bool mmc5983ma_validate_id(const mmc5983ma_config_t *config)
@@ -61,9 +61,12 @@ bool mmc5983ma_validate_id(const mmc5983ma_config_t *config)
     return gpio_utils_read_reg(&config->gpioConfig, PRODUCT_ID) == PRODUCT_ID_VALID;
 }
 
-void mmc5983ma_set_continuous_mode_odr(const mmc5983ma_config_t *config, mmc5983_odr_t odr, mmc5983ma_prd_set_t prd)
+void mmc5983ma_set_continuous_mode_odr(const mmc5983ma_config_t *config, mmc5983_odr_t odr)
 {
-    gpio_utils_write_reg(&config->gpioConfig, INTERNAL_CONTROL_2, odr | (1 << 3) | (prd << 4) | (1 << 7));
+    gpio_utils_write_reg(&config->gpioConfig, INTERNAL_CONTROL_1, 0x00);
+
+    gpio_utils_write_reg(&config->gpioConfig, INTERNAL_CONTROL_2, 0x00);
+    gpio_utils_write_reg(&config->gpioConfig, INTERNAL_CONTROL_2, odr | (1 << 3));
 }
 
 void mmc5983ma_read(const mmc5983ma_config_t *config, vec3_t *mag)
@@ -89,26 +92,26 @@ void mmc5983ma_read_temp(const mmc5983ma_config_t *config, float *temp)
 
 static void _mmc5983ma_soft_reset(const mmc5983ma_config_t *config)
 {
-    gpio_utils_write_reg(&config->gpioConfig, INTERNAL_CONTROL_1, 0x80);
+    gpio_utils_write_reg(&config->gpioConfig, INTERNAL_CONTROL_1, 1 << 7);
 
     hal_time_sleep_ms(15);
 }
 
-static void _mmc5983ma_init_base(mmc5983ma_config_t *config)
+static void _mmc5983ma_auto_set_reset(mmc5983ma_config_t *config)
 {
-    gpio_utils_write_reg(&config->gpioConfig, INTERNAL_CONTROL_0, 0x20);
+    gpio_utils_write_reg(&config->gpioConfig, INTERNAL_CONTROL_0, 1 << 5);
 }
 
 static void _mmc5983ma_set(const mmc5983ma_config_t *config)
 {
-    gpio_utils_write_reg(&config->gpioConfig, INTERNAL_CONTROL_0, 0x08);
+    gpio_utils_write_reg(&config->gpioConfig, INTERNAL_CONTROL_0, 1 << 3);
 
     hal_time_sleep_ms(1);
 }
 
 static void _mmc5983ma_reset(const mmc5983ma_config_t *config)
 {
-    gpio_utils_write_reg(&config->gpioConfig, INTERNAL_CONTROL_0, 0x10);
+    gpio_utils_write_reg(&config->gpioConfig, INTERNAL_CONTROL_0, 1 << 4);
 
     hal_time_sleep_ms(1);
 }

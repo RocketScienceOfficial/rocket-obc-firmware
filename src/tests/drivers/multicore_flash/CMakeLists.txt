@@ -1,1 +1,0 @@
-obc_add_test(multicore_flash_test obc_hal)

@@ -33,21 +33,6 @@ typedef enum mmc5983_odr
 } mmc5983_odr_t;
 
 /**
- * @brief MMC5983MA How many times the chip will do a set operation
- */
-typedef enum mmc5983ma_prd_set
-{
-    MMC5983MA_PRD_SET_1 = 0x00,
-    MMC5983MA_PRD_SET_25 = 0x01,
-    MMC5983MA_PRD_SET_75 = 0x02,
-    MMC5983MA_PRD_SET_100 = 0x03,
-    MMC5983MA_PRD_SET_250 = 0x04,
-    MMC5983MA_PRD_SET_500 = 0x05,
-    MMC5983MA_PRD_SET_1000 = 0x06,
-    MMC5983MA_PRD_SET_2000 = 0x07,
-} mmc5983ma_prd_set_t;
-
-/**
  * @brief MMC5983MA Magnetometer initialization using SPI
  *
  * @param config MMC5983MA configuration
@@ -77,9 +62,8 @@ bool mmc5983ma_validate_id(const mmc5983ma_config_t *config);
  *
  * @param config MMC5983MA configuration
  * @param odr ODR
- * @param prd PRD
  */
-void mmc5983ma_set_continuous_mode_odr(const mmc5983ma_config_t *config, mmc5983_odr_t odr, mmc5983ma_prd_set_t prd);
+void mmc5983ma_set_continuous_mode_odr(const mmc5983ma_config_t *config, mmc5983_odr_t odr);
 
 /**
  * @brief Read data from magnetometer

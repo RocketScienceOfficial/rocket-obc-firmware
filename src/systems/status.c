@@ -11,12 +11,13 @@
 
 #define WS_BRIGHTNESS 0.05f
 #define WS_COLOR(r, g, b) ws2812_get_color((uint8_t)((r) * WS_BRIGHTNESS), (uint8_t)((g) * WS_BRIGHTNESS), (uint8_t)((b) * WS_BRIGHTNESS))
+#define OTHER_DIODES_UPDATE_PERIOD_MS 500
 #define BUZZER_FREQ 2730
 #define BUZZER_DELAY_MS 1000
 
 static ws2812_color_t s_Diodes[7];
 static hal_pwm_config_t s_BuzzerConfig;
-static hal_msec_t s_OtherDiodesTimer;
+static hal_msec_t s_OtherDiodesTimeOffset;
 static bool s_BuzzerActive;
 static hal_msec_t s_BuzzerTimeOffset;
 
@@ -42,7 +43,7 @@ void status_init(void)
 
     passive_buzzer_init(&s_BuzzerConfig, PIN_BUZZER, BUZZER_FREQ);
 
-    SERIAL_DEBUG_PRINTF("READY!");
+    SERIAL_DEBUG_LOG("READY!");
 }
 
 void status_update(void)
@@ -58,12 +59,14 @@ void status_update(void)
         _update_diodes();
     }
 
-    if (hal_time_run_every_ms(500, &s_OtherDiodesTimer))
+    if (hal_time_get_ms_since_boot() - s_OtherDiodesTimeOffset >= OTHER_DIODES_UPDATE_PERIOD_MS)
     {
         s_Diodes[4] = _get_ready_diode_color();
         s_Diodes[6] = _get_arm_diode_color();
 
         _update_diodes();
+
+        s_OtherDiodesTimeOffset = hal_time_get_ms_since_boot();
     }
 
     if (sm_get_state() == FLIGHT_STATE_LANDED)

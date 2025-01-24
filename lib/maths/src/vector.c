@@ -32,6 +32,14 @@ float vec3_mag(const vec3_t *v)
     return sqrtf(v->x * v->x + v->y * v->y + v->z * v->z);
 }
 
+int vec3_mag_compare(const vec3_t *v, float n)
+{
+    float r = v->x * v->x + v->y * v->y + v->z * v->z;
+
+    return r > n * n ? 1 : r < n * n ? -1
+                                     : 0;
+}
+
 void vec3_normalize(vec3_t *v)
 {
     float magInv = fast_inv_sqrt(v->x * v->x + v->y * v->y + v->z * v->z);

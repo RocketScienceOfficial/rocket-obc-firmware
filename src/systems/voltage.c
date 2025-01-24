@@ -15,7 +15,7 @@ void voltage_init(void)
     _init_pin(PIN_5V);
     _init_pin(PIN_VBAT);
 
-    SERIAL_DEBUG_PRINTF("READY!");
+    SERIAL_DEBUG_LOG("READY!");
 }
 
 void voltage_update(void)
@@ -60,7 +60,7 @@ static void _init_pin(hal_pin_number_t pin)
     hal_gpio_init_pin(pin, GPIO_OUTPUT);
     hal_gpio_set_pin_state(pin, GPIO_LOW);
 
-    SERIAL_DEBUG_PRINTF("Pin %d inititalized!", pin);
+    SERIAL_DEBUG_LOG("Pin %d inititalized!", pin);
 }
 
 static void _set_pin_state(int enable, hal_pin_number_t pin)
@@ -69,6 +69,6 @@ static void _set_pin_state(int enable, hal_pin_number_t pin)
     {
         hal_gpio_set_pin_state(pin, enable ? GPIO_HIGH : GPIO_LOW);
 
-        SERIAL_DEBUG_PRINTF("Setting pin %d to %s", pin, enable ? "high" : "low");
+        SERIAL_DEBUG_LOG("Setting pin %d to %s", pin, enable ? "high" : "low");
     }
 }

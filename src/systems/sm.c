@@ -9,7 +9,7 @@
 #include <stddef.h>
 #include <math.h>
 
-#define START_ACC_THRESHOLD 35
+#define START_ACC_THRESHOLD (3.5f * EARTH_GRAVITY)
 #define START_ALT_THRESHOLD 3
 #define START_ALT_VERIFICATION_COUNT 300
 #define APOGEE_MAX_DELTA 2
@@ -37,7 +37,7 @@ static void _handle_state_landed(void);
 
 void sm_init(void)
 {
-    SERIAL_DEBUG_PRINTF("READY");
+    SERIAL_DEBUG_LOG("READY");
 }
 
 void sm_update(void)
@@ -99,13 +99,13 @@ static void _handle_radio_packet(void)
             {
                 s_Armed = true;
 
-                SERIAL_DEBUG_PRINTF("Armed igniters!");
+                SERIAL_DEBUG_LOG("Armed igniters!");
             }
             else if (!arm && s_Armed)
             {
                 s_Armed = false;
 
-                SERIAL_DEBUG_PRINTF("Igniters were disarmed!");
+                SERIAL_DEBUG_LOG("Igniters were disarmed!");
             }
         }
     }
@@ -122,14 +122,11 @@ static void _handle_state_standing(void)
 
     if (events_poll(MSG_SENSORS_NORMAL_READ) && !s_VerifingStandingAlt)
     {
-        vec3_t accel = sensors_get_frame()->acc1;
-        float acc_mag = vec3_mag(&accel);
-
-        if (acc_mag >= START_ACC_THRESHOLD)
+        if (vec3_mag_compare(&sensors_get_frame()->acc1, START_ACC_THRESHOLD) >= 0)
         {
             s_VerifingStandingAlt = true;
 
-            SERIAL_DEBUG_PRINTF("Started verifing altitude");
+            SERIAL_DEBUG_LOG("Started verifing altitude");
         }
     }
 
@@ -143,13 +140,13 @@ static void _handle_state_standing(void)
         }
         else
         {
-            SERIAL_DEBUG_PRINTF("TEST: %f", alt - s_BaseAlt);
+            SERIAL_DEBUG_LOG("Base altitude: %f", alt - s_BaseAlt);
 
             if (alt - s_BaseAlt >= START_ALT_THRESHOLD)
             {
                 s_State = FLIGHT_STATE_ACCELERATING;
 
-                SERIAL_DEBUG_PRINTF("State: Accelerating");
+                SERIAL_DEBUG_LOG("State: Accelerating");
             }
             else
             {
@@ -157,7 +154,7 @@ static void _handle_state_standing(void)
 
                 if (s_StandingAltVerificationIndex == START_ALT_VERIFICATION_COUNT)
                 {
-                    SERIAL_DEBUG_PRINTF("Acceleration state verification unsuccessfull");
+                    SERIAL_DEBUG_LOG("Acceleration state verification unsuccessfull");
 
                     s_BaseAlt = 0;
                     s_VerifingStandingAlt = false;
@@ -172,14 +169,11 @@ static void _handle_state_accelerating(void)
 {
     if (events_poll(MSG_SENSORS_NORMAL_READ))
     {
-        vec3_t accel = sensors_get_frame()->acc1;
-        float acc_mag = vec3_mag(&accel);
-
-        if (acc_mag < EARTH_GRAVITY)
+        if (vec3_mag_compare(&sensors_get_frame()->acc1, EARTH_GRAVITY) < 0)
         {
             s_State = FLIGHT_STATE_FREE_FLIGHT;
 
-            SERIAL_DEBUG_PRINTF("State: Free Flight");
+            SERIAL_DEBUG_LOG("State: Free Flight");
         }
     }
 }
@@ -199,8 +193,8 @@ static void _handle_state_free_flight(void)
                 s_State = FLIGHT_STATE_FREE_FALL;
                 s_ApogeeReached = true;
 
-                SERIAL_DEBUG_PRINTF("Apogee reached: %f", s_Apogee);
-                SERIAL_DEBUG_PRINTF("State: Free Fall");
+                SERIAL_DEBUG_LOG("Apogee reached: %f", s_Apogee);
+                SERIAL_DEBUG_LOG("State: Free Fall");
 
                 events_publish(MSG_SM_APOGEE_REACHED);
             }
@@ -233,7 +227,7 @@ static void _handle_state_free_fall(void)
             {
                 s_State = FLIGHT_STATE_LANDED;
 
-                SERIAL_DEBUG_PRINTF("State: Landed");
+                SERIAL_DEBUG_LOG("State: Landed");
             }
         }
     }

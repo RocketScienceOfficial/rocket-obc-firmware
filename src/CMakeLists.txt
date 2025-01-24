@@ -1,3 +1,33 @@
-add_subdirectory(obc)
-add_subdirectory(prototyping)
-add_subdirectory(tests)
+add_executable(obc
+    main.c
+    middleware/events.c
+    systems/ahrs.c
+    systems/dataman.c
+    systems/ign.c
+    systems/radio.c
+    systems/sensors.c
+    systems/serial.c
+    systems/sm.c
+    systems/status.c
+    systems/voltage.c
+)
+
+target_link_libraries(obc
+    obc_hal
+    lib_drivers_accel
+    lib_drivers_adc
+    lib_drivers_barometer
+    lib_drivers_buzzer
+    lib_drivers_gps
+    lib_drivers_imu
+    lib_drivers_led
+    lib_drivers_magnetometer
+    lib_drivers_servo
+    lib_battery
+    lib_maths
+    lib_geo
+    lib_crypto
+    datalink
+)
+
+obc_add_outputs(obc)

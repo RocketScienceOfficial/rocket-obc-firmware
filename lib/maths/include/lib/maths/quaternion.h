@@ -21,13 +21,6 @@ typedef struct quat
 quat_t quat_mul(const quat_t *a, const quat_t *b);
 
 /**
- * @brief Calculate conjugate of quaternion
- *
- * @param q Quaternion
- */
-void quat_conj(quat_t *q);
-
-/**
  * @brief Calculate inverse of a quaternion
  *
  * @param q Quaternion to inverse
@@ -47,6 +40,15 @@ void quat_normalize(quat_t *q);
  * @param v Vector to rotate
  * @param q Quaternion
  */
-void rotate_vec_through_quat(vec3_t *v, const quat_t *q);
+void quat_rotate_vec(vec3_t *v, const quat_t *q);
+
+/**
+ * @brief Calculate derivative of quaternion
+ *
+ * @param q Quaternion
+ * @param gyro Gyroscope vector
+ * @return Derivative of quaternion
+ */
+quat_t quat_gyro_derivative(const quat_t *q, const vec3_t *gyro);
 
 #endif

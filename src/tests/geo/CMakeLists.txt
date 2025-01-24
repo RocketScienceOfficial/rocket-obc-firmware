@@ -1,1 +1,0 @@
-obc_add_test(geo_test lib_geo lib_maths)

@@ -46,7 +46,7 @@ void ign_init(void)
     _init_pin(&s_IGN3, PIN_IGN_EN_3);
     _init_pin(&s_IGN4, PIN_IGN_EN_4);
 
-    SERIAL_DEBUG_PRINTF("READY");
+    SERIAL_DEBUG_LOG("READY");
 }
 
 void ign_update(void)
@@ -85,7 +85,7 @@ static void _run_control(void)
             {
                 const datalink_frame_ign_request_test_t *payload = (const datalink_frame_ign_request_test_t *)msg->payload;
 
-                SERIAL_DEBUG_PRINTF("Testing igniter %d...", payload->ignNum);
+                SERIAL_DEBUG_LOG("Testing igniter %d...", payload->ignNum);
 
                 hal_pin_number_t pin = payload->ignNum == 0 ? PIN_IGN_EN_1 : payload->ignNum == 1 ? PIN_IGN_EN_2
                                                                          : payload->ignNum == 2   ? PIN_IGN_EN_3
@@ -193,7 +193,7 @@ static void _ign_fire(ign_pin_data_t *data)
         data->fired = true;
         data->fireTime = hal_time_get_ms_since_boot();
 
-        SERIAL_DEBUG_PRINTF("Firing IGN...");
+        SERIAL_DEBUG_LOG("Firing IGN...");
     }
 }
 
@@ -207,7 +207,7 @@ static void _ign_update(ign_pin_data_t *data)
 
             data->finished = true;
 
-            SERIAL_DEBUG_PRINTF("IGN has been fired!");
+            SERIAL_DEBUG_LOG("IGN has been fired!");
         }
     }
 }

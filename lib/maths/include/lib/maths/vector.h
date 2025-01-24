@@ -52,6 +52,15 @@ void vec3_mul_num(vec3_t *v, float n);
 float vec3_mag(const vec3_t *v);
 
 /**
+ * @brief Compare vector magnitude with a value
+ *
+ * @param v Vector
+ * @param n Value to compare magnitude with
+ * @return Comparison result
+ */
+int vec3_mag_compare(const vec3_t *v, float n);
+
+/**
  * @brief Normalize vector
  *
  * @param v Vector to normalize

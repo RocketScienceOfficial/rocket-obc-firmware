@@ -5,9 +5,9 @@
 #include <hal/serial_driver.h>
 
 #ifndef NDEBUG
-#define SERIAL_DEBUG_PRINTF(fmt, ...) hal_serial_printf(fmt, ##__VA_ARGS__)
+#define SERIAL_DEBUG_LOG(fmt, ...) hal_serial_printf(fmt "\r\n", ##__VA_ARGS__)
 #else
-#define SERIAL_DEBUG_PRINTF(fmt, ...)
+#define SERIAL_DEBUG_LOG(fmt, ...)
 #endif
 
 /**

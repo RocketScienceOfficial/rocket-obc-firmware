@@ -42,11 +42,21 @@ void quat_normalize(quat_t *q)
     q->z *= normInv;
 }
 
-void rotate_vec_through_quat(vec3_t *v, const quat_t *q)
+void quat_rotate_vec(vec3_t *v, const quat_t *q)
 {
     *v = (vec3_t){
         .x = v->x * (1.0f - 2.0f * (q->y * q->y + q->z * q->z)) + v->y * 2.0f * (q->x * q->y - q->z * q->w) + v->z * 2.0f * (q->x * q->z + q->y * q->w),
         .y = v->x * 2.0f * (q->x * q->y + q->z * q->w) + v->y * (1.0f - 2.0f * (q->x * q->x + q->z * q->z)) + v->z * 2.0f * (q->y * q->z - q->x * q->w),
         .z = v->x * 2.0f * (q->x * q->z - q->y * q->w) + v->y * 2.0f * (q->y * q->z + q->x * q->w) + v->z * (1.0f - 2.0f * (q->x * q->x + q->y * q->y)),
+    };
+}
+
+quat_t quat_gyro_derivative(const quat_t *q, const vec3_t *gyro)
+{
+    return (quat_t){
+        .w = 0.5f * (-gyro->x * q->x - gyro->y * q->y - gyro->z * q->z),
+        .x = 0.5f * (+gyro->x * q->w + gyro->z * q->y - gyro->y * q->z),
+        .y = 0.5f * (+gyro->y * q->w - gyro->z * q->x + gyro->x * q->z),
+        .z = 0.5f * (+gyro->z * q->w + gyro->y * q->x - gyro->x * q->y),
     };
 }

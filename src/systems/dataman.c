@@ -61,7 +61,7 @@ void dataman_init(void)
         _save_info_file();
     }
 
-    SERIAL_DEBUG_PRINTF("READY");
+    SERIAL_DEBUG_LOG("READY");
 }
 
 void dataman_update(void)
@@ -142,7 +142,7 @@ bool dataman_is_ready(void)
 
         const dataman_file_info_t *info = _read_info();
 
-        SERIAL_DEBUG_PRINTF("Info file exists: %d", info != NULL);
+        SERIAL_DEBUG_LOG("Info file exists: %d", info != NULL);
 
         ready = info ? info->savedFramesCount + info->standingFramesCount == 0 : false;
     }
@@ -236,7 +236,7 @@ static bool _can_save_data(void)
 
 static void _clear_database(void)
 {
-    SERIAL_DEBUG_PRINTF("Clearing database...");
+    SERIAL_DEBUG_LOG("Clearing database...");
 
     size_t totalCount = SECTORS_COUNT_STANDING_BUFFER + SECTORS_COUNT_DATA;
 
@@ -257,7 +257,7 @@ static void _clear_database(void)
         serial_send_message(&response);
     }
 
-    SERIAL_DEBUG_PRINTF("Database cleared!");
+    SERIAL_DEBUG_LOG("Database cleared!");
 
     s_CurrentInfoFile.savedFramesCount = 0;
     s_CurrentInfoFile.standingFramesCount = 0;
@@ -282,7 +282,7 @@ static void _flush_data(void)
             hal_flash_write_pages(SECTORS_OFFSET_DATA * FLASH_SECTOR_SIZE / FLASH_PAGE_SIZE + s_SaveFlashOffsetPages, s_SaveBuffer, sizeof(s_SaveBuffer) / FLASH_PAGE_SIZE);
         }
 
-        SERIAL_DEBUG_PRINTF("Flash save buffer has been flushed. %d bytes were written", s_SaveBufferSize);
+        SERIAL_DEBUG_LOG("Flash save buffer has been flushed. %d bytes were written", s_SaveBufferSize);
 
         s_SaveBufferSize = 0;
     }
@@ -312,7 +312,7 @@ static void _flush_standing_buffer(void)
 
     hal_flash_write_pages(SECTORS_OFFSET_STANDING_BUFFER * FLASH_SECTOR_SIZE / FLASH_PAGE_SIZE, data, pages);
 
-    SERIAL_DEBUG_PRINTF("Standing buffer has been flushed. %d frames (%d bytes) were written", s_StandingBufferLength, s_StandingBufferLength * sizeof(dataman_frame_t));
+    SERIAL_DEBUG_LOG("Standing buffer has been flushed. %d frames (%d bytes) were written", s_StandingBufferLength, s_StandingBufferLength * sizeof(dataman_frame_t));
 }
 
 static const dataman_file_info_t *_read_info(void)
@@ -399,7 +399,7 @@ static void _read_data_raw(size_t maxFrames, size_t *currentFrameCount, const ui
 
 static void _read_data(void)
 {
-    SERIAL_DEBUG_PRINTF("Begining of data read...");
+    SERIAL_DEBUG_LOG("Begining of data read...");
 
     const dataman_file_info_t *info = _read_info();
 
@@ -444,7 +444,7 @@ static void _read_data(void)
     };
     serial_send_message(&response);
 
-    SERIAL_DEBUG_PRINTF("Data read finish!");
+    SERIAL_DEBUG_LOG("Data read finish!");
 }
 
 static void _recover_data_read(const uint8_t *data)
@@ -546,7 +546,7 @@ static void _save_info_file(void)
 
     s_ReadyTest = false;
 
-    SERIAL_DEBUG_PRINTF("Dataman file info was saved. Total frame count: %d", s_CurrentInfoFile.savedFramesCount + s_CurrentInfoFile.standingFramesCount);
+    SERIAL_DEBUG_LOG("Dataman file info was saved. Total frame count: %d", s_CurrentInfoFile.savedFramesCount + s_CurrentInfoFile.standingFramesCount);
 }
 
 static void _get_config(void)
