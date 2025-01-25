@@ -3,6 +3,7 @@
 
 #include <hal/time_tracker.h>
 #include <lib/maths/vector.h>
+#include <lib/maths/quaternion.h>
 #include <lib/geo/geo.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -18,6 +19,7 @@
 #define STANDING_BUFFER_LENGTH (FLASH_PAGE_SIZE * 2)
 #define LANDING_BUFFER_LENGTH (FLASH_PAGE_SIZE * 2)
 #define DATA_RECOVERY_MAX_FRAMES 150000
+#define DATAMAN_SAVE_RATE_MS 20
 
 /**
  * @brief Dataman frame which is saved
@@ -25,16 +27,12 @@
 typedef struct __attribute__((__packed__)) dataman_frame
 {
     uint8_t magic;
-    hal_usec_t time;
-    vec3_t acc1;
-    vec3_t acc2;
-    vec3_t acc3;
-    vec3_t gyro1;
-    vec3_t gyro2;
-    vec3_t mag1;
-    int press;
-    float kalmanHeight;
-    geo_position_wgs84_t pos;
+    uint16_t dt_us;
+    vec3_t acc;
+    vec3_t vel;
+    vec3_t pos;
+    quat_t q;
+    geo_position_wgs84_t gpsPos;
     uint8_t smState;
     uint8_t batteryVoltage;
     uint8_t ignFlags;

@@ -21,6 +21,7 @@ static size_t s_StandingBufferIndex;
 static size_t s_LandingBufferIndex;
 static dataman_file_info_t s_CurrentInfoFile;
 static bool s_ReadyTest;
+static hal_msec_t s_LastSaveTime;
 
 static dataman_frame_t _get_frame(void);
 static uint8_t _get_ign_flags(void);
@@ -78,15 +79,15 @@ void dataman_update(void)
                 {
                     if (msg->msgId == DATALINK_MESSAGE_DATA_REQUEST_READ)
                     {
-                       _read_data();
+                        _read_data();
                     }
                     else if (msg->msgId == DATALINK_MESSAGE_DATA_REQUEST_CLEAR)
                     {
-                       _clear_database();
+                        _clear_database();
                     }
                     else if (msg->msgId == DATALINK_MESSAGE_DATA_REQUEST_RECOVERY)
                     {
-                       _recover_data();
+                        _recover_data();
                     }
                     else if (msg->msgId == DATALINK_MESSAGE_CONFIG_GET)
                     {
@@ -99,15 +100,23 @@ void dataman_update(void)
                 }
             }
 
-            if (events_poll(MSG_SENSORS_NORMAL_READ))
+            hal_msec_t currentTime = hal_time_get_ms_since_boot();
+
+            if (currentTime - s_LastSaveTime >= DATAMAN_SAVE_RATE_MS)
             {
+                s_LastSaveTime = currentTime;
+
                 _save_standing_buffer_frame();
             }
         }
         else if (sm_get_state() == FLIGHT_STATE_ACCELERATING || sm_get_state() == FLIGHT_STATE_FREE_FALL || sm_get_state() == FLIGHT_STATE_FREE_FLIGHT || sm_get_state() == FLIGHT_STATE_LANDED)
         {
-            if (events_poll(MSG_SENSORS_NORMAL_READ))
+            hal_msec_t currentTime = hal_time_get_ms_since_boot();
+
+            if (currentTime - s_LastSaveTime >= DATAMAN_SAVE_RATE_MS)
             {
+                s_LastSaveTime = currentTime;
+
                 _save_frame();
 
                 if (sm_get_state() == FLIGHT_STATE_LANDED)
@@ -157,18 +166,20 @@ const dataman_config_t *dataman_get_config(void)
 
 static dataman_frame_t _get_frame(void)
 {
+    static hal_usec_t lastTime = 0;
+
+    hal_usec_t currentTime = hal_time_get_us_since_boot();
+    uint16_t dt = (uint16_t)(currentTime - lastTime);
+    lastTime = currentTime;
+
     dataman_frame_t frame = {
         .magic = DATAMAN_FRAME_MAGIC,
-        .time = hal_time_get_us_since_boot(),
-        .acc1 = sensors_get_frame()->acc1,
-        .acc2 = sensors_get_frame()->acc2,
-        .acc3 = sensors_get_frame()->acc3,
-        .gyro1 = sensors_get_frame()->gyro1,
-        .gyro2 = sensors_get_frame()->gyro2,
-        .mag1 = sensors_get_frame()->mag1,
-        .press = sensors_get_frame()->press,
-        .kalmanHeight = ahrs_get_data()->position.z,
-        .pos = sensors_get_frame()->pos,
+        .dt_us = dt,
+        .acc = sensors_get_frame()->acc2,
+        .vel = ahrs_get_data()->velocity,
+        .pos = ahrs_get_data()->position,
+        .q = ahrs_get_data()->orientation,
+        .gpsPos = sensors_get_frame()->pos,
         .smState = (uint8_t)sm_get_state(),
         .batteryVoltage = sensors_get_frame()->batVolts * 10,
         .ignFlags = _get_ign_flags(),
@@ -330,30 +341,23 @@ static bool _print_saved_frame(const dataman_frame_t *frame)
     if (_validate_frame(frame))
     {
         datalink_frame_data_saved_chunk_t payload = {
-            .time = frame->time,
-            .acc1x = frame->acc1.x,
-            .acc1y = frame->acc1.y,
-            .acc1z = frame->acc1.z,
-            .acc2x = frame->acc2.x,
-            .acc2y = frame->acc2.y,
-            .acc2z = frame->acc2.z,
-            .acc3x = frame->acc3.x,
-            .acc3y = frame->acc3.y,
-            .acc3z = frame->acc3.z,
-            .gyro1x = frame->gyro1.x,
-            .gyro1y = frame->gyro1.y,
-            .gyro1z = frame->gyro1.z,
-            .gyro2x = frame->gyro2.x,
-            .gyro2y = frame->gyro2.y,
-            .gyro2z = frame->gyro2.z,
-            .mag1x = frame->mag1.x,
-            .mag1y = frame->mag1.y,
-            .mag1z = frame->mag1.z,
-            .press = frame->press,
-            .kalmanHeight = frame->kalmanHeight,
-            .lat = frame->pos.lat,
-            .lon = frame->pos.lon,
-            .alt = frame->pos.alt,
+            .dt = frame->dt_us,
+            .accX = frame->acc.x,
+            .accY = frame->acc.y,
+            .accZ = frame->acc.z,
+            .velN = frame->vel.x,
+            .velE = frame->vel.y,
+            .velD = frame->vel.z,
+            .posN = frame->pos.x,
+            .posE = frame->pos.y,
+            .posD = frame->pos.z,
+            .qw = frame->q.w,
+            .qx = frame->q.x,
+            .qy = frame->q.y,
+            .qz = frame->q.z,
+            .lat = frame->gpsPos.lat,
+            .lon = frame->gpsPos.lon,
+            .alt = frame->gpsPos.alt,
             .smState = frame->smState,
             .batVolts10 = frame->batteryVoltage,
             .ignFlags = frame->ignFlags,
