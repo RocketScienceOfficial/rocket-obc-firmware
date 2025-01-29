@@ -33,14 +33,14 @@ void sm_update(void);
 flight_state_type_t sm_get_state(void);
 
 /**
- * @brief Gets current base altitude. 0 if state == STANDING
+ * @brief Gets current altitude relative to start. 0 if state == STANDING
  *
- * @return Base Altitude
+ * @return Altitude
  */
-float sm_get_base_alt(void);
+float sm_get_alt(void);
 
 /**
- * @brief Gets apogee reached. 0 if hasn't reached yet
+ * @brief Gets reached apogee. 0 if hasn't reached yet
  *
  * @return Apogee
  */

@@ -12,10 +12,12 @@
 
 #define STREAM_DELTA_TIME_MS 10
 #define ORIENTATION_SWITCH_THRESHOLD (2.0f * EARTH_GRAVITY)
-#define EKF_ACC_VARIANCE 0.004f
+#define EKF_ACC_VARIANCE 0.1f
 #define EKF_GPS_VARIANCE 0.5f
-#define EKF_BARO_VARIANCE 0.04f
-#define EKF_OUTDATED_MEASUREMENT_VARIANCE_MULTIPLIER 5
+#define EKF_BARO_VARIANCE 0.2f
+#define EKF_OUTDATED_MEASUREMENT_VARIANCE_MULTIPLIER 5 // 5 // 1000
+#define EKF_ACC_CHANGING_MULTIPLIER 1                   // 10 // 1000
+#define EKF_ACC_CHANGE_THRESHOLD (0.5f * EARTH_GRAVITY) // 0.2
 
 /**
  * REF: https://ahrs.readthedocs.io/en/latest/filters/madgwick.html
@@ -111,6 +113,7 @@ static geo_position_wgs84_t s_BaseGPSPos;
 static vec3_prec_t s_NEDPos;
 static float s_BaroHeightOffset;
 static float s_BaroHeight;
+static vec3_t s_LastAcc;
 static bool s_IsStreamingEKFData;
 static hal_msec_t s_StreamTimer;
 
@@ -172,6 +175,16 @@ void ahrs_update(void)
 
     if (events_poll(MSG_SENSORS_NORMAL_READ))
     {
+        if (fabsf(sensors_get_frame()->acc1.x - s_LastAcc.x) >= EKF_ACC_CHANGE_THRESHOLD || fabsf(sensors_get_frame()->acc1.y - s_LastAcc.y) >= EKF_ACC_CHANGE_THRESHOLD || fabsf(sensors_get_frame()->acc1.z - s_LastAcc.z) >= EKF_ACC_CHANGE_THRESHOLD)
+        {
+            s_EKF.cfg.varAcc = EKF_ACC_VARIANCE * EKF_ACC_CHANGING_MULTIPLIER;
+        }
+        else
+        {
+            s_EKF.cfg.varAcc = EKF_ACC_VARIANCE;
+        }
+        s_LastAcc = sensors_get_frame()->acc1;
+
         s_EKF.cfg.dt = sensors_get_frame()->measurementDt;
         s_Mahony.dt = sensors_get_frame()->measurementDt;
         s_Madgwick.dt = sensors_get_frame()->measurementDt;

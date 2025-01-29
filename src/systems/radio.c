@@ -17,7 +17,7 @@
 #define PACKETS_WITHOUT_RESPONSE_COUNT 10
 #define RADIO_TX_DONE_RECOVERY_TIME_MS 100
 #define RADIO_RESPONSE_RECOVERY_TIME_MS 2000
-#define RADIO_PACKET_FREQUNECY_TIME_MS 50
+#define RADIO_PACKET_SEND_DELAY_MS 50
 
 static uint8_t s_RecvBuffer[512];
 static size_t s_BufLen = 0;
@@ -76,14 +76,14 @@ static void _handle_protocol(void)
         SERIAL_DEBUG_LOG("Didn't receive response from GCS!");
     }
 
-    if (s_PacketTimer != 0 && hal_time_get_ms_since_boot() - s_PacketTimer >= RADIO_PACKET_FREQUNECY_TIME_MS)
+    if (s_PacketTimer != 0 && hal_time_get_ms_since_boot() - s_PacketTimer >= RADIO_PACKET_SEND_DELAY_MS)
     {
         datalink_frame_telemetry_data_obc_t payload = {
             .qw = ahrs_get_data()->orientation.w,
             .qx = ahrs_get_data()->orientation.x,
             .qy = ahrs_get_data()->orientation.y,
             .qz = ahrs_get_data()->orientation.z,
-            .velocity = sqrtf(ahrs_get_data()->velocity.x * ahrs_get_data()->velocity.x + ahrs_get_data()->velocity.y * ahrs_get_data()->velocity.y + ahrs_get_data()->velocity.z * ahrs_get_data()->velocity.z),
+            .velocity = (uint16_t)(sqrtf(ahrs_get_data()->velocity.x * ahrs_get_data()->velocity.x + ahrs_get_data()->velocity.y * ahrs_get_data()->velocity.y + ahrs_get_data()->velocity.z * ahrs_get_data()->velocity.z) * 3.6f),
             .batteryVoltage10 = sensors_get_frame()->batVolts * 10,
             .batteryPercentage = sensors_get_frame()->batPercent,
             .lat = sensors_get_frame()->pos.lat,

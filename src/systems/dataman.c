@@ -21,7 +21,7 @@ static size_t s_StandingBufferIndex;
 static size_t s_LandingBufferIndex;
 static dataman_file_info_t s_CurrentInfoFile;
 static bool s_ReadyTest;
-static hal_msec_t s_LastSaveTime;
+static hal_usec_t s_LastSaveTime;
 
 static dataman_frame_t _get_frame(void);
 static uint8_t _get_ign_flags(void);
@@ -100,44 +100,77 @@ void dataman_update(void)
                 }
             }
 
-            hal_msec_t currentTime = hal_time_get_ms_since_boot();
+            // ======================================== TESTING ========================================
+            static bool enabled = false;
 
-            if (currentTime - s_LastSaveTime >= DATAMAN_SAVE_RATE_MS)
+            hal_usec_t currentTime = hal_time_get_us_since_boot();
+
+            if (sm_is_armed())
             {
-                s_LastSaveTime = currentTime;
-
-                _save_standing_buffer_frame();
-            }
-        }
-        else if (sm_get_state() == FLIGHT_STATE_ACCELERATING || sm_get_state() == FLIGHT_STATE_FREE_FALL || sm_get_state() == FLIGHT_STATE_FREE_FLIGHT || sm_get_state() == FLIGHT_STATE_LANDED)
-        {
-            hal_msec_t currentTime = hal_time_get_ms_since_boot();
-
-            if (currentTime - s_LastSaveTime >= DATAMAN_SAVE_RATE_MS)
-            {
-                s_LastSaveTime = currentTime;
-
-                _save_frame();
-
-                if (sm_get_state() == FLIGHT_STATE_LANDED)
+                if (currentTime - s_LastSaveTime >= DATAMAN_SAVE_RATE_US)
                 {
-                    s_LandingBufferIndex++;
+                    s_LastSaveTime = currentTime;
 
-                    if (s_LandingBufferIndex == LANDING_BUFFER_LENGTH)
-                    {
-                        _flush_data();
-                        _flush_standing_buffer();
+                    _save_frame();
+                }
 
-                        s_CurrentInfoFile.savedFramesCount = s_SavedFramesCount;
-                        s_CurrentInfoFile.standingFramesCount = s_StandingBufferLength;
+                enabled = true;
+            }
+            else
+            {
+                if (enabled)
+                {
+                    _flush_data();
 
-                        _save_info_file();
+                    s_CurrentInfoFile.savedFramesCount = s_SavedFramesCount;
+                    s_CurrentInfoFile.standingFramesCount = 0;
 
-                        s_Terminated = true;
-                    }
+                    _save_info_file();
+
+                    s_Terminated = true;
+                    enabled = false;
                 }
             }
+            // ======================================== TESTING ========================================
+
+            // hal_usec_t currentTime = hal_time_get_us_since_boot();
+
+            // if (currentTime - s_LastSaveTime >= DATAMAN_SAVE_RATE_US)
+            // {
+            //     s_LastSaveTime = currentTime;
+
+            //     _save_standing_buffer_frame();
+            // }
         }
+        // else if (sm_get_state() == FLIGHT_STATE_ACCELERATING || sm_get_state() == FLIGHT_STATE_FREE_FALL || sm_get_state() == FLIGHT_STATE_FREE_FLIGHT || sm_get_state() == FLIGHT_STATE_LANDED)
+        // {
+        //     hal_usec_t currentTime = hal_time_get_us_since_boot();
+
+        //     if (currentTime - s_LastSaveTime >= DATAMAN_SAVE_RATE_US)
+        //     {
+        //         s_LastSaveTime = currentTime;
+
+        //         _save_frame();
+
+        //         if (sm_get_state() == FLIGHT_STATE_LANDED)
+        //         {
+        //             s_LandingBufferIndex++;
+
+        //             if (s_LandingBufferIndex == LANDING_BUFFER_LENGTH)
+        //             {
+        //                 _flush_data();
+        //                 _flush_standing_buffer();
+
+        //                 s_CurrentInfoFile.savedFramesCount = s_SavedFramesCount;
+        //                 s_CurrentInfoFile.standingFramesCount = s_StandingBufferLength;
+
+        //                 _save_info_file();
+
+        //                 s_Terminated = true;
+        //             }
+        //         }
+        //     }
+        // }
     }
 }
 
@@ -405,48 +438,31 @@ static void _read_data(void)
 {
     SERIAL_DEBUG_LOG("Begining of data read...");
 
-    const dataman_file_info_t *info = _read_info();
+    size_t currentFrameCount = s_CurrentInfoFile.savedFramesCount + s_CurrentInfoFile.standingFramesCount;
 
-    if (info)
-    {
-        size_t currentFrameCount = info->savedFramesCount + info->standingFramesCount;
+    datalink_frame_data_saved_size_t payload = {
+        .size = currentFrameCount,
+    };
+    datalink_frame_structure_serial_t sizeResponse = {
+        .msgId = DATALINK_MESSAGE_DATA_SAVED_SIZE,
+        .len = sizeof(payload),
+    };
+    memcpy(sizeResponse.payload, &payload, sizeof(payload));
+    serial_send_message(&sizeResponse);
 
-        datalink_frame_data_saved_size_t payload = {
-            .size = currentFrameCount,
-        };
-        datalink_frame_structure_serial_t response = {
-            .msgId = DATALINK_MESSAGE_DATA_SAVED_SIZE,
-            .len = sizeof(payload),
-        };
-        memcpy(response.payload, &payload, sizeof(payload));
-        serial_send_message(&response);
+    const uint8_t *data;
 
-        const uint8_t *data;
+    hal_flash_read(SECTORS_OFFSET_STANDING_BUFFER * FLASH_SECTOR_SIZE, &data);
+    _read_data_raw(s_CurrentInfoFile.standingFramesCount, &currentFrameCount, data);
 
-        hal_flash_read(SECTORS_OFFSET_STANDING_BUFFER * FLASH_SECTOR_SIZE, &data);
-        _read_data_raw(info->standingFramesCount, &currentFrameCount, data);
+    hal_flash_read(SECTORS_OFFSET_DATA * FLASH_SECTOR_SIZE, &data);
+    _read_data_raw(s_CurrentInfoFile.savedFramesCount, &currentFrameCount, data);
 
-        hal_flash_read(SECTORS_OFFSET_DATA * FLASH_SECTOR_SIZE, &data);
-        _read_data_raw(info->savedFramesCount, &currentFrameCount, data);
-    }
-    else
-    {
-        datalink_frame_data_saved_size_t payload = {
-            .size = 0,
-        };
-        datalink_frame_structure_serial_t response = {
-            .msgId = DATALINK_MESSAGE_DATA_SAVED_SIZE,
-            .len = sizeof(payload),
-        };
-        memcpy(response.payload, &payload, sizeof(payload));
-        serial_send_message(&response);
-    }
-
-    datalink_frame_structure_serial_t response = {
+    datalink_frame_structure_serial_t finishResponse = {
         .msgId = DATALINK_MESSAGE_DATA_FINISH_READ,
         .len = 0,
     };
-    serial_send_message(&response);
+    serial_send_message(&finishResponse);
 
     SERIAL_DEBUG_LOG("Data read finish!");
 }

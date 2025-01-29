@@ -69,9 +69,9 @@ flight_state_type_t sm_get_state(void)
     return s_State;
 }
 
-float sm_get_base_alt(void)
+float sm_get_alt(void)
 {
-    return s_BaseAlt;
+    return s_BaseAlt == 0 ? 0 : ahrs_get_data()->position.z - s_BaseAlt;
 }
 
 float sm_get_apogee(void)
@@ -114,6 +114,10 @@ static void _handle_radio_packet(void)
 static void _handle_state_standing(void)
 {
     _handle_radio_packet();
+    
+    // ======================================== TESTING ========================================
+    return;
+    // ======================================== TESTING ========================================
 
     if (!s_Armed)
     {
@@ -137,11 +141,11 @@ static void _handle_state_standing(void)
         if (s_BaseAlt == 0)
         {
             s_BaseAlt = alt;
+
+            SERIAL_DEBUG_LOG("Base altitude: %f", s_BaseAlt);
         }
         else
         {
-            SERIAL_DEBUG_LOG("Base altitude: %f", alt - s_BaseAlt);
-
             if (alt - s_BaseAlt >= START_ALT_THRESHOLD)
             {
                 s_State = FLIGHT_STATE_ACCELERATING;
@@ -182,7 +186,7 @@ static void _handle_state_free_flight(void)
 {
     if (events_poll(MSG_SENSORS_NORMAL_READ))
     {
-        float alt = ahrs_get_data()->position.z - s_BaseAlt;
+        float alt = sm_get_alt();
 
         if (alt <= s_Apogee || alt - s_Apogee <= APOGEE_MAX_DELTA)
         {
@@ -211,7 +215,7 @@ static void _handle_state_free_fall(void)
 {
     if (events_poll(MSG_SENSORS_NORMAL_READ))
     {
-        float alt = ahrs_get_data()->position.z - s_BaseAlt;
+        float alt = sm_get_alt();
         float delta = fabsf(s_LandingAlt - alt);
 
         if (delta > LAND_MAX_DELTA)
