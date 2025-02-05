@@ -114,10 +114,6 @@ static void _handle_radio_packet(void)
 static void _handle_state_standing(void)
 {
     _handle_radio_packet();
-    
-    // ======================================== TESTING ========================================
-    return;
-    // ======================================== TESTING ========================================
 
     if (!s_Armed)
     {

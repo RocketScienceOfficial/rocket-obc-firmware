@@ -12,12 +12,12 @@
 
 #define STREAM_DELTA_TIME_MS 10
 #define ORIENTATION_SWITCH_THRESHOLD (2.0f * EARTH_GRAVITY)
-#define EKF_ACC_VARIANCE 0.1f
-#define EKF_GPS_VARIANCE 0.5f
+#define EKF_ACC_VARIANCE 0.01f
+#define EKF_GPS_VARIANCE 1.2f
 #define EKF_BARO_VARIANCE 0.2f
-#define EKF_OUTDATED_MEASUREMENT_VARIANCE_MULTIPLIER 5 // 5 // 1000
-#define EKF_ACC_CHANGING_MULTIPLIER 1                   // 10 // 1000
-#define EKF_ACC_CHANGE_THRESHOLD (0.5f * EARTH_GRAVITY) // 0.2
+#define EKF_OUTDATED_MEASUREMENT_VARIANCE 1000000
+#define EKF_ACC_CHANGE_THRESHOLD (0.5f * EARTH_GRAVITY)
+#define EKF_ACC_CHANGING_VARIANCE 1000
 
 /**
  * REF: https://ahrs.readthedocs.io/en/latest/filters/madgwick.html
@@ -177,7 +177,7 @@ void ahrs_update(void)
     {
         if (fabsf(sensors_get_frame()->acc1.x - s_LastAcc.x) >= EKF_ACC_CHANGE_THRESHOLD || fabsf(sensors_get_frame()->acc1.y - s_LastAcc.y) >= EKF_ACC_CHANGE_THRESHOLD || fabsf(sensors_get_frame()->acc1.z - s_LastAcc.z) >= EKF_ACC_CHANGE_THRESHOLD)
         {
-            s_EKF.cfg.varAcc = EKF_ACC_VARIANCE * EKF_ACC_CHANGING_MULTIPLIER;
+            s_EKF.cfg.varAcc = EKF_ACC_CHANGING_VARIANCE;
         }
         else
         {
@@ -231,8 +231,8 @@ void ahrs_update(void)
             s_CurrentData.velocity.y = s_EKF.x.vel_e;
             s_CurrentData.velocity.z = s_EKF.x.vel_d;
 
-            s_EKF.cfg.varGPS = EKF_GPS_VARIANCE * EKF_OUTDATED_MEASUREMENT_VARIANCE_MULTIPLIER;
-            s_EKF.cfg.varBar = EKF_BARO_VARIANCE * EKF_OUTDATED_MEASUREMENT_VARIANCE_MULTIPLIER;
+            s_EKF.cfg.varGPS = EKF_OUTDATED_MEASUREMENT_VARIANCE;
+            s_EKF.cfg.varBar = EKF_OUTDATED_MEASUREMENT_VARIANCE;
         }
         else
         {

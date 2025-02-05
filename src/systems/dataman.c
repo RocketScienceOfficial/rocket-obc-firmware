@@ -100,77 +100,44 @@ void dataman_update(void)
                 }
             }
 
-            // ======================================== TESTING ========================================
-            static bool enabled = false;
-
             hal_usec_t currentTime = hal_time_get_us_since_boot();
 
-            if (sm_is_armed())
+            if (currentTime - s_LastSaveTime >= DATAMAN_SAVE_RATE_US)
             {
-                if (currentTime - s_LastSaveTime >= DATAMAN_SAVE_RATE_US)
-                {
-                    s_LastSaveTime = currentTime;
+                s_LastSaveTime = currentTime;
 
-                    _save_frame();
-                }
-
-                enabled = true;
+                _save_standing_buffer_frame();
             }
-            else
-            {
-                if (enabled)
-                {
-                    _flush_data();
-
-                    s_CurrentInfoFile.savedFramesCount = s_SavedFramesCount;
-                    s_CurrentInfoFile.standingFramesCount = 0;
-
-                    _save_info_file();
-
-                    s_Terminated = true;
-                    enabled = false;
-                }
-            }
-            // ======================================== TESTING ========================================
-
-            // hal_usec_t currentTime = hal_time_get_us_since_boot();
-
-            // if (currentTime - s_LastSaveTime >= DATAMAN_SAVE_RATE_US)
-            // {
-            //     s_LastSaveTime = currentTime;
-
-            //     _save_standing_buffer_frame();
-            // }
         }
-        // else if (sm_get_state() == FLIGHT_STATE_ACCELERATING || sm_get_state() == FLIGHT_STATE_FREE_FALL || sm_get_state() == FLIGHT_STATE_FREE_FLIGHT || sm_get_state() == FLIGHT_STATE_LANDED)
-        // {
-        //     hal_usec_t currentTime = hal_time_get_us_since_boot();
+        else if (sm_get_state() == FLIGHT_STATE_ACCELERATING || sm_get_state() == FLIGHT_STATE_FREE_FALL || sm_get_state() == FLIGHT_STATE_FREE_FLIGHT || sm_get_state() == FLIGHT_STATE_LANDED)
+        {
+            hal_usec_t currentTime = hal_time_get_us_since_boot();
 
-        //     if (currentTime - s_LastSaveTime >= DATAMAN_SAVE_RATE_US)
-        //     {
-        //         s_LastSaveTime = currentTime;
+            if (currentTime - s_LastSaveTime >= DATAMAN_SAVE_RATE_US)
+            {
+                s_LastSaveTime = currentTime;
 
-        //         _save_frame();
+                _save_frame();
 
-        //         if (sm_get_state() == FLIGHT_STATE_LANDED)
-        //         {
-        //             s_LandingBufferIndex++;
+                if (sm_get_state() == FLIGHT_STATE_LANDED)
+                {
+                    s_LandingBufferIndex++;
 
-        //             if (s_LandingBufferIndex == LANDING_BUFFER_LENGTH)
-        //             {
-        //                 _flush_data();
-        //                 _flush_standing_buffer();
+                    if (s_LandingBufferIndex == LANDING_BUFFER_LENGTH)
+                    {
+                        _flush_data();
+                        _flush_standing_buffer();
 
-        //                 s_CurrentInfoFile.savedFramesCount = s_SavedFramesCount;
-        //                 s_CurrentInfoFile.standingFramesCount = s_StandingBufferLength;
+                        s_CurrentInfoFile.savedFramesCount = s_SavedFramesCount;
+                        s_CurrentInfoFile.standingFramesCount = s_StandingBufferLength;
 
-        //                 _save_info_file();
+                        _save_info_file();
 
-        //                 s_Terminated = true;
-        //             }
-        //         }
-        //     }
-        // }
+                        s_Terminated = true;
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -208,7 +175,7 @@ static dataman_frame_t _get_frame(void)
     dataman_frame_t frame = {
         .magic = DATAMAN_FRAME_MAGIC,
         .dt_us = dt,
-        .acc = sensors_get_frame()->acc2,
+        .acc = ahrs_get_data()->acceleration,
         .vel = ahrs_get_data()->velocity,
         .pos = ahrs_get_data()->position,
         .q = ahrs_get_data()->orientation,
