@@ -4,8 +4,9 @@
 Rocket on-board computer software. Contains a lot of funcionality and can be used in very diverse situations.
 
 ## Features
- - Hardware Abstraction Layer
- - Variety of drivers for different sensors
+ - Hardware Abstraction Layer (HAL) for different platforms (currently only RP2040)
+ - Modular architecture
+ - Variety of drivers for different sensors (IMUs, GPS, Barometers, etc.)
  - Flight State Machine to deploy parachutes
  - Diodes controllers
  - External voltage controllers
