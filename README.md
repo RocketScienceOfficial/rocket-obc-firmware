@@ -4,10 +4,15 @@
 Rocket on-board computer software. Contains a lot of funcionality and can be used in very diverse situations.
 
 ## Features
- - Multidimensional Extended Kalman Filter
- - Flight State Machine
+ - Hardware Abstraction Layer
  - Variety of drivers for different sensors
- - Igniters controller
+ - Flight State Machine to deploy parachutes
+ - Diodes controllers
+ - External voltage controllers
+ - LoRa communication with Ground Station using DataLink protocol
+ - Data saving to internal flash memory
+ - Multidimensional Extended Kalman Filter for position and velocity estimation
+ - Mahony and Madgwick filter for orientation estimation
 
 ## Getting Started
 
