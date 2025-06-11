@@ -540,6 +540,7 @@ static void _get_config(void)
 {
     datalink_frame_config_get_t payload = {
         .mainHeight = s_CurrentInfoFile.config.mainHeight,
+        .malfunctionSpeed = s_CurrentInfoFile.config.malfunctionSpeed,
     };
     datalink_frame_structure_serial_t response = {
         .msgId = DATALINK_MESSAGE_CONFIG_GET_ACK,
@@ -554,6 +555,7 @@ static void _set_config(const datalink_frame_structure_serial_t *msg)
     const datalink_frame_config_set_t *payload = (const datalink_frame_config_set_t *)msg->payload;
 
     s_CurrentInfoFile.config.mainHeight = payload->mainHeight;
+    s_CurrentInfoFile.config.malfunctionSpeed = payload->malfunctionSpeed;
 
     _save_info_file();
 

@@ -1,6 +1,7 @@
 #include "ign.h"
 #include "sm.h"
 #include "sensors.h"
+#include "ahrs.h"
 #include "serial.h"
 #include "dataman.h"
 #include "board_config.h"
@@ -117,9 +118,16 @@ static void _run_logic(void)
     }
     else if (sm_get_state() == FLIGHT_STATE_FREE_FALL)
     {
-        if (sm_get_alt() <= dataman_get_config()->mainHeight)
+        if (!s_IGN2.fired)
         {
-            _ign_fire(&s_IGN2);
+            if ((ahrs_get_data()->velocity.x * ahrs_get_data()->velocity.x + ahrs_get_data()->velocity.y * ahrs_get_data()->velocity.y + ahrs_get_data()->velocity.z * ahrs_get_data()->velocity.z) * (3.6f * 3.6f) >= (dataman_get_config()->malfunctionSpeed * dataman_get_config()->malfunctionSpeed))
+            {
+                _ign_fire(&s_IGN2);
+            }
+            else if (sm_get_alt() <= dataman_get_config()->mainHeight)
+            {
+                _ign_fire(&s_IGN2);
+            }
         }
     }
 

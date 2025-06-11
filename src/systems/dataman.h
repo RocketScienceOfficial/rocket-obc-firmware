@@ -46,6 +46,7 @@ typedef struct __attribute__((__packed__)) dataman_frame
 typedef struct __attribute__((__packed__)) dataman_config
 {
     uint16_t mainHeight;
+    uint8_t malfunctionSpeed;
 } dataman_config_t;
 
 /**
