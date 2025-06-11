@@ -22,7 +22,6 @@ target_link_libraries(obc
     lib_drivers_imu
     lib_drivers_led
     lib_drivers_magnetometer
-    lib_drivers_servo
     lib_battery
     lib_maths
     lib_geo

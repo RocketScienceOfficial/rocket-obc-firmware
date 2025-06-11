@@ -9,8 +9,8 @@
  */
 typedef struct hal_pwm_config
 {
-    hal_pin_number_t pin;    /** Pin  */
-    unsigned long frequency; /** Frequency  */
+    hal_pin_number_t pin;   /** Pin  */
+    unsigned long clockDiv; /** Base clock divider  */
 } hal_pwm_config_t;
 
 /**
@@ -44,9 +44,9 @@ bool hal_pwm_set_frequency(hal_pwm_config_t *config, unsigned long frequency);
  * @brief Set duty cycle of PWM
  *
  * @param config PWM configuration
- * @param dutyCyclePercent Duty cycle in percent
+ * @param dutyCycleUs Duty cycle in microseconds
  * @return true if success
  */
-bool hal_pwm_set_duty(const hal_pwm_config_t *config, float dutyCyclePercent);
+bool hal_pwm_set_duty(const hal_pwm_config_t *config, unsigned int dutyCycleUs);
 
 #endif
