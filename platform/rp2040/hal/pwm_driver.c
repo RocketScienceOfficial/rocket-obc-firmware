@@ -56,7 +56,7 @@ bool hal_pwm_set_duty(const hal_pwm_config_t *config, unsigned int dutyCycleUs)
         return false;
     }
 
-    unsigned long wrap = dutyCycleUs * PWM_FREQ_HZ / config->clockDiv;
+    unsigned long wrap = dutyCycleUs * PWM_FREQ_HZ / config->clockDiv / 1000000;
 
     pwm_set_gpio_level(config->pin, wrap);
 
