@@ -17,8 +17,8 @@ void passive_buzzer_init(hal_pwm_config_t *config, hal_pin_number_t pin, unsigne
  * @brief Sets the buzzer active or inactive
  *
  * @param config The PWM config to use for the buzzer
- * @param active true to set the buzzer active, false to set it inactive
+ * @param dutyCycleUs Duty cycle in microseconds to set the buzzer to
  */
-void passive_buzzer_set_active(const hal_pwm_config_t *config, bool active);
+void passive_buzzer_set_active(const hal_pwm_config_t *config, float dutyCycleUs);
 
 #endif

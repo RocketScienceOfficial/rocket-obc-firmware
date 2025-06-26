@@ -37,26 +37,25 @@ bool hal_pwm_set_frequency(hal_pwm_config_t *config, unsigned long frequency)
         return false;
     }
 
-    unsigned long clockDiv = ceilf((float)PWM_FREQ_HZ / (float)(PWM_DEFAULT_WRAP * frequency));
-    unsigned long wrap = PWM_FREQ_HZ / (clockDiv * frequency);
+    unsigned long clockDiv = (unsigned long)ceilf((float)PWM_FREQ_HZ / (float)(PWM_DEFAULT_WRAP * frequency));
+    unsigned long wrap = (unsigned long)roundf((float)PWM_FREQ_HZ / (float)(clockDiv * frequency));
     unsigned long slice_num = pwm_gpio_to_slice_num(config->pin);
 
     pwm_set_clkdiv(slice_num, clockDiv);
-    pwm_set_wrap(slice_num, wrap);
 
     config->clockDiv = clockDiv;
 
     return true;
 }
 
-bool hal_pwm_set_duty(const hal_pwm_config_t *config, unsigned int dutyCycleUs)
+bool hal_pwm_set_duty(const hal_pwm_config_t *config, float dutyCycleUs)
 {
     if (!config)
     {
         return false;
     }
 
-    unsigned long wrap = dutyCycleUs * PWM_FREQ_HZ / config->clockDiv / 1000000;
+    unsigned long wrap = (unsigned long)roundf(dutyCycleUs * (PWM_FREQ_HZ / 1e6) / config->clockDiv);
 
     pwm_set_gpio_level(config->pin, wrap);
 

@@ -13,6 +13,7 @@
 #define WS_COLOR(r, g, b) ws2812_get_color((uint8_t)((r) * WS_BRIGHTNESS), (uint8_t)((g) * WS_BRIGHTNESS), (uint8_t)((b) * WS_BRIGHTNESS))
 #define OTHER_DIODES_UPDATE_PERIOD_MS 500
 #define BUZZER_FREQ 2730
+#define BUZZER_DUTY_CYCLE_US (1e6f / BUZZER_FREQ * 0.5f)
 #define BUZZER_DELAY_MS 1000
 
 static ws2812_color_t s_Diodes[7];
@@ -76,7 +77,7 @@ void status_update(void)
             s_BuzzerActive = !s_BuzzerActive;
             s_BuzzerTimeOffset = hal_time_get_ms_since_boot();
 
-            passive_buzzer_set_active(&s_BuzzerConfig, s_BuzzerActive);
+            passive_buzzer_set_active(&s_BuzzerConfig, s_BuzzerActive ? BUZZER_DUTY_CYCLE_US : 0.0f);
         }
     }
 }

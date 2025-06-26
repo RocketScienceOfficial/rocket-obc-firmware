@@ -47,6 +47,6 @@ bool hal_pwm_set_frequency(hal_pwm_config_t *config, unsigned long frequency);
  * @param dutyCycleUs Duty cycle in microseconds
  * @return true if success
  */
-bool hal_pwm_set_duty(const hal_pwm_config_t *config, unsigned int dutyCycleUs);
+bool hal_pwm_set_duty(const hal_pwm_config_t *config, float dutyCycleUs);
 
 #endif
