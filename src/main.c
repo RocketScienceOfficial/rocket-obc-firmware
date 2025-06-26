@@ -13,14 +13,14 @@
 
 static void _init_systems(void)
 {
-    sensors_init();
-    radio_init();
     ahrs_init();
+    dataman_init();
+    ign_init();
+    radio_init();
+    sensors_init();
     serial_init();
     sm_init();
-    dataman_init();
     status_init();
-    ign_init();
     voltage_init();
 
     SERIAL_DEBUG_LOG("All systems initialized!");
