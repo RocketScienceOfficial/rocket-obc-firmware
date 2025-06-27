@@ -20,7 +20,6 @@ static size_t s_StandingBufferLength;
 static size_t s_StandingBufferIndex;
 static size_t s_LandingBufferIndex;
 static dataman_file_info_t s_CurrentInfoFile;
-static bool s_ReadyTest;
 static hal_usec_t s_LastSaveTime;
 
 static dataman_frame_t _get_frame(void);
@@ -33,7 +32,6 @@ static bool _can_save_data(void);
 static void _clear_database(void);
 static void _flush_data(void);
 static void _flush_standing_buffer(void);
-static const dataman_file_info_t *_read_info(void);
 static bool _print_saved_frame(const dataman_frame_t *frame);
 static void _read_data_raw(size_t maxFrames, size_t *currentFrameCount, const uint8_t *data);
 static void _read_data(void);
@@ -41,26 +39,14 @@ static void _recover_data_read(const uint8_t *data);
 static void _recover_data(void);
 static void _save_frame(void);
 static void _save_standing_buffer_frame(void);
+static void _read_info_file(void);
 static void _save_info_file(void);
 static void _get_config(void);
 static void _set_config(const datalink_frame_structure_serial_t *msg);
 
 void dataman_init(void)
 {
-    const dataman_file_info_t *tmpInfo = _read_info();
-
-    if (tmpInfo)
-    {
-        s_CurrentInfoFile = *tmpInfo;
-    }
-    else
-    {
-        s_CurrentInfoFile = (dataman_file_info_t){
-            .magic = DATAMAN_FILE_INFO_MAGIC,
-        };
-
-        _save_info_file();
-    }
+    _read_info_file();
 
     SERIAL_DEBUG_LOG("READY");
 }
@@ -143,20 +129,7 @@ void dataman_update(void)
 
 bool dataman_is_ready(void)
 {
-    static bool ready = false;
-
-    if (!s_ReadyTest)
-    {
-        s_ReadyTest = true;
-
-        const dataman_file_info_t *info = _read_info();
-
-        SERIAL_DEBUG_LOG("Info file exists: %d", info != NULL);
-
-        ready = info ? info->savedFramesCount + info->standingFramesCount == 0 : false;
-    }
-
-    return ready;
+    return s_CurrentInfoFile.savedFramesCount + s_CurrentInfoFile.standingFramesCount == 0;
 }
 
 const dataman_config_t *dataman_get_config(void)
@@ -324,16 +297,6 @@ static void _flush_standing_buffer(void)
     hal_flash_write_pages(SECTORS_OFFSET_STANDING_BUFFER * FLASH_SECTOR_SIZE / FLASH_PAGE_SIZE, data, pages);
 
     SERIAL_DEBUG_LOG("Standing buffer has been flushed. %d frames (%d bytes) were written", s_StandingBufferLength, s_StandingBufferLength * sizeof(dataman_frame_t));
-}
-
-static const dataman_file_info_t *_read_info(void)
-{
-    const uint8_t *data;
-    hal_flash_read(SECTORS_OFFSET_FILE_INFO * FLASH_SECTOR_SIZE, &data);
-
-    const dataman_file_info_t *info = (const dataman_file_info_t *)data;
-
-    return _validate_info(info) ? info : NULL;
 }
 
 static bool _print_saved_frame(const dataman_frame_t *frame)
@@ -521,17 +484,41 @@ static void _save_standing_buffer_frame(void)
     }
 }
 
+static void _read_info_file(void)
+{
+    const uint8_t *data;
+    hal_flash_read(SECTORS_OFFSET_FILE_INFO * FLASH_SECTOR_SIZE, &data);
+
+    const dataman_file_info_t *info = (const dataman_file_info_t *)data;
+
+    if (_validate_info(info))
+    {
+        s_CurrentInfoFile = *info;
+
+        SERIAL_DEBUG_LOG("Dataman file info was read. Total frame count: %d", s_CurrentInfoFile.savedFramesCount + s_CurrentInfoFile.standingFramesCount);
+    }
+    else
+    {
+        SERIAL_DEBUG_LOG("Dataman file info is invalid, creating new one...");
+
+        s_CurrentInfoFile = (dataman_file_info_t){
+            .magic = DATAMAN_FILE_INFO_MAGIC,
+        };
+
+        _save_info_file();
+    }
+}
+
 static void _save_info_file(void)
 {
     s_CurrentInfoFile.crc = crc16_mcrf4xx_calculate((const uint8_t *)&s_CurrentInfoFile, sizeof(s_CurrentInfoFile) - 2);
 
     uint8_t data[256];
+    memset(data, 0xff, sizeof(data));
     memcpy(data, &s_CurrentInfoFile, sizeof(dataman_file_info_t));
 
     hal_flash_erase_sectors(SECTORS_OFFSET_FILE_INFO, 1);
     hal_flash_write_pages(SECTORS_OFFSET_FILE_INFO * FLASH_SECTOR_SIZE / FLASH_PAGE_SIZE, data, 1);
-
-    s_ReadyTest = false;
 
     SERIAL_DEBUG_LOG("Dataman file info was saved. Total frame count: %d", s_CurrentInfoFile.savedFramesCount + s_CurrentInfoFile.standingFramesCount);
 }
