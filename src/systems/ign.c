@@ -120,7 +120,7 @@ static void _run_logic(void)
     {
         if (!s_IGN2.fired)
         {
-            if ((ahrs_get_data()->velocity.x * ahrs_get_data()->velocity.x + ahrs_get_data()->velocity.y * ahrs_get_data()->velocity.y + ahrs_get_data()->velocity.z * ahrs_get_data()->velocity.z) * (3.6f * 3.6f) >= (dataman_get_config()->malfunctionSpeed * dataman_get_config()->malfunctionSpeed))
+            if ((ahrs_get_data()->velocity.x * ahrs_get_data()->velocity.x + ahrs_get_data()->velocity.y * ahrs_get_data()->velocity.y + ahrs_get_data()->velocity.z * ahrs_get_data()->velocity.z) >= (dataman_get_config()->malfunctionSpeed * dataman_get_config()->malfunctionSpeed))
             {
                 _ign_fire(&s_IGN2);
             }
