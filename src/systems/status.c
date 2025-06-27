@@ -6,8 +6,8 @@
 #include "serial.h"
 #include "board_config.h"
 #include "../middleware/events.h"
+#include <hal/pwm_driver.h>
 #include <lib/drivers/led/w2812_driver.h>
-#include <lib/drivers/buzzer/passive_buzzer_driver.h>
 
 #define WS_BRIGHTNESS 0.05f
 #define WS_COLOR(r, g, b) ws2812_get_color((uint8_t)((r) * WS_BRIGHTNESS), (uint8_t)((g) * WS_BRIGHTNESS), (uint8_t)((b) * WS_BRIGHTNESS))
@@ -17,7 +17,7 @@
 #define BUZZER_DELAY_MS 1000
 
 static ws2812_color_t s_Diodes[7];
-static hal_pwm_config_t s_BuzzerConfig;
+static hal_pwm_config_t s_BuzzerPWMConfig;
 static hal_msec_t s_OtherDiodesTimeOffset;
 static bool s_BuzzerActive;
 static hal_msec_t s_BuzzerTimeOffset;
@@ -42,7 +42,7 @@ void status_init(void)
 
     _update_diodes();
 
-    passive_buzzer_init(&s_BuzzerConfig, PIN_BUZZER, BUZZER_FREQ);
+    hal_pwm_init_pin(&s_BuzzerPWMConfig, PIN_BUZZER, BUZZER_FREQ);
 
     SERIAL_DEBUG_LOG("READY!");
 }
@@ -77,7 +77,7 @@ void status_update(void)
             s_BuzzerActive = !s_BuzzerActive;
             s_BuzzerTimeOffset = hal_time_get_ms_since_boot();
 
-            passive_buzzer_set_active(&s_BuzzerConfig, s_BuzzerActive ? BUZZER_DUTY_CYCLE_US : 0.0f);
+            hal_pwm_set_duty(&s_BuzzerPWMConfig, s_BuzzerActive ? BUZZER_DUTY_CYCLE_US : 0.0f);
         }
     }
 }
