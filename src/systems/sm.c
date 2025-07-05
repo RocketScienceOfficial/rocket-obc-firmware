@@ -99,11 +99,15 @@ static void _handle_radio_packet(void)
             {
                 s_Armed = true;
 
+                events_publish(MSG_SM_ARMED);
+
                 SERIAL_DEBUG_LOG("Armed igniters!");
             }
             else if (!arm && s_Armed)
             {
                 s_Armed = false;
+
+                events_publish(MSG_SM_DISARMED);
 
                 SERIAL_DEBUG_LOG("Igniters were disarmed!");
             }
