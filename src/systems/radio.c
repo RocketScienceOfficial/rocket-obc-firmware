@@ -84,7 +84,7 @@ static void _handle_protocol(void)
             .qy = ahrs_get_data()->orientation.y,
             .qz = ahrs_get_data()->orientation.z,
             .velocity = (uint16_t)(sqrtf(ahrs_get_data()->velocity.x * ahrs_get_data()->velocity.x + ahrs_get_data()->velocity.y * ahrs_get_data()->velocity.y + ahrs_get_data()->velocity.z * ahrs_get_data()->velocity.z) * 3.6f),
-            .batteryVoltage10 = sensors_get_frame()->batVolts * 10,
+            .batteryVoltage100 = sensors_get_frame()->batVolts * 100,
             .batteryPercentage = sensors_get_frame()->batPercent,
             .lat = sensors_get_frame()->pos.lat,
             .lon = sensors_get_frame()->pos.lon,

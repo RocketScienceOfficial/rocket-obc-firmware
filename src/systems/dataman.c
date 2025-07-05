@@ -154,7 +154,7 @@ static dataman_frame_t _get_frame(void)
         .q = ahrs_get_data()->orientation,
         .gpsPos = sensors_get_frame()->pos,
         .smState = (uint8_t)sm_get_state(),
-        .batteryVoltage = sensors_get_frame()->batVolts * 10,
+        .batteryVoltage100 = sensors_get_frame()->batVolts * 100,
         .ignFlags = _get_ign_flags(),
         .gpsData = _get_gps_data(),
     };
@@ -322,7 +322,7 @@ static bool _print_saved_frame(const dataman_frame_t *frame)
             .lon = frame->gpsPos.lon,
             .alt = frame->gpsPos.alt,
             .smState = frame->smState,
-            .batVolts10 = frame->batteryVoltage,
+            .batteryVoltage100 = frame->batteryVoltage100,
             .ignFlags = frame->ignFlags,
             .gpsData = frame->gpsData,
         };

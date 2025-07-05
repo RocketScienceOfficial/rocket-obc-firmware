@@ -34,7 +34,7 @@ typedef struct __attribute__((__packed__)) dataman_frame
     quat_t q;
     geo_position_wgs84_t gpsPos;
     uint8_t smState;
-    uint8_t batteryVoltage;
+    uint16_t batteryVoltage100;
     uint8_t ignFlags;
     uint8_t gpsData;
     uint16_t crc;
