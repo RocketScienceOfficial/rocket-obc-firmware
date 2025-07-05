@@ -23,9 +23,9 @@ typedef struct buzzer_tone
 } buzzer_tone_t;
 
 static ws2812_color_t s_Diodes[7];
-static hal_pwm_config_t s_BuzzerPWMConfig;
 static hal_msec_t s_OtherDiodesTimeOffset;
 
+static hal_pwm_config_t s_BuzzerPWMConfig;
 static const buzzer_tone_t *s_CurrentTone;
 static size_t s_CurrentToneSize;
 static hal_msec_t s_BuzzerToneStartTime;
