@@ -10,7 +10,7 @@
 #include <hal/time_tracker.h>
 #include <string.h>
 
-#define IGN_UP_TIME_MS 1000
+#define IGN_UP_TIME_MS 10
 #define IGN_FUSE_WORKING_IGN_PRESENT_FACTOR 0
 #define IGN_FUSE_WORKING_IGN_NOT_PRESENT_FACTOR 0.0189607f
 #define IGN_FUSE_NOT_WORKING_IGN_PRESENT_FACTOR 0.0297897f
