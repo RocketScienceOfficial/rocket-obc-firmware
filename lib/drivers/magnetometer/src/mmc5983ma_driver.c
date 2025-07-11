@@ -40,6 +40,8 @@ void mmc5983ma_init_spi(mmc5983ma_config_t *config, hal_spi_instance_t spi, hal_
     hal_spi_init_cs(cs);
 
     _mmc5983ma_auto_set_reset(config);
+    _mmc5983ma_set(config);
+    _mmc5983ma_reset(config);
 }
 
 void mmc5983ma_init_i2c(mmc5983ma_config_t *config, hal_i2c_instance_t i2c)
@@ -54,6 +56,8 @@ void mmc5983ma_init_i2c(mmc5983ma_config_t *config, hal_i2c_instance_t i2c)
     };
 
     _mmc5983ma_auto_set_reset(config);
+    _mmc5983ma_set(config);
+    _mmc5983ma_reset(config);
 }
 
 bool mmc5983ma_validate_id(const mmc5983ma_config_t *config)

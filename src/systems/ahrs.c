@@ -11,13 +11,13 @@
 #include <string.h>
 
 #define STREAM_DELTA_TIME_MS 10
-#define ORIENTATION_SWITCH_THRESHOLD (2.0f * EARTH_GRAVITY)
-#define EKF_ACC_VARIANCE 0.01f
-#define EKF_GPS_VARIANCE 1.2f
-#define EKF_BARO_VARIANCE 0.2f
+#define ORIENTATION_ACCELERATION_SWITCH_THRESHOLD (2.0f * EARTH_GRAVITY)
+#define ORIENTATION_MAGNETIC_FIELD_SWITCH_THRESHOLD 750
+#define ORIENTATION_HIGH_GAIN_DISABLE_TIME_MS 5000
+#define EKF_ACC_VARIANCE 0.02f
+#define EKF_GPS_VARIANCE 1.7f
+#define EKF_BARO_VARIANCE 0.25f
 #define EKF_OUTDATED_MEASUREMENT_VARIANCE 1000000
-#define EKF_ACC_CHANGE_THRESHOLD (0.5f * EARTH_GRAVITY)
-#define EKF_ACC_CHANGING_VARIANCE 1000
 
 /**
  * REF: https://ahrs.readthedocs.io/en/latest/filters/madgwick.html
@@ -107,17 +107,16 @@ typedef struct ekf_data
 static ahrs_data_t s_CurrentData;
 static bool s_Calibrated;
 static madgwick_data_t s_Madgwick;
-static mahony_data_t s_Mahony;
 static ekf_data_t s_EKF;
 static geo_position_wgs84_t s_BaseGPSPos;
 static vec3_prec_t s_NEDPos;
 static float s_BaroHeightOffset;
 static float s_BaroHeight;
-static vec3_t s_LastAcc;
+static hal_msec_t s_HighGainDisableTimer;
 static bool s_IsStreamingEKFData;
 static hal_msec_t s_StreamTimer;
 
-static void _madgwick_init(madgwick_data_t *data, float omegaError, float dt);
+static void _madgwick_init(madgwick_data_t *data, float beta, float dt);
 static void _madgwick_update_imu(madgwick_data_t *data, quat_t *q, vec3_t gyroVec, vec3_t accVec);
 static void _madgwick_update_marg(madgwick_data_t *data, quat_t *q, vec3_t gyroVec, vec3_t accVec, vec3_t magVec);
 static void _mahony_init(mahony_data_t *data, float kp, float ki, float dt);
@@ -136,9 +135,10 @@ void ahrs_init(void)
 {
     s_CurrentData.orientation = (quat_t){1.0f, 0.0f, 0.0f, 0.0f};
 
-    _madgwick_init(&s_Madgwick, 6.0f, 0.0025f);
-    _mahony_init(&s_Mahony, 6.0f, 0.0f, 0.0025f);
+    _madgwick_init(&s_Madgwick, 1.0f, 0.0025f);
     _ekf_init(&s_EKF);
+
+    s_HighGainDisableTimer = hal_time_get_ms_since_boot();
 
     SERIAL_DEBUG_LOG("READY");
 }
@@ -175,24 +175,25 @@ void ahrs_update(void)
 
     if (events_poll(MSG_SENSORS_NORMAL_READ))
     {
-        if (fabsf(sensors_get_frame()->acc1.x - s_LastAcc.x) >= EKF_ACC_CHANGE_THRESHOLD || fabsf(sensors_get_frame()->acc1.y - s_LastAcc.y) >= EKF_ACC_CHANGE_THRESHOLD || fabsf(sensors_get_frame()->acc1.z - s_LastAcc.z) >= EKF_ACC_CHANGE_THRESHOLD)
-        {
-            s_EKF.cfg.varAcc = EKF_ACC_CHANGING_VARIANCE;
-        }
-        else
-        {
-            s_EKF.cfg.varAcc = EKF_ACC_VARIANCE;
-        }
-        s_LastAcc = sensors_get_frame()->acc1;
-
         s_EKF.cfg.dt = sensors_get_frame()->measurementDt;
-        s_Mahony.dt = sensors_get_frame()->measurementDt;
         s_Madgwick.dt = sensors_get_frame()->measurementDt;
 
-        if (vec3_mag_compare(&sensors_get_frame()->acc1, ORIENTATION_SWITCH_THRESHOLD) < 0)
+        if (s_HighGainDisableTimer != 0 && hal_time_get_ms_since_boot() - s_HighGainDisableTimer >= ORIENTATION_HIGH_GAIN_DISABLE_TIME_MS)
         {
-            _mahony_update_marg(&s_Mahony, &s_CurrentData.orientation, sensors_get_frame()->gyro1, sensors_get_frame()->acc1, sensors_get_frame()->mag1);
-            // _madgwick_update_marg(&s_Madgwick, &s_CurrentData.orientation, sensors_get_frame()->gyro1, sensors_get_frame()->acc1, sensors_get_frame()->mag1);
+            s_HighGainDisableTimer = 0;
+            s_Madgwick.beta = 0.041f;
+        }
+
+        if (vec3_mag_compare(&sensors_get_frame()->acc1, ORIENTATION_ACCELERATION_SWITCH_THRESHOLD) < 0)
+        {
+            if (vec3_mag_compare(&sensors_get_frame()->mag1, ORIENTATION_MAGNETIC_FIELD_SWITCH_THRESHOLD) < 0)
+            {
+                _madgwick_update_marg(&s_Madgwick, &s_CurrentData.orientation, sensors_get_frame()->gyro1, sensors_get_frame()->acc1, sensors_get_frame()->mag1);
+            }
+            else
+            {
+                _madgwick_update_imu(&s_Madgwick, &s_CurrentData.orientation, sensors_get_frame()->gyro1, sensors_get_frame()->acc1);
+            }
         }
         else
         {
@@ -236,7 +237,7 @@ void ahrs_update(void)
         }
         else
         {
-            if (value_approx_eql(newAcc.x, 0.0f, 0.2f) && value_approx_eql(newAcc.y, 0.0f, 0.2f) && value_approx_eql(newAcc.z, 0.0f, 0.2f))
+            if (s_HighGainDisableTimer == 0 && value_approx_eql(newAcc.x, 0.0f, 0.1f) && value_approx_eql(newAcc.y, 0.0f, 0.1f) && value_approx_eql(newAcc.z, 0.0f, 0.1f))
             {
                 SERIAL_DEBUG_LOG("Orientation calibrated!");
 
@@ -298,9 +299,9 @@ const ahrs_data_t *ahrs_get_data(void)
     return &s_CurrentData;
 }
 
-static void _madgwick_init(madgwick_data_t *data, float omegaError, float dt)
+static void _madgwick_init(madgwick_data_t *data, float beta, float dt)
 {
-    data->beta = sqrtf(3.0f) / 2.0f * DEG_2_RAD(omegaError);
+    data->beta = beta;
     data->dt = dt;
 }
 

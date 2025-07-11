@@ -16,10 +16,12 @@
 #include <lib/drivers/led/w2812_driver.h>
 #include <lib/battery/battery_utils.h>
 #include <stdlib.h>
+#include <math.h>
 
 #define MEAS_UPDATE_PERIOD_US 2500
 #define ADC_UPDATE_PERIOD_MS 100
 #define BATTERY_VOLTAGE_DIVIDER 11.0f
+#define BATTERY_VOLTAGE_DIFFERENCE_THRESHOLD 0.1f
 #define BARO_PRESS_STEP_THRESHOLD 50
 #define EXP_FILTER_BARO_COEFF 0.05f
 #define EXP_FILTER_IGN_COEFF 0.3f
@@ -194,7 +196,7 @@ void sensors_update(void)
 
     static float batteryReadings[10];
     static size_t batteryReadingsNextIndex = 0;
-    static float batteryReadinsSum = 0;
+    static float batteryReadingsSum = 0;
     static size_t batteryReadingsCount = 0;
 
     if (hal_time_get_ms_since_boot() - s_ADCMeasurementTimeOffset >= ADC_UPDATE_PERIOD_MS)
@@ -208,12 +210,12 @@ void sensors_update(void)
 
         if (batteryReadingsCount < 10)
         {
-            batteryReadinsSum += batteryReading;
+            batteryReadingsSum += batteryReading;
             batteryReadingsCount++;
         }
         else
         {
-            batteryReadinsSum = batteryReadinsSum + batteryReading - batteryReadings[batteryReadingsNextIndex];
+            batteryReadingsSum = batteryReadingsSum + batteryReading - batteryReadings[batteryReadingsNextIndex];
         }
 
         batteryReadings[batteryReadingsNextIndex++] = batteryReading;
@@ -223,15 +225,30 @@ void sensors_update(void)
             batteryReadingsNextIndex = 0;
         }
 
-        float totalBat = batteryReadinsSum / batteryReadingsCount;
+        float totalBat = batteryReadingsSum / batteryReadingsCount;
+        float smoothedBatVolts = _exp_smoothing(totalBat, s_Frame.batVolts, EXP_FILTER_BAT_COEFF);
+        float deltaBatVolts = smoothedBatVolts - s_Frame.batVolts;
 
-        s_Frame.batVolts = _exp_smoothing(totalBat, s_Frame.batVolts, EXP_FILTER_BAT_COEFF);
+        s_Frame.batVolts = smoothedBatVolts;
 
-        battery_data_t data = {};
-        battery_convert(&s_BatteryConfig, s_Frame.batVolts, &data);
+        if (s_Frame.batVolts < 0.1f)
+        {
+            s_Frame.batVolts = 0.0f;
+        }
 
-        s_Frame.batPercent = data.percentage;
-        s_Frame.batNCells = data.nCells;
+        if (fabsf(deltaBatVolts) < BATTERY_VOLTAGE_DIFFERENCE_THRESHOLD)
+        {
+            battery_data_t data = {};
+            battery_convert(&s_BatteryConfig, s_Frame.batVolts, &data);
+
+            s_Frame.batPercent = data.percentage;
+            s_Frame.batNCells = data.nCells;
+        }
+        else
+        {
+            s_Frame.batPercent = 0;
+            s_Frame.batNCells = 0;
+        }
 
         s_ADCMeasurementTimeOffset = hal_time_get_ms_since_boot();
 

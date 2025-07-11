@@ -120,7 +120,7 @@ static void _run_logic(void)
     {
         if (!s_IGN2.fired)
         {
-            if ((ahrs_get_data()->velocity.x * ahrs_get_data()->velocity.x + ahrs_get_data()->velocity.y * ahrs_get_data()->velocity.y + ahrs_get_data()->velocity.z * ahrs_get_data()->velocity.z) >= (dataman_get_config()->malfunctionSpeed * dataman_get_config()->malfunctionSpeed))
+            if (vec3_mag_compare(&ahrs_get_data()->velocity, dataman_get_config()->malfunctionSpeed) >= 0)
             {
                 _ign_fire(&s_IGN2);
             }

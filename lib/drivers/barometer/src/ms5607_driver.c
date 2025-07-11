@@ -120,9 +120,9 @@ static void _ms5607_req_value(ms5607_config_t *config, bool pressure)
 
     ms5607_osr_t osr = pressure ? config->pressOSR : config->tempOSR;
     hal_usec_t timeout = osr == MS5607_OSR_4096 ? 10000 : osr == MS5607_OSR_2048 || osr == MS5607_OSR_1024 ? 5000
-                                                  : osr == MS5607_OSR_512                              ? 2000
-                                                  : osr == MS5607_OSR_256                              ? 1000
-                                                                                                       : 0;
+                                                      : osr == MS5607_OSR_512                              ? 2000
+                                                      : osr == MS5607_OSR_256                              ? 1000
+                                                                                                           : 0;
 
     config->nextTime = hal_time_get_us_since_boot() + timeout;
 }
