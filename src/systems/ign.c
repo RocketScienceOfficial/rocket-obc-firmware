@@ -92,7 +92,7 @@ static void _run_control(void)
                                                                                                   : PIN_IGN_EN_4;
 
                 hal_gpio_set_pin_state(pin, GPIO_HIGH);
-                hal_time_sleep_ms(1000);
+                hal_time_sleep_ms(IGN_UP_TIME_MS);
                 hal_gpio_set_pin_state(pin, GPIO_LOW);
 
                 datalink_frame_structure_serial_t response = {
@@ -107,34 +107,37 @@ static void _run_control(void)
 
 static void _run_logic(void)
 {
-    if (events_poll(MSG_SM_APOGEE_REACHED))
+    if (sm_is_armed())
     {
-        _ign_fire(&s_IGN1);
+        if (events_poll(MSG_SM_APOGEE_REACHED))
+        {
+            _ign_fire(&s_IGN1);
 
-        if (sm_get_apogee() <= dataman_get_config()->mainHeight)
-        {
-            _ign_fire(&s_IGN2);
-        }
-    }
-    else if (sm_get_state() == FLIGHT_STATE_FREE_FALL)
-    {
-        if (!s_IGN2.fired)
-        {
-            if (vec3_mag_compare(&ahrs_get_data()->velocity, dataman_get_config()->malfunctionSpeed) >= 0)
-            {
-                _ign_fire(&s_IGN2);
-            }
-            else if (sm_get_alt() <= dataman_get_config()->mainHeight)
+            if (sm_get_apogee() <= dataman_get_config()->mainHeight)
             {
                 _ign_fire(&s_IGN2);
             }
         }
-    }
+        else if (sm_get_state() == FLIGHT_STATE_FREE_FALL)
+        {
+            if (!s_IGN2.fired)
+            {
+                if (vec3_mag_compare(&ahrs_get_data()->velocity, dataman_get_config()->malfunctionSpeed) >= 0)
+                {
+                    _ign_fire(&s_IGN2);
+                }
+                else if (sm_get_alt() <= dataman_get_config()->mainHeight)
+                {
+                    _ign_fire(&s_IGN2);
+                }
+            }
+        }
 
-    _ign_update(&s_IGN1);
-    _ign_update(&s_IGN2);
-    _ign_update(&s_IGN3);
-    _ign_update(&s_IGN4);
+        _ign_update(&s_IGN1);
+        _ign_update(&s_IGN2);
+        _ign_update(&s_IGN3);
+        _ign_update(&s_IGN4);
+    }
 }
 
 static void _update_flags(void)
