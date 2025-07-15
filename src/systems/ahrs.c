@@ -11,9 +11,9 @@
 #include <string.h>
 
 #define STREAM_DELTA_TIME_MS 10
+#define ORIENTATION_MADGWICK_BETA 0.033f
 #define ORIENTATION_ACCELERATION_SWITCH_THRESHOLD (2.0f * EARTH_GRAVITY)
-#define ORIENTATION_MAGNETIC_FIELD_SWITCH_THRESHOLD 750
-#define ORIENTATION_HIGH_GAIN_DISABLE_TIME_MS 5000
+#define ORIENTATION_HIGH_GAIN_DISABLE_TIME_MS 3000
 #define EKF_ACC_VARIANCE 0.02f
 #define EKF_GPS_VARIANCE 1.7f
 #define EKF_BARO_VARIANCE 0.25f
@@ -105,7 +105,6 @@ typedef struct ekf_data
 } ekf_data_t;
 
 static ahrs_data_t s_CurrentData;
-static bool s_Calibrated;
 static madgwick_data_t s_Madgwick;
 static ekf_data_t s_EKF;
 static geo_position_wgs84_t s_BaseGPSPos;
@@ -181,35 +180,28 @@ void ahrs_update(void)
         if (s_HighGainDisableTimer != 0 && hal_time_get_ms_since_boot() - s_HighGainDisableTimer >= ORIENTATION_HIGH_GAIN_DISABLE_TIME_MS)
         {
             s_HighGainDisableTimer = 0;
-            s_Madgwick.beta = 0.041f;
+            s_Madgwick.beta = ORIENTATION_MADGWICK_BETA;
         }
 
         if (vec3_mag_compare(&sensors_get_frame()->acc1, ORIENTATION_ACCELERATION_SWITCH_THRESHOLD) < 0)
         {
-            if (vec3_mag_compare(&sensors_get_frame()->mag1, ORIENTATION_MAGNETIC_FIELD_SWITCH_THRESHOLD) < 0)
-            {
-                _madgwick_update_marg(&s_Madgwick, &s_CurrentData.orientation, sensors_get_frame()->gyro1, sensors_get_frame()->acc1, sensors_get_frame()->mag1);
-            }
-            else
-            {
-                _madgwick_update_imu(&s_Madgwick, &s_CurrentData.orientation, sensors_get_frame()->gyro1, sensors_get_frame()->acc1);
-            }
+            _madgwick_update_imu(&s_Madgwick, &s_CurrentData.orientation, sensors_get_frame()->gyro1, sensors_get_frame()->acc1);
         }
         else
         {
             _integrate_gyro(&s_CurrentData.orientation, sensors_get_frame()->gyro1, sensors_get_frame()->measurementDt);
         }
 
-        vec3_t newAcc = sensors_get_frame()->acc1;
-        quat_rotate_vec(&newAcc, &s_CurrentData.orientation);
-        newAcc.x *= -1;
-        newAcc.y *= -1;
-        newAcc.z -= EARTH_GRAVITY;
-
-        s_CurrentData.acceleration = newAcc;
-
-        if (s_Calibrated)
+        if (s_HighGainDisableTimer == 0)
         {
+            vec3_t newAcc = sensors_get_frame()->acc1;
+            quat_rotate_vec(&newAcc, &s_CurrentData.orientation);
+            newAcc.x *= -1;
+            newAcc.y *= -1;
+            newAcc.z -= EARTH_GRAVITY;
+
+            s_CurrentData.acceleration = newAcc;
+
             ekf_controls_t controls = {
                 .acc_n = newAcc.x,
                 .acc_e = newAcc.y,
@@ -234,15 +226,6 @@ void ahrs_update(void)
 
             s_EKF.cfg.varGPS = EKF_OUTDATED_MEASUREMENT_VARIANCE;
             s_EKF.cfg.varBar = EKF_OUTDATED_MEASUREMENT_VARIANCE;
-        }
-        else
-        {
-            if (s_HighGainDisableTimer == 0 && value_approx_eql(newAcc.x, 0.0f, 0.1f) && value_approx_eql(newAcc.y, 0.0f, 0.1f) && value_approx_eql(newAcc.z, 0.0f, 0.1f))
-            {
-                SERIAL_DEBUG_LOG("Orientation calibrated!");
-
-                s_Calibrated = true;
-            }
         }
     }
 
