@@ -25,7 +25,7 @@
 #define BARO_PRESS_STEP_THRESHOLD 50
 #define EXP_FILTER_BARO_COEFF 0.05f
 #define EXP_FILTER_IGN_COEFF 0.3f
-#define EXP_FILTER_BAT_COEFF 0.4f
+#define EXP_FILTER_BAT_COEFF 0.2f
 
 // REF: https://blog.ampow.com/lipo-voltage-chart/
 static battery_table_entry_t s_BatteryTable[] = {
@@ -206,7 +206,7 @@ void sensors_update(void)
         s_Frame.ignDet3Volts = _exp_smoothing(1.035f * (hal_adc_read_voltage(PIN_IGN_DET_3) - 0.036f), s_Frame.ignDet3Volts, EXP_FILTER_IGN_COEFF);
         s_Frame.ignDet4Volts = _exp_smoothing(1.035f * (hal_adc_read_voltage(PIN_IGN_DET_4) - 0.036f), s_Frame.ignDet4Volts, EXP_FILTER_IGN_COEFF);
 
-        float batteryReading = ads786x_read(&s_ADS786XConfig) * BATTERY_VOLTAGE_DIVIDER;
+        float batteryReading = ads786x_read(&s_ADS786XConfig) * BATTERY_VOLTAGE_DIVIDER + 0.10f;
 
         if (batteryReadingsCount < 10)
         {
