@@ -231,7 +231,7 @@ void sensors_update(void)
 
         s_Frame.batVolts = smoothedBatVolts;
 
-        if (s_Frame.batVolts < 0.1f)
+        if (s_Frame.batVolts < 0.2f)
         {
             s_Frame.batVolts = 0.0f;
         }
