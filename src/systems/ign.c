@@ -196,6 +196,11 @@ static void _set_cont_flags(ign_pin_data_t *data, float v)
 
 static void _ign_fire(ign_pin_data_t *data)
 {
+    if (!sm_is_armed())
+    {
+        return;
+    }
+
     if (!data->fired && !data->finished)
     {
         hal_gpio_set_pin_state(data->pin, GPIO_HIGH);
@@ -209,6 +214,11 @@ static void _ign_fire(ign_pin_data_t *data)
 
 static void _ign_update(ign_pin_data_t *data)
 {
+    if (!sm_is_armed())
+    {
+        return;
+    }
+
     if (data->fired && !data->finished)
     {
         if (hal_time_get_ms_since_boot() - data->fireTime >= IGN_UP_TIME_MS)
