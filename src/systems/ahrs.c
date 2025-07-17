@@ -30,34 +30,16 @@ typedef struct madgwick_data
     float dt;
 } madgwick_data_t;
 
-/**
- * REF: https://github.com/PaulStoffregen/MahonyAHRS/blob/master/src/MahonyAHRS.cpp
- * REF: https://nitinjsanket.github.io/tutorials/attitudeest/mahony.html
- */
-typedef struct mahony_data
-{
-    float Kp;
-    float Ki;
-    float integralFBx;
-    float integralFBy;
-    float integralFBz;
-    float dt;
-} mahony_data_t;
-
-#define EKF_NUM_STATES 6
-#define EKF_NUM_CONTROLS 3
-#define EKF_NUM_MEASUREMENTS 4
+#define EKF_NUM_STATES 2
+#define EKF_NUM_CONTROLS 1
+#define EKF_NUM_MEASUREMENTS 2
 
 typedef union ekf_state
 {
     struct
     {
-        float pos_n;
-        float pos_e;
-        float pos_d;
-        float vel_n;
-        float vel_e;
-        float vel_d;
+        float pos;
+        float vel;
     };
 
     float data[EKF_NUM_STATES];
@@ -67,9 +49,7 @@ typedef union ekf_controls
 {
     struct
     {
-        float acc_n;
-        float acc_e;
-        float acc_d;
+        float acc;
     };
 
     float data[EKF_NUM_CONTROLS];
@@ -79,9 +59,7 @@ typedef union ekf_measurements
 {
     struct
     {
-        float gps_n;
-        float gps_e;
-        float gps_d;
+        float gps_alt;
         float baroHeight;
     };
 
@@ -118,10 +96,6 @@ static hal_msec_t s_StreamTimer;
 static void _madgwick_init(madgwick_data_t *data, float beta, float dt);
 static void _madgwick_update_imu(madgwick_data_t *data, quat_t *q, vec3_t gyroVec, vec3_t accVec);
 static void _madgwick_update_marg(madgwick_data_t *data, quat_t *q, vec3_t gyroVec, vec3_t accVec, vec3_t magVec);
-static void _mahony_init(mahony_data_t *data, float kp, float ki, float dt);
-static void _mahony_update_imu(mahony_data_t *data, quat_t *q, vec3_t gyroVec, vec3_t accVec);
-static void _mahony_update_marg(mahony_data_t *data, quat_t *q, vec3_t gyroVec, vec3_t accVec, vec3_t magVec);
-static void _mahony_update_base(mahony_data_t *data, quat_t *q, vec3_t gyroVec, float ex, float ey, float ez);
 static void _integrate_gyro(quat_t *q, vec3_t gyro, float dt);
 static void _ekf_init(ekf_data_t *data);
 static void _ekf_predict_state(ekf_data_t *data, const ekf_controls_t *controls);
@@ -203,26 +177,22 @@ void ahrs_update(void)
             s_CurrentData.acceleration = newAcc;
 
             ekf_controls_t controls = {
-                .acc_n = newAcc.x,
-                .acc_e = newAcc.y,
-                .acc_d = newAcc.z,
+                .acc = newAcc.z,
             };
 
             ekf_measurements_t measurements = {
-                .gps_n = s_NEDPos.x,
-                .gps_e = s_NEDPos.y,
-                .gps_d = s_NEDPos.z,
+                .gps_alt = s_NEDPos.z,
                 .baroHeight = s_BaroHeight,
             };
 
             _ekf_update(&s_EKF, &controls, &measurements);
 
-            s_CurrentData.position.x = s_EKF.x.pos_n;
-            s_CurrentData.position.y = s_EKF.x.pos_e;
-            s_CurrentData.position.z = s_EKF.x.pos_d;
-            s_CurrentData.velocity.x = s_EKF.x.vel_n;
-            s_CurrentData.velocity.y = s_EKF.x.vel_e;
-            s_CurrentData.velocity.z = s_EKF.x.vel_d;
+            s_CurrentData.position.x = s_NEDPos.x;
+            s_CurrentData.position.y = s_NEDPos.y;
+            s_CurrentData.position.z = s_EKF.x.pos;
+            s_CurrentData.velocity.x = 0;
+            s_CurrentData.velocity.y = 0;
+            s_CurrentData.velocity.z = s_EKF.x.vel;
 
             s_EKF.cfg.varGPS = EKF_OUTDATED_MEASUREMENT_VARIANCE;
             s_EKF.cfg.varBar = EKF_OUTDATED_MEASUREMENT_VARIANCE;
@@ -386,90 +356,6 @@ static void _madgwick_update_marg(madgwick_data_t *data, quat_t *q, vec3_t gyroV
     quat_normalize(q);
 }
 
-static void _mahony_init(mahony_data_t *data, float kp, float ki, float dt)
-{
-    data->Kp = kp;
-    data->Ki = ki;
-    data->integralFBx = 0.0f;
-    data->integralFBy = 0.0f;
-    data->integralFBz = 0.0f;
-    data->dt = dt;
-}
-
-static void _mahony_update_imu(mahony_data_t *data, quat_t *q, vec3_t gyroVec, vec3_t accVec)
-{
-    vec3_normalize(&accVec);
-
-    const float vx = 2.0f * (q->x * q->z - q->w * q->y);
-    const float vy = 2.0f * (q->w * q->x + q->y * q->z);
-    const float vz = q->w * q->w - q->x * q->x - q->y * q->y + q->z * q->z;
-
-    _mahony_update_base(
-        data,
-        q,
-        gyroVec,
-        accVec.y * vz - accVec.z * vy,
-        accVec.z * vx - accVec.x * vz,
-        accVec.x * vy - accVec.y * vx);
-}
-
-static void _mahony_update_marg(mahony_data_t *data, quat_t *q, vec3_t gyroVec, vec3_t accVec, vec3_t magVec)
-{
-    vec3_normalize(&accVec);
-    vec3_normalize(&magVec);
-
-    const float qwqw = q->w * q->w;
-    const float qwqx = q->w * q->x;
-    const float qwqy = q->w * q->y;
-    const float qwqz = q->w * q->z;
-    const float qxqx = q->x * q->x;
-    const float qxqy = q->x * q->y;
-    const float qxqz = q->x * q->z;
-    const float qyqy = q->y * q->y;
-    const float qyqz = q->y * q->z;
-    const float qzqz = q->z * q->z;
-
-    const float hx = 2.0f * (magVec.x * (0.5f - qyqy - qzqz) + magVec.y * (qxqy - qwqz) + magVec.z * (qxqz + qwqy));
-    const float hy = 2.0f * (magVec.x * (qxqy + qwqz) + magVec.y * (0.5f - qxqx - qzqz) + magVec.z * (qyqz - qwqx));
-    const float bx = sqrtf(hx * hx + hy * hy);
-    const float bz = 2.0f * (magVec.x * (qxqz - qwqy) + magVec.y * (qyqz + qwqx) + magVec.z * (0.5f - qxqx - qyqy));
-
-    const float vx = 2.0f * (qxqz - qwqy);
-    const float vy = 2.0f * (qwqx + qyqz);
-    const float vz = qwqw - qxqx - qyqy + qzqz;
-    const float wx = 2.0f * (bx * (0.5f - qyqy - qzqz) + bz * (qxqz - qwqy));
-    const float wy = 2.0f * (bx * (qxqy - qwqz) + bz * (qwqx + qyqz));
-    const float wz = 2.0f * (bx * (qwqy + qxqz) + bz * (0.5f - qxqx - qyqy));
-
-    _mahony_update_base(
-        data,
-        q,
-        gyroVec,
-        (accVec.y * vz - accVec.z * vy) + (magVec.y * wz - magVec.z * wy),
-        (accVec.z * vx - accVec.x * vz) + (magVec.z * wx - magVec.x * wz),
-        (accVec.x * vy - accVec.y * vx) + (magVec.x * wy - magVec.y * wx));
-}
-
-static void _mahony_update_base(mahony_data_t *data, quat_t *q, vec3_t gyroVec, float ex, float ey, float ez)
-{
-    if (data->Ki > 0.0f)
-    {
-        data->integralFBx += data->Ki * ex * data->dt;
-        data->integralFBy += data->Ki * ey * data->dt;
-        data->integralFBz += data->Ki * ez * data->dt;
-
-        gyroVec.x += data->integralFBx;
-        gyroVec.y += data->integralFBy;
-        gyroVec.z += data->integralFBz;
-    }
-
-    gyroVec.x += data->Kp * ex;
-    gyroVec.y += data->Kp * ey;
-    gyroVec.z += data->Kp * ez;
-
-    _integrate_gyro(q, gyroVec, data->dt);
-}
-
 /**
  * REF: https://ahrs.readthedocs.io/en/latest/filters/angular.html
  */
@@ -511,12 +397,8 @@ static void _ekf_predict_state(ekf_data_t *data, const ekf_controls_t *controls)
     const float dt = data->cfg.dt;
 
     ekf_state_t newState = {
-        .pos_n = data->x.pos_n + data->x.vel_n * dt + 0.5f * controls->acc_n * dt * dt,
-        .pos_e = data->x.pos_e + data->x.vel_e * dt + 0.5f * controls->acc_e * dt * dt,
-        .pos_d = data->x.pos_d + data->x.vel_d * dt + 0.5f * controls->acc_d * dt * dt,
-        .vel_n = data->x.vel_n + controls->acc_n * dt,
-        .vel_e = data->x.vel_e + controls->acc_e * dt,
-        .vel_d = data->x.vel_d + controls->acc_d * dt,
+        .pos = data->x.pos + data->x.vel * dt + 0.5f * controls->acc * dt * dt,
+        .vel = data->x.vel + controls->acc * dt,
     };
 
     data->x = newState;
@@ -527,49 +409,13 @@ static void _ekf_predict_covariance(ekf_data_t *data, const ekf_controls_t *cont
     const float var_acc = data->cfg.varAcc;
     const float dt = data->cfg.dt;
 
-    const float PS0 = (1.0f / 4.0f) * var_acc * (dt * dt * dt * dt);
-    const float PS1 = data->P[3][3] * dt;
-    const float PS2 = PS1 + data->P[0][3];
-    const float PS3 = data->P[3][4] * dt;
-    const float PS4 = PS3 + data->P[0][4];
-    const float PS5 = data->P[3][5] * dt;
-    const float PS6 = PS5 + data->P[0][5];
-    const float PS7 = (1.0f / 2.0f) * var_acc * (dt * dt * dt);
-    const float PS8 = data->P[4][3] * dt;
-    const float PS9 = PS8 + data->P[1][3];
-    const float PS10 = data->P[4][4] * dt;
-    const float PS11 = PS10 + data->P[1][4];
-    const float PS12 = data->P[4][5] * dt;
-    const float PS13 = PS12 + data->P[1][5];
-    const float PS14 = data->P[5][3] * dt;
-    const float PS15 = PS14 + data->P[2][3];
-    const float PS16 = data->P[5][4] * dt;
-    const float PS17 = PS16 + data->P[2][4];
-    const float PS18 = data->P[5][5] * dt;
-    const float PS19 = PS18 + data->P[2][5];
-    const float PS20 = var_acc * (dt * dt);
+    const float PS0 = data->P[1][1] * dt;
+    const float PS1 = PS0 + data->P[0][1];
+    const float PS2 = (1.0f / 2.0f) * var_acc * (dt * dt * dt);
 
-    data->P_Next[0][0] = PS0 + PS2 * dt + data->P[0][0] + data->P[3][0] * dt;
-    data->P_Next[0][1] = PS4 * dt + data->P[0][1] + data->P[3][1] * dt;
-    data->P_Next[0][2] = PS6 * dt + data->P[0][2] + data->P[3][2] * dt;
-    data->P_Next[0][3] = PS2 + PS7;
-    data->P_Next[0][4] = PS4;
-    data->P_Next[0][5] = PS6;
-    data->P_Next[1][1] = PS0 + PS11 * dt + data->P[1][1] + data->P[4][1] * dt;
-    data->P_Next[1][2] = PS13 * dt + data->P[1][2] + data->P[4][2] * dt;
-    data->P_Next[1][3] = PS9;
-    data->P_Next[1][4] = PS11 + PS7;
-    data->P_Next[1][5] = PS13;
-    data->P_Next[2][2] = PS0 + PS19 * dt + data->P[2][2] + data->P[5][2] * dt;
-    data->P_Next[2][3] = PS15;
-    data->P_Next[2][4] = PS17;
-    data->P_Next[2][5] = PS19 + PS7;
-    data->P_Next[3][3] = PS20 + data->P[3][3];
-    data->P_Next[3][4] = data->P[3][4];
-    data->P_Next[3][5] = data->P[3][5];
-    data->P_Next[4][4] = PS20 + data->P[4][4];
-    data->P_Next[4][5] = data->P[4][5];
-    data->P_Next[5][5] = PS20 + data->P[5][5];
+    data->P_Next[0][0] = PS1 * dt + data->P[0][0] + data->P[1][0] * dt + (1.0f / 4.0f) * var_acc * (dt * dt * dt * dt);
+    data->P_Next[0][1] = PS1 + PS2;
+    data->P_Next[1][1] = data->P[1][1] + var_acc * (dt * dt);
 
     for (size_t i = 0; i < EKF_NUM_STATES; i++)
     {
@@ -593,73 +439,23 @@ static void _ekf_fusion(ekf_data_t *data, const ekf_controls_t *controls, const 
 
     H[0][0] = 1;
     H[0][1] = 0;
-    H[0][2] = 0;
-    H[0][3] = 0;
-    H[0][4] = 0;
-    H[0][5] = 0;
-    H[1][0] = 0;
-    H[1][1] = 1;
-    H[1][2] = 0;
-    H[1][3] = 0;
-    H[1][4] = 0;
-    H[1][5] = 0;
-    H[2][0] = 0;
-    H[2][1] = 0;
-    H[2][2] = 1;
-    H[2][3] = 0;
-    H[2][4] = 0;
-    H[2][5] = 0;
-    H[3][0] = 0;
-    H[3][1] = 0;
-    H[3][2] = 1;
-    H[3][3] = 0;
-    H[3][4] = 0;
-    H[3][5] = 0;
+    H[1][0] = 1;
+    H[1][1] = 0;
 
     float K[EKF_NUM_STATES][EKF_NUM_MEASUREMENTS];
 
     const float KS0 = 1.0f / (data->P[0][0] + var_gps);
-    const float KS1 = 1.0f / (data->P[1][1] + var_gps);
-    const float KS2 = data->P[2][2] * var_baro;
-    const float KS3 = data->P[2][2] * var_gps;
-    const float KS4 = 1.0f / (KS2 + KS3 + var_baro * var_gps);
-    const float KS5 = KS4 * data->P[0][2];
-    const float KS6 = KS4 * data->P[1][2];
-    const float KS7 = KS4 * data->P[3][2];
-    const float KS8 = KS4 * data->P[4][2];
-    const float KS9 = KS4 * data->P[5][2];
+    const float KS1 = 1.0f / (data->P[0][0] + var_baro);
 
     K[0][0] = KS0 * data->P[0][0];
-    K[0][1] = KS1 * data->P[0][1];
-    K[0][2] = KS5 * var_baro;
-    K[0][3] = KS5 * var_gps;
+    K[0][1] = KS1 * data->P[0][0];
     K[1][0] = KS0 * data->P[1][0];
-    K[1][1] = KS1 * data->P[1][1];
-    K[1][2] = KS6 * var_baro;
-    K[1][3] = KS6 * var_gps;
-    K[2][0] = KS0 * data->P[2][0];
-    K[2][1] = KS1 * data->P[2][1];
-    K[2][2] = KS2 * KS4;
-    K[2][3] = KS3 * KS4;
-    K[3][0] = KS0 * data->P[3][0];
-    K[3][1] = KS1 * data->P[3][1];
-    K[3][2] = KS7 * var_baro;
-    K[3][3] = KS7 * var_gps;
-    K[4][0] = KS0 * data->P[4][0];
-    K[4][1] = KS1 * data->P[4][1];
-    K[4][2] = KS8 * var_baro;
-    K[4][3] = KS8 * var_gps;
-    K[5][0] = KS0 * data->P[5][0];
-    K[5][1] = KS1 * data->P[5][1];
-    K[5][2] = KS9 * var_baro;
-    K[5][3] = KS9 * var_gps;
+    K[1][1] = KS1 * data->P[1][0];
 
     float innov[EKF_NUM_MEASUREMENTS];
 
     innov[0] = measurements->data[0] - data->x.data[0];
-    innov[1] = measurements->data[1] - data->x.data[1];
-    innov[2] = measurements->data[2] - data->x.data[2];
-    innov[3] = measurements->data[3] - data->x.data[2];
+    innov[1] = measurements->data[1] - data->x.data[0];
 
     float *states = data->x.data;
 
