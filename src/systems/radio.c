@@ -83,7 +83,7 @@ static void _handle_protocol(void)
             .qx = ahrs_get_data()->orientation.x,
             .qy = ahrs_get_data()->orientation.y,
             .qz = ahrs_get_data()->orientation.z,
-            .velocity = (uint16_t)(vec3_mag(&ahrs_get_data()->velocity) * 3.6f),
+            .velocity_kmh = (uint16_t)(vec3_mag(&ahrs_get_data()->velocity) * 3.6f),
             .batteryVoltage100 = sensors_get_frame()->batVolts * 100,
             .batteryPercentage = sensors_get_frame()->batPercent,
             .lat = sensors_get_frame()->pos.lat,

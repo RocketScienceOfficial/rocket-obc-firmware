@@ -33,7 +33,7 @@ void sm_update(void);
 flight_state_type_t sm_get_state(void);
 
 /**
- * @brief Gets current altitude relative to start. 0 if state == STANDING
+ * @brief Gets current altitude relative to start. 0 if state == FLIGHT_STATE_STANDING
  *
  * @return Altitude
  */
