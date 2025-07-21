@@ -158,7 +158,7 @@ void sensors_update(void)
         s_Frame.mag1.y *= -1;
         s_Frame.mag1.z *= -1;
 
-        s_Frame.measurementDt = (currentTime - s_MeasurementTimeOffset) / 1000000.0f;
+        s_Frame.measurementDt = fminf(currentTime - s_MeasurementTimeOffset, MEAS_UPDATE_PERIOD_US) / 1000000.0f;
         s_MeasurementTimeOffset = currentTime;
 
         events_publish(MSG_SENSORS_NORMAL_READ);
