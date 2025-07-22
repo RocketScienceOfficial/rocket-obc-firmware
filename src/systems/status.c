@@ -51,6 +51,9 @@ static const buzzer_tone_t s_DisarmMusic[] = {
     {0, 50},
     {698, 100},
 };
+static const buzzer_tone_t s_GPSFixMusic[] = {
+    {1976, 750},
+};
 static const buzzer_tone_t s_LandedMusic[] = {
     {BUZZER_FREQ, 500},
     {0, 500},
@@ -217,6 +220,24 @@ static void _handle_buzzer(void)
             s_CurrentToneSize = sizeof(s_LandedMusic) / sizeof(buzzer_tone_t);
 
             _play_current_buzzer_tone();
+        }
+    }
+    else if (events_poll(MSG_SENSORS_GPS_READ))
+    {
+        static bool gpsFixPlayed = false;
+
+        if (sensors_get_frame()->gpsFix && !gpsFixPlayed)
+        {
+            gpsFixPlayed = true;
+
+            s_CurrentTone = s_GPSFixMusic;
+            s_CurrentToneSize = sizeof(s_GPSFixMusic) / sizeof(buzzer_tone_t);
+
+            _play_current_buzzer_tone();
+        }
+        else if (!sensors_get_frame()->gpsFix)
+        {
+            gpsFixPlayed = false;
         }
     }
 
