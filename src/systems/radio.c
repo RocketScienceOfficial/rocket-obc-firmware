@@ -34,6 +34,7 @@ static void _handle_uart_communication(void);
 static void _process_new_frame(void);
 static void _send_message(const datalink_frame_structure_serial_t *message);
 static uint16_t _packet_get_alt(void);
+static uint8_t _packet_get_gps_data(void);
 static uint8_t _packet_get_control_flags(void);
 static bool _packet_check_ign_cont(uint8_t ign);
 
@@ -79,16 +80,17 @@ static void _handle_protocol(void)
     if (s_PacketTimer != 0 && hal_time_get_ms_since_boot() - s_PacketTimer >= RADIO_PACKET_SEND_DELAY_MS)
     {
         datalink_frame_telemetry_data_obc_t payload = {
-            .qw = ahrs_get_data()->orientation.w,
-            .qx = ahrs_get_data()->orientation.x,
-            .qy = ahrs_get_data()->orientation.y,
-            .qz = ahrs_get_data()->orientation.z,
+            .qw = (int16_t)(ahrs_get_data()->orientation.w * 32767),
+            .qx = (int16_t)(ahrs_get_data()->orientation.x * 32767),
+            .qy = (int16_t)(ahrs_get_data()->orientation.y * 32767),
+            .qz = (int16_t)(ahrs_get_data()->orientation.z * 32767),
             .velocity_kmh = (uint16_t)(vec3_mag(&ahrs_get_data()->velocity) * 3.6f),
             .batteryVoltage100 = sensors_get_frame()->batVolts * 100,
             .batteryPercentage = sensors_get_frame()->batPercent,
-            .lat = sensors_get_frame()->pos.lat,
-            .lon = sensors_get_frame()->pos.lon,
+            .lat = (int)(sensors_get_frame()->pos.lat * 10000000),
+            .lon = (int)(sensors_get_frame()->pos.lon * 10000000),
             .alt = _packet_get_alt(),
+            .gpsData = _packet_get_gps_data(),
             .state = (uint8_t)sm_get_state(),
             .controlFlags = _packet_get_control_flags(),
         };
@@ -190,6 +192,11 @@ static uint16_t _packet_get_alt(void)
     float tmp = ahrs_get_data()->position.z;
 
     return tmp > 0 ? (uint16_t)tmp : 0;
+}
+
+static uint8_t _packet_get_gps_data(void)
+{
+    return (uint8_t)sensors_get_frame()->gpsIs3dFix | (sensors_get_frame()->gpsSatellitesCount << 1);
 }
 
 static uint8_t _packet_get_control_flags(void)
