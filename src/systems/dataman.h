@@ -33,7 +33,7 @@ typedef struct __attribute__((__packed__)) dataman_frame
     vec3_t pos;
     quat_t q;
     geo_position_wgs84_t gpsPos;
-    uint16_t pressure;
+    int pressure;
     uint8_t smState;
     uint16_t batteryVoltage100;
     uint8_t ignFlags;
