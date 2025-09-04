@@ -288,9 +288,12 @@ static void _reverse_buff(dataman_frame_t *buffer, size_t start, size_t end)
 
 static void _flush_standing_buffer(void)
 {
-    _reverse_buff(s_StandingBuffer, 0, s_StandingBufferIndex - 1);
-    _reverse_buff(s_StandingBuffer, s_StandingBufferIndex, STANDING_BUFFER_LENGTH - 1);
-    _reverse_buff(s_StandingBuffer, 0, STANDING_BUFFER_LENGTH - 1);
+    if (s_StandingBufferIndex != 0)
+    {
+        _reverse_buff(s_StandingBuffer, 0, s_StandingBufferIndex - 1);
+        _reverse_buff(s_StandingBuffer, s_StandingBufferIndex, STANDING_BUFFER_LENGTH - 1);
+        _reverse_buff(s_StandingBuffer, 0, STANDING_BUFFER_LENGTH - 1);
+    }
 
     uint8_t *data = (uint8_t *)s_StandingBuffer;
     size_t pages = sizeof(s_StandingBuffer) / FLASH_PAGE_SIZE;
