@@ -32,11 +32,11 @@ void ign_update(void);
 uint8_t ign_get_cont_flags(uint8_t ignNumber);
 
 /**
- * @brief Checks if specified igniter is currently being fired
+ * @brief Checks if specified igniter is has been fired
  * 
  * @param ignNumber Number (1-4) of igniter
- * @return State of igniter
+ * @return Has igniter been fired
  */
-bool ign_get_state(uint8_t ignNumber);
+bool ign_is_fired(uint8_t ignNumber);
 
 #endif

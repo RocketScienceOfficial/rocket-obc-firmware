@@ -71,10 +71,10 @@ typedef enum dataman_ign_flags
     DATAMAN_IGN_FLAG_IGN_2_CONT = 1 << 1,
     DATAMAN_IGN_FLAG_IGN_3_CONT = 1 << 2,
     DATAMAN_IGN_FLAG_IGN_4_CONT = 1 << 3,
-    DATAMAN_IGN_FLAG_IGN_1_STATE = 1 << 4,
-    DATAMAN_IGN_FLAG_IGN_2_STATE = 1 << 5,
-    DATAMAN_IGN_FLAG_IGN_3_STATE = 1 << 6,
-    DATAMAN_IGN_FLAG_IGN_4_STATE = 1 << 7,
+    DATAMAN_IGN_FLAG_IGN_1_FIRED = 1 << 4,
+    DATAMAN_IGN_FLAG_IGN_2_FIRED = 1 << 5,
+    DATAMAN_IGN_FLAG_IGN_3_FIRED = 1 << 6,
+    DATAMAN_IGN_FLAG_IGN_4_FIRED = 1 << 7,
 } dataman_ign_flags_t;
 
 /**

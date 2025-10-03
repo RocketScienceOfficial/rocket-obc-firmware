@@ -169,10 +169,10 @@ static uint8_t _get_ign_flags(void)
 {
     uint8_t flags = 0;
 
-    flags |= _get_single_ign_flag(1, DATAMAN_IGN_FLAG_IGN_1_CONT, DATAMAN_IGN_FLAG_IGN_1_STATE);
-    flags |= _get_single_ign_flag(2, DATAMAN_IGN_FLAG_IGN_2_CONT, DATAMAN_IGN_FLAG_IGN_2_STATE);
-    flags |= _get_single_ign_flag(3, DATAMAN_IGN_FLAG_IGN_3_CONT, DATAMAN_IGN_FLAG_IGN_3_STATE);
-    flags |= _get_single_ign_flag(4, DATAMAN_IGN_FLAG_IGN_4_CONT, DATAMAN_IGN_FLAG_IGN_4_STATE);
+    flags |= _get_single_ign_flag(1, DATAMAN_IGN_FLAG_IGN_1_CONT, DATAMAN_IGN_FLAG_IGN_1_FIRED);
+    flags |= _get_single_ign_flag(2, DATAMAN_IGN_FLAG_IGN_2_CONT, DATAMAN_IGN_FLAG_IGN_2_FIRED);
+    flags |= _get_single_ign_flag(3, DATAMAN_IGN_FLAG_IGN_3_CONT, DATAMAN_IGN_FLAG_IGN_3_FIRED);
+    flags |= _get_single_ign_flag(4, DATAMAN_IGN_FLAG_IGN_4_CONT, DATAMAN_IGN_FLAG_IGN_4_FIRED);
 
     return flags;
 }
@@ -185,9 +185,9 @@ static uint8_t _get_gps_data(void)
 static uint8_t _get_single_ign_flag(uint8_t ignNumber, dataman_ign_flags_t contFlag, dataman_ign_flags_t stateFlag)
 {
     uint8_t contFlags = ign_get_cont_flags(ignNumber);
-    bool state = ign_get_state(ignNumber);
+    bool fired = ign_is_fired(ignNumber);
 
-    return ((contFlags & IGN_CONT_FLAG_IGN_PRESENT) && (contFlags & IGN_CONT_FLAG_FUSE_WORKING) ? (uint8_t)contFlag : 0) | (state ? (uint8_t)stateFlag : 0);
+    return ((contFlags & IGN_CONT_FLAG_IGN_PRESENT) && (contFlags & IGN_CONT_FLAG_FUSE_WORKING) ? (uint8_t)contFlag : 0) | (fired ? (uint8_t)stateFlag : 0);
 }
 
 static bool _validate_frame(const dataman_frame_t *frame)

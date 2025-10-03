@@ -64,13 +64,12 @@ uint8_t ign_get_cont_flags(uint8_t ignNumber)
                                                               : 0;
 }
 
-bool ign_get_state(uint8_t ignNumber)
+bool ign_is_fired(uint8_t ignNumber)
 {
-    const ign_pin_data_t *ign = ignNumber == 1 ? &s_IGN1 : ignNumber == 2 ? &s_IGN2
-                                                       : ignNumber == 3   ? &s_IGN3
-                                                       : ignNumber == 4   ? &s_IGN4
-                                                                          : 0;
-    return ign->fired && !ign->finished;
+    return ignNumber == 1 ? s_IGN1.fired : ignNumber == 2 ? s_IGN2.fired
+                                       : ignNumber == 3   ? s_IGN3.fired
+                                       : ignNumber == 4   ? s_IGN4.fired
+                                                          : false;
 }
 
 static void _run_control(void)
