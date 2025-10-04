@@ -28,16 +28,19 @@ typedef struct __attribute__((__packed__)) dataman_frame
 {
     uint8_t magic;
     uint16_t dt_us;
-    vec3_t acc;
-    vec3_t vel;
-    vec3_t pos;
-    quat_t q;
+    vec3_t accRaw;
+    vec3_t gyroRaw;
+    vec3_t magRaw;
     geo_position_wgs84_t gpsPos;
+    uint8_t gpsData;
     int pressure;
+    vec3_t accNED;
+    vec3_t velNED;
+    vec3_t posNED;
+    quat_t qNED;
     uint8_t smState;
     uint16_t batteryVoltage100;
     uint8_t ignFlags;
-    uint8_t gpsData;
     uint16_t crc;
 } dataman_frame_t;
 
