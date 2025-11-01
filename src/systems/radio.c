@@ -35,6 +35,7 @@ static void _process_new_frame(void);
 static void _send_message(const datalink_frame_structure_serial_t *message);
 static uint16_t _packet_get_alt(void);
 static uint8_t _packet_get_gps_data(void);
+static uint8_t _packet_get_ign_flags(void);
 static uint8_t _packet_get_control_flags(void);
 static bool _packet_check_ign_cont(uint8_t ign);
 
@@ -92,6 +93,7 @@ static void _handle_protocol(void)
             .alt = _packet_get_alt(),
             .gpsData = _packet_get_gps_data(),
             .state = (uint8_t)sm_get_state(),
+            .ignFlags = _packet_get_ign_flags(),
             .controlFlags = _packet_get_control_flags(),
         };
         datalink_frame_structure_serial_t frame = {
@@ -199,6 +201,46 @@ static uint8_t _packet_get_gps_data(void)
     return (uint8_t)sensors_get_frame()->gpsIs3dFix | (sensors_get_frame()->gpsSatellitesCount << 1);
 }
 
+static uint8_t _packet_get_ign_flags(void)
+{
+    uint8_t flags = 0;
+
+    if (_packet_check_ign_cont(1))
+    {
+        flags |= DATALINK_FLAGS_TELEMETRY_DATA_CONTROL_IGN_1_CONT;
+    }
+    if (_packet_check_ign_cont(2))
+    {
+        flags |= DATALINK_FLAGS_TELEMETRY_DATA_CONTROL_IGN_2_CONT;
+    }
+    if (_packet_check_ign_cont(3))
+    {
+        flags |= DATALINK_FLAGS_TELEMETRY_DATA_CONTROL_IGN_3_CONT;
+    }
+    if (_packet_check_ign_cont(4))
+    {
+        flags |= DATALINK_FLAGS_TELEMETRY_DATA_CONTROL_IGN_4_CONT;
+    }
+    if (ign_is_tested(1))
+    {
+        flags |= DATALINK_FLAGS_TELEMETRY_DATA_CONTROL_IGN_1_RES_FIRE;
+    }
+    if (ign_is_tested(2))
+    {
+        flags |= DATALINK_FLAGS_TELEMETRY_DATA_CONTROL_IGN_2_RES_FIRE;
+    }
+    if (ign_is_tested(3))
+    {
+        flags |= DATALINK_FLAGS_TELEMETRY_DATA_CONTROL_IGN_3_RES_FIRE;
+    }
+    if (ign_is_tested(4))
+    {
+        flags |= DATALINK_FLAGS_TELEMETRY_DATA_CONTROL_IGN_4_RES_FIRE;
+    }
+
+    return flags;
+}
+
 static uint8_t _packet_get_control_flags(void)
 {
     uint8_t flags = 0;
@@ -219,22 +261,6 @@ static uint8_t _packet_get_control_flags(void)
     if (voltageFlags & VOLTAGE_PIN_STATE_VBAT)
     {
         flags |= DATALINK_FLAGS_TELEMETRY_DATA_CONTROL_VBAT_ENABLED;
-    }
-    if (_packet_check_ign_cont(1))
-    {
-        flags |= DATALINK_FLAGS_TELEMETRY_DATA_CONTROL_IGN_1;
-    }
-    if (_packet_check_ign_cont(2))
-    {
-        flags |= DATALINK_FLAGS_TELEMETRY_DATA_CONTROL_IGN_2;
-    }
-    if (_packet_check_ign_cont(3))
-    {
-        flags |= DATALINK_FLAGS_TELEMETRY_DATA_CONTROL_IGN_3;
-    }
-    if (_packet_check_ign_cont(4))
-    {
-        flags |= DATALINK_FLAGS_TELEMETRY_DATA_CONTROL_IGN_4;
     }
 
     return flags;

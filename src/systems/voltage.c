@@ -28,9 +28,9 @@ void voltage_update(void)
         {
             const datalink_frame_telemetry_response_t *frame = (const datalink_frame_telemetry_response_t *)msg->payload;
 
-            _set_pin_state(frame->controlFlags & DATALINK_FLAGS_TELEMETRY_RESPONSE_CONTROL_3V3_ENABLED, PIN_3V3);
-            _set_pin_state(frame->controlFlags & DATALINK_FLAGS_TELEMETRY_RESPONSE_CONTROL_5V_ENABLED, PIN_5V);
-            _set_pin_state(frame->controlFlags & DATALINK_FLAGS_TELEMETRY_RESPONSE_CONTROL_VBAT_ENABLED, PIN_VBAT);
+            _set_pin_state(frame->flags & DATALINK_FLAGS_TELEMETRY_RESPONSE_CONTROL_3V3_ENABLED, PIN_3V3);
+            _set_pin_state(frame->flags & DATALINK_FLAGS_TELEMETRY_RESPONSE_CONTROL_5V_ENABLED, PIN_5V);
+            _set_pin_state(frame->flags & DATALINK_FLAGS_TELEMETRY_RESPONSE_CONTROL_VBAT_ENABLED, PIN_VBAT);
         }
     }
 }

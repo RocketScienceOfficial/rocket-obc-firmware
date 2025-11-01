@@ -93,7 +93,7 @@ static void _handle_radio_packet(void)
         if (msg && msg->msgId == DATALINK_MESSAGE_TELEMETRY_RESPONSE)
         {
             const datalink_frame_telemetry_response_t *payload = (const datalink_frame_telemetry_response_t *)msg->payload;
-            bool arm = payload->controlFlags & DATALINK_FLAGS_TELEMETRY_RESPONSE_CONTROL_ARM_ENABLED;
+            bool arm = payload->flags & DATALINK_FLAGS_TELEMETRY_RESPONSE_CONTROL_ARM_ENABLED;
 
             if (arm && !s_Armed)
             {

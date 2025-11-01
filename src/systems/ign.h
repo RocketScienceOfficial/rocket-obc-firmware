@@ -33,10 +33,18 @@ uint8_t ign_get_cont_flags(uint8_t ignNumber);
 
 /**
  * @brief Checks if specified igniter is has been fired
- * 
+ *
  * @param ignNumber Number (1-4) of igniter
  * @return Has igniter been fired
  */
 bool ign_is_fired(uint8_t ignNumber);
+
+/**
+ * @brief Checks if specified igniter has been tested
+ *
+ * @param ignNumber Number (1-4) of igniter
+ * @return Has igniter been tested
+ */
+bool ign_is_tested(uint8_t ignNumber);
 
 #endif

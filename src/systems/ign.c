@@ -3,6 +3,7 @@
 #include "sensors.h"
 #include "ahrs.h"
 #include "serial.h"
+#include "radio.h"
 #include "dataman.h"
 #include "board_config.h"
 #include "../middleware/events.h"
@@ -30,6 +31,7 @@ static ign_pin_data_t s_IGN1;
 static ign_pin_data_t s_IGN2;
 static ign_pin_data_t s_IGN3;
 static ign_pin_data_t s_IGN4;
+static uint8_t s_TestedIgniters;
 
 static void _run_control(void);
 static void _run_logic(void);
@@ -37,6 +39,7 @@ static void _update_flags(void);
 static void _init_pin(ign_pin_data_t *data, hal_pin_number_t pin);
 static void _set_cont_flags(ign_pin_data_t *data, float v);
 static void _ign_fire(ign_pin_data_t *data);
+static void _ign_test(uint8_t ignId);
 static void _ign_update(ign_pin_data_t *data);
 
 void ign_init(void)
@@ -72,6 +75,13 @@ bool ign_is_fired(uint8_t ignNumber)
                                                           : false;
 }
 
+bool ign_is_tested(uint8_t ignNumber)
+{
+    uint8_t flag = 1 << (ignNumber - 1);
+
+    return (s_TestedIgniters & flag) > 0;
+}
+
 static void _run_control(void)
 {
     if (sm_get_state() == FLIGHT_STATE_STANDING)
@@ -86,19 +96,32 @@ static void _run_control(void)
 
                 SERIAL_DEBUG_LOG("Testing igniter %d...", payload->ignNum);
 
-                hal_pin_number_t pin = payload->ignNum == 0 ? PIN_IGN_EN_1 : payload->ignNum == 1 ? PIN_IGN_EN_2
-                                                                         : payload->ignNum == 2   ? PIN_IGN_EN_3
-                                                                                                  : PIN_IGN_EN_4;
-
-                hal_gpio_set_pin_state(pin, GPIO_HIGH);
-                hal_time_sleep_ms(IGN_UP_TIME_MS);
-                hal_gpio_set_pin_state(pin, GPIO_LOW);
+                _ign_test(payload->ignNum);
 
                 datalink_frame_structure_serial_t response = {
                     .msgId = DATALINK_MESSAGE_IGN_FINISH_TEST,
                     .len = 0,
                 };
                 serial_send_message(&response);
+            }
+        }
+        if (events_poll(MSG_RADIO_PACKET_RECEIVED))
+        {
+            const datalink_frame_structure_serial_t *msg = radio_get_current_message();
+
+            if (msg && msg->msgId == DATALINK_MESSAGE_TELEMETRY_RESPONSE)
+            {
+                const datalink_frame_telemetry_response_t *frame = (const datalink_frame_telemetry_response_t *)msg->payload;
+
+                for (uint8_t n = 0; n < 4; n++)
+                {
+                    uint8_t reqFlag = DATALINK_FLAGS_TELEMETRY_DATA_CONTROL_IGN_1_REQ_FIRE << n;
+
+                    if (frame->flags & reqFlag && !ign_is_tested(n + 1))
+                    {
+                        _ign_test(n);
+                    }
+                }
             }
         }
     }
@@ -209,6 +232,19 @@ static void _ign_fire(ign_pin_data_t *data)
 
         SERIAL_DEBUG_LOG("Firing IGN...");
     }
+}
+
+static void _ign_test(uint8_t ignId)
+{
+    hal_pin_number_t pin = ignId == 0 ? PIN_IGN_EN_1 : ignId == 1 ? PIN_IGN_EN_2
+                                                   : ignId == 2   ? PIN_IGN_EN_3
+                                                                  : PIN_IGN_EN_4;
+
+    hal_gpio_set_pin_state(pin, GPIO_HIGH);
+    hal_time_sleep_ms(IGN_UP_TIME_MS);
+    hal_gpio_set_pin_state(pin, GPIO_LOW);
+
+    s_TestedIgniters |= (1 << ignId);
 }
 
 static void _ign_update(ign_pin_data_t *data)
