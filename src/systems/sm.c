@@ -1,6 +1,5 @@
 #include "sm.h"
 #include "sensors.h"
-#include "ahrs.h"
 #include "radio.h"
 #include "serial.h"
 #include "../middleware/events.h"
@@ -28,6 +27,7 @@ static size_t s_LastAltApogeeVertificationIndex;
 static float s_LandingAlt;
 static size_t s_LastAltLandVerificationIndex;
 
+static float _get_current_height(void);
 static void _handle_radio_packet(void);
 static void _handle_state_standing(void);
 static void _handle_state_accelerating(void);
@@ -69,9 +69,9 @@ flight_state_type_t sm_get_state(void)
     return s_State;
 }
 
-float sm_get_alt(void)
+float sm_get_relative_alt(void)
 {
-    return s_BaseAlt == 0 ? 0 : ahrs_get_data()->position.z - s_BaseAlt;
+    return s_BaseAlt == 0 ? 0 : _get_current_height() - s_BaseAlt;
 }
 
 float sm_get_apogee(void)
@@ -82,6 +82,11 @@ float sm_get_apogee(void)
 bool sm_is_armed(void)
 {
     return s_Armed;
+}
+
+static float _get_current_height(void)
+{
+    return sensors_get_frame()->baroHeight;
 }
 
 static void _handle_radio_packet(void)
@@ -136,7 +141,7 @@ static void _handle_state_standing(void)
 
     if (events_poll(MSG_SENSORS_NORMAL_READ) && s_VerifingStandingAlt)
     {
-        float alt = ahrs_get_data()->position.z;
+        float alt = _get_current_height();
 
         if (s_BaseAlt == 0)
         {
@@ -186,7 +191,7 @@ static void _handle_state_free_flight(void)
 {
     if (events_poll(MSG_SENSORS_NORMAL_READ))
     {
-        float alt = sm_get_alt();
+        float alt = sm_get_relative_alt();
 
         if (alt <= s_Apogee || alt - s_Apogee <= APOGEE_MAX_DELTA)
         {
@@ -215,7 +220,7 @@ static void _handle_state_free_fall(void)
 {
     if (events_poll(MSG_SENSORS_NORMAL_READ))
     {
-        float alt = sm_get_alt();
+        float alt = sm_get_relative_alt();
         float delta = fabsf(s_LandingAlt - alt);
 
         if (delta > LAND_MAX_DELTA)

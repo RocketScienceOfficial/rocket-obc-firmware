@@ -148,7 +148,7 @@ static void _run_logic(void)
                 {
                     _ign_fire(&s_IGN2);
                 }
-                else if (sm_get_alt() <= dataman_get_config()->mainHeight)
+                else if (sm_get_relative_alt() <= dataman_get_config()->mainHeight)
                 {
                     _ign_fire(&s_IGN2);
                 }

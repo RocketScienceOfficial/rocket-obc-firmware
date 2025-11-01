@@ -35,9 +35,9 @@ flight_state_type_t sm_get_state(void);
 /**
  * @brief Gets current altitude relative to start. 0 if state == FLIGHT_STATE_STANDING
  *
- * @return Altitude
+ * @return Altitude relative to start
  */
-float sm_get_alt(void);
+float sm_get_relative_alt(void);
 
 /**
  * @brief Gets reached apogee. 0 if hasn't reached yet
