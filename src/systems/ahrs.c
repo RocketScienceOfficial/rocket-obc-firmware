@@ -103,6 +103,7 @@ static void _ekf_predict_covariance(ekf_data_t *data, const ekf_controls_t *cont
 static void _ekf_fusion(ekf_data_t *data, const ekf_controls_t *controls, const ekf_measurements_t *measurements);
 static void _ekf_force_cov_symmetry(ekf_data_t *data);
 static void _ekf_update(ekf_data_t *data, const ekf_controls_t *controls, const ekf_measurements_t *measurements);
+static float _calculate_gps_variance();
 
 void ahrs_init(void)
 {
@@ -129,7 +130,7 @@ void ahrs_update(void)
             s_NEDPos = geo_to_ned(sensors_get_frame()->pos, s_BaseGPSPos);
         }
 
-        s_EKF.cfg.varGPS = EKF_GPS_VARIANCE;
+        s_EKF.cfg.varGPS = _calculate_gps_variance();
     }
 
     if (events_poll(MSG_SENSORS_BARO_READ))
@@ -530,4 +531,28 @@ static void _ekf_update(ekf_data_t *data, const ekf_controls_t *controls, const 
     _ekf_fusion(data, controls, measurements);
 
     _ekf_force_cov_symmetry(data);
+}
+
+static float _calculate_gps_variance()
+{
+    int n = sensors_get_frame()->gpsSatellitesCount;
+
+    if (n <= 4)
+        return EKF_OUTDATED_MEASUREMENT_VARIANCE;
+    else if (n == 5)
+        return 50.0f;
+    else if (n == 6)
+        return 20.0f;
+    else if (n == 7)
+        return 10.0f;
+    else if (n == 8)
+        return 7.0f;
+    else if (n == 9)
+        return 5.0f;
+    else if (n == 10)
+        return 3.0f;
+    else if (n == 11)
+        return 2.0f;
+    else
+        return EKF_GPS_VARIANCE;
 }
